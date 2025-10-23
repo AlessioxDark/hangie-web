@@ -3,12 +3,18 @@
 @import 'tw-animate-css';
 
 @theme {
-	--color-primary: #2563eb; /* #1d4ed8 */
-	--color-complementary: #f97316;
+	--color-primary: #2563eb;
+	--color-bg-1: #ffffff;
+	--color-bg-2: #f8fafc;
+	--color-bg-3: #e2e8f0;
+	--color-text-1: #0f172a;
+	--color-text-2: #64748b;
+	--color-text-3: #94a3b8;
+	/* --color-complementary: #f97316;
 	--color-accent: #10b981;
 	--color-neutral-white: #ffffff;
 	--color-neutral-white-2: #fbfbfe;
-	--color-neutral-black: #090909;
+	--color-neutral-black: #090909; */
 
 	/* support colors */
 	--color-success: #ef4444;
