@@ -1,0 +1,79 @@
+import SidebarIcons from '@/utils/SidebarIcons';
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const BottomNav = () => {
+	type ValidPath = `/${string}`;
+
+	const isLinkActive = (linkPath: ValidPath): boolean => {
+		// Gestione più robusta del path attivo
+		if (linkPath === '/') {
+			return location.pathname === '/';
+		}
+		return location.pathname.startsWith(linkPath);
+	};
+	type SidebarLinksType = {
+		id: number;
+		title: 'Home' | 'Chats' | 'Profilo' | 'Amici';
+		link: ValidPath;
+		description: string;
+	};
+	const sidebarLinks: SidebarLinksType[] = [
+		{
+			id: 1,
+			title: 'Home',
+			link: '/',
+			description: 'Scopri nuovi eventi',
+		},
+		{
+			id: 2,
+			title: 'Chats',
+
+			link: '/chats',
+			description: 'I tuoi messaggi',
+		},
+		{
+			id: 3,
+			title: 'Amici',
+			link: '/Friends',
+			description: 'I tuoi eventi',
+		},
+		{
+			id: 4,
+			title: 'Profilo',
+			link: '/profile',
+			description: 'Impostazioni account',
+		},
+	];
+	return (
+		<div className="w-full h-[5rem] bg-bg-1 flex flex-row justify-center items-center gap-12 md:gap-24">
+			{sidebarLinks.map((link) => {
+				const isActive = isLinkActive(link.link);
+
+				return (
+					<Link
+						to={link.link}
+						key={link.id}
+						className={`
+								flex items-center gap-1 ${
+									isActive ? ' text-primary  ' : ' text-text-2 bg-bg-1 '
+								} 
+							`}
+						aria-label={link.description}
+						aria-current={isActive ? 'page' : undefined}
+					>
+						<SidebarIcons
+							size={'mobile'}
+							isActive={isActive}
+							title={link.title}
+						/>
+
+						<span className="font-body font-medium text-sm">{link.title}</span>
+					</Link>
+				);
+			})}
+		</div>
+	);
+};
+
+export default BottomNav;

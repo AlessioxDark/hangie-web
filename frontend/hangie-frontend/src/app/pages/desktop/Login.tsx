@@ -5,10 +5,10 @@ import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router';
 import { z } from 'zod';
 
-import appleLogo from '../../assets/Apple_logo.svg';
-import facebookLogo from '../../assets/Facebook_logo.svg';
-import googleLogo from '../../assets/Google_logo.svg';
-import { supabase } from '../../config/db.js';
+import appleLogo from '../../../assets/Apple_logo.svg';
+import facebookLogo from '../../../assets/Facebook_logo.svg';
+import googleLogo from '../../../assets/Google_logo.svg';
+import { supabase } from '../../../config/db.js';
 
 const Login = () => {
 	const schema = z.object({

@@ -1,11 +1,12 @@
 import React from 'react';
-
+const DESKTOPSIZE = '30px';
+const MOBILESIZE = '30px';
 // ==================== HOME ICON ====================
-const HomeIconOutline = (props: React.SVGProps<SVGSVGElement>) => (
+const HomeIconOutline = ({ size }) => (
 	<svg
 		fill="none"
-		width="40px"
-		height="40px"
+		width={size}
+		height={size}
 		viewBox="-4.5 0 32 32"
 		xmlns="http://www.w3.org/2000/svg"
 		stroke="#64748b"
@@ -17,11 +18,11 @@ const HomeIconOutline = (props: React.SVGProps<SVGSVGElement>) => (
 	</svg>
 );
 
-const HomeIconSolid = (props: React.SVGProps<SVGSVGElement>) => (
+const HomeIconSolid = ({ size }) => (
 	<svg
 		fill="#2463eb"
-		width={'50px'}
-		height={'50px'}
+		width={size == MOBILESIZE ? '35px' : '45px'}
+		height={size == MOBILESIZE ? '35px' : '45px'}
 		viewBox="-4.5 0 32 32"
 		version="1.1"
 		xmlns="http://www.w3.org/2000/svg"
@@ -34,11 +35,11 @@ const HomeIconSolid = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 // ==================== CHAT ICON ====================
-const ChatIconOutline = (props: React.SVGProps<SVGSVGElement>) => (
+const ChatIconOutline = ({ size }) => (
 	<svg
 		fill="none"
-		width="40px"
-		height="40px"
+		width={size}
+		height={size}
 		viewBox="0 0 24 24"
 		xmlns="http://www.w3.org/2000/svg"
 		stroke={'#64748b'}
@@ -53,11 +54,11 @@ const ChatIconOutline = (props: React.SVGProps<SVGSVGElement>) => (
 	</svg>
 );
 
-const ChatIconSolid = (props: React.SVGProps<SVGSVGElement>) => (
+const ChatIconSolid = ({ size }) => (
 	<svg
 		fill="none"
-		width="40px"
-		height="40px"
+		width={size}
+		height={size}
 		viewBox="0 0 24 24"
 		xmlns="http://www.w3.org/2000/svg"
 	>
@@ -71,15 +72,15 @@ const ChatIconSolid = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 // ==================== FRIENDS ICON ====================
-const FriendsIconOutline = (props: React.SVGProps<SVGSVGElement>) => (
+const FriendsIconOutline = ({ size }) => (
 	<svg
 		fill="none"
 		viewBox="0 0 24 24"
 		xmlns="http://www.w3.org/2000/svg"
 		stroke="#64748b"
 		stroke-width={1.5}
-		width="40px"
-		height="40px"
+		width={size}
+		height={size}
 	>
 		<g id="SVGRepo_iconCarrier">
 			<path
@@ -110,13 +111,13 @@ const FriendsIconOutline = (props: React.SVGProps<SVGSVGElement>) => (
 	</svg>
 );
 
-const FriendsIconSolid = (props: React.SVGProps<SVGSVGElement>) => (
+const FriendsIconSolid = ({ size }) => (
 	<svg
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 24 24"
-		width="40px"
-		height="40px"
+		width={size}
+		height={size}
 	>
 		<g id="SVGRepo_iconCarrier">
 			<path
@@ -148,10 +149,10 @@ const FriendsIconSolid = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 // ==================== PROFILE ICON ====================
-const ProfileIconOutline = (props: React.SVGProps<SVGSVGElement>) => (
+const ProfileIconOutline = ({ size }) => (
 	<svg
-		width="40px"
-		height="40px"
+		width={size}
+		height={size}
 		viewBox="0 0 24 24"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
@@ -177,10 +178,10 @@ const ProfileIconOutline = (props: React.SVGProps<SVGSVGElement>) => (
 	</svg>
 );
 
-const ProfileIconSolid = (props: React.SVGProps<SVGSVGElement>) => (
+const ProfileIconSolid = ({ size }) => (
 	<svg
-		width="40px"
-		height="40px"
+		width={size}
+		height={size}
 		viewBox="0 0 24 24"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
@@ -222,7 +223,7 @@ interface SidebarIconsProps {
 const SidebarIcons: React.FC<SidebarIconsProps> = ({
 	title,
 	isActive,
-	className = '',
+	size,
 }) => {
 	const iconSet = ICON_MAP[title];
 
@@ -235,8 +236,9 @@ const SidebarIcons: React.FC<SidebarIconsProps> = ({
 
 	return (
 		<IconComponent
-			className={` transition-colors duration-200 ${className}`}
+			// className={` transition-colors duration-200 `}
 			aria-hidden="true"
+			size={size == 'desktop' ? DESKTOPSIZE : MOBILESIZE}
 		/>
 	);
 };

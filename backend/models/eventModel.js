@@ -36,16 +36,25 @@ const supabase = require('../config/db');
 const getAll = async (req) => {
 	// Estrae l'offset dal corpo della richiesta.
 	const { offset } = req.body;
-
-	// Esegue la query principale per recuperare i dati degli eventi, con un range per la paginazione.
-	// Ho corretto il range in (offset, offset + 19) per recuperare esattamente 20 elementi,
-	// che è il comportamento tipico della paginazione.
+	const token = req.headers.authorization.split(' ')[1];
+	const {
+		data: { user },
+		error: tokenError,
+	} = await supabase.auth.getUser(token);
+	console.log(user);
 	const { data, error } = await supabase
-		.from('eventi')
+		.from('risposte_eventi')
 		.select(
-			'event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),eventi_categorie(categorie(*)),descrizione'
+			'event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,cover_img,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))'
 		)
-		.range(offset, offset + 19);
+		.range(0, offset + 19)
+		.eq('user_id', user.id);
+	// const { data, error } = await supabase
+	// 	.from('eventi')
+	// 	.select(
+	// 		'event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,cover_img,event_imgs(*),gruppi(*,partecipanti_gruppo(*)) as partecipanti,risposte_eventi(status)'
+	// 	)
+	// 	.range(0, offset + 19);
 
 	// Se la query ha fallito, restituisce immediatamente l'errore.
 	if (error) {
@@ -53,50 +62,48 @@ const getAll = async (req) => {
 		return { data: null, error };
 	}
 
-	// Utilizziamo Promise.all per gestire le operazioni asincrone in parallelo.
-	// Questo è cruciale perché per ogni evento, facciamo 3 richieste asincrone a Supabase Storage.
-	const dataWithImages = await Promise.all(
-		// Mappa l'array 'data' e per ogni evento, recupera gli URL delle immagini in modo asincrono.
-		data.map(async (evento) => {
-			let images = [];
-			const imagePromises = [];
+	// const dataWithImages = await Promise.all(
+	// 	// Mappa l'array 'data' e per ogni evento, recupera gli URL delle immagini in modo asincrono.
+	// 	data.event_imgs.map(async (event_img) => {
+	// 		let images = [];
+	// 		const imagePromises = [];
 
-			// Per ogni evento, crea 3 promesse per recuperare gli URL delle immagini.
-			for (let i = 1; i <= 3; i++) {
-				// const path = `${evento.event_id}/${i}.jpg`;
-				const path = `test/${i}.jpg`;
+	// 		// Per ogni evento, crea 3 promesse per recuperare gli URL delle immagini.
+	// 		for (let i = 1; i <= 3; i++) {
+	// 			// const path = `${evento.event_id}/${i}.jpg`;
+	// 			const path = event_img;
 
-				const {
-					data: { publicUrl },
-					error: publicUrlError,
-				} = supabase.storage
-					.from('event_details_imgs') // Updated bucket name here
-					.getPublicUrl(path);
-				if (publicUrlError) {
-					console.error(
-						`Errore nel recuperare l'immagine ${i}.jpg:`,
-						publicUrlError
-					);
-					return null;
-				}
-				imagePromises.push(publicUrl);
-			}
-			console.log(imagePromises);
-			// Attende che tutte le promesse per le immagini dell'evento corrente siano risolte.
-			images = await Promise.all(imagePromises);
+	// 			const {
+	// 				data: { publicUrl },
+	// 				error: publicUrlError,
+	// 			} = supabase.storage
+	// 				.from('eventi') // Updated bucket name here
+	// 				.getPublicUrl(path);
+	// 			if (publicUrlError) {
+	// 				console.error(
+	// 					`Errore nel recuperare l'immagine ${i}.jpg:`,
+	// 					publicUrlError
+	// 				);
+	// 				return null;
+	// 			}
+	// 			imagePromises.push(publicUrl);
+	// 		}
+	// 		console.log(imagePromises);
+	// 		// Attende che tutte le promesse per le immagini dell'evento corrente siano risolte.
+	// 		images = await Promise.all(imagePromises);
 
-			// Filtra gli eventuali valori null dall'array delle immagini in caso di errori.
-			const filteredImages = images.filter((url) => url !== null);
+	// 		// Filtra gli eventuali valori null dall'array delle immagini in caso di errori.
+	// 		const filteredImages = images.filter((url) => url !== null);
 
-			// Restituisce un nuovo oggetto evento che include anche l'array delle immagini.
-			return { ...evento, event_imgs: filteredImages };
-		})
-	);
+	// 		// Restituisce un nuovo oggetto evento che include anche l'array delle immagini.
+	// 		return { ...evento, event_imgs: filteredImages };
+	// 	})
+	// );
 
-	console.log('Dati con immagini recuperate:', dataWithImages);
+	console.log('Dati con immagini recuperate:', data);
 
 	// Restituisce i dati completi con gli URL delle immagini.
-	return { data: dataWithImages, error: null };
+	return { data: data, error: null };
 };
 
 const getEvents = async () => {

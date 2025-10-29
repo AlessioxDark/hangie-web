@@ -49,7 +49,7 @@ const Sidebar = () => {
 	};
 
 	return (
-		<aside className="xl:h-full xl:w-1/5 xl:p-6 flex flex-col gap-28 shadow-xl bg-bg-1">
+		<aside className="xl:h-full xl:w-[320px] xl:p-6 flex flex-col gap-28 shadow-xl bg-bg-1 sticky z-20  top-10">
 			<header className="flex w-full flex-row gap-4 items-center py-4">
 				{/* <img
 						src={logo}
@@ -89,12 +89,12 @@ const Sidebar = () => {
 							aria-label={link.description}
 							aria-current={isActive ? 'page' : undefined}
 						>
-							<div
-								className={`transition-transform duration-300 ${
-									isActive ? 'scale-110' : 'group-hover:scale-110'
-								}`}
-							>
-								<SidebarIcons isActive={isActive} title={link.title} />
+							<div>
+								<SidebarIcons
+									size={'desktop'}
+									isActive={isActive}
+									title={link.title}
+								/>
 							</div>
 							<span className="font-body font-medium text-xl">
 								{link.title}

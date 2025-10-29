@@ -24,6 +24,7 @@ const EventCard = ({
 	event_imgs,
 	eventi_categorie,
 	descrizione,
+	cover_img,
 }: any) => {
 	const [pfpUrl, setPfpUrl] = useState(defaultpfp);
 	const [isLiked, setIsLiked] = useState(false);
@@ -206,7 +207,7 @@ const EventCard = ({
 		// 		</div>
 
 		<div className="flex flex-col ">
-			<img src={event_imgs[0]} className="w-full  rounded-2xl" alt="" />
+			<img src={cover_img} className="w-full  rounded-2xl" alt="" />
 			<div className="p-3">
 				<h1 className="font-title text-xl font-black">{titolo}</h1>
 			</div>

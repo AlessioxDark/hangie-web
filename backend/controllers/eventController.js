@@ -3,10 +3,42 @@ const Event = require('../models/eventModel');
 const getAllEvents = async (req, res) => {
 	try {
 		const { data, error } = await Event.getAll(req); // Chiama il modello per ottenere gli eventi
+		const cleanData = data.map((response) => {
+			// Estrae l'oggetto evento dal campo 'eventi' e aggiunge lo 'status'
+			return {
+				event_id: response.event_id,
+				status: response.status, // Stato (pending, accepted, refused)
+				costo: response.eventi.costo,
+				data: response.eventi.data,
+				titolo: response.eventi.titolo,
+				descrizione: response.eventi.descrizione,
+				cover_img: response.eventi.cover_img,
+				event_imgs: response.eventi.event_imgs,
+				luogo: response.eventi.luoghi, // Attenzione, qui è 'luoghi' non 'luogo'
+				utente: response.eventi.utenti,
+				gruppo: response.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
+				// Non includere ...dato (spread) qui se vuoi un oggetto pulito
+			};
+		});
+		const newCleanData = {
+			pending: cleanData.filter((response) => {
+				return response.status == 'pending';
+			}),
+			accepted: cleanData.filter((response) => {
+				return response.status == 'accepted';
+			}),
+			refused: cleanData.filter((response) => {
+				// ⬅️ Aggiungi 'refused' (o 'rejected' se usi quel termine)
+				return response.status == 'refused';
+			}),
+		};
+
+		console.log(newCleanData);
+		console.log(newCleanData);
 		if (error) {
 			throw Error(error);
 		}
-		res.json(data);
+		res.json(newCleanData);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}
