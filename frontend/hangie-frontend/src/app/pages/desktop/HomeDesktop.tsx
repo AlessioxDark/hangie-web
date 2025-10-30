@@ -100,13 +100,15 @@ const HomeDesktop = () => {
 	}, []);
 	// Gestione cambio filtro
 
-	const renderEmptyState = (message: string) => (
-		<div className="flex flex-col items-center justify-center py-20 px-4">
+	const renderEmptyState = () => (
+		<div className="flex flex-col items-center justify-center py-20 px-4 w-full justify-center">
 			<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
 				<Calendar className="w-8 h-8 text-gray-400" />
 			</div>
 
-			<h3 className="text-lg font-medium text-gray-900 mb-2">{message}</h3>
+			<h3 className="text-lg font-medium text-gray-900 mb-2">
+				Nessun Evento per il momento
+			</h3>
 			<p className="text-gray-500 text-center max-w-sm">
 				{/* {eventsData.description ||
 					'Controlla più tardi per nuovi eventi'} */}
@@ -177,17 +179,20 @@ const HomeDesktop = () => {
 									</p>
 								</div>
 							</div>
-
-							<div className="flex flex-row gap-8 ">
-								{eventsData &&
-									eventsData.pending.slice(0, 3).map((event) => (
-										// const evento = event.evento
-										<EventCardSuspendedDesktop
-											key={event.event_id}
-											{...event}
-										/>
-									))}
-							</div>
+							{eventsData.pending.length > 0 ? (
+								<div className="flex flex-row gap-8 ">
+									{eventsData &&
+										eventsData.pending.slice(0, 3).map((event) => (
+											// const evento = event.evento
+											<EventCardSuspendedDesktop
+												key={event.event_id}
+												{...event}
+											/>
+										))}
+								</div>
+							) : (
+								renderEmptyState()
+							)}
 						</section>
 
 						{/* EVENTI FUTURI */}
@@ -205,8 +210,10 @@ const HomeDesktop = () => {
 									</p>
 								</div>
 							</div>
-							<div
-								className="
+
+							{eventsData.accepted.length > 0 ? (
+								<div
+									className="
             grid 
             grid-cols-1
             md:grid-cols-2
@@ -215,13 +222,15 @@ const HomeDesktop = () => {
             2xl:grid-cols-4
             gap-8
             "
-							>
-								{eventsData &&
-									eventsData.accepted.map((event) => (
+								>
+									{eventsData.accepted.map((event) => (
 										// const evento = event.evento
 										<EventCardDesktop key={event.event_id} {...event} />
 									))}
-							</div>
+								</div>
+							) : (
+								renderEmptyState()
+							)}
 						</section>
 					</div>
 				</main>

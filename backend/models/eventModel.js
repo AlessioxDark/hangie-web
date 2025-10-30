@@ -48,6 +48,9 @@ const getAll = async (req) => {
 			'event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,data_scadenza,cover_img,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))'
 		)
 		.range(0, offset + 19)
+
+		.limit(0)
+
 		.eq('user_id', user.id);
 	// const { data, error } = await supabase
 	// 	.from('eventi')
@@ -222,17 +225,10 @@ const getSuspended = async (req) => {
 		.select(
 			'event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,cover_img,data_scadenza,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))'
 		)
-		.range(0, offset + 19)
+		// .range(0, offset + 19)
+
 		.eq('user_id', user.id)
-		.eq('status', 'pending');
+		.eq('status', 'pending')
+		.limit(0);
 	return { data, error };
-};
-module.exports = {
-	getAll,
-	getEvent,
-	getEvents,
-	modify,
-	newEvent,
-	modifyResponse,
-	getSuspended,
 };

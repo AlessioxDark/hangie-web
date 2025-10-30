@@ -1,5 +1,6 @@
 import ChevronLeft from '@/assets/other/ChevronLeft';
 import EventCardSuspendedDesktop from '@/features/EventsHomePage/EventCardSuspendedDesktop';
+import { Calendar } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { supabase } from '../../../config/db';
@@ -82,9 +83,9 @@ const EventsSuspendedDesktop = () => {
 			<h1 className="font-body text-text-1 text-4xl font-bold my-6">
 				Eventi in sospeso
 			</h1>
-			<div className="grid grid-cols-3 gap-8 ">
-				{eventsData &&
-					eventsData.map((event) => (
+			{eventsData ? (
+				<div className="grid grid-cols-3 gap-8 ">
+					{eventsData.map((event) => (
 						// const evento = event.evento
 						<EventCardSuspendedDesktop
 							key={event.event_id}
@@ -93,7 +94,22 @@ const EventsSuspendedDesktop = () => {
 							line_clamp={2}
 						/>
 					))}
-			</div>
+				</div>
+			) : (
+				<div className="flex flex-col items-center justify-center py-20 px-4 w-full justify-center">
+					<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+						<Calendar className="w-8 h-8 text-gray-400" />
+					</div>
+
+					<h3 className="text-lg font-medium text-gray-900 mb-2">
+						Nessun Evento per il momento
+					</h3>
+					<p className="text-gray-500 text-center max-w-sm">
+						{/* {eventsData.description ||
+					'Controlla più tardi per nuovi eventi'} */}
+					</p>
+				</div>
+			)}
 		</div>
 	);
 };
