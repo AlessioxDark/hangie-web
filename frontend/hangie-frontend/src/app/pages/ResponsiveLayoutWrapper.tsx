@@ -1,31 +1,32 @@
 import LayoutDesktop from '@/components/Layouts/desktop/LayoutDesktop';
 import LayoutMobile from '@/components/Layouts/mobile/LayoutMobile';
+import useMediaQuery from '@/hooks/IsDekstop';
 import { useEffect, useState } from 'react';
-const useMediaQuery = (query) => {
-	const [matches, setMatches] = useState(() => {
-		// Determinazione iniziale basata sullo stato della finestra
-		if (typeof window !== 'undefined') {
-			return window.matchMedia(query).matches;
-		}
-		return false;
-	});
+// const useMediaQuery = (query) => {
+// 	const [matches, setMatches] = useState(() => {
+// 		// Determinazione iniziale basata sullo stato della finestra
+// 		if (typeof window !== 'undefined') {
+// 			return window.matchMedia(query).matches;
+// 		}
+// 		return false;
+// 	});
 
-	useEffect(() => {
-		const media = window.matchMedia(query);
-		if (media.matches !== matches) {
-			setMatches(media.matches);
-		}
+// 	useEffect(() => {
+// 		const media = window.matchMedia(query);
+// 		if (media.matches !== matches) {
+// 			setMatches(media.matches);
+// 		}
 
-		// Aggiunge il listener per la reattività
-		const listener = (event) => setMatches(event.matches);
-		media.addEventListener('change', listener);
+// 		// Aggiunge il listener per la reattività
+// 		const listener = (event) => setMatches(event.matches);
+// 		media.addEventListener('change', listener);
 
-		// Cleanup: Rimuove il listener quando il componente viene smontato
-		return () => media.removeEventListener('change', listener);
-	}, [matches, query]);
+// 		// Cleanup: Rimuove il listener quando il componente viene smontato
+// 		return () => media.removeEventListener('change', listener);
+// 	}, [matches, query]);
 
-	return matches;
-};
+// 	return matches;
+// };
 const ResponsiveLayoutWrapper = ({ children }) => {
 	// L'hook è chiamato correttamente qui, al top-level del componente wrapper.
 	const isDesktop = useMediaQuery('(min-width: 1280px)');

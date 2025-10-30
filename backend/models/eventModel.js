@@ -45,7 +45,7 @@ const getAll = async (req) => {
 	const { data, error } = await supabase
 		.from('risposte_eventi')
 		.select(
-			'event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,cover_img,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))'
+			'event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,data_scadenza,cover_img,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))'
 		)
 		.range(0, offset + 19)
 		.eq('user_id', user.id);
@@ -108,15 +108,14 @@ const getAll = async (req) => {
 
 const getEvents = async () => {
 	// const { user_id } = req.params;
-	const { data, error } = await supabase
-		.from('risposte_eventi')
-		.select(
-			'eventi(event_id,luogo,costo,data,titolo,created_by,event_cover_img)'
-		)
-		// .eq('risposte_eventi.user_id', user_id)
-		.eq('status', 'accepted');
-
-	return { data, error };
+	// const { data, error } = await supabase
+	// 	.from('risposte_eventi')
+	// 	.select(
+	// 		'eventi(event_id,luogo,costo,data,titolo,created_by,event_cover_img)'
+	// 	)
+	// 	// .eq('risposte_eventi.user_id', user_id)
+	// 	.eq('status', 'accepted');
+	// return { data, error };
 };
 const getEvent = async (req) => {
 	const { event_id } = req.params;
@@ -206,6 +205,28 @@ const modifyResponse = async (req) => {
 		.eq('event_id', event_id);
 	return { data, error };
 };
+const getSuspended = async (req) => {
+	const { offset } = req.body;
+	const token = req.headers.authorization.split(' ')[1];
+
+	const {
+		data: { user },
+		error: tokenError,
+	} = await supabase.auth.getUser(token);
+	if (tokenError) {
+		return { data: null, tokenError };
+	}
+	// const finalData = { event_id, user_id, status: status };
+	const { data, error } = await supabase
+		.from('risposte_eventi')
+		.select(
+			'event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,cover_img,data_scadenza,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))'
+		)
+		.range(0, offset + 19)
+		.eq('user_id', user.id)
+		.eq('status', 'pending');
+	return { data, error };
+};
 module.exports = {
 	getAll,
 	getEvent,
@@ -213,4 +234,5 @@ module.exports = {
 	modify,
 	newEvent,
 	modifyResponse,
+	getSuspended,
 };

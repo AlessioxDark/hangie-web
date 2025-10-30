@@ -50,10 +50,10 @@ const EventCardDesktop = ({
 
 			{gruppo && (
 				<div className="absolute top-3 left-3 max-w-[70%]">
-					<div className="px-3 py-2 bg-primary backdrop-blur-sm rounded-xl shadow-lg">
+					<div className="px-3 py-2 bg-text-1/80 backdrop-blur-md rounded-xl shadow-lg">
 						<div className="flex items-center gap-2">
 							<div className="w-7 h-7">
-								<ProfileIcon />
+								<img src={gruppo.group_cover_img} alt="" />
 							</div>
 
 							<span className="text-sm font-bold text-bg-1 truncate">

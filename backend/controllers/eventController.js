@@ -17,6 +17,7 @@ const getAllEvents = async (req, res) => {
 				luogo: response.eventi.luoghi, // Attenzione, qui è 'luoghi' non 'luogo'
 				utente: response.eventi.utenti,
 				gruppo: response.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
+				scadenza: response.eventi.data_scadenza,
 				// Non includere ...dato (spread) qui se vuoi un oggetto pulito
 			};
 		});
@@ -122,7 +123,34 @@ const modifyResponseEvent = async (req, res) => {
 		res.status(500).json({ error: err.message });
 	}
 };
-
+const getSuspendedEvents = async (req, res) => {
+	try {
+		const { data, error } = await Event.getSuspended(req); // Chiama il modello per ottenere gli eventi
+		console.log(data);
+		const cleanData = data.map((response) => {
+			// Estrae l'oggetto evento dal campo 'eventi' e aggiunge lo 'status'
+			return {
+				event_id: response.event_id,
+				status: response.status, // Stato (pending, accepted, refused)
+				costo: response.eventi.costo,
+				data: response.eventi.data,
+				titolo: response.eventi.titolo,
+				descrizione: response.eventi.descrizione,
+				cover_img: response.eventi.cover_img,
+				event_imgs: response.eventi.event_imgs,
+				luogo: response.eventi.luoghi, // Attenzione, qui è 'luoghi' non 'luogo'
+				utente: response.eventi.utenti,
+				gruppo: response.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
+				scadenza: response.eventi.data_scadenza, // Attenzione, qui è 'gruppi' non 'gruppo'
+				// Non includere ...dato (spread) qui se vuoi un oggetto pulito
+			};
+		});
+		if (error) throw error;
+		res.json({ success: true, data: cleanData });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
 module.exports = {
 	getAllEvents,
 	getMyEvents,
@@ -130,4 +158,5 @@ module.exports = {
 	modifyEvent,
 	addNewEvent,
 	modifyResponseEvent,
+	getSuspendedEvents,
 };
