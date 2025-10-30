@@ -49,8 +49,6 @@ const getAll = async (req) => {
 		)
 		.range(0, offset + 19)
 
-		.limit(0)
-
 		.eq('user_id', user.id);
 	// const { data, error } = await supabase
 	// 	.from('eventi')
@@ -228,7 +226,7 @@ const getSuspended = async (req) => {
 		// .range(0, offset + 19)
 
 		.eq('user_id', user.id)
-		.eq('status', 'pending')
-		.limit(0);
+		.eq('status', 'pending');
+
 	return { data, error };
 };
