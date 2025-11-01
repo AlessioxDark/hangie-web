@@ -1,39 +1,52 @@
 import ChevronRight from '@/assets/other/ChevronRight.js';
-import ProfileIcon from '@/components/ProfileIcon';
-import SearchBar from '@/components/SearchBar';
+
 import EventCardDesktop from '@/components/events/EventCardDesktop';
 import EventCardSuspendedDesktop from '@/features/EventsHomePage/EventCardSuspendedDesktop.js';
-import type { UUID } from 'crypto';
-import {
-	AlertCircle,
-	Calendar,
-	CircleChevronRight,
-	Loader2,
-	MapPin,
-} from 'lucide-react';
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from 'react';
+
+import { AlertCircle, Calendar, Loader2 } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { supabase } from '../../../config/db.js';
+type Utente = {
+	nome: string;
+	user_id: string;
+	profile_pic: null | string;
+};
 
+type EventDataTypes = {
+	titolo: string;
+	data: Date;
+	scadenza: Date;
+	descrizione: string;
+	costo: number;
+	status: 'accepted' | 'pending' | 'refused';
+	cover_img: string;
+	event_imgs: string[];
+	gruppo: any[];
+	utente: Utente[];
+	luogo: any[];
+};
+
+type EventDataTypesArray = {
+	pending: EventDataTypes[];
+	accepted: EventDataTypes[];
+	refused: EventDataTypes[];
+};
+const EVENTSINPAGE = 12;
 const HomeDesktop = () => {
 	const sliderRef = useRef<HTMLDivElement>(null);
-	const [eventsData, setEventsData] = useState({
+	const [eventsData, setEventsData] = useState<EventDataTypesArray>({
 		pending: [],
 		accepted: [],
 		refused: [],
 	});
-	const [isLoading, setIsLoading] = useState<boolean>(true);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 
-	const [error, setError] = useState(null);
+	const [error, setError] = useState<string | null>(null);
 	const [offset, setOffset] = useState<number>(0);
 
 	const fetchEvents = useCallback(async (): Promise<void> => {
+		if (isLoading) return;
 		try {
 			setIsLoading(true);
 			const {
@@ -61,11 +74,29 @@ const HomeDesktop = () => {
 
 				const data = await response.json();
 				console.log(data);
-				setEventsData((prevData) => ({
-					pending: [...prevData.pending, ...data.pending],
-					accepted: [...prevData.accepted, ...data.accepted],
-					refused: [...prevData.refused, ...data.refused],
-				}));
+
+				setEventsData((prevData) => {
+					const mergeAccepted = [...prevData.accepted, ...data.accepted];
+
+					const dedupAccepted = Array.from(
+						new Map(mergeAccepted.map((item) => [item.event_id, item])).values()
+					);
+
+					const mergePending = [...prevData.pending, ...data.pending];
+					const dedupPending = Array.from(
+						new Map(mergePending.map((item) => [item.event_id, item])).values()
+					);
+					const mergeRefused = [...prevData.refused, ...data.refused];
+					const dedupRefused = Array.from(
+						new Map(mergeRefused.map((item) => [item.event_id, item])).values()
+					);
+
+					return {
+						pending: dedupPending,
+						accepted: dedupAccepted,
+						refused: dedupRefused, // fai uguale se ti serve
+					};
+				});
 			}
 		} catch (err: any) {
 			console.error('Errore fetch eventi:', err);
@@ -73,27 +104,28 @@ const HomeDesktop = () => {
 		} finally {
 			setIsLoading(false);
 		}
+	}, [offset, isLoading]);
+	useEffect(() => {
+		fetchEvents();
 	}, [offset]);
-
 	useEffect(() => {
 		const slider = sliderRef.current;
 		if (!slider) return;
 
 		const onScroll = () => {
+			if (isLoading) return; // <--- QUESTA RIGA QUI
 			const { scrollHeight, scrollTop, clientHeight } = slider;
 			const distanzaDalBasso = scrollHeight - scrollTop - clientHeight;
 
-			if (distanzaDalBasso < 540 && !isLoading) {
-				setOffset((prevOffset) => (prevOffset += 16));
+			if (distanzaDalBasso < 540) {
+				setOffset((prevOffset) => prevOffset + EVENTSINPAGE);
 			}
 		};
 		slider.addEventListener('scroll', onScroll);
 		return () => slider.removeEventListener('scroll', onScroll);
 	}, [isLoading]);
 
-	useEffect(() => {
-		fetchEvents();
-	}, [offset, fetchEvents]);
+	useEffect(() => {}, [offset, fetchEvents]);
 	useEffect(() => {
 		if (eventsData) {
 		}
@@ -101,7 +133,7 @@ const HomeDesktop = () => {
 	// Gestione cambio filtro
 
 	const renderEmptyState = () => (
-		<div className="flex flex-col items-center justify-center py-20 px-4 w-full justify-center">
+		<div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
 			<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
 				<Calendar className="w-8 h-8 text-gray-400" />
 			</div>
@@ -120,23 +152,85 @@ const HomeDesktop = () => {
 		if (error) {
 			return (
 				<div className="flex flex-col items-center justify-center py-20">
-					<div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6">
-						<AlertCircle className="w-8 h-8 text-red-500" />
+					<div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
+						<AlertCircle className="w-8 h-8 text-warning" />
 					</div>
-					<h3 className="text-lg font-medium text-gray-900 mb-2">
+					<h3 className="text-lg font-medium text-text-1 mb-2">
 						Ops! Qualcosa è andato storto
 					</h3>
 					<p className="text-gray-500 mb-6 text-center">{error}</p>
 					<button
 						onClick={() => fetchEvents()}
-						className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+						className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
 					>
 						Riprova
 					</button>
 				</div>
 			);
 		}
-
+		if (isLoading) {
+			return (
+				<div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
+					<div className=" rounded-full flex items-center justify-center mb-6">
+						<Loader2 className="w-16 h-16 text-primary animate-spin" />
+					</div>
+					<h3 className="text-lg font-medium text-gray-900 mb-2">
+						Caricamento degli eventi...
+					</h3>
+					<p className="text-gray-500 text-center max-w-sm">
+						Stiamo scoprendo le prossime esperienze per te.
+					</p>
+				</div>
+			);
+		}
+		if (type == 'pending') {
+			return (
+				<div>
+					{eventsData.pending.length > 0 ? (
+						<div className="flex flex-row gap-8 ">
+							{eventsData &&
+								eventsData.pending.slice(0, 3).map((event) => (
+									<div className="w-full max-w-[37rem]" key={event.event_id}>
+										<EventCardSuspendedDesktop {...event} />
+									</div>
+								))}
+						</div>
+					) : (
+						renderEmptyState()
+					)}
+				</div>
+			);
+		}
+		if (type == 'accepted') {
+			return (
+				<div>
+					{eventsData.accepted.length > 0 ? (
+						<div
+							className="
+              grid 
+              grid-cols-1
+              md:grid-cols-2
+              lg:grid-cols-3
+              xl:grid-cols-4
+              2xl:grid-cols-4
+              gap-8
+              "
+						>
+							{eventsData.accepted.map((event) => {
+								// const evento = event.evento
+								return (
+									<div key={event.event_id}>
+										<EventCardDesktop {...event} />
+									</div>
+								);
+							})}
+						</div>
+					) : (
+						renderEmptyState()
+					)}
+				</div>
+			);
+		}
 		return null;
 	};
 
@@ -179,20 +273,7 @@ const HomeDesktop = () => {
 									</p>
 								</div>
 							</div>
-							{eventsData.pending.length > 0 ? (
-								<div className="flex flex-row gap-8 ">
-									{eventsData &&
-										eventsData.pending.slice(0, 3).map((event) => (
-											// const evento = event.evento
-											<EventCardSuspendedDesktop
-												key={event.event_id}
-												{...event}
-											/>
-										))}
-								</div>
-							) : (
-								renderEmptyState()
-							)}
+							{renderContent('pending')}
 						</section>
 
 						{/* EVENTI FUTURI */}
@@ -210,27 +291,7 @@ const HomeDesktop = () => {
 									</p>
 								</div>
 							</div>
-
-							{eventsData.accepted.length > 0 ? (
-								<div
-									className="
-            grid 
-            grid-cols-1
-            md:grid-cols-2
-            lg:grid-cols-3
-            xl:grid-cols-4
-            2xl:grid-cols-4
-            gap-8
-            "
-								>
-									{eventsData.accepted.map((event) => (
-										// const evento = event.evento
-										<EventCardDesktop key={event.event_id} {...event} />
-									))}
-								</div>
-							) : (
-								renderEmptyState()
-							)}
+							{renderContent('accepted')}
 						</section>
 					</div>
 				</main>

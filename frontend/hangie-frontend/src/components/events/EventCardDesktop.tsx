@@ -35,15 +35,15 @@ const EventCardDesktop = ({
 
 	return (
 		<article
-			className="flex flex-col shadow-md shadow-black/20 border border-[#E2E8F0] rounded-xl cursor-pointer group    hover:shadow-xl
-		     hover:-translate-y-1 relative hover:shadow-black/30 hover:shadow-
-		  
+			className="flex flex-col  border border-[#E2E8F0] rounded-xl cursor-pointer group
+		     hover:-translate-y-2 relative
+		  shadow-sm hover:shadow-2xl
 		     transition-all duration-300
 	 "
 		>
 			<img
 				src={cover_img}
-				className="w-full rounded-t-md h-56 object-cover flex-shrink-0"
+				className="w-full rounded-t-xl h-56 object-cover flex-shrink-0"
 				alt="Immagine cover evento"
 				loading="lazy"
 			/>
@@ -107,23 +107,8 @@ const EventCardDesktop = ({
 									<>
 										<div className="flex -space-x-2">
 											{gruppo.partecipanti_gruppo.map((partecipante, index) => (
-												<div
-													key={index}
-													className="w-7 h-7 rounded-full border-2 border-white bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden"
-													title={partecipante.nome}
-												>
-													<p>sd</p>
-													{partecipante.profile_pic ? (
-														<img
-															src={partecipante.profile_pic}
-															alt={partecipante.nome}
-															className="w-full h-full object-cover"
-														/>
-													) : (
-														<div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">
-															ciao
-														</div>
-													)}
+												<div className="w-7 h-7" key={partecipante.user_id}>
+													<ProfileIcon />
 												</div>
 											))}
 
@@ -138,7 +123,7 @@ const EventCardDesktop = ({
 										</div>
 
 										<span className="text-text-2 font-body font-medium text-base truncate">
-											{1} partecipant
+											{gruppo.partecipanti_gruppo.length} partecipant
 											{gruppo.partecipanti_gruppo.length !== 1 ? 'i' : 'e'}
 										</span>
 									</>

@@ -35,6 +35,8 @@ const supabase = require('../config/db');
 
 const getAll = async (req) => {
 	// Estrae l'offset dal corpo della richiesta.
+	const EVENTSINPAGE = 12;
+
 	const { offset } = req.body;
 	const token = req.headers.authorization.split(' ')[1];
 	const {
@@ -47,7 +49,7 @@ const getAll = async (req) => {
 		.select(
 			'event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,data_scadenza,cover_img,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))'
 		)
-		.range(0, offset + 19)
+		.range(offset, offset + EVENTSINPAGE - 1)
 
 		.eq('user_id', user.id);
 	// const { data, error } = await supabase
@@ -209,6 +211,7 @@ const modifyResponse = async (req) => {
 const getSuspended = async (req) => {
 	const { offset } = req.body;
 	const token = req.headers.authorization.split(' ')[1];
+	const EVENTSINPAGE = 12;
 
 	const {
 		data: { user },
@@ -223,10 +226,14 @@ const getSuspended = async (req) => {
 		.select(
 			'event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,cover_img,data_scadenza,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))'
 		)
-		// .range(0, offset + 19)
 
 		.eq('user_id', user.id)
-		.eq('status', 'pending');
+		.eq('status', 'pending')
+		.range(offset, offset + EVENTSINPAGE - 1);
 
 	return { data, error };
+};
+module.exports = {
+	getAll,
+	getSuspended,
 };

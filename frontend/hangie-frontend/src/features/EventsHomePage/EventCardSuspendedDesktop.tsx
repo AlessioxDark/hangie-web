@@ -37,8 +37,8 @@ interface EventCardSuspendedProps {
 	gruppo?: Gruppo;
 	scadenza?: string; // ✅ NUOVO: data scadenza
 	giorni_rimasti?: number; // ✅ NUOVO: giorni rimanenti
-	maxW: number;
-	line_clamp: number;
+	maxW: string;
+	line_clamp: string;
 }
 
 const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
@@ -48,8 +48,8 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
 	gruppo,
 	scadenza,
 	giorni_rimasti = 3,
-	maxW = 33, // Default 3 giorni
-	line_clamp = 1,
+
+	line_clamp = 'line-clamp-1',
 }) => {
 	const formattedTime = data
 		? new Date(data).toLocaleTimeString('it-IT', {
@@ -120,7 +120,7 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
 			className={`
         group
         flex flex-col
-        bg-white
+        bg-bg-1
         border border-gray-200
         rounded-2xl
         overflow-hidden
@@ -131,7 +131,7 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
         transition-all duration-300
         cursor-pointer
         w-full
-        max-w-[${maxW}rem]
+     
        
       `}
 		>
@@ -140,7 +140,7 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
       ════════════════════════════════════════════════════ */}
 			<div
 				className="
-        flex items-center justify-between gap-3
+        flex items-center justify-between gap-4
         px-6 pt-6
         from-blue-50 to-purple-50
       
@@ -187,7 +187,7 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
 							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 						/>
 					</svg>
-					<span className="text-xs font-bold text-white whitespace-nowrap font-body">
+					<span className="text-sm font-body font-bold text-white whitespace-nowrap ">
 						{getUrgencyText()}
 					</span>
 				</div>
@@ -198,13 +198,13 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
       ════════════════════════════════════════════════════ */}
 			<div className="p-6 flex flex-col justify-between h-full ">
 				{/* Data + Titolo */}
-				<div className="flex flex-col gap-3">
+				<div className="flex flex-col gap-4">
 					<div className="flex flex-col ">
-						<time className="block text-blue-600 text-sm font-bold uppercase tracking-wider">
+						<time className="block text-blue-600 text-base font-bold uppercase tracking-wider">
 							{formattedTime}
 						</time>
 						<h3
-							className={`text-2xl font-bold text-gray-900 leading-tight line-clamp-${line_clamp}`}
+							className={`text-2xl font-bold text-gray-900 leading-tight ${line_clamp}`}
 						>
 							{titolo}
 						</h3>
@@ -221,24 +221,7 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
 								<div className="flex items-center gap-2.5 flex-1 min-w-0">
 									<div className="flex -space-x-2 flex-shrink-0">
 										{avatarsToDisplay.map((partecipante, index) => (
-											// <div
-											// 	key={index}
-											// 	className="w-7 h-7 rounded-full border-2 border-white overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500"
-											// 	title={partecipante.nome}
-											// >
-											// 	{partecipante.profile_pic ? (
-											// 		<img
-											// 			src={partecipante.profile_pic}
-											// 			alt={partecipante.nome}
-											// 			className="w-full h-full object-cover"
-											// 		/>
-											// 	) : (
-											// 		<div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">
-											// 			m
-											// 		</div>
-											// 	)}
-											// </div>
-											<div className="w-7 h-7">
+											<div className="w-7 h-7" key={partecipante.user_id}>
 												<ProfileIcon />
 											</div>
 										))}
@@ -294,6 +277,8 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
                 font-bold 
                 hover:bg-primary/80             
                 transition-colors
+                duration-300 
+
                  text-lg  
                  cursor-pointer 
               "
@@ -310,7 +295,8 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
                 font-bold 
                 hover:bg-bg-2/80
                 hover:border-text-2/80
-                transition-colors  
+                transition-colors 
+                duration-300 
                 text-lg  
                 cursor-pointer       
               "
