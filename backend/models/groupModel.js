@@ -12,8 +12,7 @@ const getAll = async () => {
        eventi(
        titolo,
        event_id,
-       data,
-       event_cover_img)
+       data)
        `
 	);
 

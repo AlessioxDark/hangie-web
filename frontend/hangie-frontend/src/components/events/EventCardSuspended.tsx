@@ -41,7 +41,7 @@ interface EventCardSuspendedProps {
 	line_clamp: string;
 }
 
-const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
+const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
 	titolo,
 	data,
 	utente,
@@ -315,4 +315,4 @@ const EventCardSuspendedDesktop: React.FC<EventCardSuspendedProps> = ({
 	);
 };
 
-export default EventCardSuspendedDesktop;
+export default EventCardSuspended;

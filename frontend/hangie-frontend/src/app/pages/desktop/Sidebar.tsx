@@ -57,10 +57,10 @@ const Sidebar = () => {
 						className="w-15 h-15"
 						loading="lazy"
 					/> */}
-				<div className="bg-primary rounded-2xl py-4 px-6">
-					<span className="font-body text-bg-1 font-black text-6xl">H</span>
+				<div className="bg-primary rounded-2xl py-2 px-4">
+					<span className="font-body text-bg-1 font-black text-5xl">H</span>
 				</div>
-				<h1 className="font-body font-bold text-5xl text-text-1">Hangie</h1>
+				<h1 className="font-body font-bold text-4xl text-text-1">HANGIE</h1>
 			</header>
 
 			{/* Navigation */}

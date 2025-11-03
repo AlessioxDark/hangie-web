@@ -3,13 +3,13 @@ import React from 'react';
 import DollarIcon from '@/assets/eventCardIcons/DollarIcon';
 import MapIcon from '@/assets/eventCardIcons/MapIcon';
 import ParticipantsIcon from '@/assets/eventCardIcons/ParticipantsIcon';
-import ProfileIcon from '../ProfileIcon';
+import ProfileIcon from '@/components/ProfileIcon';
 
 /*
 todo
 Non toccare niente altro, cerca di risolvere al meglio rpoblema altezze diverse, 
 magari potresti centrare tutta la parte ceh non riguarda pfp in tutto lo spazio rimanente */
-const EventCardDesktop = ({
+const EventCard = ({
 	titolo,
 	created_by,
 	event_id,
@@ -152,4 +152,4 @@ const EventCardDesktop = ({
 		</article>
 	);
 };
-export default EventCardDesktop;
+export default EventCard;

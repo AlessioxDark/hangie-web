@@ -1,6 +1,6 @@
 import React from 'react';
 const DESKTOPSIZE = '30px';
-const MOBILESIZE = '30px';
+const MOBILESIZE = '35px';
 // ==================== HOME ICON ====================
 const HomeIconOutline = ({ size }) => (
 	<svg
@@ -21,8 +21,8 @@ const HomeIconOutline = ({ size }) => (
 const HomeIconSolid = ({ size }) => (
 	<svg
 		fill="#2463eb"
-		width={size == MOBILESIZE ? '35px' : '45px'}
-		height={size == MOBILESIZE ? '35px' : '45px'}
+		width={size == MOBILESIZE ? '40px' : '45px'}
+		height={size == MOBILESIZE ? '40px' : '45px'}
 		viewBox="-4.5 0 32 32"
 		version="1.1"
 		xmlns="http://www.w3.org/2000/svg"

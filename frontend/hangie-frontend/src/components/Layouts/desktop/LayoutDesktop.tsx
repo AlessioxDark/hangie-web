@@ -1,6 +1,6 @@
+import Chats from '@/app/pages/Chats';
 import React from 'react';
 import Sidebar from '../../../app/pages/desktop/Sidebar';
-
 const LayoutDesktop = ({ children }) => {
 	return (
 		<div className="h-screen w-full flex flex-row">

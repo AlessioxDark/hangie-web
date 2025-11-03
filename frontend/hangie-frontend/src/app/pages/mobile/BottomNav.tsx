@@ -46,7 +46,7 @@ const BottomNav = () => {
 		},
 	];
 	return (
-		<div className="w-full h-[5rem] bg-bg-1 flex flex-row justify-center items-center gap-12 md:gap-24">
+		<div className=" bottom-0 fixed w-full h-24 border-t border-text-2/80 bg-bg-1 flex flex-row  items-center justify-around">
 			{sidebarLinks.map((link) => {
 				const isActive = isLinkActive(link.link);
 
@@ -55,7 +55,7 @@ const BottomNav = () => {
 						to={link.link}
 						key={link.id}
 						className={`
-								flex items-center gap-1 ${
+								flex items-center flex-col  gap-1 ${
 									isActive ? ' text-primary  ' : ' text-text-2 bg-bg-1 '
 								} 
 							`}
@@ -68,7 +68,9 @@ const BottomNav = () => {
 							title={link.title}
 						/>
 
-						<span className="font-body font-medium text-sm">{link.title}</span>
+						<span className="font-body font-semibold text-lg ">
+							{link.title}
+						</span>
 					</Link>
 				);
 			})}

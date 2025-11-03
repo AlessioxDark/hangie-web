@@ -26,4 +26,6 @@
 	--font-title: 'Montserrat';
 	--font-body: 'Open Sans', 'serif';
 	--font-test: 'Mona Sans', 'serif';
+
+	--breakpoint-xs: 600px;
 }
