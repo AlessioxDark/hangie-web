@@ -20,6 +20,7 @@
     "nodemon": "^3.1.10",
     "postgres": "^3.4.7",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "supabase": "^2.31.8",
     "zod": "^4.0.10"
   }

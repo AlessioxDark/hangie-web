@@ -1,4 +1,4 @@
-import LayoutChatDesktop from '@/components/Layouts/desktop/LayoutChatDesktop';
+import LayoutChatDesktop from '@/components/Layouts/desktop/chats/LayoutChatDesktop';
 import LayoutDesktop from '@/components/Layouts/desktop/LayoutDesktop';
 import LayoutMobile from '@/components/Layouts/mobile/LayoutMobile';
 import useMediaQuery from '@/hooks/IsDekstop';

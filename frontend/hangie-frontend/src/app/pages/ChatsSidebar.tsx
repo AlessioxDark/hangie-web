@@ -1,10 +1,13 @@
+import GroupChat from '@/components/groups/desktop/GroupChat.js';
 import GroupCard from '@/components/groups/groupCard.js';
-import React, { useEffect, useState } from 'react';
+
+import React, { useContext, useEffect, useState } from 'react';
 import { supabase } from '../../config/db.js';
 const ChatsSidebar = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<null | string>('');
 	const [groupsData, setGroupsData] = useState([]);
+
 	const fetchGroups = async () => {
 		if (isLoading) return;
 		try {
@@ -44,9 +47,11 @@ const ChatsSidebar = () => {
 			setIsLoading(false);
 		}
 	};
+
 	useEffect(() => {
 		fetchGroups();
 	}, []);
+
 	return (
 		<div className="h-screen bg-bg-1 w-1/4">
 			<div className="flex flex-col gap-12">
@@ -60,9 +65,9 @@ const ChatsSidebar = () => {
 				</div>
 				<div>
 					{groupsData.length > 0 ? (
-						groupsData.map((group) => {
+						groupsData.map((group, i) => {
 							// console.log(group);
-							return <GroupCard {...group} />;
+							return <GroupCard index={i} {...group} />;
 						})
 					) : (
 						<div>
@@ -71,6 +76,7 @@ const ChatsSidebar = () => {
 					)}
 				</div>
 			</div>
+			{/* <div>{currentChat && <GroupChat {...currentChatData} />}</div> */}
 		</div>
 	);
 };

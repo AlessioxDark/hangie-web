@@ -9,6 +9,7 @@ const getAllGroups = async (req, res) => {
 		const formattedData = data.map((row) => {
 			let ultimoMessaggio = null;
 			row.messaggi.forEach((messaggio) => {
+				console.log(messaggio);
 				if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
 					ultimoMessaggio = messaggio;
 				}
@@ -23,7 +24,7 @@ const getAllGroups = async (req, res) => {
 			const { messaggi, eventi, ...groupData } = row;
 			return {
 				...groupData,
-				ultimoMessaggio: ultimoMessaggio.content,
+				ultimoMessaggio: ultimoMessaggio,
 				evento: ultimoEvento,
 			};
 		});

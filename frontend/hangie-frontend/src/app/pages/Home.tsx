@@ -177,11 +177,18 @@ const Home = () => {
 				return (
 					<div>
 						{eventsData.pending.length > 0 ? (
-							<div className="flex xs:flex-col lg:flex-row gap-8 ">
+							<div
+								className="grid 
+   xs:grid-cols-1          
+    lg:grid-cols-2 
+    xl:grid-cols-3  
+    grid-rows-1      
+    gap-8"
+							>
 								{eventsData &&
 									eventsData.pending.slice(0, 3).map((event) => (
 										<div
-											className="w-full lg:max-w-[37rem]"
+											className="w-full xl:min-width-[30rem] xl:max-w-[37rem]"
 											key={event.event_id}
 										>
 											<EventCardSuspendedDesktop {...event} />
@@ -189,6 +196,17 @@ const Home = () => {
 									))}
 							</div>
 						) : (
+							// <div className="flex xs:flex-col lg:flex-row gap-8 ">
+							// 	{eventsData &&
+							// 		eventsData.pending.slice(0, 3).map((event) => (
+							// 			<div
+							// 				className="w-full  xl:max-w-[37rem]"
+							// 				key={event.event_id}
+							// 			>
+							// 				<EventCardSuspendedDesktop {...event} />
+							// 			</div>
+							// 		))}
+							// </div>
 							renderEmptyState()
 						)}
 					</div>
@@ -204,8 +222,8 @@ const Home = () => {
               grid-cols-1
               md:grid-cols-2
               lg:grid-cols-3
-              xl:grid-cols-4
               2xl:grid-cols-4
+         
               gap-8
               "
 							>
@@ -268,7 +286,7 @@ const Home = () => {
 									</p>
 								</div>
 							</div>
-							{renderContent('pending')}
+							<div className="w-fit">{renderContent('pending')}</div>
 						</section>
 
 						{/* EVENTI FUTURI */}
@@ -286,7 +304,9 @@ const Home = () => {
 									</p>
 								</div>
 							</div>
-							{renderContent('accepted')}
+							<div className=" xs:mb-24 xl:mb-0">
+								{renderContent('accepted')}
+							</div>
 						</section>
 					</div>
 				</main>

@@ -21,8 +21,8 @@ const HomeIconOutline = ({ size }) => (
 const HomeIconSolid = ({ size }) => (
 	<svg
 		fill="#2463eb"
-		width={size == MOBILESIZE ? '40px' : '45px'}
-		height={size == MOBILESIZE ? '40px' : '45px'}
+		width={size == MOBILESIZE ? '40px' : DESKTOPSIZE}
+		height={size == MOBILESIZE ? '40px' : DESKTOPSIZE}
 		viewBox="-4.5 0 32 32"
 		version="1.1"
 		xmlns="http://www.w3.org/2000/svg"
