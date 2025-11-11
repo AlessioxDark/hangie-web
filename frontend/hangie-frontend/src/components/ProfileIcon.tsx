@@ -23,7 +23,7 @@ const defaultPfp = () => {
 		</svg>
 	);
 };
-const ProfileIcon = () => {
+const ProfileIcon = ({ user_id }) => {
 	const [userPfp, setUserPfp] = useState('');
 	const [isLoggedIn, setisLoggedIn] = useState(false);
 	const navigate = useNavigate();
@@ -40,7 +40,7 @@ const ProfileIcon = () => {
 			}
 			if (session) {
 				const response = await fetch(
-					'http://localhost:3000/api/profile/getpfp',
+					`http://localhost:3000/api/profile/getpfp/${user_id}`,
 					{
 						method: 'GET',
 						headers: {
@@ -50,6 +50,7 @@ const ProfileIcon = () => {
 				);
 
 				if (!response.ok) {
+					setUserPfp(defaultPfp);
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
 
@@ -61,7 +62,7 @@ const ProfileIcon = () => {
 					setUserPfp(
 						<img
 							src={data.data[0].profile_pic}
-							className="w-full h-full"
+							className="w-full h-full rounded-full"
 							alt="profile pic"
 						/>
 					);

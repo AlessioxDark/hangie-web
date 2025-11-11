@@ -2,30 +2,24 @@ const Group = require('../models/groupModel');
 
 const getAllGroups = async (req, res) => {
 	try {
-		const { data, error } = await Group.getAll(); // Chiama il modello per ottenere gli eventi
+		const { data, error } = await Group.getAll(req); // Chiama il modello per ottenere gli eventi
 		if (error) {
 			console.log(error);
 		}
 		const formattedData = data.map((row) => {
 			let ultimoMessaggio = null;
-			row.messaggi.forEach((messaggio) => {
+			row.gruppi.messaggi.forEach((messaggio) => {
 				console.log(messaggio);
 				if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
 					ultimoMessaggio = messaggio;
 				}
 			});
-			let ultimoEvento = null;
-			row.eventi.forEach((evento) => {
-				if (!ultimoEvento || evento.data > ultimoEvento.data) {
-					ultimoEvento = evento;
-				}
-			});
 
-			const { messaggi, eventi, ...groupData } = row;
+			const { gruppi, ...groupData } = row;
 			return {
 				...groupData,
+				...gruppi,
 				ultimoMessaggio: ultimoMessaggio,
-				evento: ultimoEvento,
 			};
 		});
 		console.log(formattedData);
@@ -40,8 +34,17 @@ const getSpecificGroup = async (req, res) => {
 		if (error) {
 			console.log(error);
 		}
-		console.log(data);
-		res.json(data);
+		console.log('data', data);
+		const formattedData = data.map((row) => {
+			const { gruppi, utenti, ...groupData } = row;
+			return {
+				...groupData,
+				...gruppi,
+				partecipanti: utenti,
+			};
+		});
+		console.log(formattedData);
+		res.json(formattedData);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}

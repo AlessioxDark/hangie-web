@@ -1,5 +1,6 @@
 const supabase = require('../config/db');
-const getPfp = async (token) => {
+const getPfp = async (req, token) => {
+	const { user_id } = req.params;
 	const {
 		data: { user },
 		error: tokenError,
@@ -11,7 +12,8 @@ const getPfp = async (token) => {
 	const { data, error } = await supabase
 		.from('utenti')
 		.select('profile_pic')
-		.eq('user_id', user.id);
+		.eq('user_id', user_id);
+	console.log('pfp', data, error);
 	return { data, error };
 };
 module.exports = {

@@ -1,14 +1,16 @@
 import Chats from '@/app/pages/Chats.js';
 import ChatsSidebar from '@/app/pages/ChatsSidebar';
 import Sidebar from '@/app/pages/desktop/Sidebar';
-import React, { createContext, useEffect, useState } from 'react';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../../config/db.js';
 import { ChatContext } from './ChatContext.js';
 const LayoutChatDesktop = ({ children }) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<null | string>('');
-	const [currentChat, setCurrentChat] = useState(null);
+	const [currentGroup, setCurrentGroup] = useState(null);
 	const [currentChatData, setCurrentChatData] = useState(null);
+	const [currentGroupData, setCurrentGroupData] = useState(null);
 
 	const fetchChat = async () => {
 		if (isLoading) return;
@@ -21,7 +23,7 @@ const LayoutChatDesktop = ({ children }) => {
 			} = await supabase.auth.getSession();
 			if (session) {
 				const response = await fetch(
-					`http://localhost:3000/api/groups/${currentChat}`,
+					`http://localhost:3000/api/groups/${currentGroup}`,
 					{
 						method: 'GET',
 						// body: JSON.stringify({ offset: offset }),
@@ -40,10 +42,54 @@ const LayoutChatDesktop = ({ children }) => {
 
 				const data = await response.json();
 				console.log(data);
-
-				setCurrentChatData((prevData) => {
-					return data;
+				console.log(session);
+				const newData = data.map((dato) => {
+					return {
+						...dato,
+						messaggi: dato.messaggi.map((mess) => {
+							return { ...mess, isUser: mess.user_id === session.user.id };
+						}),
+					};
 				});
+				setCurrentChatData(newData);
+			}
+		} catch (err: any) {
+			console.error('Errore fetch eventi:', err);
+			setError(err.message || 'Errore nel caricamento degli eventi');
+		} finally {
+			setIsLoading(false);
+		}
+	};
+	const fetchFirstGroup = async () => {
+		if (isLoading) return;
+		try {
+			setError(null);
+			setIsLoading(true);
+			const {
+				data: { session },
+				error,
+			} = await supabase.auth.getSession();
+			if (session) {
+				const response = await fetch(`http://localhost:3000/api/groups/`, {
+					method: 'GET',
+					// body: JSON.stringify({ offset: offset }),
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${session.access_token}`,
+					},
+				});
+				if (!response.ok) {
+					console.log(response);
+					setError(
+						response.statusText || 'Errore nel caricamento degli eventi'
+					);
+				}
+
+				const data = await response.json();
+				console.log(data);
+
+				setCurrentGroup(data[0].group_id);
+				setCurrentGroupData(data[0]);
 			}
 		} catch (err: any) {
 			console.error('Errore fetch eventi:', err);
@@ -53,29 +99,81 @@ const LayoutChatDesktop = ({ children }) => {
 		}
 	};
 	useEffect(() => {
-		fetchChat();
-	}, [currentChat]);
-
+		if (currentGroup != null) {
+			fetchChat();
+		}
+	}, [currentGroup]);
+	useEffect(() => {
+		if (currentGroup == null) {
+			fetchFirstGroup();
+		}
+	}, []);
+	const renderContent = useCallback(() => {
+		if (isLoading) {
+			return (
+				<div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">
+					<div className=" rounded-full flex items-center justify-center mb-6">
+						<Loader2 className="w-20 h-20 text-primary animate-spin" />
+					</div>
+					<h3 className="text-2xl font-medium text-gray-900 mb-2">
+						Caricamento della chat...
+					</h3>
+					<p className="text-gray-500 text-center text-lg ">
+						Stiamo cercaando la chat per te
+					</p>
+				</div>
+			);
+		}
+		if (error) {
+			return (
+				<div className="flex flex-col items-center justify-center py-20">
+					<div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
+						<AlertCircle className="w-20 h-20 text-warning" />
+					</div>
+					<h3 className="text-2xl font-medium text-text-1 mb-2">
+						Ops! Qualcosa è andato storto
+					</h3>
+					<p className="text-gray-500 mb-6 text-center text-lg">{error}</p>
+					<button
+						onClick={() => fetchChat()}
+						className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
+					>
+						Riprova
+					</button>
+				</div>
+			);
+		}
+		if (currentChatData) {
+			return currentChatData.map((chat, chatIndex) => {
+				return <Chats {...chat} />;
+			});
+		}
+		return <p>c'è stato un errore</p>;
+	}, [
+		currentChatData,
+		fetchChat,
+		currentGroup,
+		error,
+		isLoading,
+		fetchFirstGroup,
+	]);
 	return (
 		<ChatContext.Provider
 			value={{
-				currentChat: currentChat,
+				currentGroup: currentGroup,
+				setCurrentGroup: setCurrentGroup,
 				currentChatData: currentChatData,
-				setCurrentChat: setCurrentChat,
 				setCurrentChatData: setCurrentChatData,
+				currentGroupData: currentGroupData,
+				setCurrentGroupData: setCurrentGroupData,
 			}}
 		>
 			<div className="h-screen w-full flex flex-row">
 				<Sidebar />
 				<ChatsSidebar />
 				<div className="flex flex-col w-full h-screen  bg-bg-2">
-					<main className="flex-grow h-screen overflow-y-auto px-20 py-12">
-						{/* {children} */}
-						{currentChatData?.map((chat, chatIndex) => {
-							if (currentChat == chatIndex) {
-								return <Chats {...chat} />;
-							}
-						})}
+					<main className="flex-grow h-screen overflow-y-auto">
+						{renderContent()}
 					</main>
 				</div>
 				{/* {children} */}

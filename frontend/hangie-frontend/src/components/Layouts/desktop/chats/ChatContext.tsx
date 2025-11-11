@@ -1,10 +1,12 @@
 import React, { createContext, useContext } from 'react';
 
 export const ChatContext = createContext({
-	currentChat: null,
-	currentChatData: null,
-	setCurrentChat: (arg) => arg,
-	setCurrentChatData: (arg) => arg,
+	currentChatData: null, // dati chat corrente
+	setCurrentChatData: (arg) => arg, // impostare dati chat
+	currentGroup: null, // id chat corrente
+	setCurrentGroup: (arg) => arg, // impostare id chat
+	currentGroupData: null,
+	setCurrentGroupData: (arg) => arg,
 });
 
 export const useChat = () => {

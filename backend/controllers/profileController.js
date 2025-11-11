@@ -3,7 +3,7 @@ const Profile = require('../models/profileModel');
 const getPfp = async (req, res) => {
 	const token = req.headers.authorization.split(' ')[1];
 
-	const { data, error } = await Profile.getPfp(token);
+	const { data, error } = await Profile.getPfp(req, token);
 	if (error) {
 		return res.status(400).json({
 			success: false,

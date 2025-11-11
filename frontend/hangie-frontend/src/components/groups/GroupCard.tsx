@@ -8,11 +8,11 @@ const GroupCard = ({
 	index,
 	group_id,
 	created_at,
+
+	partecipanti,
 }) => {
-	const { setCurrentChat, currentChat } = useChat();
-	useEffect(() => {
-		console.log('currentChat è', currentChat);
-	}, [currentChat]);
+	const { setCurrentGroup, setCurrentGroupData } = useChat();
+
 	const formatTime = (dateString) => {
 		const date = new Date(dateString);
 		// Mostra l'ora se è oggi, altrimenti la data breve
@@ -35,8 +35,14 @@ const GroupCard = ({
     transition-colors
     border-b border-gray-200"
 			onClick={() => {
-				// console.log('cliccato gruppo');
-				setCurrentChat(index);
+				setCurrentGroup(group_id);
+				setCurrentGroupData({
+					nome,
+					group_id,
+					created_at,
+					group_cover_img,
+					partecipanti,
+				});
 			}}
 		>
 			<div className="flex flex-row items-center justify-between w-full h-full">
@@ -44,7 +50,7 @@ const GroupCard = ({
 					<img src={group_cover_img} className="h-16 w-16" alt="" />
 					<div className="flex flex-col">
 						<h1 className="font-bold font-body text-xl">{nome}</h1>
-						<p className="text-text-2 font-body text-lg">
+						<p className="text-text-2 font-body text-lg line-clamp-1">
 							{ultimoMessaggio?.content}
 						</p>
 					</div>

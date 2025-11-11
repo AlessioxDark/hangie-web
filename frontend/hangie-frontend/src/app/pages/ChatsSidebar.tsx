@@ -1,7 +1,8 @@
 import GroupChat from '@/components/groups/desktop/GroupChat.js';
 import GroupCard from '@/components/groups/groupCard.js';
 
-import React, { useContext, useEffect, useState } from 'react';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { supabase } from '../../config/db.js';
 const ChatsSidebar = () => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +35,7 @@ const ChatsSidebar = () => {
 				}
 
 				const data = await response.json();
+
 				console.log(data);
 
 				setGroupsData((prevData) => {
@@ -51,7 +53,51 @@ const ChatsSidebar = () => {
 	useEffect(() => {
 		fetchGroups();
 	}, []);
-
+	const renderContent = useCallback(() => {
+		if (isLoading) {
+			return (
+				<div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">
+					<div className=" rounded-full flex items-center justify-center mb-6">
+						<Loader2 className="w-16 h-16 text-primary animate-spin" />
+					</div>
+					<h3 className="text-xl font-medium text-gray-900 mb-2">
+						Caricamento della chat...
+					</h3>
+					<p className="text-gray-500 text-center  ">
+						Stiamo cercaando la chat per te
+					</p>
+				</div>
+			);
+		}
+		if (error) {
+			return (
+				<div className="flex flex-col items-center justify-center py-20">
+					<div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
+						<AlertCircle className="w-16 h-16 text-warning" />
+					</div>
+					<h3 className="text-lg font-medium text-text-1 mb-2">
+						Ops! Qualcosa è andato storto
+					</h3>
+					<p className="text-gray-500 mb-6 text-center">{error}</p>
+					<button
+						onClick={() => fetchGroups()}
+						className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
+					>
+						Riprova
+					</button>
+				</div>
+			);
+		}
+		if (groupsData.length == 0) {
+			return <h1>Non ci sono gruppi</h1>;
+		}
+		if (groupsData) {
+			return groupsData.map((group, i) => {
+				return <GroupCard index={i} {...group} />;
+			});
+		}
+		return <p>c'è stato un errore</p>;
+	}, [fetchGroups, error, isLoading]);
 	return (
 		<div className="h-screen bg-bg-1 w-1/4">
 			<div className="flex flex-col gap-12">
@@ -63,18 +109,7 @@ const ChatsSidebar = () => {
 						<span className="text-bg-1 text-5xl font-body">+</span>
 					</div>
 				</div>
-				<div>
-					{groupsData.length > 0 ? (
-						groupsData.map((group, i) => {
-							// console.log(group);
-							return <GroupCard index={i} {...group} />;
-						})
-					) : (
-						<div>
-							<h1>ancora nessun gruppo</h1>
-						</div>
-					)}
-				</div>
+				<div>{renderContent()}</div>
 			</div>
 			{/* <div>{currentChat && <GroupChat {...currentChatData} />}</div> */}
 		</div>
