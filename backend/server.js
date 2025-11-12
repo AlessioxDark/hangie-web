@@ -5,7 +5,7 @@ const http = require('http'); // Importiamo il modulo HTTP di Node
 
 const { Server } = require('socket.io');
 const cors = require('cors');
-require('./config/db');
+const supabase = require('./config/db');
 const eventRoutes = require('./routes/eventRoutes');
 const groupRoutes = require('./routes/groupRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -26,11 +26,26 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
 	console.log('nuovo utente collegato al server', socket.id);
 
-	socket.on('send_message', (message, room) => {
+	socket.on('send_message', async (message, room, token) => {
 		console.log(
 			`Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
 		);
-		socket.broadcast.emit('receive_message', message);
+
+		const {
+			data: { user },
+			error: tokenError,
+		} = await supabase.auth.getUser(token);
+		console.log(user);
+		const { data, error } = await supabase
+			.from('messaggi')
+			.insert([{ content: message, user_id: user.id, group_id: room }]);
+
+		socket.to(room).emit('receive_message', message);
+	});
+
+	socket.on('join_room', (room_id) => {
+		console.log('room_joinata');
+		socket.join(room_id);
 	});
 });
 

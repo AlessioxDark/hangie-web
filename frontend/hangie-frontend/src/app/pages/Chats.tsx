@@ -1,19 +1,22 @@
 import SendIcon from '@/assets/other/SendIcon';
 import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
 import MessageCard from '@/components/Layouts/desktop/chats/messaggi/MessageCard';
+import type { Socket } from 'dgram';
 import React, { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { supabase } from '../../config/db.js';
 const Chats = ({ nome, messaggi }) => {
 	const { currentGroupData, setCurrentChatData, currentChatData } = useChat();
-	const [chatInput, setChatInput] = useState(null);
+	const [chatInput, setChatInput] = useState<string>('');
 	const messagesEndRef = useRef(null);
-	const socketRef = useRef(null);
+	const socketRef = useRef<any>(null);
+	const chatInputRef = useRef<any>(null);
+
+	console.log(currentChatData);
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
 	});
-	console.log(currentGroupData);
-	console.log(currentGroupData.group_id);
+
 	useEffect(() => {
 		console.log(chatInput);
 	}, [chatInput]);
@@ -31,20 +34,78 @@ const Chats = ({ nome, messaggi }) => {
 			socket.disconnect();
 		};
 	}, []);
-	const sendMessage = () => {
-		socketRef.current.emit(
-			'send_message',
-			chatInput,
-			currentGroupData.group_id
-		);
+	const sendMessage = async () => {
+		console.log('messaggio inviato');
+		const token = await getToken();
+		const {
+			data: { user },
+			error: tokenError,
+		} = await supabase.auth.getUser(token);
+		if (token) {
+			socketRef.current.emit(
+				'send_message',
+				chatInput,
+				currentGroupData?.group_id,
+				token
+			);
+
+			console.log('risposta avviata gestendo dato');
+			console.log(user);
+			setCurrentChatData((prevData) => {
+				return prevData.map((dato) => {
+					return dato.group_id === currentGroupData.group_id
+						? {
+								...dato,
+								messaggi: [
+									...dato.messaggi,
+									{
+										// mettere tutti i dati per questo da errore es nome, pfpf ecc.
+										content: chatInput,
+										group_id: currentGroupData.group_id,
+										user_id: user.id,
+										sent_at: Date.now(),
+										isUser: true,
+									},
+								],
+						  }
+						: dato;
+				});
+			});
+			setChatInput('');
+			if (chatInputRef.current) {
+				// Pulisce l'elemento DOM (l'input visibile)
+				chatInputRef.current.textContent = '';
+			}
+		}
+		//Puliamo input
+		console.log(token);
 	};
+
+	const getToken = async () => {
+		const {
+			data: { session },
+			error,
+		} = await supabase.auth.getSession();
+
+		if (error) {
+			console.error('Errore getSession:', error);
+			return;
+		}
+		if (session) {
+			return session.access_token;
+		}
+	};
+
 	useEffect(() => {
 		if (currentGroupData) {
+			socketRef.current.emit('join_room', currentChatData.group_id);
+
 			socketRef.current.on('receive_message', (data) => {
 				console.log('messaggio ricevuto: ', data);
 			});
 		}
 	}, []);
+
 	return (
 		<div className="w-full h-full flex flex-col">
 			<div className="bg-bg-1 p-4 flex flex-row items-center gap-6">
@@ -70,7 +131,7 @@ const Chats = ({ nome, messaggi }) => {
 				</div>
 			</div>
 			<div className="flex-1 overflow-y-auto px-20">
-				<div className="flex flex-col gap-8 mt-8">
+				<div className="flex flex-col gap-4 mt-8">
 					{messaggi.map((mess) => {
 						return (
 							<div className={`w-full flex ${mess.isUser && 'justify-end'}`}>
@@ -104,14 +165,26 @@ const Chats = ({ nome, messaggi }) => {
 					>
 						<div
 							contentEditable={true}
-							className="
+							ref={chatInputRef}
+							className={`
                 min-h-10 max-h-32
                 whitespace-pre-wrap
-                focus:placeholder-transparent
-                w-full p-2  outline-none font-body text-lg text-text-1 placeholder-text-2 items-start overflow-y-auto"
+                w-full p-2  outline-none font-body text-lg text-text-1 items-start overflow-y-auto
+             
+                `}
 							onInput={(e) => {
 								setChatInput(e.target.textContent);
+								if (!e.target.textContent) {
+									e.currentTarget.innerHTML = '';
+								}
 							}}
+							onKeyDown={(e) => {
+								if (e.key == 'Enter') {
+									e.preventDefault();
+									sendMessage();
+								}
+							}}
+							data-placeholder="Scrivi un messaggio..."
 						></div>
 					</div>
 					<div onClick={sendMessage}>
