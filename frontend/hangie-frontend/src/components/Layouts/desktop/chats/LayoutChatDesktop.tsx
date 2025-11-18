@@ -1,4 +1,5 @@
 import Chats from '@/app/pages/Chats.js';
+import ChatsEvents from '@/app/pages/ChatsEvents.js';
 import ChatsSidebar from '@/app/pages/ChatsSidebar';
 import Sidebar from '@/app/pages/desktop/Sidebar';
 import { AlertCircle, Loader2 } from 'lucide-react';
@@ -176,6 +177,7 @@ const LayoutChatDesktop = ({ children }) => {
 						{renderContent()}
 					</main>
 				</div>
+				<ChatsEvents />
 				{/* {children} */}
 			</div>
 		</ChatContext.Provider>

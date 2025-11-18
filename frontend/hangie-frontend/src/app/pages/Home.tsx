@@ -3,6 +3,7 @@ import ChevronRight from '@/assets/other/ChevronRight.js';
 import EventCardDesktop from '@/components/events/EventCard.js';
 import EventCardSuspendedDesktop from '@/components/events/EventCardSuspended.js';
 
+import EventDetailsModal from '@/components/events/EventDetailsModal.js';
 import { AlertCircle, Calendar, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ParticipantsIcon = () => {
+const ParticipantsIcon = ({ color }) => {
 	return (
 		<svg
 			version="1.1"
@@ -9,7 +9,7 @@ const ParticipantsIcon = () => {
 			xmlnsXlink="http://www.w3.org/1999/xlink"
 			viewBox="0 0 512 512"
 			xmlSpace="preserve"
-			fill="#64748b"
+			fill={color}
 		>
 			<g id="SVGRepo_iconCarrier">
 				<g>

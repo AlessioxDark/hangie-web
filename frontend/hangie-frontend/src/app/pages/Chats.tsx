@@ -130,7 +130,7 @@ const Chats = ({ nome, messaggi }) => {
 					</div>
 				</div>
 			</div>
-			<div className="flex-1 overflow-y-auto px-20">
+			<div className="flex-1 overflow-y-auto px-8">
 				<div className="flex flex-col gap-4 mt-8">
 					{messaggi.map((mess) => {
 						return (

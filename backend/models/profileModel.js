@@ -13,7 +13,7 @@ const getPfp = async (req, token) => {
 		.from('utenti')
 		.select('profile_pic')
 		.eq('user_id', user_id);
-	console.log('pfp', data, error);
+
 	return { data, error };
 };
 module.exports = {

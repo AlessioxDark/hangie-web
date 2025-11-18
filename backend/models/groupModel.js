@@ -39,9 +39,19 @@ const getEvents = async (req) => {
 	const { group_id } = req.params;
 
 	const { data, error } = await supabase
-		.from('eventi')
-		.select('event_id,titolo,event_cover_img,costo')
+		.from('eventi_gruppo')
+		// .select(
+		// 	'*,risposte_eventi(event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,data_scadenza,cover_img,gruppi(*,partecipanti_gruppo(*)))'
+		// )
+		.select(
+			'*, eventi(event_id,costo,data,titolo,utenti (user_id, nome, profile_pic),luoghi(*),risposte_eventi(*),descrizione, data_scadenza,cover_img,event_imgs(*),gruppi(*, partecipanti_gruppo(*)))'
+		)
+		// .select(
+		// 	'*,eventi(*,event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,data_scadenza,cover_img,gruppi(*,partecipanti_gruppo(*))'
+		// )
 		.eq('group_id', group_id);
+
+	console.log('trovando eventi_gruppo');
 	console.log(data);
 	return { data, error };
 };

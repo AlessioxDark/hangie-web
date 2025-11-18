@@ -1,37 +1,4 @@
 const supabase = require('../config/db');
-// const getAll = async (req) => {
-// 	const { offset } = req.body;
-
-// 	const { data, error } = await supabase
-// 		.from('eventi')
-// 		.select(
-// 			'event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(nome, citta),categorie(nome)'
-// 		)
-// 		.range(0, offset + 20);
-// 	data.map(async (evento) => {
-// 		let images = [];
-// 		for (let i = 1; i <= 3; i++) {
-// 			const path = `${evento.event_id}/${i}.jpg`;
-// 			const {
-// 				data: { publicUrl },
-// 				error: publicUrlError,
-// 			} = supabase.storage
-// 				.from('event_details_imgs') // Updated bucket name here
-// 				.getPublicUrl(path);
-// 			if (publicUrlError) {
-// 				console.error(
-// 					`Errore nel recuperare l'immagine ${i}.jpg:`,
-// 					publicUrlError
-// 				);
-// 			}
-// 			images.push(publicUrl);
-// 		}
-// 		return { ...evento, event_imgs: images };
-// 	});
-
-// 	console.log('ecco data', data);
-// 	return { data, error };
-// };
 
 const getAll = async (req) => {
 	// Estrae l'offset dal corpo della richiesta.
@@ -130,7 +97,7 @@ const getEvent = async (req) => {
 	     *,
 	      utenti(creatore:nome,user_id ),
 	 	    luoghi(nome, citta,indirizzo),
-	 	     risposte_eventi(*,utenti(profile_pic))
+	 	     risposte_eventi(*,utenti(profile_pic,user_id,nome))
       
 	  `
 		)
@@ -138,13 +105,13 @@ const getEvent = async (req) => {
 		.single();
 
 	let images = [];
-	for (let i = 1; i <= 3; i++) {
+	for (let i = 1; i <= 4; i++) {
 		const path = `${event_id}/${i}.jpg`;
 		const {
 			data: { publicUrl },
 			error: publicUrlError,
 		} = supabase.storage
-			.from('event_details_imgs') // Updated bucket name here
+			.from('eventi') // Updated bucket name here
 			.getPublicUrl(path);
 		if (publicUrlError) {
 			console.error(
@@ -236,4 +203,5 @@ const getSuspended = async (req) => {
 module.exports = {
 	getAll,
 	getSuspended,
+	getEvent,
 };

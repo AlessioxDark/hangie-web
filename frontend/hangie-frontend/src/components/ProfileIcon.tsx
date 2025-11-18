@@ -38,7 +38,7 @@ const ProfileIcon = ({ user_id }) => {
 				console.error('Errore getSession:', error);
 				return;
 			}
-			if (session) {
+			if (session && user_id != undefined) {
 				const response = await fetch(
 					`http://localhost:3000/api/profile/getpfp/${user_id}`,
 					{
@@ -69,7 +69,7 @@ const ProfileIcon = ({ user_id }) => {
 				}
 				setisLoggedIn(true);
 			} else {
-				navigate('/login');
+				// navigate('/login');
 			}
 		} catch (err) {
 			setUserPfp(defaultPfp);
@@ -82,7 +82,7 @@ const ProfileIcon = ({ user_id }) => {
 		<div
 			className="rounded-full w-full h-full cursor-pointer"
 			onClick={() => {
-				navigate(isLoggedIn ? '/profile' : '/login');
+				// navigate(isLoggedIn ? '/profile' : '/login');
 			}}
 		>
 			{userPfp}

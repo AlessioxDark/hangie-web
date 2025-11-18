@@ -41,6 +41,7 @@ const Login = () => {
 
 		try {
 			const { user_email, password } = data;
+			console.log(password);
 			let realEmail = user_email;
 			if (!realEmail.includes('@')) {
 				supabase
@@ -49,8 +50,9 @@ const Login = () => {
 					.eq('handle', user_email)
 					.single();
 			}
+			console.log(realEmail, password);
 			const { data: authData, error: authError } =
-				await supabase.signInWithPassword({
+				await supabase.auth.signInWithPassword({
 					email: realEmail,
 					password: password,
 				});
@@ -59,7 +61,8 @@ const Login = () => {
 				return;
 			}
 		} catch (error) {
-			// setError('root', { message: 'errore' });
+			console.log(`errore ${error} `);
+			setError('root', { message: `errore ${error} ` });
 		}
 		console.log('Registrazione completata con successo.');
 		navigate('/');
