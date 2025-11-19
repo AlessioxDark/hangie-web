@@ -93,6 +93,7 @@ const SignUp = () => {
 			preferenze: [],
 		},
 	});
+	const { setUserId, setIsAuthenticated, setToken } = useUser();
 
 	const {
 		register,
@@ -114,20 +115,6 @@ const SignUp = () => {
 		const dataGiorno = new Date(data.anno, numeroMese, data.giorno);
 		const { giorno, mese, anno, confermaPassword, ...datiUtili } = data;
 		const finalData = { ...datiUtili, data: dataGiorno };
-
-		// controlla se email c'è gia
-		// const { data:datiEmail, error:erroreEmail } = await supabase
-		//   .from('utenti')
-		//   .select('email')
-		//   .eq('email', finalData.email);
-
-		// if (erroreEmail) {
-		//   setError("root",{message:'Errore durante la ricerca per email:'} );
-		//   return
-		// }
-		// if (datiEmail.length > 0) {
-		// 	setError("root",{message:"L'email è già in uso."});
-		// }
 
 		const { data: datiUsername, error: erroreUsername } = await supabase
 			.from('utenti')
@@ -188,6 +175,9 @@ const SignUp = () => {
 				if (!dati.success) {
 					setError('root', { message: dati.error.message });
 				} else {
+					setToken(session.access_token);
+					setUserId(session.user.id);
+					setIsAuthenticated(true);
 					navigate('/');
 				}
 			});
@@ -341,7 +331,7 @@ const SignUp = () => {
 									Hai già un account?{' '}
 									<Link
 										to="/login"
-										className="font-body font-semibold hover:underline transition-colors duration-200 text-accent"
+										className="font-body font-semibold hover:underline transition-colors duration-200 text-primary"
 									>
 										Accedi qui
 									</Link>
@@ -367,7 +357,7 @@ const SignUp = () => {
 									className={`px-8 py-3 font-title font-bold rounded-lg cursor-pointer transition-all duration-200 ease-in-out 
 									${
 										currentStep === 2
-											? 'bg-complementary hover:bg-complementary/80'
+											? 'bg-primary hover:bg-primary/80'
 											: 'bg-primary hover:bg-primary/80'
 									}
 									text-white`}
@@ -404,7 +394,7 @@ const SignUp = () => {
 							<button
 								key={index}
 								type="button"
-								className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out border-2 hover:shadow-md bg-white border-[#e5e7eb] hover:border-accent hover:translate-y-[-1px]"
+								className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out border-2 hover:shadow-md bg-white border-[#e5e7eb] hover:border-primary hover:translate-y-[-1px]"
 							>
 								<img
 									src={social.src}

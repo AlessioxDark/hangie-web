@@ -69,7 +69,7 @@ const RegisterStep3 = ({}: any) => {
 							onClick={() => handleChipClick(hobby)}
 							className={`px-4 py-2 rounded-full font-medium transition-colors duration-200 font-body ${
 								isSelected
-									? `bg-accent text-white `
+									? `bg-primary text-bg-1 `
 									: 'bg-[#e5e7eb] text-[#6b7280] hover:bg-[#d1d5db]'
 							}`}
 						>

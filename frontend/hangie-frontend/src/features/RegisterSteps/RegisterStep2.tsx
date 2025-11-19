@@ -63,7 +63,7 @@ const RegisterStep2 = ({}: any) => {
 				<div className="flex flex-row gap-5 w-full">
 					<input
 						type="number"
-						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 						placeholder="Giorno"
 						{...register('giorno')}
 						min={0}
@@ -76,7 +76,7 @@ const RegisterStep2 = ({}: any) => {
 						value={meseValue}
 					>
 						<SelectTrigger
-							className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+							className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 							style={{ height: '100%', fontFamily: 'var(--font-body)' }}
 						>
 							<SelectValue placeholder="Mese" className="text-xl" />
@@ -100,7 +100,7 @@ const RegisterStep2 = ({}: any) => {
 
 					<input
 						type="number"
-						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 						placeholder="Anno"
 						{...register('anno')}
 						min={0}

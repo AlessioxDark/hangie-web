@@ -3,14 +3,16 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router';
-import { z } from 'zod';
+import { email, z } from 'zod';
 
+import { useUser } from '@/app/UserContext.js';
 import appleLogo from '../../../assets/Apple_logo.svg';
 import facebookLogo from '../../../assets/Facebook_logo.svg';
 import googleLogo from '../../../assets/Google_logo.svg';
 import { supabase } from '../../../config/db.js';
 
 const Login = () => {
+	const { setUserId, setIsAuthenticated, setToken } = useUser();
 	const schema = z.object({
 		user_email: z.string().min(1, 'il campo è obbligatorio'),
 		password: z.string().min(1, 'la password è obbligatoria'),
@@ -56,24 +58,29 @@ const Login = () => {
 					email: realEmail,
 					password: password,
 				});
+			console.log('authData:', authData);
 			if (authError) {
 				setError('root', { message: 'Credenziali non corrette' });
 				return;
 			}
+			setUserId(authData.user.id);
+			setToken(authData.session.access_token);
 		} catch (error) {
 			console.log(`errore ${error} `);
 			setError('root', { message: `errore ${error} ` });
 		}
+
+		setIsAuthenticated(true);
 		console.log('Registrazione completata con successo.');
 		navigate('/');
 	};
 
 	const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 	return (
-		<div className="h-screen w-full p-5 flex justify-center items-center flex-col relative bg-neutral-white-2">
+		<div className="h-screen w-full p-5 flex justify-center items-center flex-col relative bg-bg-2">
 			{/* 60% - Primary dominance in header */}
 			<div className="absolute top-5 flex w-full h-1/4 justify-center items-center">
-				<h1 className="font-bold font-title text-center text-3xl text-primary">
+				<h1 className="font-bold font-title text-center text-5xl text-primary">
 					Benvenuto ad Hangie
 				</h1>
 			</div>
@@ -95,7 +102,7 @@ const Login = () => {
 								<div>
 									<input
 										type="text"
-										className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+										className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 										placeholder="Email o Username"
 										{...register('user_email')}
 									/>
@@ -110,7 +117,7 @@ const Login = () => {
 									<div className="relative flex items-center">
 										<input
 											type={isPasswordVisible ? 'text' : 'password'}
-											className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+											className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 											placeholder="Password"
 											{...register('password')}
 										/>
@@ -161,7 +168,7 @@ const Login = () => {
 								Sei nuovo qui?{' '}
 								<Link
 									to="/signup"
-									className="font-body font-semibold hover:underline transition-colors duration-200 text-accent"
+									className="font-body font-semibold hover:underline transition-colors duration-200 text-primary"
 								>
 									Crea un account
 								</Link>
@@ -174,7 +181,7 @@ const Login = () => {
 								type="button"
 								className={`px-8 py-3 font-title font-bold rounded-lg cursor-pointer transition-all duration-200 ease-in-out 
                   
-											bg-complementary hover:bg-complementary/80
+											bg-primary hover:bg-primary/80
 											
 									
                   text-white`}
@@ -209,7 +216,7 @@ const Login = () => {
 							<button
 								key={index}
 								type="button"
-								className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out border-2 hover:shadow-md bg-white border-[#e5e7eb] hover:border-accent hover:translate-y-[-1px]"
+								className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out border-2 hover:shadow-md bg-white border-[#e5e7eb] hover:border-primary hover:translate-y-[-1px]"
 							>
 								<img
 									src={social.src}

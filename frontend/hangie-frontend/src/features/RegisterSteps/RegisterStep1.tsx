@@ -17,7 +17,7 @@ const RegisterStep1 = () => {
 				<div>
 					<input
 						type="text"
-						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 						placeholder="Nome Completo"
 						{...register('nomeCompleto')}
 					/>
@@ -30,7 +30,7 @@ const RegisterStep1 = () => {
 				<div>
 					<input
 						type="text"
-						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 						placeholder="Username"
 						{...register('username')}
 					/>
@@ -43,7 +43,7 @@ const RegisterStep1 = () => {
 				<div>
 					<input
 						type="email"
-						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+						className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 						placeholder="Email"
 						{...register('email')}
 					/>
@@ -57,7 +57,7 @@ const RegisterStep1 = () => {
 					<div className="relative flex items-center justify-end">
 						<input
 							type={isPasswordVisible ? 'text' : 'password'}
-							className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+							className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 							placeholder="Password"
 							{...register('password')}
 						/>
@@ -81,7 +81,7 @@ const RegisterStep1 = () => {
 					<div className="relative flex items-center justify-end">
 						<input
 							type={isPasswordVisible ? 'text' : 'password'}
-							className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-accent transition-colors shadow-sm hover:shadow-md"
+							className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
 							placeholder="Conferma Password"
 							{...register('confermaPassword')}
 						/>

@@ -13,58 +13,76 @@ import EventsSuspended from './pages/EventsSuspended';
 import Home from './pages/Home';
 import { ModalContext } from './pages/ModalContext';
 import ResponsiveLayoutWrapper from './pages/ResponsiveLayoutWrapper';
+import { UserContext } from './UserContext';
 
 function App() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [modalData, setModalData] = useState({ event_id: null });
+	const [isAuth, setIsAuth] = useState(false);
+	const [userData, setUserData] = useState([]);
+	const [userId, setUserId] = useState([]);
+	const [token, setToken] = useState([]);
 
 	return (
 		<BrowserRouter>
-			<ModalContext.Provider
+			<UserContext.Provider
 				value={{
-					setIsOpen: setIsOpen,
-					isOpen: isOpen,
-					openModal: () => {
-						setIsOpen(true);
-					},
-					closeModal: () => {
-						setIsOpen(false);
-					},
-					modalData: modalData,
-					setModalData: setModalData,
+					isAuthenticated: isAuth,
+					setIsAuthenticated: setIsAuth,
+					userId: userId,
+					token,
+					setToken,
+					setUserData: setUserData,
+					setUserId: setUserId,
+					userData: userData,
 				}}
 			>
-				<Routes>
-					<Route path="/signup" element={<SignUp />}></Route>
-					<Route path="/login" element={<Login />}></Route>
-					<Route
-						path="/chats"
-						element={
-							<ResponsiveLayoutWrapper layoutType="chat">
-								<Chats />
-							</ResponsiveLayoutWrapper>
-						}
-					></Route>
+				<ModalContext.Provider
+					value={{
+						setIsOpen: setIsOpen,
+						isOpen: isOpen,
+						openModal: () => {
+							setIsOpen(true);
+						},
+						closeModal: () => {
+							setIsOpen(false);
+						},
+						modalData: modalData,
+						setModalData: setModalData,
+					}}
+				>
+					<Routes>
+						<Route path="/signup" element={<SignUp />}></Route>
+						<Route path="/login" element={<Login />}></Route>
+						<Route
+							path="/chats"
+							element={
+								<ResponsiveLayoutWrapper layoutType="chat">
+									<Chats />
+								</ResponsiveLayoutWrapper>
+							}
+						></Route>
 
-					<Route
-						path="/"
-						element={
-							<ResponsiveLayoutWrapper>
-								<Home />
-							</ResponsiveLayoutWrapper>
-						}
-					/>
-					<Route
-						path="/events/suspended/all"
-						element={
-							<ResponsiveLayoutWrapper>
-								<EventsSuspended />
-							</ResponsiveLayoutWrapper>
-						}
-					/>
-				</Routes>
-				<EventDetailsModal />
-			</ModalContext.Provider>
+						<Route
+							path="/"
+							element={
+								<ResponsiveLayoutWrapper>
+									<Home />
+								</ResponsiveLayoutWrapper>
+							}
+						/>
+						<Route
+							path="/events/suspended/all"
+							element={
+								<ResponsiveLayoutWrapper>
+									<EventsSuspended />
+								</ResponsiveLayoutWrapper>
+							}
+						/>
+					</Routes>
+					<EventDetailsModal />
+				</ModalContext.Provider>
+			</UserContext.Provider>
 		</BrowserRouter>
 	);
 }
