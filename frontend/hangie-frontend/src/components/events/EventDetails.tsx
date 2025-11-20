@@ -1,10 +1,10 @@
-import { useModal } from '@/app/pages/ModalContext';
 import DollarIcon from '@/assets/eventCardIcons/DollarIcon';
 import MapIcon from '@/assets/eventCardIcons/MapIcon';
 import ParticipantsIcon from '@/assets/eventCardIcons/ParticipantsIcon';
 import CalendarIcon from '@/assets/eventPageIcons/CalendarIcon';
 import ChevronLeft from '@/assets/other/ChevronLeft';
 import ChevronRight from '@/assets/other/ChevronRight';
+import { useModal } from '@/contexts/ModalContext';
 import { X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import ProfileIcon from '../ProfileIcon';

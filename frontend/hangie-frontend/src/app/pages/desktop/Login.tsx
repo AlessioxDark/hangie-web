@@ -2,17 +2,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate } from 'react-router';
 import { email, z } from 'zod';
 
-import { useUser } from '@/app/UserContext.js';
 import appleLogo from '../../../assets/Apple_logo.svg';
 import facebookLogo from '../../../assets/Facebook_logo.svg';
 import googleLogo from '../../../assets/Google_logo.svg';
 import { supabase } from '../../../config/db.js';
+import { useAuth } from '../../../contexts/AuthContext.js';
 
 const Login = () => {
-	const { setUserId, setIsAuthenticated, setToken } = useUser();
+	const { LoginUser } = useAuth();
+	const [isLoading, setIsLoading] = useState(false);
 	const schema = z.object({
 		user_email: z.string().min(1, 'il campo è obbligatorio'),
 		password: z.string().min(1, 'la password è obbligatoria'),
@@ -40,10 +41,9 @@ const Login = () => {
 	const onSubmit: SubmitHandler<FormFields> = async (data) => {
 		console.log('inviato');
 		console.log(data);
-
+		setIsLoading(true);
 		try {
 			const { user_email, password } = data;
-			console.log(password);
 			let realEmail = user_email;
 			if (!realEmail.includes('@')) {
 				supabase
@@ -52,27 +52,22 @@ const Login = () => {
 					.eq('handle', user_email)
 					.single();
 			}
-			console.log(realEmail, password);
-			const { data: authData, error: authError } =
-				await supabase.auth.signInWithPassword({
-					email: realEmail,
-					password: password,
-				});
-			console.log('authData:', authData);
+
+			const { authData, authError } = await LoginUser(realEmail, password);
+
 			if (authError) {
 				setError('root', { message: 'Credenziali non corrette' });
 				return;
 			}
-			setUserId(authData.user.id);
-			setToken(authData.session.access_token);
+
+			console.log('Registrazione completata con successo.');
 		} catch (error) {
 			console.log(`errore ${error} `);
 			setError('root', { message: `errore ${error} ` });
+		} finally {
+			setIsLoading(false);
+			<Navigate to={'/'} replace />;
 		}
-
-		setIsAuthenticated(true);
-		console.log('Registrazione completata con successo.');
-		navigate('/');
 	};
 
 	const [isPasswordVisible, setIsPasswordVisible] = useState(false);

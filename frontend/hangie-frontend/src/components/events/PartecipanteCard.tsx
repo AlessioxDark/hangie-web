@@ -35,9 +35,15 @@ const GetStatusColor = (statusValue) => {
 		return 'bg-error ring-2 ring-red-600';
 	}
 
-	return 'bg-warning';
+	return 'bg-danger';
 };
-const PartecipanteCard = ({ user_id, utenti, created_at, status }) => {
+const PartecipanteCard = ({
+	user_id,
+	utenti,
+	created_at,
+	status,
+	is_creator,
+}) => {
 	return (
 		<div className="w-full flex flex-row justify-between items-center">
 			<div className="flex flex-row gap-4 items-center">
@@ -45,9 +51,16 @@ const PartecipanteCard = ({ user_id, utenti, created_at, status }) => {
 					<ProfileIcon user_id={user_id} />
 				</div>
 				<div className="flex flex-col gap-1">
-					<span className="text-text-1 text-xl font-body font-medium">
-						{utenti.nome}
-					</span>
+					<div className="flex flex-row gap-3 items-center">
+						<span className="text-text-1 text-xl font-body font-medium">
+							{utenti.nome}
+						</span>
+						{is_creator && (
+							<div className="font-body text-text-2 bg-bg-3 rounded-full px-2 py-1 text-sm font-medium">
+								Creatore
+							</div>
+						)}
+					</div>
 					<span className="text-text-3 font-body text-sm">
 						Risposto {formatDate(created_at)}
 					</span>

@@ -4,12 +4,13 @@ import RegisterStep3 from '@/features/RegisterSteps/RegisterStep3';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate } from 'react-router';
 import { z } from 'zod';
 import appleLogo from '../../../assets/Apple_logo.svg';
 import facebookLogo from '../../../assets/Facebook_logo.svg';
 import googleLogo from '../../../assets/Google_logo.svg';
 import { supabase } from '../../../config/db.js';
+import { useAuth } from '../../../contexts/AuthContext.js';
 const mesiValidi = [
 	'Gennaio',
 	'Febbraio',
@@ -47,6 +48,8 @@ const steps = [
 	},
 ];
 const SignUp = () => {
+	const { signUpNewUser, session } = useAuth();
+	const [isLoading, setIsLoading] = useState(false);
 	const schema = z.object({
 		// Definizione dei campi
 		nomeCompleto: z.string().min(1, 'Il nome completo è obbligatorio'),
@@ -93,7 +96,6 @@ const SignUp = () => {
 			preferenze: [],
 		},
 	});
-	const { setUserId, setIsAuthenticated, setToken } = useUser();
 
 	const {
 		register,
@@ -106,7 +108,7 @@ const SignUp = () => {
 		clearErrors,
 		watch,
 	} = methods;
-	const navigate = useNavigate();
+
 	const [currentStep, setCurrentStep] = useState(0);
 
 	const onSubmit: SubmitHandler<FormFields> = async (data) => {
@@ -129,58 +131,56 @@ const SignUp = () => {
 			setError('root', { message: "L'username è già in uso." });
 			return;
 		}
+		setIsLoading(true);
+		try {
+			const { email, password } = finalData;
+			const { authData, authError } = await signUpNewUser(email, password);
 
-		const { email, password } = finalData;
+			if (authError) {
+				setError('root', {
+					message: `Utente già registrato`,
+				});
 
-		const { data: authData, error: authError } = await supabase.auth.signUp({
-			email: email,
-			password: password,
-		});
+				return;
+			}
+			const { user: utente } = authData;
+			if (!utente) {
+				setError('root', {
+					message: 'Registrazione non riuscita, utente non creato',
+				});
+				return;
+			}
+			// const {
+			// 	data: { session },
+			// 	error: erroreSession,
+			// } = await supabase.auth.getSession();
+			// if (erroreSession) {
+			// 	setError('root', {
+			// 		message: 'errore durante la creazione di una sessione',
+			// 	});
+			// }
 
-		if (authError) {
-			setError('root', {
-				message: `Utente già registrato`,
-			});
-
-			return;
+			fetch('http://localhost:3000/api/auth/register', {
+				body: JSON.stringify(finalData),
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${session.access_token}`,
+				},
+				method: 'POST',
+			})
+				.then((res) => res.json())
+				.then((dati) => {
+					if (!dati.success) {
+						setError('root', { message: dati.error.message });
+					} else {
+						<Navigate to={'/'} replace />;
+					}
+				});
+		} catch (error) {
+			setError('root', { message: error });
+		} finally {
+			setIsLoading(false);
 		}
-
-		const { user: utente } = authData;
-		if (!utente) {
-			setError('root', {
-				message: 'Registrazione non riuscita, utente non creato',
-			});
-			return;
-		}
-		const {
-			data: { session },
-			error: erroreSession,
-		} = await supabase.auth.getSession();
-		if (erroreSession) {
-			setError('root', {
-				message: 'errore durante la creazione di una sessione',
-			});
-		}
-
-		fetch('http://localhost:3000/api/auth/register', {
-			body: JSON.stringify(finalData),
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${session.access_token}`,
-			},
-			method: 'POST',
-		})
-			.then((res) => res.json())
-			.then((dati) => {
-				if (!dati.success) {
-					setError('root', { message: dati.error.message });
-				} else {
-					setToken(session.access_token);
-					setUserId(session.user.id);
-					setIsAuthenticated(true);
-					navigate('/');
-				}
-			});
 	};
 
 	const handleStepChange = () => {

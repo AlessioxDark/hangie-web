@@ -1,8 +1,8 @@
 import SendIcon from '@/assets/other/SendIcon';
 import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
 import MessageCard from '@/components/Layouts/desktop/chats/messaggi/MessageCard';
-import type { Socket } from 'dgram';
-import React, { useEffect, useRef, useState } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { supabase } from '../../config/db.js';
 const Chats = ({ nome, messaggi }) => {
@@ -12,14 +12,10 @@ const Chats = ({ nome, messaggi }) => {
 	const socketRef = useRef<any>(null);
 	const chatInputRef = useRef<any>(null);
 
-	console.log(currentChatData);
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
 	});
 
-	useEffect(() => {
-		console.log(chatInput);
-	}, [chatInput]);
 	useEffect(() => {
 		const SERVER_URL = 'http://localhost:3000';
 
@@ -34,6 +30,7 @@ const Chats = ({ nome, messaggi }) => {
 			socket.disconnect();
 		};
 	}, []);
+
 	const sendMessage = async () => {
 		console.log('messaggio inviato');
 		const token = await getToken();
@@ -159,10 +156,12 @@ const Chats = ({ nome, messaggi }) => {
                             focus-within:ring-2 
                             focus-within:ring-blue-500
                             p-2 shadow-inner transition-shadow
-                            flex items-start
+                            flex items-center
+                            
                             
           "
 					>
+						<div>cp</div>
 						<div
 							contentEditable={true}
 							ref={chatInputRef}

@@ -1,5 +1,5 @@
-import { useModal } from '@/app/pages/ModalContext';
 import ChevronLeft from '@/assets/other/ChevronLeft';
+import { useModal } from '@/contexts/ModalContext';
 import { X } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import PartecipanteCard from './PartecipanteCard';
@@ -149,6 +149,7 @@ const EventDetailsParticipants = ({
 
 			<div className="flex flex-col gap-4 overflow-y-auto px-1">
 				{currentRisposte.map((risposta) => {
+					console.log(risposta);
 					return <PartecipanteCard {...risposta} />;
 				})}
 			</div>

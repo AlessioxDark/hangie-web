@@ -1,8 +1,8 @@
-import { useModal } from '@/app/pages/ModalContext';
 import DollarIcon from '@/assets/eventCardIcons/DollarIcon';
 import MapIcon from '@/assets/eventCardIcons/MapIcon';
 import ParticipantsIcon from '@/assets/eventCardIcons/ParticipantsIcon';
 import ProfileIcon from '@/components/ProfileIcon';
+import { useModal } from '@/contexts/ModalContext';
 import React from 'react';
 import { Link } from 'react-router';
 

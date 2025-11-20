@@ -1,6 +1,7 @@
-import { useModal } from '@/app/pages/ModalContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useModal } from '@/contexts/ModalContext';
 import { AlertCircle, Loader2, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import EventDetails from './EventDetails';
 import EventDetailsParticipants from './EventDetailsParticipants';
@@ -8,6 +9,7 @@ const MountElement = document.getElementById('overlays');
 
 const EventDetailsModal = () => {
 	const { isOpen, modalData, closeModal } = useModal();
+	const { session } = useAuth();
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState(false);
@@ -50,6 +52,21 @@ const EventDetailsModal = () => {
 		}
 	}, [modalData.event_id]);
 
+	const getEventStatus = () => {
+		console.log('eventStatus');
+		if (eventData?.created_by === session.user.id) {
+			console.log('creator');
+			return 'creator'; // L'utente è il creatore, vede i pulsanti di modifica
+		}
+		const userResponse = eventData?.risposte_eventi?.find(
+			(risposta) => risposta.utenti.user_id === session.user.id
+		);
+
+		if (userResponse) {
+			console.log(userResponse.status);
+			return userResponse.status;
+		}
+	};
 	const renderContent = () => {
 		if (error) {
 			return (
@@ -97,7 +114,7 @@ const EventDetailsModal = () => {
 				<EventDetails
 					{...eventData}
 					setCurrentPage={setCurrentPage}
-					event_status={'pending'}
+					event_status={getEventStatus()}
 				/>
 			);
 		}

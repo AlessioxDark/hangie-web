@@ -4,17 +4,18 @@ import EventCardSuspended from '@/components/events/EventCardSuspended';
 import GroupEventCard from '@/components/groups/GroupEventCard';
 import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
 import { AlertCircle, Calendar, Loader2 } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router';
-// import {supabase} '../../config/db.js'
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+
 const FILTER_TYPES = ['accepted', 'pending', 'archive'];
 const ChatsEvents = ({}) => {
-	const [groupEventsData, setGroupEventsData] = useState([]);
+	const [groupEventsData, setGroupEventsData] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
 	const [currentFilter, setCurrentFilter] = useState('');
 	const { currentGroup } = useChat();
-
+	const [query, setQuery] = useState('');
+	const { session } = useAuth();
 	const fetchGroupEvents = async () => {
 		console.log('Fetch inziata');
 		if (isLoading) return;
@@ -45,7 +46,22 @@ const ChatsEvents = ({}) => {
 			setIsLoading(false);
 		}
 	};
+	const getEventStatus = (event) => {
+		console.log('eventStatus');
+		if (event?.created_by === session.user.id) {
+			console.log('creator');
+			return 'creator'; // L'utente è il creatore, vede i pulsanti di modifica
+		}
+		console.log(session.user.id);
+		console.log(event.risposte_eventi);
+		const userResponse = event.risposte_eventi.find(
+			(risposta) => risposta.user_id === session.user.id
+		);
 
+		if (userResponse) {
+			return userResponse.status;
+		}
+	};
 	useEffect(() => {
 		console.log('fetching...');
 		if (currentGroup !== null) fetchGroupEvents();
@@ -61,150 +77,72 @@ const ChatsEvents = ({}) => {
 			</h3>
 		</div>
 	);
-	const renderContent = useCallback(
-		(type: string) => {
-			if (error) {
-				return (
-					<div className="flex flex-col items-center justify-center py-20">
-						<div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
-							<AlertCircle className="w-16 h-16 text-warning" />
-						</div>
-						<h3 className="text-lg font-medium text-text-1 mb-2">
-							Ops! Qualcosa è andato storto
-						</h3>
-						<p className="text-gray-500 mb-6 text-center">{error}</p>
-						<button
-							onClick={() => fetchGroupEvents()}
-							className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
-						>
-							Riprova
-						</button>
-					</div>
-				);
+
+	const filteredEvents = useMemo(() => {
+		const allEvents = groupEventsData || [];
+
+		// Funzione helper per determinare lo status di partecipazione dell'utente corrente (userId)
+		const getUserEventStatus = (event) => {
+			// 1. Controlla se l'utente è il creatore
+			if (event.created_by === session.user.id) {
+				return 'creator'; // Status speciale per il creatore
 			}
-			if (isLoading) {
-				return (
-					<div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
-						<div className=" rounded-full flex items-center justify-center mb-6">
-							<Loader2 className="w-16 h-16 text-primary animate-spin" />
-						</div>
-						<h3 className="text-lg font-medium text-gray-900 mb-2">
-							Caricamento degli eventi...
-						</h3>
-						<p className="text-gray-500 text-center max-w-sm">
-							Stiamo scoprendo le prossime esperienze per te.
-						</p>
-					</div>
-				);
+
+			// 2. Cerca la risposta dell'utente corrente nell'array risposte_eventi
+			const userResponse = (event.risposte_eventi || []).find(
+				// Assumo che l'oggetto risposta abbia un campo 'user_id'
+				(risposta) => risposta.user_id === session.user.id
+				// Se 'risposte_eventi' contiene oggetti annidati con { utenti: { user_id: '...' } }
+				// usa: (risposta) => risposta.utenti?.user_id === userId
+			);
+
+			// 3. Restituisce lo status trovato o 'pending' se l'utente non ha risposto
+			if (userResponse) {
+				// Lo status è il campo 'status' all'interno dell'oggetto risposta
+				return userResponse.status;
 			}
-			if (type == 'pending') {
-				return (
-					<div>
-						{groupEventsData?.pending?.length > 0 ? (
-							<div
-								className=" 
-   flex flex-col gap-4"
-							>
-								{groupEventsData &&
-									groupEventsData.pending.map((event) => (
-										<div className="w-full " key={event.event_id}>
-											<GroupEventCard type={type} {...event} />
-										</div>
-									))}
-							</div>
-						) : (
-							// <div className="flex xs:flex-col lg:flex-row gap-8 ">
-							// 	{eventsData &&
-							// 		eventsData.pending.slice(0, 3).map((event) => (
-							// 			<div
-							// 				className="w-full  xl:max-w-[37rem]"
-							// 				key={event.event_id}
-							// 			>
-							// 				<EventCardSuspendedDesktop {...event} />
-							// 			</div>
-							// 		))}
-							// </div>
-							renderEmptyState()
-						)}
-					</div>
-				);
-			}
-			if (type == 'accepted') {
-				return (
-					<div>
-						{groupEventsData?.accepted?.length > 0 ? (
-							<div
-								className="
-                flex flex-col gap-4
-              "
-							>
-								{groupEventsData?.accepted?.map((event) => {
-									// const evento = event.evento
-									return (
-										<div key={event.event_id}>
-											<GroupEventCard type={type} {...event} />
-										</div>
-									);
-								})}
-							</div>
-						) : (
-							renderEmptyState()
-						)}
-					</div>
-				);
-			}
-			if (type == 'archive') {
-				return (
-					<div>
-						{groupEventsData?.rejected?.length > 0 ? (
-							<div
-								className="
-                flex flex-col gap-4
-              "
-							>
-								{groupEventsData?.rejected?.map((event) => {
-									// const evento = event.evento
-									return (
-										<div key={event.event_id}>
-											<GroupEventCard type={type} {...event} />
-										</div>
-									);
-								})}
-							</div>
-						) : (
-							renderEmptyState()
-						)}
-					</div>
-				);
-			}
-			if (type == '') {
-				return (
-					<div>
-						{groupEventsData?.all?.length > 0 ? (
-							<div
-								className="
-                flex flex-col gap-4
-              "
-							>
-								{groupEventsData?.all?.map((event) => {
-									// const evento = event.evento
-									return (
-										<div key={event.event_id}>
-											<GroupEventCard type={event.status} {...event} />
-										</div>
-									);
-								})}
-							</div>
-						) : (
-							renderEmptyState()
-						)}
-					</div>
-				);
-			}
-			return null;
-		},
-		[fetchGroupEvents, groupEventsData, error, isLoading]
-	);
+
+			// 4. Se non è creatore e non ha una risposta registrata, è 'pending' (non ha risposto)
+			return 'pending';
+		};
+
+		// Lista di eventi filtrata in base allo status
+		let statusFilteredList = [];
+
+		if (currentFilter === '') {
+			// Se il filtro è vuoto, include tutti gli eventi
+			statusFilteredList = allEvents;
+		} else {
+			// Altrimenti, filtra in base allo status
+			statusFilteredList = allEvents.filter((event) => {
+				const status = getUserEventStatus(event);
+
+				// Filtra per lo status selezionato
+				if (currentFilter === 'pending') {
+					// 'Pending' deve includere sia gli eventi con status 'pending' sia quelli
+					// dove l'utente è il creatore e non ha 'risposto' a sé stesso
+					return status === 'pending' || status === 'creator';
+				}
+
+				// Per 'accepted' e 'rejected', cerca lo status esatto
+				return status === currentFilter;
+			});
+		}
+
+		// 2. Filtro per la query di ricerca (si applica sempre alla lista filtrata per status)
+		if (query.trim() !== '') {
+			const regex = new RegExp(query, 'i');
+			return statusFilteredList.filter(
+				(evento) => evento.titolo && evento.titolo.match(regex)
+			);
+		}
+
+		// Restituisce la lista filtrata per status (o la lista completa se currentFilter è '')
+		return statusFilteredList;
+
+		// Aggiungi userId come dipendenza per assicurarti che il filtro venga rieseguito
+		// se l'utente cambia.
+	}, [groupEventsData, currentFilter, query, session.user.id]);
 
 	return (
 		<div className="min-w-1/5 max-w-1/5 h-full">
@@ -215,22 +153,49 @@ const ChatsEvents = ({}) => {
 						{groupEventsData?.all.length || 0} eventi
 					</span> */}
 				</div>
-				<div className="flex w-full flex-row gap-4 items-center">
-					{FILTER_TYPES.map((filter) => {
-						return (
-							<div
-								onClick={() => {
-									if (currentFilter === filter) {
-										setCurrentFilter('');
-									} else {
-										setCurrentFilter(filter);
-									}
+				<div className="w-full flex flex-col gap-4">
+					<div className="flex flex-row w-full  gap-4 items-center">
+						<div
+							className="
+          bg-gray-100 flex-1 
+                            rounded-4xl 
+                            focus-within:ring-2 
+                            focus-within:ring-blue-500
+                            p-2 shadow-inner transition-shadow
+                            flex items-start
+                            
+          "
+						>
+							<input
+								className={`
+                min-h-10 max-h-32
+                whitespace-pre-wrap
+                w-full p-2  outline-none font-body text-lg text-text-1 items-start overflow-y-auto
+             
+                `}
+								placeholder="Scrivi un evento"
+								onInput={(e) => {
+									setQuery(e.target.value);
 								}}
-								className={`px-5 py-2 ${
-									currentFilter == filter
-										? 'bg-primary text-bg-1 shadow-lg shadow-primary/50'
-										: 'bg-bg-2 text-text-2 border border-text-2 hover:bg-bg-3 hover:shadow-md'
-								} font-body   text-xl cursor-pointer
+							/>
+						</div>
+					</div>
+					<div className="flex w-full flex-row gap-3 items-center">
+						{FILTER_TYPES.map((filter) => {
+							return (
+								<div
+									onClick={() => {
+										if (currentFilter === filter) {
+											setCurrentFilter('');
+										} else {
+											setCurrentFilter(filter);
+										}
+									}}
+									className={`px-5 py-2 ${
+										currentFilter == filter
+											? 'bg-primary text-bg-1 shadow-lg shadow-primary/50'
+											: 'bg-bg-2 text-text-2 border border-text-2 hover:bg-bg-3 hover:shadow-md'
+									} font-body   text-xl cursor-pointer
                 
                 
                 px-4 py-2 
@@ -243,14 +208,35 @@ const ChatsEvents = ({}) => {
 
              
               `}
-							>
-								{filter}
-							</div>
-						);
-					})}
+								>
+									{filter}
+								</div>
+							);
+						})}
+					</div>
 				</div>
 				<div className="flex flex-col gap-8">
-					{renderContent(currentFilter)}
+					<div>
+						{filteredEvents?.length > 0 ? (
+							<div
+								className="
+                flex flex-col gap-4
+              "
+							>
+								{filteredEvents?.map((event) => {
+									// const evento = event.evento
+									const status = getEventStatus(event);
+									return (
+										<div key={event.event_id}>
+											<GroupEventCard type={status} {...event} />
+										</div>
+									);
+								})}
+							</div>
+						) : (
+							renderEmptyState()
+						)}
+					</div>
 				</div>
 			</div>
 		</div>

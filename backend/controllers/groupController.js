@@ -59,7 +59,7 @@ const getGroupEvents = async (req, res) => {
 			// Estrae l'oggetto evento dal campo 'eventi' e aggiunge lo 'status'
 			return {
 				event_id: response.event_id,
-				status: response.eventi.risposte_eventi[0].status, // Stato (pending, accepted, refused)
+				risposte_eventi: response.eventi.risposte_eventi, // Stato (pending, accepted, refused)
 
 				costo: response.eventi.costo,
 				data: response.eventi.data,
@@ -76,23 +76,11 @@ const getGroupEvents = async (req, res) => {
 				// Non includere ...dato (spread) qui se vuoi un oggetto pulito
 			};
 		});
-		const newCleanData = {
-			all: cleanData,
-			pending: cleanData.filter((response) => {
-				return response.status == 'pending';
-			}),
-			accepted: cleanData.filter((response) => {
-				return response.status == 'accepted';
-			}),
-			rejected: cleanData.filter((response) => {
-				// ⬅️ Aggiungi 'refused' (o 'rejected' se usi quel termine)
-				return response.status == 'rejected';
-			}),
-		};
+
 		console.log('i dati eventi eventsdata', data);
 		console.log('i dati eventi eventsdata clean', cleanData);
 
-		res.json(newCleanData);
+		res.json(cleanData);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}
