@@ -3,8 +3,8 @@ import { useModal } from '@/contexts/ModalContext';
 import { AlertCircle, Loader2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import EventDetails from './EventDetails';
-import EventDetailsParticipants from './EventDetailsParticipants';
+import EventDetails from '../events/EventDetails';
+import EventDetailsParticipants from '../events/EventDetailsParticipants';
 const MountElement = document.getElementById('overlays');
 
 const EventDetailsModal = () => {

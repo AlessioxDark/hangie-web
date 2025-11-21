@@ -3,7 +3,8 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Login from './pages/desktop/Login';
 import SignUp from './pages/desktop/SignUp';
 
-import EventDetailsModal from '@/features/events/EventDetailsModal';
+import EventDetailsModal from '@/features/modal/EventDetailsModal';
+import ModalHandler from '@/features/modal/ModalHandler';
 import { AuthContextProvider } from '../contexts/AuthContext';
 import { ModalContext, ModalProvider } from '../contexts/ModalContext';
 import Chats from './pages/Chats';
@@ -44,7 +45,7 @@ function App() {
 							}
 						/>
 					</Routes>
-					<EventDetailsModal />
+					<ModalHandler />
 				</ModalProvider>
 			</AuthContextProvider>
 		</BrowserRouter>

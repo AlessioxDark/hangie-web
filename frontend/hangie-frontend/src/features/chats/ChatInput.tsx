@@ -1,5 +1,6 @@
 import ClipIcon from '@/assets/icons/ClipIcon';
 import SendIcon from '@/assets/icons/SendIcon';
+import { useModal } from '@/contexts/ModalContext';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const ChatInput = ({
@@ -11,6 +12,7 @@ const ChatInput = ({
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const dropdownRef = useRef(null);
 	const debounceTimerRef = useRef(null);
+	const { openModal } = useModal();
 	const toggleDropdown = () => {
 		setIsDropdownOpen((prev) => !prev);
 	};
@@ -50,6 +52,9 @@ const ChatInput = ({
 	const isSendActive =
 		inputValue && inputValue.trim().length > 0 && !isDropdownOpen;
 
+	const handleDropdownChoice = (type) => {
+		openModal({ type, data: null });
+	};
 	return (
 		<div
 			className="
@@ -82,8 +87,13 @@ const ChatInput = ({
 						</div>
 						{isDropdownOpen && (
 							<div className="absolute bottom-12 w-32 min-h-28 bg-bg-1 transition-all rounded-xl ">
-								<div className="w-full text-center hover:bg-bg-3 py-2 crusor-pointer transition-all rounded-t-xl">
-									<span className="text-text-1 font-body font-medium  w-full">
+								<div className="w-full text-center hover:bg-bg-3/60 py-2 cursor-pointer transition-all rounded-t-xl">
+									<span
+										className="text-text-1 font-body font-medium  w-full"
+										onClick={() => {
+											handleDropdownChoice('CREATE_EVENT_MODAL');
+										}}
+									>
 										Crea Evento
 									</span>
 								</div>

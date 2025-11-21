@@ -4,7 +4,7 @@ import EventCard from '@/features/events/EventCard.js';
 import EventCardSuspended from '@/features/events/EventCardSuspended.js';
 
 import RenderEmptyState from '@/components/renderEmptyState.js';
-import EventDetailsModal from '@/features/events/EventDetailsModal.js';
+import EventDetailsModal from '@/features/modal/EventDetailsModal.js';
 import { AlertCircle, Calendar, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
