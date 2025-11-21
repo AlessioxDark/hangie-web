@@ -2,6 +2,7 @@ import SendIcon from '@/assets/icons/SendIcon.js';
 import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
 import MessageCard from '@/components/Layouts/desktop/chats/messaggi/MessageCard';
 
+import { useAuth } from '@/contexts/AuthContext.js';
 import ChatInput from '@/features/chats/ChatInput.js';
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
@@ -12,6 +13,7 @@ const Chats = ({ messaggi }) => {
 	const messagesEndRef = useRef(null);
 	const socketRef = useRef<any>(null);
 	const chatInputRef = useRef<any>(null);
+	const { session } = useAuth();
 
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
@@ -34,63 +36,40 @@ const Chats = ({ messaggi }) => {
 
 	const sendMessage = async () => {
 		console.log('messaggio inviato');
-		const token = await getToken();
-		const {
-			data: { user },
-			error: tokenError,
-		} = await supabase.auth.getUser(token);
-		if (token) {
-			socketRef.current.emit(
-				'send_message',
-				chatInput,
-				currentGroupData?.group_id,
-				token
-			);
+		const trimmedInput = chatInput.trim();
+		socketRef.current.emit(
+			'send_message',
+			trimmedInput,
+			currentGroupData?.group_id,
+			session.access_token
+		);
 
-			console.log('risposta avviata gestendo dato');
-			console.log(user);
-			setCurrentChatData((prevData) => {
-				return prevData.map((dato) => {
-					return dato.group_id === currentGroupData.group_id
-						? {
-								...dato,
-								messaggi: [
-									...dato.messaggi,
-									{
-										// mettere tutti i dati per questo da errore es nome, pfpf ecc.
-										content: chatInput,
-										group_id: currentGroupData.group_id,
-										user_id: user.id,
-										sent_at: Date.now(),
-										isUser: true,
-									},
-								],
-						  }
-						: dato;
-				});
+		console.log('risposta avviata gestendo dato');
+
+		setCurrentChatData((prevData) => {
+			return prevData.map((dato) => {
+				return dato.group_id === currentGroupData.group_id
+					? {
+							...dato,
+							messaggi: [
+								...dato.messaggi,
+								{
+									// mettere tutti i dati per questo da errore es nome, pfpf ecc.
+									content: trimmedInput,
+									group_id: currentGroupData.group_id,
+									user_id: session.user.id,
+									sent_at: Date.now(),
+									isUser: true,
+								},
+							],
+					  }
+					: dato;
 			});
-			setChatInput('');
-			if (chatInputRef.current) {
-				// Pulisce l'elemento DOM (l'input visibile)
-				chatInputRef.current.textContent = '';
-			}
-		}
-		//Puliamo input
-		console.log(token);
-	};
-
-	const getToken = async () => {
-		const {
-			data: { session },
-			error,
-		} = await supabase.auth.getSession();
-
-		if (error) {
-			console.error('Errore getSession:', error);
-			return;
-		}
-		if (session) {
-			return session.access_token;
+		});
+		setChatInput('');
+		if (chatInputRef.current) {
+			// Pulisce l'elemento DOM (l'input visibile)
+			chatInputRef.current.textContent = '';
 		}
 	};
 
@@ -143,7 +122,8 @@ const Chats = ({ messaggi }) => {
 			<ChatInput
 				chatInputRef={chatInputRef}
 				sendMessage={sendMessage}
-				setChatInput={setChatInput}
+				inputValue={chatInput}
+				setInputValue={setChatInput}
 			/>
 		</div>
 	);

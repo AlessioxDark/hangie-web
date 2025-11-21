@@ -6,7 +6,7 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../../config/db.js';
 import { ChatContext } from './ChatContext.js';
-const LayoutChatDesktop = ({ children }) => {
+const LayoutChatDesktop = ({}) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<null | string>('');
 	const [currentGroup, setCurrentGroup] = useState(null);

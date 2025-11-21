@@ -1,15 +1,11 @@
-import EventPage from '@/features/EventsHomePage/EventPage';
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import LayoutDesktop from '../components/Layouts/desktop/LayoutDesktop';
-import LayoutMobile from '../components/Layouts/mobile/LayoutMobile';
 import Login from './pages/desktop/Login';
 import SignUp from './pages/desktop/SignUp';
 
 import EventDetailsModal from '@/features/events/EventDetailsModal';
 import { AuthContextProvider } from '../contexts/AuthContext';
 import { ModalContext } from '../contexts/ModalContext';
-import ChatsSidebar from '../features/chats/ChatsSidebar';
 import Chats from './pages/Chats';
 import EventsSuspended from './pages/EventsSuspended';
 import Home from './pages/Home';

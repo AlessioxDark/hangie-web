@@ -1,6 +1,55 @@
+import ClipIcon from '@/assets/icons/ClipIcon';
 import SendIcon from '@/assets/icons/SendIcon';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-const ChatInput = ({ chatInputRef, setChatInput, sendMessage }) => {
+const ChatInput = ({
+	chatInputRef,
+	inputValue,
+	setInputValue,
+	sendMessage,
+}) => {
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const dropdownRef = useRef(null);
+	const debounceTimerRef = useRef(null);
+	const toggleDropdown = () => {
+		setIsDropdownOpen((prev) => !prev);
+	};
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+				setIsDropdownOpen(false);
+			}
+		};
+
+		// Aggiunge l'event listener al documento
+		document.addEventListener('mousedown', handleClickOutside);
+
+		// Pulizia: rimuove l'event listener quando il componente viene smontato
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
+
+	const handleInput = useCallback(
+		(e) => {
+			const currentContent = e.currentTarget.textContent || '';
+
+			// 1. Cancella il timer precedente (se l'utente sta ancora digitando)
+			if (debounceTimerRef.current) {
+				clearTimeout(debounceTimerRef.current);
+			}
+
+			// 2. Imposta un nuovo timer per aggiornare lo stato del genitore
+			debounceTimerRef.current = setTimeout(() => {
+				// Questa chiamata avviene solo DOPO la pausa, riducendo i re-render del genitore.
+				setInputValue(currentContent);
+			}, 100);
+		},
+		[setInputValue]
+	);
+	const isSendActive =
+		inputValue && inputValue.trim().length > 0 && !isDropdownOpen;
+
 	return (
 		<div
 			className="
@@ -11,47 +60,86 @@ const ChatInput = ({ chatInputRef, setChatInput, sendMessage }) => {
 			style={{ borderWidth: '0.1px', borderLeft: '0px' }}
 		>
 			{/* Contenitore Input Interno */}
-			<div className="flex flex-row w-full max-w-4xl gap-4 items-center">
+			<div className="flex flex-row w-full max-w-4xl min-w-4xl gap-4 items-center">
 				<div
 					className="
           bg-gray-100 flex-1 
                             rounded-4xl 
                             focus-within:ring-2 
                             focus-within:ring-blue-500
-                            p-2 shadow-inner transition-shadow
+                            p-1 shadow-inner transition-shadow
                             flex items-center
-                            
+                            max-w-4xl min-w-4xl gap-0.5
                             
           "
 				>
-					<div>cp</div>
 					<div
-						contentEditable={true}
+						className=" relative transition-all self-start ml-1 hover:bg-bg-3 rounded-full h-12 w-12 flex items-center justify-center"
+						ref={dropdownRef}
+					>
+						<div className="w-6 h-6" onClick={toggleDropdown}>
+							<ClipIcon />
+						</div>
+						{isDropdownOpen && (
+							<div className="absolute bottom-12 w-32 min-h-28 bg-bg-1 transition-all rounded-xl ">
+								<div className="w-full text-center hover:bg-bg-3 py-2 crusor-pointer transition-all rounded-t-xl">
+									<span className="text-text-1 font-body font-medium  w-full">
+										Crea Evento
+									</span>
+								</div>
+							</div>
+						)}
+					</div>
+
+					<div
+						// CRUCIALE: Disabilita l'editing quando il dropdown è aperto
+						contentEditable={!isDropdownOpen}
 						ref={chatInputRef}
 						className={`
-                min-h-10 max-h-32
-                whitespace-pre-wrap
-                w-full p-2  outline-none font-body text-lg text-text-1 items-start overflow-y-auto
-             
-                `}
-						onInput={(e) => {
-							setChatInput(e.target.textContent);
-							if (!e.target.textContent) {
-								e.currentTarget.innerHTML = '';
-							}
-						}}
+                            min-h-8
+                            max-h-32
+                           
+                            w-full py-2 px-1 pr-3 outline-none 
+                            text-lg text-text-1 font-body
+                            overflow-y-auto 
+                            transition-opacity duration-200
+                           
+                            ${
+															isDropdownOpen
+																? 'opacity-50 cursor-not-allowed'
+																: 'opacity-100'
+														}
+                        `}
+						onInput={handleInput}
 						onKeyDown={(e) => {
-							if (e.key == 'Enter') {
+							if (e.key === 'Enter' && !e.shiftKey) {
 								e.preventDefault();
-								sendMessage();
+								if (isSendActive) sendMessage(); // Invia solo se attivo
 							}
 						}}
 						data-placeholder="Scrivi un messaggio..."
 					></div>
 				</div>
-				<div onClick={sendMessage}>
+				<button
+					onClick={isSendActive ? sendMessage : undefined}
+					disabled={!isSendActive}
+					className={`
+                        w-11 h-11 
+                        flex items-center justify-center 
+                        rounded-full 
+                        transition-all duration-150
+                        shadow-md 
+                        flex-shrink-0
+                        ${
+													isSendActive
+														? 'bg-indigo-600 hover:bg-indigo-700 active:scale-95'
+														: 'bg-gray-300 cursor-not-allowed shadow-none'
+												}
+                    `}
+					aria-label="Invia messaggio"
+				>
 					<SendIcon />
-				</div>
+				</button>
 			</div>
 		</div>
 	);

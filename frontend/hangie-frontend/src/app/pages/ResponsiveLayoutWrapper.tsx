@@ -36,7 +36,7 @@ const ResponsiveLayoutWrapper = ({ children, layoutType = 'standard' }) => {
 	// Se desktop, usa il LayoutDesktop
 	if (isDesktop) {
 		if (layoutType == 'chat') {
-			return <LayoutChatDesktop>{children}</LayoutChatDesktop>;
+			return <LayoutChatDesktop></LayoutChatDesktop>;
 		}
 		return <LayoutDesktop>{children}</LayoutDesktop>;
 	}
