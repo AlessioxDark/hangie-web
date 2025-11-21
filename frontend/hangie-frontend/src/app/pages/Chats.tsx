@@ -1,4 +1,4 @@
-import SendIcon from '@/assets/other/SendIcon';
+import SendIcon from '@/assets/icons/SendIcon.js';
 import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
 import MessageCard from '@/components/Layouts/desktop/chats/messaggi/MessageCard';
 

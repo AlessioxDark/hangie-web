@@ -1,8 +1,6 @@
-import ChevronRight from '@/assets/other/ChevronRight';
-import EventCard from '@/components/events/EventCard';
-import EventCardSuspended from '@/components/events/EventCardSuspended';
-import GroupEventCard from '@/components/groups/GroupEventCard';
 import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
+import SearchBar from '@/components/SearchBar';
+import GroupEventCard from '@/features/groups/GroupEventCard';
 import { AlertCircle, Calendar, Loader2 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -81,55 +79,38 @@ const ChatsEvents = ({}) => {
 	const filteredEvents = useMemo(() => {
 		const allEvents = groupEventsData || [];
 
-		// Funzione helper per determinare lo status di partecipazione dell'utente corrente (userId)
 		const getUserEventStatus = (event) => {
-			// 1. Controlla se l'utente è il creatore
 			if (event.created_by === session.user.id) {
-				return 'creator'; // Status speciale per il creatore
+				return 'creator';
 			}
 
-			// 2. Cerca la risposta dell'utente corrente nell'array risposte_eventi
 			const userResponse = (event.risposte_eventi || []).find(
-				// Assumo che l'oggetto risposta abbia un campo 'user_id'
 				(risposta) => risposta.user_id === session.user.id
-				// Se 'risposte_eventi' contiene oggetti annidati con { utenti: { user_id: '...' } }
-				// usa: (risposta) => risposta.utenti?.user_id === userId
 			);
 
-			// 3. Restituisce lo status trovato o 'pending' se l'utente non ha risposto
 			if (userResponse) {
-				// Lo status è il campo 'status' all'interno dell'oggetto risposta
 				return userResponse.status;
 			}
 
-			// 4. Se non è creatore e non ha una risposta registrata, è 'pending' (non ha risposto)
 			return 'pending';
 		};
 
-		// Lista di eventi filtrata in base allo status
 		let statusFilteredList = [];
 
 		if (currentFilter === '') {
-			// Se il filtro è vuoto, include tutti gli eventi
 			statusFilteredList = allEvents;
 		} else {
-			// Altrimenti, filtra in base allo status
 			statusFilteredList = allEvents.filter((event) => {
 				const status = getUserEventStatus(event);
 
-				// Filtra per lo status selezionato
 				if (currentFilter === 'pending') {
-					// 'Pending' deve includere sia gli eventi con status 'pending' sia quelli
-					// dove l'utente è il creatore e non ha 'risposto' a sé stesso
 					return status === 'pending' || status === 'creator';
 				}
 
-				// Per 'accepted' e 'rejected', cerca lo status esatto
 				return status === currentFilter;
 			});
 		}
 
-		// 2. Filtro per la query di ricerca (si applica sempre alla lista filtrata per status)
 		if (query.trim() !== '') {
 			const regex = new RegExp(query, 'i');
 			return statusFilteredList.filter(
@@ -137,11 +118,7 @@ const ChatsEvents = ({}) => {
 			);
 		}
 
-		// Restituisce la lista filtrata per status (o la lista completa se currentFilter è '')
 		return statusFilteredList;
-
-		// Aggiungi userId come dipendenza per assicurarti che il filtro venga rieseguito
-		// se l'utente cambia.
 	}, [groupEventsData, currentFilter, query, session.user.id]);
 
 	return (
@@ -154,32 +131,8 @@ const ChatsEvents = ({}) => {
 					</span> */}
 				</div>
 				<div className="w-full flex flex-col gap-4">
-					<div className="flex flex-row w-full  gap-4 items-center">
-						<div
-							className="
-          bg-gray-100 flex-1 
-                            rounded-4xl 
-                            focus-within:ring-2 
-                            focus-within:ring-blue-500
-                            p-2 shadow-inner transition-shadow
-                            flex items-start
-                            
-          "
-						>
-							<input
-								className={`
-                min-h-10 max-h-32
-                whitespace-pre-wrap
-                w-full p-2  outline-none font-body text-lg text-text-1 items-start overflow-y-auto
-             
-                `}
-								placeholder="Scrivi un evento"
-								onInput={(e) => {
-									setQuery(e.target.value);
-								}}
-							/>
-						</div>
-					</div>
+					<SearchBar query={query} setQuery={setQuery} />
+
 					<div className="flex w-full flex-row gap-3 items-center">
 						{FILTER_TYPES.map((filter) => {
 							return (
@@ -224,7 +177,6 @@ const ChatsEvents = ({}) => {
               "
 							>
 								{filteredEvents?.map((event) => {
-									// const evento = event.evento
 									const status = getEventStatus(event);
 									return (
 										<div key={event.event_id}>

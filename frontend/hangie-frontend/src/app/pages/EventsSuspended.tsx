@@ -1,8 +1,5 @@
-import ChevronLeft from '@/assets/other/ChevronLeft';
-import {
-	default as EventCardSuspended,
-	default as EventCardSuspendedDesktop,
-} from '@/components/events/EventCardSuspended';
+import ChevronLeft from '@/assets/icons/ChevronLeft';
+import EventCardSuspended from '@/features/events/EventCardSuspended';
 import { AlertCircle, Calendar, Loader2 } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';

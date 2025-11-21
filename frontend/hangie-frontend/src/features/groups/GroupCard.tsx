@@ -1,6 +1,6 @@
+import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
 import React, { useEffect } from 'react';
 import { Link } from 'react-router';
-import { useChat } from '../Layouts/desktop/chats/ChatContext';
 
 const GroupCard = ({
 	nome,

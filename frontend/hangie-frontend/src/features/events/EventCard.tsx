@@ -1,8 +1,6 @@
-import React from 'react';
-
-import DollarIcon from '@/assets/eventCardIcons/DollarIcon';
-import MapIcon from '@/assets/eventCardIcons/MapIcon';
-import ParticipantsIcon from '@/assets/eventCardIcons/ParticipantsIcon';
+import DollarIcon from '@/assets/icons/DollarIcon';
+import MapIcon from '@/assets/icons/MapIcon';
+import ParticipantsIcon from '@/assets/icons/ParticipantsIcon';
 import ProfileIcon from '@/components/ProfileIcon';
 
 /*

@@ -1,4 +1,4 @@
-import DoubleTick from '@/assets/other/DoubleTick';
+import DoubleTick from '@/assets/icons/DoubleTick';
 import ProfileIcon from '@/components/ProfileIcon';
 
 const MessageCard = ({ isUser, content, utenti, user_id, sent_at }) => {

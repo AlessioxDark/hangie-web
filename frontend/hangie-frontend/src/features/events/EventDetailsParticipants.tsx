@@ -1,4 +1,4 @@
-import ChevronLeft from '@/assets/other/ChevronLeft';
+import ChevronLeft from '@/assets/icons/ChevronLeft';
 import { useModal } from '@/contexts/ModalContext';
 import { X } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';

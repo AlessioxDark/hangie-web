@@ -1,5 +1,5 @@
+import ProfileIcon from '@/components/ProfileIcon';
 import React from 'react';
-import ProfileIcon from '../ProfileIcon';
 const formatDate = (dateString) => {
 	const now = Date.now();
 

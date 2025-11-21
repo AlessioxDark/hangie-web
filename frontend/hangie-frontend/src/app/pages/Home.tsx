@@ -1,9 +1,9 @@
-import ChevronRight from '@/assets/other/ChevronRight.js';
+import ChevronRight from '@/assets/icons/ChevronRight.js';
 
-import EventCardDesktop from '@/components/events/EventCard.js';
-import EventCardSuspendedDesktop from '@/components/events/EventCardSuspended.js';
+import EventCard from '@/features/events/EventCard.js';
+import EventCardSuspended from '@/features/events/EventCardSuspended.js';
 
-import EventDetailsModal from '@/components/events/EventDetailsModal.js';
+import EventDetailsModal from '@/features/events/EventDetailsModal.js';
 import { AlertCircle, Calendar, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
@@ -192,7 +192,7 @@ const Home = () => {
 											className="w-full xl:min-width-[30rem] xl:max-w-[37rem]"
 											key={event.event_id}
 										>
-											<EventCardSuspendedDesktop {...event} />
+											<EventCardSuspended {...event} />
 										</div>
 									))}
 							</div>
@@ -232,7 +232,7 @@ const Home = () => {
 									// const evento = event.evento
 									return (
 										<div key={event.event_id}>
-											<EventCardDesktop {...event} />
+											<EventCard {...event} />
 										</div>
 									);
 								})}

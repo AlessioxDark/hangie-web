@@ -6,7 +6,7 @@ import LayoutMobile from '../components/Layouts/mobile/LayoutMobile';
 import Login from './pages/desktop/Login';
 import SignUp from './pages/desktop/SignUp';
 
-import EventDetailsModal from '@/components/events/EventDetailsModal';
+import EventDetailsModal from '@/features/events/EventDetailsModal';
 import { AuthContextProvider } from '../contexts/AuthContext';
 import { ModalContext } from '../contexts/ModalContext';
 import Chats from './pages/Chats';

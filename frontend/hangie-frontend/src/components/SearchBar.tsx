@@ -1,25 +1,38 @@
-import { Search, X } from 'lucide-react';
-import React, { useState } from 'react';
-const SearchBar = () => {
-	const [inputValue, setInputValue] = useState('');
+import SearchLensIcon from '@/assets/icons/SearchLensIcon';
+import { X } from 'lucide-react';
+
+const SearchBar = ({ query, setQuery }) => {
 	const handleClearInput = () => {
-		setInputValue('');
+		setQuery('');
 	};
 	return (
-		<div className="border-2 border-neutral-300 p-3 h-14 rounded-full flex flex-row justify-between items-center shadow-md bg-white w-full mx-auto focus-within:ring-2 focus-within:ring-primary">
+		<div
+			className="border border-bg-3 p-3 h-1 rounded-4xl flex flex-row justify-between items-center  bg-bg-2 w-full mx-auto focus-within:ring-2 focus-within:ring-primary
+    
+      flex-1 
+                  
+                           
+                           
+                             shadow-inner transition-shadow
+                           
+    
+    "
+		>
 			<div className="flex gap-2 flex-row w-full items-center group">
-				<Search size={28} className="text-gray-600" />
+				<div className="w-8 h-8">
+					<SearchLensIcon />
+				</div>
 				<input
 					type="text"
-					className="w-full h-full text-lg outline-none font-body flex items-center placeholder-gray-400 focus:outline-none "
+					className="w-full h-full text-lg outline-none  flex items-center placeholder-text-2 focus:outline-none font-body text-text-1 min-h-10 max-h-32 whitespace-pre-wrap "
 					placeholder="Cerca..."
 					onInput={(e) => {
-						setInputValue(e.target.value);
+						setQuery(e.target.value);
 					}}
-					value={inputValue}
+					value={query}
 				/>
 			</div>
-			{inputValue !== '' && (
+			{query !== '' && (
 				<X
 					size={28}
 					className="text-gray-600 cursor-pointer "

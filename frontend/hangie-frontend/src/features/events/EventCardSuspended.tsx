@@ -1,4 +1,4 @@
-import ParticipantsIcon from '@/assets/eventCardIcons/ParticipantsIcon';
+import ParticipantsIcon from '@/assets/icons/ParticipantsIcon';
 import ProfileIcon from '@/components/ProfileIcon';
 import { Clock1 } from 'lucide-react'; // Aggiungi questa icona
 import React from 'react';

@@ -1,5 +1,4 @@
-import GroupChat from '@/components/groups/desktop/GroupChat.js';
-import GroupCard from '@/components/groups/groupCard.js';
+import GroupCard from '@/features/groups/GroupCard.js';
 
 import { AlertCircle, Loader2 } from 'lucide-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';

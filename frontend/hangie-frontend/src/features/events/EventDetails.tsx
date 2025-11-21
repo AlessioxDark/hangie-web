@@ -1,13 +1,13 @@
-import DollarIcon from '@/assets/eventCardIcons/DollarIcon';
-import MapIcon from '@/assets/eventCardIcons/MapIcon';
-import ParticipantsIcon from '@/assets/eventCardIcons/ParticipantsIcon';
-import CalendarIcon from '@/assets/eventPageIcons/CalendarIcon';
-import ChevronLeft from '@/assets/other/ChevronLeft';
-import ChevronRight from '@/assets/other/ChevronRight';
+import CalendarIcon from '@/assets/icons/CalendarIcon';
+import ChevronLeft from '@/assets/icons/ChevronLeft';
+import ChevronRight from '@/assets/icons/ChevronRight';
+import DollarIcon from '@/assets/icons/DollarIcon';
+import MapIcon from '@/assets/icons/MapIcon';
+import ParticipantsIcon from '@/assets/icons/ParticipantsIcon';
+import ProfileIcon from '@/components/ProfileIcon';
 import { useModal } from '@/contexts/ModalContext';
 import { X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import ProfileIcon from '../ProfileIcon';
 const EventDetails = ({
 	event_imgs,
 	descrizione,
