@@ -2,6 +2,7 @@ import DollarIcon from '@/assets/icons/DollarIcon';
 import MapIcon from '@/assets/icons/MapIcon';
 import ParticipantsIcon from '@/assets/icons/ParticipantsIcon';
 import ProfileIcon from '@/components/ProfileIcon';
+import { useModal } from '@/contexts/ModalContext';
 
 /*
 todo
@@ -31,6 +32,7 @@ const EventCard = ({
 		  })
 		: '';
 
+	const { openModal, setModalData } = useModal();
 	return (
 		<article
 			className="flex flex-col  border border-[#E2E8F0] rounded-xl cursor-pointer group
@@ -38,6 +40,10 @@ const EventCard = ({
 		  shadow-sm hover:shadow-2xl
 		     transition-all duration-300
 	 "
+			onClick={() => {
+				openModal();
+				setModalData({ event_id });
+			}}
 		>
 			<img
 				src={cover_img}

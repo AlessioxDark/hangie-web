@@ -3,6 +3,7 @@ import ChevronRight from '@/assets/icons/ChevronRight.js';
 import EventCard from '@/features/events/EventCard.js';
 import EventCardSuspended from '@/features/events/EventCardSuspended.js';
 
+import RenderEmptyState from '@/components/renderEmptyState.js';
 import EventDetailsModal from '@/features/events/EventDetailsModal.js';
 import { AlertCircle, Calendar, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -126,18 +127,6 @@ const Home = () => {
 		return () => slider.removeEventListener('scroll', onScroll);
 	}, [isLoading]);
 
-	const renderEmptyState = () => (
-		<div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
-			<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-				<Calendar className="w-8 h-8 text-gray-400" />
-			</div>
-
-			<h3 className="text-lg font-medium text-gray-900 mb-2">
-				Nessun Evento per il momento
-			</h3>
-		</div>
-	);
-
 	const renderContent = useCallback(
 		(type: string) => {
 			if (error) {
@@ -208,7 +197,7 @@ const Home = () => {
 							// 			</div>
 							// 		))}
 							// </div>
-							renderEmptyState()
+							<RenderEmptyState />
 						)}
 					</div>
 				);
@@ -238,7 +227,7 @@ const Home = () => {
 								})}
 							</div>
 						) : (
-							renderEmptyState()
+							<RenderEmptyState />
 						)}
 					</div>
 				);

@@ -4,7 +4,7 @@ export const ModalContext = createContext({
 	isOpen: false,
 	setIsOpen: (arg) => arg,
 	closeModal: (arg) => {},
-	openModal: (arg) => {},
+	openModal: () => {},
 	modalData: null,
 	setModalData: (arg) => arg,
 });

@@ -110,7 +110,6 @@ const ChatsSidebar = () => {
 				</div>
 				<div>{renderContent()}</div>
 			</div>
-			{/* <div>{currentChat && <GroupChat {...currentChatData} />}</div> */}
 		</div>
 	);
 };

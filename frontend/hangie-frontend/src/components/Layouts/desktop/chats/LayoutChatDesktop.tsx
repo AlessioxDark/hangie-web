@@ -1,7 +1,7 @@
 import Chats from '@/app/pages/Chats.js';
-import ChatsEvents from '@/app/pages/ChatsEvents.js';
-import ChatsSidebar from '@/app/pages/ChatsSidebar';
 import Sidebar from '@/app/pages/desktop/Sidebar';
+import ChatsEvents from '@/features/chats/ChatsEvents.js';
+import ChatsSidebar from '@/features/chats/ChatsSidebar.js';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../../config/db.js';
@@ -178,7 +178,6 @@ const LayoutChatDesktop = ({ children }) => {
 					</main>
 				</div>
 				<ChatsEvents />
-				{/* {children} */}
 			</div>
 		</ChatContext.Provider>
 	);
