@@ -115,7 +115,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
 
 		return `Scade tra ${parti.slice(0, 2).join(' e ')}`; // Mostra solo le due unità più grandi
 	};
-	const { openModal, setModalData } = useModal();
+	const { openModal } = useModal();
 	return (
 		<article
 			className={`
@@ -136,8 +136,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
        
       `}
 			onClick={() => {
-				openModal();
-				setModalData({ event_id });
+				openModal({ data: { event_id: event_id }, type: 'EVENT_MODAL' });
 			}}
 		>
 			{/* ═══════════════════════════════════════════════════

@@ -8,7 +8,7 @@ import EventDetailsParticipants from './EventDetailsParticipants';
 const MountElement = document.getElementById('overlays');
 
 const EventDetailsModal = () => {
-	const { isOpen, modalData, closeModal } = useModal();
+	const { isModalOpen, modalData, closeModal } = useModal();
 	const { session } = useAuth();
 
 	const [isLoading, setIsLoading] = useState(false);
@@ -46,11 +46,10 @@ const EventDetailsModal = () => {
 		}
 	};
 	useEffect(() => {
-		console.log(modalData.event_id);
-		if (modalData.event_id) {
+		if (modalData?.event_id) {
 			fetchEvent();
 		}
-	}, [modalData.event_id]);
+	}, [modalData?.event_id]);
 
 	const getEventStatus = () => {
 		console.log('eventStatus');
@@ -131,7 +130,7 @@ const EventDetailsModal = () => {
 	useEffect(() => {}, [currentPage]);
 	return createPortal(
 		<>
-			{isOpen && (
+			{isModalOpen && (
 				<div
 					className="fixed inset-0 z-50 flex items-center justify-center p-4 
              bg-black/40

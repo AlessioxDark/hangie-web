@@ -32,7 +32,7 @@ const EventCard = ({
 		  })
 		: '';
 
-	const { openModal, setModalData } = useModal();
+	const { openModal } = useModal();
 	return (
 		<article
 			className="flex flex-col  border border-[#E2E8F0] rounded-xl cursor-pointer group
@@ -41,8 +41,7 @@ const EventCard = ({
 		     transition-all duration-300
 	 "
 			onClick={() => {
-				openModal();
-				setModalData({ event_id });
+				openModal({ data: { event_id: event_id }, type: 'EVENT_MODAL' });
 			}}
 		>
 			<img

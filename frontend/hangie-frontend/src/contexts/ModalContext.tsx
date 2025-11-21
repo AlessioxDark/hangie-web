@@ -1,12 +1,12 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 export const ModalContext = createContext({
-	isOpen: false,
-	setIsOpen: (arg) => arg,
+	isModalOpen: false,
 	closeModal: (arg) => {},
 	openModal: () => {},
+	modalType: null,
+
 	modalData: null,
-	setModalData: (arg) => arg,
 });
 export const useModal = () => {
 	const context = useContext(ModalContext);
@@ -17,4 +17,31 @@ export const useModal = () => {
 	}
 
 	return context;
+};
+
+export const ModalProvider = ({ children }) => {
+	const MODAL_TYPES = ['EVENT_MODAL', 'CREATE_EVENT_MODAL'];
+	const [modalState, setModalState] = useState({ type: null, data: null });
+
+	const { type: modalType, data: modalData } = modalState;
+	const isModalOpen = modalType !== null;
+	const openModal = ({ type, data }) => {
+		if (!type) {
+			throw new Error('devi Inserire un tipo');
+		}
+		if (!data) {
+			throw new Error('devi Inserire dati');
+		}
+		setModalState({ type, data });
+	};
+	const closeModal = () => {
+		setModalState({ type: null, data: null });
+	};
+	return (
+		<ModalContext.Provider
+			value={{ openModal, closeModal, modalType, modalData, isModalOpen }}
+		>
+			{children}
+		</ModalContext.Provider>
+	);
 };

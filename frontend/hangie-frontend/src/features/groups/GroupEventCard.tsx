@@ -80,7 +80,7 @@ const GroupEventCard = ({
 		return `Scade tra ${parti.slice(0, 2).join(' e ')}`; // Mostra solo le due unità più grandi
 	};
 
-	const { isOpen, setIsOpen, openModal, setModalData } = useModal();
+	const { openModal } = useModal();
 	return (
 		<div
 			className={`flex flex-col p-4   border border-[#E2E8F0] rounded-xl cursor-pointer group
@@ -90,8 +90,7 @@ const GroupEventCard = ({
            ${(type == 'archive' || type == 'rejected') && 'grayscale'}
 		 `}
 			onClick={() => {
-				openModal();
-				setModalData({ event_id });
+				openModal({ data: { event_id: event_id }, type: 'EVENT_MODAL' });
 			}}
 			// to={`/events/${event_id}`}
 		>
