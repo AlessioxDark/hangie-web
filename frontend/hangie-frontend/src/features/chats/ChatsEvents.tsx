@@ -109,7 +109,7 @@ const ChatsEvents = ({}) => {
 		}
 
 		return statusFilteredList;
-	}, [groupEventsData, currentFilter, query, session.user.id]);
+	}, [groupEventsData, currentFilter, query, session?.user.id]);
 
 	return (
 		<div className="min-w-1/5 max-w-1/5 h-full">

@@ -108,7 +108,7 @@ const Chats = ({ messaggi }) => {
 				</div>
 			</div>
 			<div className="flex-1 overflow-y-auto px-8">
-				<div className="flex flex-col gap-4 mt-8">
+				<div className="flex flex-col gap-2 mt-8">
 					{messaggi.map((mess) => {
 						return (
 							<div className={`w-full flex ${mess.isUser && 'justify-end'}`}>

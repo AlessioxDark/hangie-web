@@ -53,7 +53,7 @@ const ChatInput = ({
 		inputValue && inputValue.trim().length > 0 && !isDropdownOpen;
 
 	const handleDropdownChoice = (type) => {
-		openModal({ type, data: null });
+		openModal({ type: type, data: null });
 	};
 	return (
 		<div

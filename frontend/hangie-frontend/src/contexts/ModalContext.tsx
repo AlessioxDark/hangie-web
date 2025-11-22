@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 export const ModalContext = createContext({
 	isModalOpen: false,
@@ -29,14 +29,15 @@ export const ModalProvider = ({ children }) => {
 		if (!type) {
 			throw new Error('devi Inserire un tipo');
 		}
-		if (!data) {
-			throw new Error('devi Inserire dati');
-		}
+
 		setModalState({ type, data });
 	};
 	const closeModal = () => {
 		setModalState({ type: null, data: null });
 	};
+	useEffect(() => {
+		console.log('modaltype:', modalType);
+	}, [modalType]);
 	return (
 		<ModalContext.Provider
 			value={{ openModal, closeModal, modalType, modalData, isModalOpen }}

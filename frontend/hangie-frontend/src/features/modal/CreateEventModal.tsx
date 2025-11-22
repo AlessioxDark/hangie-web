@@ -1,9 +1,12 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useModal } from '@/contexts/ModalContext';
-import React, { useState } from 'react';
-
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import CreateEventForm from '../events/CreateEventForm';
+const MountElement = document.getElementById('overlays');
 const CreateEventModal = () => {
-	// const { isModalOpen, modalData, closeModal } = useModal();
+	const { isModalOpen, modalData, modalType, closeModal } = useModal();
+
 	// const { session } = useAuth();
 	// const [isLoading, setIsLoading] = useState(false);
 	// const [error, setError] = useState(false);
@@ -119,27 +122,26 @@ const CreateEventModal = () => {
 	// 	}
 	// };
 	// useEffect(() => {}, [currentPage]);
-	// return createPortal(
-	// 	<>
-	// 		{isModalOpen && (
-	// 			<div
-	// 				className="fixed inset-0 z-50 flex items-center justify-center p-4
-	//            bg-black/40
-	//            transition-opacity duration-300"
-	// 				// Chiude il modal cliccando sull'overlay
-	// 				aria-modal="true"
-	// 				role="dialog"
-	// 				aria-labelledby="modal-title"
-	// 			>
-	// 				<div className=" bg-bg-1  rounded-2xl p-8 w-70/100  overflow-y-auto">
-	// 					{renderContent()}
-	// 				</div>
-	// 				{/* <EventDetails {...eventData} /> */}
-	// 			</div>
-	// 		)}
-	// 	</>,
-	// 	MountElement
-	// );;
+	return createPortal(
+		<>
+			{isModalOpen && (
+				<div
+					className="fixed inset-0 z-50 flex items-center justify-center p-4
+	           bg-black/40
+	           transition-opacity duration-300"
+					// Chiude il modal cliccando sull'overlay
+					aria-modal="true"
+					role="dialog"
+					aria-labelledby="modal-title"
+				>
+					<CreateEventForm />
+
+					{/* <EventDetails {...eventData} /> */}
+				</div>
+			)}
+		</>,
+		MountElement
+	);
 };
 
 export default CreateEventModal;

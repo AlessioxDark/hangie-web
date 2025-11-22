@@ -52,9 +52,7 @@ const EventDetailsModal = () => {
 	}, [modalData?.event_id]);
 
 	const getEventStatus = () => {
-		console.log('eventStatus');
 		if (eventData?.created_by === session.user.id) {
-			console.log('creator');
 			return 'creator'; // L'utente è il creatore, vede i pulsanti di modifica
 		}
 		const userResponse = eventData?.risposte_eventi?.find(
@@ -62,7 +60,6 @@ const EventDetailsModal = () => {
 		);
 
 		if (userResponse) {
-			console.log(userResponse.status);
 			return userResponse.status;
 		}
 	};
