@@ -29,8 +29,9 @@ export const ModalProvider = ({ children }) => {
 		if (!type) {
 			throw new Error('devi Inserire un tipo');
 		}
-
+		console.log('sto per cambiare modal');
 		setModalState({ type, data });
+		console.log('cambiato modal');
 	};
 	const closeModal = () => {
 		setModalState({ type: null, data: null });
@@ -38,6 +39,7 @@ export const ModalProvider = ({ children }) => {
 	useEffect(() => {
 		console.log('modaltype:', modalType);
 	}, [modalType]);
+
 	return (
 		<ModalContext.Provider
 			value={{ openModal, closeModal, modalType, modalData, isModalOpen }}

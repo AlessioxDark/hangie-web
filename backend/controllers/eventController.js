@@ -34,8 +34,6 @@ const getAllEvents = async (req, res) => {
 			}),
 		};
 
-		console.log(newCleanData);
-		console.log(newCleanData);
 		if (error) {
 			throw Error(error);
 		}
@@ -89,8 +87,7 @@ const getSpecificEvent = async (req, res) => {
 			}
 		});
 		if (error) throw error;
-		console.log(finalData);
-		console.log(newData);
+
 		res.json(newData);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
@@ -106,8 +103,10 @@ const modifyEvent = async (req, res) => {
 	}
 };
 const addNewEvent = async (req, res) => {
+	console.log('adding new event');
 	try {
 		const { data, error } = await Event.newEvent(req); // Chiama il modello per ottenere gli eventi
+
 		if (error) throw error;
 		res.json(data);
 	} catch (err) {
@@ -126,7 +125,7 @@ const modifyResponseEvent = async (req, res) => {
 const getSuspendedEvents = async (req, res) => {
 	try {
 		const { data, error } = await Event.getSuspended(req); // Chiama il modello per ottenere gli eventi
-		console.log(data);
+
 		const cleanData = data.map((response) => {
 			// Estrae l'oggetto evento dal campo 'eventi' e aggiunge lo 'status'
 			return {

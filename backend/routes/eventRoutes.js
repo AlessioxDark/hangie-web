@@ -7,7 +7,7 @@ router.post('/discover', eventController.getAllEvents);
 router.get('/myevents', eventController.getMyEvents);
 router.post('/suspendedevenets/all', eventController.getSuspendedEvents);
 router.patch('/modify/:event_id', eventController.modifyEvent);
-router.post('/add/newEvent', eventController.addNewEvent);
+router.post('/add/create-event', eventController.addNewEvent);
 router.post(
 	'/request/:event_id',
 	authMiddleware.authMiddleware,

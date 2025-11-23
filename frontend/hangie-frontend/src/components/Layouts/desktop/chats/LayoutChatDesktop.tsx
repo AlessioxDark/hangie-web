@@ -5,7 +5,7 @@ import ChatsSidebar from '@/features/chats/ChatsSidebar.js';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../../config/db.js';
-import { ChatContext } from './ChatContext.js';
+import { ChatContext, ChatProvider } from './ChatContext.js';
 const LayoutChatDesktop = ({}) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<null | string>('');
@@ -159,27 +159,16 @@ const LayoutChatDesktop = ({}) => {
 		fetchFirstGroup,
 	]);
 	return (
-		<ChatContext.Provider
-			value={{
-				currentGroup: currentGroup,
-				setCurrentGroup: setCurrentGroup,
-				currentChatData: currentChatData,
-				setCurrentChatData: setCurrentChatData,
-				currentGroupData: currentGroupData,
-				setCurrentGroupData: setCurrentGroupData,
-			}}
-		>
-			<div className="h-screen w-full flex flex-row">
-				<Sidebar />
-				<ChatsSidebar />
-				<div className="flex flex-col w-full h-screen  bg-bg-2">
-					<main className="flex-grow h-screen overflow-y-auto">
-						{renderContent()}
-					</main>
-				</div>
-				<ChatsEvents />
+		<div className="h-screen w-full flex flex-row">
+			<Sidebar />
+			<ChatsSidebar />
+			<div className="flex flex-col w-full h-screen  bg-bg-2">
+				<main className="flex-grow h-screen overflow-y-auto">
+					{renderContent()}
+				</main>
 			</div>
-		</ChatContext.Provider>
+			<ChatsEvents />
+		</div>
 	);
 };
 

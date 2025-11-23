@@ -3,6 +3,8 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Login from './pages/desktop/Login';
 import SignUp from './pages/desktop/SignUp';
 
+import { ChatProvider } from '@/components/Layouts/desktop/chats/ChatContext';
+import LayoutChatDesktop from '@/components/Layouts/desktop/chats/LayoutChatDesktop';
 import EventDetailsModal from '@/features/modal/EventDetailsModal';
 import ModalHandler from '@/features/modal/ModalHandler';
 import { AuthContextProvider } from '../contexts/AuthContext';
@@ -15,38 +17,33 @@ function App() {
 	return (
 		<BrowserRouter>
 			<AuthContextProvider>
-				<ModalProvider>
-					<Routes>
-						<Route path="/signup" element={<SignUp />}></Route>
-						<Route path="/login" element={<Login />}></Route>
-						<Route
-							path="/chats"
-							element={
-								<ResponsiveLayoutWrapper layoutType="chat">
-									<Chats />
-								</ResponsiveLayoutWrapper>
-							}
-						></Route>
+				<ChatProvider>
+					<ModalProvider>
+						<Routes>
+							<Route path="/signup" element={<SignUp />}></Route>
+							<Route path="/login" element={<Login />}></Route>
+							<Route path="/chats" element={<LayoutChatDesktop />}></Route>
 
-						<Route
-							path="/"
-							element={
-								<ResponsiveLayoutWrapper>
-									<Home />
-								</ResponsiveLayoutWrapper>
-							}
-						/>
-						<Route
-							path="/events/suspended/all"
-							element={
-								<ResponsiveLayoutWrapper>
-									<EventsSuspended />
-								</ResponsiveLayoutWrapper>
-							}
-						/>
-					</Routes>
-					<ModalHandler />
-				</ModalProvider>
+							<Route
+								path="/"
+								element={
+									<ResponsiveLayoutWrapper>
+										<Home />
+									</ResponsiveLayoutWrapper>
+								}
+							/>
+							<Route
+								path="/events/suspended/all"
+								element={
+									<ResponsiveLayoutWrapper>
+										<EventsSuspended />
+									</ResponsiveLayoutWrapper>
+								}
+							/>
+						</Routes>
+						<ModalHandler />
+					</ModalProvider>
+				</ChatProvider>
 			</AuthContextProvider>
 		</BrowserRouter>
 	);

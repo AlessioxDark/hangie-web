@@ -1,5 +1,42 @@
 const supabase = require('../config/db');
 
+const getCoords = async ({ indirizzo, citta, cap }) => {
+	const queryCompleta = `${indirizzo}, ${cap} ${citta}, Italia`;
+	const queryCodificata = encodeURIComponent(queryCompleta);
+	const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${queryCodificata}&format=json&limit=1`;
+	try {
+		const response = await fetch(nominatimUrl);
+		if (!response.ok) {
+			console.error(
+				`Errore nella richiesta API: Stato ${response.status} - ${response.statusText}`
+			);
+			return null;
+		}
+
+		// 5. Parsa il corpo della risposta come JSON
+		const data = await response.json();
+
+		// 6. Elabora il risultato
+		if (data.length > 0) {
+			// L'API restituisce un array, prendiamo il primo risultato
+			const primoRisultato = data[0];
+
+			// Le coordinate sono presenti come stringhe, le convertiamo in numeri
+			const latitudine = parseFloat(primoRisultato.lat);
+			const longitudine = parseFloat(primoRisultato.lon);
+
+			console.log(`Geocoding Riuscito:`);
+			console.log(` - Trovato: ${primoRisultato.display_name}`);
+			console.log(` - Latitudine (lat): ${latitudine}`);
+			console.log(` - Longitudine (lon): ${longitudine}`);
+
+			return { latitudine, longitudine };
+		}
+	} catch (err) {
+		return err;
+	}
+};
+
 const getAll = async (req) => {
 	// Estrae l'offset dal corpo della richiesta.
 	const EVENTSINPAGE = 12;
@@ -152,10 +189,65 @@ const modify = async (req) => {
 		.eq('event_id', event_id);
 	return { data, error };
 };
+
 const newEvent = async (req) => {
-	const body = req.body;
-	const { data, error } = await supabase.from('eventi').insert([{ ...body }]);
-	return { data, error };
+	const token = req.headers.authorization.split(' ')[1];
+	const { images, ...realBody } = req.body.data;
+	const { latitudine, longitudine } = await getCoords({
+		cap: realBody.cap,
+		indirizzo: realBody.indirizzo,
+		citta: realBody.citta,
+	});
+
+	const { data: luoghiInsert, error: luoghiError } = await supabase
+		.from('luoghi')
+		.insert([
+			{
+				cap: realBody.cap,
+				indirizzo: realBody.indirizzo,
+				citta: realBody.citta,
+				nome: realBody.nome_luogo,
+				latitudine,
+				longitudine,
+			},
+		])
+		.onConflict('indirizzo,longitudine,latitudine')
+		.doNothing()
+		.select('*');
+	const luogoId = luoghiInsert?.[0].luogo_id;
+	if (luoghiError) {
+		console.error("Errore nell'upsert del luogo:", luoghiError);
+		return { data: null, error: luoghiError };
+	}
+	console.log(luoghiInsert);
+	console.log(luogoId);
+
+	const { data: userData, error: userError } = await supabase.auth.getUser(
+		token
+	);
+
+	if (userError) {
+		console.error('Utente non autenticato o errore di sessione:', sessionError);
+		// Gestisci l'errore, magari reindirizzando al login
+		return;
+	}
+
+	// L'ID utente (uid) si trova sotto session.user.id
+	const user_id = userData.user.id;
+	const { cap, indirizzo, nome_luogo, citta, ...eventBody } = realBody;
+	const { data: eventData, error } = await supabase
+		.from('eventi')
+		.insert([{ ...eventBody, luogo_id: luogoId, created_by: user_id }])
+		.select('*');
+	if (error) {
+		console.error("Errore nell'inserimento:", error);
+		// È fondamentale uscire qui se l'inserimento fallisce
+		return { data: null, error };
+	}
+	const eventId = eventData?.[0].event_id;
+	console.log('ci sono qui');
+
+	return { data: { event_id: eventId }, error: null };
 };
 const modifyResponse = async (req) => {
 	const { status, event_id } = req.body;
@@ -204,4 +296,5 @@ module.exports = {
 	getAll,
 	getSuspended,
 	getEvent,
+	newEvent,
 };

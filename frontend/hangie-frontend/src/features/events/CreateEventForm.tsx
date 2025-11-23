@@ -1,3 +1,5 @@
+import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useModal } from '@/contexts/ModalContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
@@ -7,9 +9,10 @@ import z from 'zod';
 import FormInput from '../CreateEvent/FormInput';
 import FormTextarea from '../CreateEvent/FormTextarea';
 // Componente Textarea
-
+import { supabase } from '../../config/db.js';
 const CreateEventForm = () => {
 	const { closeModal } = useModal();
+	const { session } = useAuth();
 	const [images, setImages] = useState([]);
 	const fileInputRef = useRef(null);
 	const schema = z.object({
@@ -40,11 +43,12 @@ const CreateEventForm = () => {
 			.min(5, 'il cap deve essere composto da 5 cifre')
 			.max(5, 'il cap deve essere composto da 5 numeri'),
 		citta: z.string(),
+		nome_luogo: z.string(),
 	});
 	type FormFields = z.infer<typeof schema>;
 	const methods = useForm({
 		resolver: zodResolver(schema),
-		mode: 'onTouched',
+		mode: 'onSubmit',
 	});
 
 	const {
@@ -59,20 +63,23 @@ const CreateEventForm = () => {
 		watch,
 	} = methods;
 
+	const { currentGroup, currentGroupData } = useChat();
 	const removeImg = (clickedImage) => {
 		setImages((prevImages) => prevImages.filter((img) => img !== clickedImage));
 	};
 	const handleFileChange = (event) => {
 		const files = event.target.files;
 		if (files.length === 0) return;
-
+		console.log(files, event.target.files);
 		// Convertiamo i file selezionati in URL temporanei
 		const newImages = Array.from(files).map((file, index) => ({
 			url: URL.createObjectURL(file), // URL temporaneo per l'anteprima
 			file,
-			name: index + 1,
+			type: file.type,
+			ext: file.name.split('.')[1],
+			name: index == 0 ? 'cover' : index,
 		}));
-
+		console.log(newImages[0].file.size);
 		// Aggiungiamo i nuovi URL all'array di immagini esistente
 		setImages((prevImages) => [...prevImages, ...newImages]);
 
@@ -84,7 +91,72 @@ const CreateEventForm = () => {
 	}, []);
 	const [imageError, setImageError] = useState(false); // Stato per l'errore
 
-	const onSubmit = () => {};
+	const onSubmit = async (data) => {
+		console.log('inviato');
+		console.log('session', session);
+		try {
+			// FASE 1: Creiamo l'evento nel DB (solo dati testuali)
+			// Nota: Non inviamo 'images' qui
+			const response = await fetch(
+				'http://localhost:3000/api/events/add/create-event',
+				{
+					method: 'POST',
+					headers: {
+						'Content-type': 'application/json',
+						Authorization: `Bearer ${session.access_token}`,
+					},
+					body: JSON.stringify({
+						data: { ...data, group_id: currentGroup }, // Niente images qui
+					}),
+				}
+			);
+			console.log('richiesta');
+			const result = await response.json();
+
+			if (!response.ok) {
+				console.log('male');
+				throw new Error(result.error || 'Errore creazione evento');
+			}
+
+			const newEventId = result.event_id; // Assumi che l'API restituisca l'ID
+			console.log('ok');
+			console.log('Evento creato, ID:', newEventId);
+
+			// FASE 2: Upload Diretto delle Immagini su Supabase Storage
+			const uploadPromises = images.map(async (img, index) => {
+				const fileExt = img.file.name.split('.').pop();
+				const fileName = `${newEventId}/${img.name}.${fileExt}`;
+				const filePath = `${fileName}`;
+				const { data: uploadData, error: uploadError } = await supabase.storage
+					.from('eventi')
+					.upload(filePath, img.file, {
+						upsert: true,
+						contentType: img.type,
+						cacheControl: '3600',
+					});
+
+				if (uploadError) throw uploadError;
+				const { data: urlData } = supabase.storage
+					.from('eventi')
+					.getPublicUrl(uploadData.path);
+				return urlData.publicUrl;
+			});
+
+			const uploadedUrls = await Promise.all(uploadPromises);
+
+			const cover_url = uploadedUrls[0];
+			const { data: coverData, error: coverError } = await supabase
+				.from('eventi')
+				.update({ cover_img: cover_url })
+				.eq('event_id', newEventId);
+			if (coverError) throw coverError;
+			console.log('Tutte le immagini caricate con successo!');
+			// closeModal(); // Chiudi solo se tutto è andato bene
+		} catch (error) {
+			console.error('Errore durante il processo:', error);
+			// Qui puoi gestire l'errore (es. mostrare un toast notification)
+		}
+	};
 	return (
 		<div
 			className={`w-full max-w-4xl mx-auto rounded-2xl shadow-2xl overflow-hidden bg-bg-1`}
@@ -222,14 +294,24 @@ const CreateEventForm = () => {
 							Dettagli sul Luogo
 						</h1>
 						<div className="flex flex-col gap-6">
-							<FormInput
-								id="indirizzo"
-								label="Indirizzo / Luogo"
-								placeholder="Via Roma, 12, 00100 Roma"
-								type="text"
-								register={register}
-								error={errors.indirizzo}
-							/>
+							<div className="flex flex-row gap-4">
+								<FormInput
+									id="nome_luogo"
+									label="Nome Luogo"
+									placeholder="Casa di Marco"
+									type="text"
+									register={register}
+									error={errors.nome_luogo}
+								/>
+								<FormInput
+									id="indirizzo"
+									label="Indirizzo / Luogo"
+									placeholder="Via Roma, 12, 00100 Roma"
+									type="text"
+									register={register}
+									error={errors.indirizzo}
+								/>
+							</div>
 							<div className="flex flex-row gap-4">
 								<FormInput
 									id="citta"
@@ -243,7 +325,7 @@ const CreateEventForm = () => {
 									id="cap"
 									label="CAP"
 									placeholder="00100"
-									type="number"
+									type="text"
 									register={register}
 									error={errors.cap}
 								/>
@@ -260,6 +342,9 @@ const CreateEventForm = () => {
 						className={`px-9 py-4 bg-primary text-white font-bold rounded-xl 
                         hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-lg cursor-pointer`}
 						disabled={isSubmitting}
+						onClick={() => {
+							handleSubmit(onSubmit)();
+						}}
 					>
 						{isSubmitting ? 'Creazione...' : 'Crea e Pubblica Evento'}
 					</button>

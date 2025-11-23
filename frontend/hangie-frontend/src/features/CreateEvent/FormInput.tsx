@@ -3,7 +3,6 @@ import MapIcon from '@/assets/icons/MapIcon';
 import React from 'react';
 
 const FormInput = ({ id, label, type, placeholder, register, error }) => {
-	console.log(register);
 	const isDateField = type === 'datetime-local';
 
 	return (
@@ -59,7 +58,7 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
 																	}
 		                             `}
 					// Uso corretto della funzione register
-					{...register(id)}
+					{...register(id, { valueAsNumber: type === 'number' })}
 				/>
 			</div>
 			{/* L'errore viene mostrato se esiste */}
