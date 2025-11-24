@@ -15,37 +15,44 @@ const CreateEventForm = () => {
 	const { session } = useAuth();
 	const [images, setImages] = useState([]);
 	const fileInputRef = useRef(null);
-	const schema = z.object({
-		titolo: z.string().min(1, 'il titolo è obbligatorio'),
-		descrizione: z
-			.string()
-			.min(1, 'la descrizione è obbligatoria')
-			.min(30, 'la descrizione deve essere minimo 30 caratteri')
-			.max(350, 'La descrizione può essere massimo 350 caratteri'),
-		data: z
-			.string()
-			.min(1, 'La data di iscrizione è obbligatoria')
-			.pipe(z.coerce.date()) // Trasforma la stringa (data HTML) in Date object
-			.refine((date) => date > new Date(), {
-				message: 'La data di scadenza deve essere futura.',
-			}),
-		data_scadenza: z
-			.string()
-			.min(1, 'La data di iscrizione è obbligatoria')
-			.pipe(z.coerce.date()) // Trasforma la stringa (data HTML) in Date object
-			.refine((date) => date > new Date(), {
-				message: 'La data di scadenza deve essere futura.',
-			}),
-		indirizzo: z.string().min(1, "l'indirizzo è obbligatorio"),
-		costo: z.number(),
-		cap: z
-			.string()
-			.min(5, 'il cap deve essere composto da 5 cifre')
-			.max(5, 'il cap deve essere composto da 5 numeri'),
-		citta: z.string(),
-		nome_luogo: z.string(),
-	});
-	type FormFields = z.infer<typeof schema>;
+	const schema = z
+		.object({
+			titolo: z.string().min(1, 'il titolo è obbligatorio'),
+			descrizione: z
+				.string()
+				.min(1, 'la descrizione è obbligatoria')
+				.min(30, 'la descrizione deve essere minimo 30 caratteri')
+				.max(350, 'La descrizione può essere massimo 350 caratteri'),
+			data: z
+				.string()
+				.min(1, 'La data di iscrizione è obbligatoria')
+				.pipe(z.coerce.date()) // Trasforma la stringa (data HTML) in Date object
+				.refine((date) => date > new Date(), {
+					message: 'La data di scadenza deve essere futura.',
+				}),
+			data_scadenza: z
+				.string()
+				.min(1, 'La data di iscrizione è obbligatoria')
+				.pipe(z.coerce.date()) // Trasforma la stringa (data HTML) in Date object
+				.refine((date) => date > new Date(), {
+					message: 'La data di scadenza deve essere futura.',
+				}),
+			indirizzo: z.string().min(1, "l'indirizzo è obbligatorio"),
+			costo: z.number().min(0, 'il costo non può essere negativo'),
+			cap: z
+				.string()
+				.min(5, 'il cap deve essere composto da 5 cifre')
+				.max(5, 'il cap deve essere composto da 5 numeri'),
+			citta: z.string().min(1, 'La città e obbligatoria'),
+			nome_luogo: z.string().min(1, 'è obbligatorio dare un nome al luogo'),
+		})
+		// 3. REGOLA COMPOSITA: Confronta data evento e scadenza
+		.refine((data) => data.data < data.data_scadenza, {
+			message:
+				"La data dell'evento deve essere successiva alla scadenza iscrizione.",
+			// Indica a React Hook Form di associare l'errore al campo 'data'
+			path: ['data'],
+		});
 	const methods = useForm({
 		resolver: zodResolver(schema),
 		mode: 'onSubmit',
@@ -54,23 +61,33 @@ const CreateEventForm = () => {
 	const {
 		register,
 		handleSubmit,
-		trigger,
-		setValue,
 		formState: { errors, isSubmitting },
-		getValues,
 		setError,
-		clearErrors,
-		watch,
 	} = methods;
-
+	const ACCEPTED_EXTENSIONS = ['jpg', 'png', 'jpeg', 'webm', 'svg'];
 	const { currentGroup, currentGroupData } = useChat();
 	const removeImg = (clickedImage) => {
 		setImages((prevImages) => prevImages.filter((img) => img !== clickedImage));
 	};
 	const handleFileChange = (event) => {
 		const files = event.target.files;
-		if (files.length === 0) return;
-		console.log(files, event.target.files);
+		if (files.length === 0) {
+			setImageError({
+				message: `Inserire almeno un'immagine`,
+			});
+			return;
+		}
+		for (let i = 0; i < files.length; i++) {
+			const ext = files[i].name.split('.')[1];
+			console.log(ext);
+			if (!ACCEPTED_EXTENSIONS.includes(ext)) {
+				setImageError({
+					message: `Accettiamo solo ${ACCEPTED_EXTENSIONS.join(', ')}`,
+				});
+				event.target.value = null;
+				return;
+			}
+		}
 		// Convertiamo i file selezionati in URL temporanei
 		const newImages = Array.from(files).map((file, index) => ({
 			url: URL.createObjectURL(file), // URL temporaneo per l'anteprima
@@ -92,11 +109,23 @@ const CreateEventForm = () => {
 	const [imageError, setImageError] = useState(false); // Stato per l'errore
 
 	const onSubmit = async (data) => {
-		console.log('inviato');
 		console.log('session', session);
+		console.log(imageError);
+
+		if (images.length === 0) {
+			setImageError({
+				message: `Inserire almeno un'immagine`,
+			});
+			return;
+		}
+
+		if (imageError) {
+			return;
+		}
 		try {
 			// FASE 1: Creiamo l'evento nel DB (solo dati testuali)
 			// Nota: Non inviamo 'images' qui
+			console.log('inviato');
 			const response = await fetch(
 				'http://localhost:3000/api/events/add/create-event',
 				{
@@ -151,7 +180,7 @@ const CreateEventForm = () => {
 				.eq('event_id', newEventId);
 			if (coverError) throw coverError;
 			console.log('Tutte le immagini caricate con successo!');
-			// closeModal(); // Chiudi solo se tutto è andato bene
+			closeModal(); // Chiudi solo se tutto è andato bene
 		} catch (error) {
 			console.error('Errore durante il processo:', error);
 			// Qui puoi gestire l'errore (es. mostrare un toast notification)
@@ -163,8 +192,9 @@ const CreateEventForm = () => {
 		>
 			<form
 				className="flex flex-col"
-				onSubmit={() => {
-					handleSubmit(onSubmit);
+				onSubmit={(e) => {
+					e.preventDefault();
+					handleSubmit(onSubmit)();
 				}}
 			>
 				{/* Intestazione */}
@@ -201,11 +231,6 @@ const CreateEventForm = () => {
 						>
 							Carosello immagini <span className="text-red-500 text-sm">*</span>
 						</h1>
-						{imageError && (
-							<p className="text-sm font-semibold text-red-600 -mt-2">
-								Per favore, carica almeno un'immagine per l'evento.
-							</p>
-						)}
 
 						<div className="flex flex-row flex-wrap gap-4 overflow-x-auto pb-4">
 							{/* Bottone Aggiungi Immagine */}
@@ -243,6 +268,11 @@ const CreateEventForm = () => {
 								</div>
 							))}
 						</div>
+						{imageError && (
+							<p className="text-sm font-semibold text-red-600 -mt-2">
+								{imageError.message}
+							</p>
+						)}
 					</div>
 
 					{/* Titolo e Descrizione */}
@@ -271,7 +301,7 @@ const CreateEventForm = () => {
 							label="Data Evento (Data e Ora)"
 							type="datetime-local"
 							register={register}
-							error={errors.data_inizio}
+							error={errors.data}
 						/>
 						<FormInput
 							id="data_scadenza"
@@ -338,13 +368,10 @@ const CreateEventForm = () => {
 				{/* Footer e Pulsante Crea */}
 				<div className={`flex justify-center p-4 bg-bg-2 border-t border-bg-3`}>
 					<button
-						type="button" // Uso type="button" e chiamo la funzione che gestisce la validazione e l'invio
+						type="submit" // Uso type="button" e chiamo la funzione che gestisce la validazione e l'invio
 						className={`px-9 py-4 bg-primary text-white font-bold rounded-xl 
                         hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-lg cursor-pointer`}
 						disabled={isSubmitting}
-						onClick={() => {
-							handleSubmit(onSubmit)();
-						}}
 					>
 						{isSubmitting ? 'Creazione...' : 'Crea e Pubblica Evento'}
 					</button>

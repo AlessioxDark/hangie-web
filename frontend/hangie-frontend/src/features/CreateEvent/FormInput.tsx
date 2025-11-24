@@ -3,8 +3,6 @@ import MapIcon from '@/assets/icons/MapIcon';
 import React from 'react';
 
 const FormInput = ({ id, label, type, placeholder, register, error }) => {
-	const isDateField = type === 'datetime-local';
-
 	return (
 		<div className="flex flex-col gap-1 w-full group">
 			<label
@@ -52,9 +50,7 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
 		                             ${
 																		id === 'costo' ||
 																		id === 'indirizzo' ||
-																		isDateField
-																			? 'rounded-l-none'
-																			: 'rounded-l-xl'
+																		'rounded-l-xl'
 																	}
 		                             `}
 					// Uso corretto della funzione register
@@ -63,7 +59,7 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
 			</div>
 			{/* L'errore viene mostrato se esiste */}
 			{error?.message && (
-				<p className="text-sm text-red-500 ">{error.message}</p>
+				<p className="text-sm font-body  text-red-500 ">{error.message}</p>
 			)}
 		</div>
 	);
