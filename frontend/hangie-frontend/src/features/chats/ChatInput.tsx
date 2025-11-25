@@ -86,7 +86,7 @@ const ChatInput = ({
 							<ClipIcon />
 						</div>
 						{isDropdownOpen && (
-							<div className="absolute bottom-12 w-32 min-h-28 bg-bg-1 transition-all rounded-xl ">
+							<div className="absolute bottom-12 w-32 min-h-12 bg-bg-1 transition-all rounded-xl ">
 								<div className="w-full text-center hover:bg-bg-3/60 py-2 cursor-pointer transition-all rounded-t-xl">
 									<span
 										className="text-text-1 font-body font-medium  w-full"

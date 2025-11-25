@@ -75,7 +75,7 @@ const Chats = ({ messaggi }) => {
 
 	useEffect(() => {
 		if (currentGroupData) {
-			socketRef.current.emit('join_room', currentChatData.group_id);
+			socketRef.current.emit('join_room', currentChatData?.group_id);
 
 			socketRef.current.on('receive_message', (data) => {
 				console.log('messaggio ricevuto: ', data);

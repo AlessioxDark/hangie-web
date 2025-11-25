@@ -1,6 +1,19 @@
 import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useModal } from '@/contexts/ModalContext';
+import {
+	closestCenter,
+	DndContext,
+	PointerSensor,
+	useSensor,
+	useSensors,
+} from '@dnd-kit/core';
+import {
+	arrayMove,
+	horizontalListSortingStrategy, // Utilità fondamentale per riordinare l'array
+	SortableContext,
+	useSortable,
+} from '@dnd-kit/sortable';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import React, { useCallback, useRef, useState } from 'react';
@@ -10,11 +23,13 @@ import FormInput from '../CreateEvent/FormInput';
 import FormTextarea from '../CreateEvent/FormTextarea';
 // Componente Textarea
 import { supabase } from '../../config/db.js';
+import ImageInput from '../CreateEventForm/ImageInput.js';
+import SortableImg from '../CreateEventForm/SortableImg.js';
 const CreateEventForm = () => {
+	const IMAGE_LIMIT = 4;
 	const { closeModal } = useModal();
 	const { session } = useAuth();
 	const [images, setImages] = useState([]);
-	const fileInputRef = useRef(null);
 	const schema = z
 		.object({
 			titolo: z.string().min(1, 'il titolo è obbligatorio'),
@@ -64,54 +79,20 @@ const CreateEventForm = () => {
 		formState: { errors, isSubmitting },
 		setError,
 	} = methods;
-	const ACCEPTED_EXTENSIONS = ['jpg', 'png', 'jpeg', 'webm', 'svg'];
 	const { currentGroup, currentGroupData } = useChat();
-	const removeImg = (clickedImage) => {
-		setImages((prevImages) => prevImages.filter((img) => img !== clickedImage));
-	};
-	const handleFileChange = (event) => {
-		const files = event.target.files;
-		if (files.length === 0) {
-			setImageError({
-				message: `Inserire almeno un'immagine`,
-			});
-			return;
-		}
-		for (let i = 0; i < files.length; i++) {
-			const ext = files[i].name.split('.')[1];
-			console.log(ext);
-			if (!ACCEPTED_EXTENSIONS.includes(ext)) {
-				setImageError({
-					message: `Accettiamo solo ${ACCEPTED_EXTENSIONS.join(', ')}`,
-				});
-				event.target.value = null;
-				return;
-			}
-		}
-		// Convertiamo i file selezionati in URL temporanei
-		const newImages = Array.from(files).map((file, index) => ({
-			url: URL.createObjectURL(file), // URL temporaneo per l'anteprima
-			file,
-			type: file.type,
-			ext: file.name.split('.')[1],
-			name: index == 0 ? 'cover' : index,
-		}));
-		console.log(newImages[0].file.size);
-		// Aggiungiamo i nuovi URL all'array di immagini esistente
-		setImages((prevImages) => [...prevImages, ...newImages]);
 
-		event.target.value = null;
-	};
-	const handleButtonClick = useCallback(() => {
-		// Clicca sull'elemento input file nascosto
-		fileInputRef.current.click();
-	}, []);
 	const [imageError, setImageError] = useState(false); // Stato per l'errore
 
 	const onSubmit = async (data) => {
 		console.log('session', session);
 		console.log(imageError);
-
+		console.log(images.length);
+		if (images.length > IMAGE_LIMIT) {
+			console.log('troppe');
+			setImageError({
+				message: `Puoi inserire massimo ${IMAGE_LIMIT} immagini`,
+			});
+		}
 		if (images.length === 0) {
 			setImageError({
 				message: `Inserire almeno un'immagine`,
@@ -216,64 +197,12 @@ const CreateEventForm = () => {
 
 				{/* Contenuto del Form (Step 1) */}
 				<div className="p-8 flex flex-col gap-3">
-					{/* Sezione Immagini */}
-					<div className="flex flex-col gap-3">
-						<input
-							type="file"
-							ref={fileInputRef}
-							onChange={handleFileChange}
-							style={{ display: 'none' }}
-							accept="image/*"
-							multiple
-						/>
-						<h1
-							className={`font-body text-text-1 text-xl font-semibold flex items-center gap-2`}
-						>
-							Carosello immagini <span className="text-red-500 text-sm">*</span>
-						</h1>
-
-						<div className="flex flex-row flex-wrap gap-4 overflow-x-auto pb-4">
-							{/* Bottone Aggiungi Immagine */}
-							<div
-								className={`bg-bg-2 rounded-xl border-2 ${
-									imageError
-										? 'border-red-500 ring-4 ring-red-100'
-										: `border-text-2 border-dashed`
-								} 
-                                    aspect-square min-w-[150px] w-40 flex items-center justify-center cursor-pointer 
-                                    hover:bg-bg-3 transition-all duration-200 shadow-inner`}
-								onClick={handleButtonClick}
-								aria-label="Aggiungi Immagine"
-							>
-								<span className={`font-body font-bold text-text-2 text-6xl`}>
-									+
-								</span>
-							</div>
-
-							{/* Anteprime Immagini */}
-							{images.map((image, index) => (
-								<div key={index} className="w-40 h-40 relative group">
-									<div
-										className="absolute top-2 right-2 p-1.5 rounded-full bg-text-2 hover:bg-text-2/80 transition-colors cursor-pointer text-white  z-10 shadow-lg"
-										onClick={() => removeImg(image)}
-										aria-label={`Rimuovi immagine ${index + 1}`}
-									>
-										<X size={18} fill={'#000000'} />
-									</div>
-									<img
-										src={image.url}
-										alt={`Anteprima immagine ${index + 1}`}
-										className="rounded-xl w-full h-full object-cover shadow-md  transition-transform group-hover:scale-[1.02]"
-									/>
-								</div>
-							))}
-						</div>
-						{imageError && (
-							<p className="text-sm font-semibold text-red-600 -mt-2">
-								{imageError.message}
-							</p>
-						)}
-					</div>
+					<ImageInput
+						imageError={imageError}
+						setImageError={setImageError}
+						images={images}
+						setImages={setImages}
+					/>
 
 					{/* Titolo e Descrizione */}
 					<div className="flex flex-col gap-3">
