@@ -11,10 +11,7 @@ export const ChatContext = createContext({
 
 export const useChat = () => {
 	const context = useContext(ChatContext);
-	useEffect(() => {
-		console.log('context chat');
-		console.log(context.currentGroup);
-	}, [context.currentGroup]);
+
 	// Si può aggiungere un check per assicurarsi che l'hook venga usato all'interno del Provider
 	if (context === undefined) {
 		throw new Error("useChat deve essere usato all'interno di un ChatProvider");
@@ -27,10 +24,6 @@ export const ChatProvider = ({ children }) => {
 	const [currentGroup, setCurrentGroup] = useState(null);
 	const [currentGroupData, setCurrentGroupData] = useState(null);
 
-	useEffect(() => {
-		console.log('context chat');
-		console.log(currentGroup);
-	}, [currentGroup]);
 	// Si può aggiungere un check per assicurarsi che l'hook venga usato all'interno del Provider
 
 	return (

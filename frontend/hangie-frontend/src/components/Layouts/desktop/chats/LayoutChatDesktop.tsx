@@ -5,13 +5,18 @@ import ChatsSidebar from '@/features/chats/ChatsSidebar.js';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../../config/db.js';
-import { ChatContext, ChatProvider } from './ChatContext.js';
+import { ChatContext, ChatProvider, useChat } from './ChatContext.js';
 const LayoutChatDesktop = ({}) => {
+	const {
+		currentGroup,
+		setCurrentGroup,
+		currentGroupData,
+		setCurrentGroupData,
+		currentChatData,
+		setCurrentChatData,
+	} = useChat();
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<null | string>('');
-	const [currentGroup, setCurrentGroup] = useState(null);
-	const [currentChatData, setCurrentChatData] = useState(null);
-	const [currentGroupData, setCurrentGroupData] = useState(null);
 
 	const fetchChat = async () => {
 		if (isLoading) return;
@@ -52,7 +57,7 @@ const LayoutChatDesktop = ({}) => {
 						}),
 					};
 				});
-				setCurrentChatData(newData);
+				setCurrentChatData(newData[0]);
 			}
 		} catch (err: any) {
 			console.error('Errore fetch eventi:', err);
@@ -63,6 +68,7 @@ const LayoutChatDesktop = ({}) => {
 	};
 	const fetchFirstGroup = async () => {
 		if (isLoading) return;
+		console.log('sto fetchando first group');
 		try {
 			setError(null);
 			setIsLoading(true);
@@ -91,6 +97,7 @@ const LayoutChatDesktop = ({}) => {
 
 				setCurrentGroup(data[0].group_id);
 				setCurrentGroupData(data[0]);
+				console.log('ottenuti dati');
 			}
 		} catch (err: any) {
 			console.error('Errore fetch eventi:', err);
@@ -144,15 +151,20 @@ const LayoutChatDesktop = ({}) => {
 				</div>
 			);
 		}
-		if (currentChatData) {
-			return currentChatData.map((chat, chatIndex) => {
-				return <Chats {...chat} />;
-			});
+		if (currentChatData && currentGroupData && currentChatData.messaggi) {
+			console.log('sto renderizzando chat');
+			console.log(currentChatData);
+			// return currentChatData.map((chat, chatIndex) => {
+			// 	return <Chats {...chat} />;
+			// });
+
+			return <Chats messaggi={currentChatData?.messaggi} />;
 		}
 		return <p>c'è stato un errore</p>;
 	}, [
 		currentChatData,
 		fetchChat,
+		currentGroupData,
 		currentGroup,
 		error,
 		isLoading,

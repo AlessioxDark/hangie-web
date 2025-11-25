@@ -19,10 +19,11 @@ import { X } from 'lucide-react';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
-import FormInput from '../CreateEvent/FormInput';
-import FormTextarea from '../CreateEvent/FormTextarea';
+import FormInput from '../CreateEventForm/FormInput.js';
+import FormTextarea from '../CreateEventForm/FormTextarea.js';
 // Componente Textarea
 import { supabase } from '../../config/db.js';
+import FormInputCollection from '../CreateEventForm/FormInputCollection.js';
 import ImageInput from '../CreateEventForm/ImageInput.js';
 import SortableImg from '../CreateEventForm/SortableImg.js';
 const CreateEventForm = () => {
@@ -161,6 +162,7 @@ const CreateEventForm = () => {
 				.eq('event_id', newEventId);
 			if (coverError) throw coverError;
 			console.log('Tutte le immagini caricate con successo!');
+
 			closeModal(); // Chiudi solo se tutto è andato bene
 		} catch (error) {
 			console.error('Errore durante il processo:', error);
@@ -196,104 +198,15 @@ const CreateEventForm = () => {
 				</div>
 
 				{/* Contenuto del Form (Step 1) */}
-				<div className="p-8 flex flex-col gap-3">
-					<ImageInput
-						imageError={imageError}
-						setImageError={setImageError}
-						images={images}
-						setImages={setImages}
-					/>
 
-					{/* Titolo e Descrizione */}
-					<div className="flex flex-col gap-3">
-						<FormInput
-							id="titolo"
-							label="Titolo Evento"
-							placeholder="Es: Mostra d'Arte Contemporanea"
-							type="text"
-							register={register}
-							error={errors.titolo}
-						/>
-						<FormTextarea
-							id="descrizione"
-							label="Descrizione"
-							placeholder="Descrivi l'evento: cosa, chi, quando e perché."
-							register={register}
-							error={errors.descrizione}
-						/>
-					</div>
-
-					{/* Date e Costo */}
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-						<FormInput
-							id="data"
-							label="Data Evento (Data e Ora)"
-							type="datetime-local"
-							register={register}
-							error={errors.data}
-						/>
-						<FormInput
-							id="data_scadenza"
-							label="Scadenza Iscrizione"
-							type="datetime-local"
-							register={register}
-							error={errors.data_scadenza}
-						/>
-						<FormInput
-							id="costo"
-							label="Costo (€)"
-							placeholder="0.00"
-							type="number" // Lasciamo text per regex e input corretto
-							register={register}
-							error={errors.costo}
-						/>
-					</div>
-					<div className="flex flex-col gap-4">
-						<h1 className="font-body text-text-1 text-xl font-medium">
-							Dettagli sul Luogo
-						</h1>
-						<div className="flex flex-col gap-6">
-							<div className="flex flex-row gap-4">
-								<FormInput
-									id="nome_luogo"
-									label="Nome Luogo"
-									placeholder="Casa di Marco"
-									type="text"
-									register={register}
-									error={errors.nome_luogo}
-								/>
-								<FormInput
-									id="indirizzo"
-									label="Indirizzo / Luogo"
-									placeholder="Via Roma, 12, 00100 Roma"
-									type="text"
-									register={register}
-									error={errors.indirizzo}
-								/>
-							</div>
-							<div className="flex flex-row gap-4">
-								<FormInput
-									id="citta"
-									label="Citta / Provincia"
-									placeholder="Roma"
-									type="text"
-									register={register}
-									error={errors.citta}
-								/>
-								<FormInput
-									id="cap"
-									label="CAP"
-									placeholder="00100"
-									type="text"
-									register={register}
-									error={errors.cap}
-								/>
-							</div>
-						</div>
-					</div>
-					{/* Indirizzo */}
-				</div>
-
+				<FormInputCollection
+					register={register}
+					errors={errors}
+					imageError={imageError}
+					setImageError={setImageError}
+					images={images}
+					setImages={setImages}
+				/>
 				{/* Footer e Pulsante Crea */}
 				<div className={`flex justify-center p-4 bg-bg-2 border-t border-bg-3`}>
 					<button

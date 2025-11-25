@@ -14,7 +14,9 @@ const Chats = ({ messaggi }) => {
 	const socketRef = useRef<any>(null);
 	const chatInputRef = useRef<any>(null);
 	const { session } = useAuth();
-
+	useEffect(() => {
+		console.log('aperto chat');
+	}, []);
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
 	});
@@ -82,7 +84,7 @@ const Chats = ({ messaggi }) => {
 			});
 		}
 	}, []);
-
+	console.log(currentGroupData);
 	return (
 		<div className="w-full h-full flex flex-col">
 			<div className="bg-bg-1 p-4 flex flex-row items-center gap-6">
