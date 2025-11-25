@@ -8,7 +8,7 @@ const getAll = async (req) => {
 
 	const { data, error } = await supabase
 		.from('partecipanti_gruppo')
-		.select('gruppi(*,messaggi(*))')
+		.select('gruppi(*,messaggi(*),partecipanti_gruppo(*,utenti(*)))')
 		.eq('partecipante_id', user.identities[0].user_id);
 	if (error) {
 		console.log(error);

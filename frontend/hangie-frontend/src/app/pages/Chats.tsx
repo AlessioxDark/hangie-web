@@ -98,14 +98,22 @@ const Chats = ({ messaggi }) => {
 						{currentGroupData?.nome}
 					</span>
 					<div>
-						{
-							// <span key={currentGroupData?.utenti.user_id}>
-							// 	{currentGroupData?.partecipante.nome}
-							// </span>
-						}
-						{/* {currentGroupData?.utenti.map((utente) => {
-							return <span key={utente.user_id}>{utente.nome}</span>;
-						})} */}
+						{/* <span key={currentGroupData?.utenti.user_id}>
+							{currentGroupData?.partecipante.nome}
+						</span>
+            */}
+
+						{currentGroupData?.partecipanti_gruppo?.map(
+							(partecipante, iPart) => {
+								return (
+									<span key={partecipante.utenti.user_id}>
+										{partecipante.utenti.nome}{' '}
+										{iPart !==
+											currentGroupData?.partecipanti_gruppo?.length - 1 && ', '}
+									</span>
+								);
+							}
+						)}
 					</div>
 				</div>
 			</div>

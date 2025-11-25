@@ -15,9 +15,9 @@ const getAllGroups = async (req, res) => {
 				}
 			});
 
-			const { gruppi, ...groupData } = row;
+			const { gruppi } = row;
+			console.log('gruppi', gruppi);
 			return {
-				...groupData,
 				...gruppi,
 				ultimoMessaggio: ultimoMessaggio,
 			};
