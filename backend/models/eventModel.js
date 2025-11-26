@@ -193,33 +193,55 @@ const modify = async (req) => {
 const newEvent = async (req) => {
 	const token = req.headers.authorization.split(' ')[1];
 	const { images, ...realBody } = req.body.data;
-	const { latitudine, longitudine } = await getCoords({
-		cap: realBody.cap,
-		indirizzo: realBody.indirizzo,
-		citta: realBody.citta,
-	});
 
-	const { data: luoghiInsert, error: luoghiError } = await supabase
+	const { data: luogoEsistente } = await supabase
 		.from('luoghi')
-		.insert([
-			{
-				cap: realBody.cap,
-				indirizzo: realBody.indirizzo,
-				citta: realBody.citta,
-				nome: realBody.nome_luogo,
-				latitudine,
-				longitudine,
-			},
-		])
-		.onConflict('indirizzo,longitudine,latitudine')
-		.doNothing()
-		.select('*');
-	const luogoId = luoghiInsert?.[0].luogo_id;
-	if (luoghiError) {
-		console.error("Errore nell'upsert del luogo:", luoghiError);
-		return { data: null, error: luoghiError };
+		.select('luogo_id')
+		.eq('indirizzo', realBody.indirizzo)
+		.eq('citta', realBody.citta)
+		.eq('cap', realBody.cap) // Usa i campi che definiscono l'unicità per te
+		.single();
+
+	let luogoId = luogoEsistente?.luogo_id;
+
+	// 2. Se NON esiste, inseriscilo
+	if (!luogoId) {
+		const {
+			latitudine,
+			longitudine,
+			err: coordError,
+		} = await getCoords({
+			cap: realBody.cap,
+			indirizzo: realBody.indirizzo,
+			citta: realBody.citta,
+		});
+		console.log('dopo funzione');
+		if (coordError) {
+			console.error('errore nel ritrovamento della posizione:', coordError);
+			return { data: null, error: coordError };
+		}
+		const { data: luogoNuovo, error: insertError } = await supabase
+			.from('luoghi')
+			.insert([
+				{
+					cap: realBody.cap,
+					indirizzo: realBody.indirizzo,
+					citta: realBody.citta,
+					nome: realBody.nome_luogo,
+					latitudine,
+					longitudine,
+				},
+			])
+			.select('luogo_id')
+			.single();
+
+		if (insertError) {
+			console.error('Errore creazione luogo:', insertError);
+			return { data: null, error: insertError };
+		}
+		luogoId = luogoNuovo.luogo_id;
 	}
-	console.log(luoghiInsert);
+
 	console.log(luogoId);
 
 	const { data: userData, error: userError } = await supabase.auth.getUser(
@@ -227,7 +249,7 @@ const newEvent = async (req) => {
 	);
 
 	if (userError) {
-		console.error('Utente non autenticato o errore di sessione:', sessionError);
+		console.error('Utente non autenticato o errore di sessione:', userError);
 		// Gestisci l'errore, magari reindirizzando al login
 		return;
 	}
@@ -247,6 +269,22 @@ const newEvent = async (req) => {
 	const eventId = eventData?.[0].event_id;
 	console.log('ci sono qui');
 
+	const { data: messageData, error: errorMessage } = await supabase
+		.from('messaggi')
+		.insert([
+			{
+				type: 'event',
+				event_id: eventId,
+				user_id,
+				group_id: realBody.group_id,
+			},
+		])
+		.select('*');
+	if (errorMessage) {
+		console.error("Errore nell'inserimento:", errorMessage);
+		// È fondamentale uscire qui se l'inserimento fallisce
+		return { data: null, error: errorMessage };
+	}
 	return { data: { event_id: eventId }, error: null };
 };
 const modifyResponse = async (req) => {

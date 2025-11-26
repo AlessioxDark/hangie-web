@@ -30,6 +30,7 @@ const CreateEventForm = () => {
 	const IMAGE_LIMIT = 4;
 	const { closeModal } = useModal();
 	const { session } = useAuth();
+	const { socketRef, setCurrentChatData } = useChat();
 	const [images, setImages] = useState([]);
 	const schema = z
 		.object({
@@ -83,7 +84,31 @@ const CreateEventForm = () => {
 	const { currentGroup, currentGroupData } = useChat();
 
 	const [imageError, setImageError] = useState(false); // Stato per l'errore
+	const sendEvent = (event_id) => {
+		socketRef.current.emit(
+			'send_event',
+			event_id,
+			currentGroupData?.group_id,
+			session.access_token
+		);
 
+		setCurrentChatData((prevData) => {
+			return {
+				...prevData,
+				messaggi: [
+					...prevData.messaggi,
+					{
+						group_id: currentGroupData.group_id,
+						user_id: session.user.id,
+						sent_at: Date.now(),
+						isUser: true,
+						event_id,
+						type: 'event',
+					},
+				],
+			};
+		});
+	};
 	const onSubmit = async (data) => {
 		console.log('session', session);
 		console.log(imageError);
@@ -162,7 +187,7 @@ const CreateEventForm = () => {
 				.eq('event_id', newEventId);
 			if (coverError) throw coverError;
 			console.log('Tutte le immagini caricate con successo!');
-
+			sendEvent(newEventId);
 			closeModal(); // Chiudi solo se tutto è andato bene
 		} catch (error) {
 			console.error('Errore durante il processo:', error);

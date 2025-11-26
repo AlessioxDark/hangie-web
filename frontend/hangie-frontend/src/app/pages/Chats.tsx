@@ -8,10 +8,11 @@ import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { supabase } from '../../config/db.js';
 const Chats = ({ messaggi }) => {
-	const { currentGroupData, setCurrentChatData, currentChatData } = useChat();
+	const { currentGroupData, setCurrentChatData, currentChatData, socketRef } =
+		useChat();
 	const [chatInput, setChatInput] = useState<string>('');
 	const messagesEndRef = useRef(null);
-	const socketRef = useRef<any>(null);
+	// const socketRef = useRef<any>(null);
 	const chatInputRef = useRef<any>(null);
 	const { session } = useAuth();
 	useEffect(() => {
@@ -20,21 +21,6 @@ const Chats = ({ messaggi }) => {
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
 	});
-
-	useEffect(() => {
-		const SERVER_URL = 'http://localhost:3000';
-
-		// Stabilisce la connessione con il server
-		const socket = io(SERVER_URL);
-		socketRef.current = socket;
-		socket.on('connect', () => {
-			console.log('Socket.IO Connesso! ID:', socket.id);
-		});
-
-		return () => {
-			socket.disconnect();
-		};
-	}, []);
 
 	const sendMessage = async () => {
 		console.log('messaggio inviato');
@@ -49,24 +35,20 @@ const Chats = ({ messaggi }) => {
 		console.log('risposta avviata gestendo dato');
 
 		setCurrentChatData((prevData) => {
-			return prevData.map((dato) => {
-				return dato.group_id === currentGroupData.group_id
-					? {
-							...dato,
-							messaggi: [
-								...dato.messaggi,
-								{
-									// mettere tutti i dati per questo da errore es nome, pfpf ecc.
-									content: trimmedInput,
-									group_id: currentGroupData.group_id,
-									user_id: session.user.id,
-									sent_at: Date.now(),
-									isUser: true,
-								},
-							],
-					  }
-					: dato;
-			});
+			return {
+				...prevData,
+				messaggi: [
+					...prevData.messaggi,
+					{
+						// mettere tutti i dati per questo da errore es nome, pfpf ecc.
+						content: trimmedInput,
+						group_id: currentGroupData.group_id,
+						user_id: session.user.id,
+						sent_at: Date.now(),
+						isUser: true,
+					},
+				],
+			};
 		});
 		setChatInput('');
 		if (chatInputRef.current) {
@@ -81,6 +63,9 @@ const Chats = ({ messaggi }) => {
 
 			socketRef.current.on('receive_message', (data) => {
 				console.log('messaggio ricevuto: ', data);
+			});
+			socketRef.current.on('receive_event', (data) => {
+				console.log('evento ricevuto: ', data);
 			});
 		}
 	}, []);
@@ -98,11 +83,6 @@ const Chats = ({ messaggi }) => {
 						{currentGroupData?.nome}
 					</span>
 					<div>
-						{/* <span key={currentGroupData?.utenti.user_id}>
-							{currentGroupData?.partecipante.nome}
-						</span>
-            */}
-
 						{currentGroupData?.partecipanti_gruppo?.map(
 							(partecipante, iPart) => {
 								return (
