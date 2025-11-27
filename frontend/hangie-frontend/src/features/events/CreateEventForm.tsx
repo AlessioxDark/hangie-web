@@ -153,7 +153,7 @@ const CreateEventForm = () => {
 				console.log('male');
 				throw new Error(result.error || 'Errore creazione evento');
 			}
-
+			console.log(result);
 			const newEventId = result.event_id; // Assumi che l'API restituisca l'ID
 			console.log('ok');
 			console.log('Evento creato, ID:', newEventId);

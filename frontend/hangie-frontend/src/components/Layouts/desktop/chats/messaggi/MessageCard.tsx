@@ -12,7 +12,7 @@ const MessageCard = ({ isUser, content, utenti, user_id, sent_at }) => {
 		<div className=" flex flex-row items-start gap-2 ">
 			{!isUser && (
 				<div className="w-14 h-14 -mt-4   ">
-					<ProfileIcon user_id={utenti.user_id} />
+					<ProfileIcon user_id={user_id} />
 				</div>
 			)}
 

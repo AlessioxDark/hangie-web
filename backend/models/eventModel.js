@@ -193,33 +193,31 @@ const modify = async (req) => {
 const newEvent = async (req) => {
 	const token = req.headers.authorization.split(' ')[1];
 	const { images, ...realBody } = req.body.data;
-
+	const {
+		latitudine,
+		longitudine,
+		err: coordError,
+	} = await getCoords({
+		cap: realBody.cap,
+		indirizzo: realBody.indirizzo,
+		citta: realBody.citta,
+	});
+	console.log('dopo funzione');
+	if (coordError) {
+		console.error('errore nel ritrovamento della posizione:', coordError);
+		return { data: null, error: coordError };
+	}
 	const { data: luogoEsistente } = await supabase
 		.from('luoghi')
 		.select('luogo_id')
-		.eq('indirizzo', realBody.indirizzo)
-		.eq('citta', realBody.citta)
-		.eq('cap', realBody.cap) // Usa i campi che definiscono l'unicità per te
+		.eq('longitudine', longitudine)
+		.eq('latitudine', latitudine)
 		.single();
 
 	let luogoId = luogoEsistente?.luogo_id;
 
 	// 2. Se NON esiste, inseriscilo
 	if (!luogoId) {
-		const {
-			latitudine,
-			longitudine,
-			err: coordError,
-		} = await getCoords({
-			cap: realBody.cap,
-			indirizzo: realBody.indirizzo,
-			citta: realBody.citta,
-		});
-		console.log('dopo funzione');
-		if (coordError) {
-			console.error('errore nel ritrovamento della posizione:', coordError);
-			return { data: null, error: coordError };
-		}
 		const { data: luogoNuovo, error: insertError } = await supabase
 			.from('luoghi')
 			.insert([
@@ -285,7 +283,7 @@ const newEvent = async (req) => {
 		// È fondamentale uscire qui se l'inserimento fallisce
 		return { data: null, error: errorMessage };
 	}
-	return { data: { event_id: eventId }, error: null };
+	return { data: { event_id: eventId, messageData }, error: null };
 };
 const modifyResponse = async (req) => {
 	const { status, event_id } = req.body;

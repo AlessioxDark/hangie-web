@@ -32,32 +32,39 @@ const LayoutChatDesktop = ({}) => {
 					`http://localhost:3000/api/groups/${currentGroup}`,
 					{
 						method: 'GET',
-						// body: JSON.stringify({ offset: offset }),
 						headers: {
 							'Content-Type': 'application/json',
 							Authorization: `Bearer ${session.access_token}`,
 						},
 					}
 				);
+
 				if (!response.ok) {
-					console.log(response);
+					const errorData = await response.json().catch(() => ({}));
 					setError(
-						response.statusText || 'Errore nel caricamento degli eventi'
+						errorData.error?.message ||
+							response.statusText ||
+							'Errore nel caricamento della chat'
 					);
+					return;
 				}
 
-				const data = await response.json();
-				console.log(data);
-				console.log(session);
-				const newData = data.map((dato) => {
-					return {
-						...dato,
-						messaggi: dato.messaggi.map((mess) => {
-							return { ...mess, isUser: mess.user_id === session.user.id };
-						}),
-					};
-				});
-				setCurrentChatData(newData[0]);
+				const result = await response.json();
+				const groupData = result;
+				console.log(result);
+				if (groupData) {
+					const mappedMessages = groupData.messaggi.map((mess) => ({
+						...mess,
+						isUser: mess.user_id === session.user.id,
+					}));
+
+					setCurrentChatData({
+						...groupData,
+						messaggi: mappedMessages,
+					});
+				} else {
+					setError('Dati del gruppo non trovati.');
+				}
 			}
 		} catch (err: any) {
 			console.error('Errore fetch eventi:', err);
@@ -151,7 +158,7 @@ const LayoutChatDesktop = ({}) => {
 				</div>
 			);
 		}
-		if (currentChatData && currentGroupData && currentChatData.messaggi) {
+		if (currentChatData && currentGroupData) {
 			console.log('sto renderizzando chat');
 			console.log(currentChatData);
 			// return currentChatData.map((chat, chatIndex) => {

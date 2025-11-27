@@ -1,9 +1,9 @@
 import SendIcon from '@/assets/icons/SendIcon.js';
 import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
 import MessageCard from '@/components/Layouts/desktop/chats/messaggi/MessageCard';
-
 import { useAuth } from '@/contexts/AuthContext.js';
 import ChatInput from '@/features/chats/ChatInput.js';
+import MessageEvent from '@/features/chats/MessageEvent.js';
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { supabase } from '../../config/db.js';
@@ -100,6 +100,13 @@ const Chats = ({ messaggi }) => {
 			<div className="flex-1 overflow-y-auto px-8">
 				<div className="flex flex-col gap-2 mt-8">
 					{messaggi.map((mess) => {
+						if (mess.type == 'event') {
+							return (
+								<div className={`w-full flex ${mess.isUser && 'justify-end'}`}>
+									<MessageEvent {...mess} />
+								</div>
+							);
+						}
 						return (
 							<div className={`w-full flex ${mess.isUser && 'justify-end'}`}>
 								<MessageCard {...mess} />

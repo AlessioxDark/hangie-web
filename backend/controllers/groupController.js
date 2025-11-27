@@ -29,22 +29,14 @@ const getAllGroups = async (req, res) => {
 	}
 };
 const getSpecificGroup = async (req, res) => {
+	console.log('qui si');
 	try {
 		const { data, error } = await Group.getGroup(req);
 		if (error) {
 			console.log(error);
 		}
-		console.log('data', data);
-		const formattedData = data.map((row) => {
-			const { gruppi, utenti, ...groupData } = row;
-			return {
-				...groupData,
-				...gruppi,
-				partecipanti: utenti,
-			};
-		});
 
-		res.json(formattedData);
+		res.json(data);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}

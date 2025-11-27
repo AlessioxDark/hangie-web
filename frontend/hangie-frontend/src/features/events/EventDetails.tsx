@@ -134,7 +134,6 @@ const EventDetails = ({
 					>
 						<ChevronLeft />
 					</button>
-
 					{/* Contenitore Immagini (si muove con la trasformazione) */}
 					<div
 						className={`flex flex-row gap-4 transition-transform duration-500 ease-in-out`}
