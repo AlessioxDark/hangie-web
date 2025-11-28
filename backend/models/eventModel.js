@@ -277,13 +277,89 @@ const newEvent = async (req) => {
 				group_id: realBody.group_id,
 			},
 		])
-		.select('*');
+		.select(
+			'*,eventi(*, luoghi(nome, citta, indirizzo),utenti(creatore:nome, user_id),risposte_eventi(*, utenti(profile_pic, user_id, nome))) '
+		);
 	if (errorMessage) {
 		console.error("Errore nell'inserimento:", errorMessage);
 		// È fondamentale uscire qui se l'inserimento fallisce
 		return { data: null, error: errorMessage };
 	}
-	return { data: { event_id: eventId, messageData }, error: null };
+	const imagesPromises = (messageData || []).map(async (event) => {
+		const imagePublicUrls = [];
+		for (let i = 1; i <= 4; i++) {
+			const path = `${event.eventi.event_id}/${i}.jpg`;
+			// Non gestisco l'errore del getPublicUrl perché è implicito che alcune immagini potrebbero non esistere
+			const {
+				data: { publicUrl },
+			} = supabase.storage.from('eventi').getPublicUrl(path);
+			imagePublicUrls.push(publicUrl);
+		}
+		return { event_id: event.eventi.event_id, images: imagePublicUrls };
+	});
+
+	const imagesResults = await Promise.all(imagesPromises);
+	const imageMap = imagesResults.reduce((acc, result) => {
+		acc[result.event_id] = result.images;
+		return acc;
+	}, {});
+
+	const { data: eventGroupData, error: eventGroupError } = await supabase
+		.from('eventi_gruppo')
+		.insert([
+			{
+				event_id: eventId,
+				group_id: realBody.group_id,
+			},
+		]);
+	if (eventGroupError) {
+		console.error("Errore nell'inserimento:", eventGroupError);
+		// È fondamentale uscire qui se l'inserimento fallisce
+		return { data: null, error: eventGroupError };
+	}
+
+	const { data: participantsData, error: participantsError } = await supabase
+		.from('partecipanti_gruppo')
+		.select('partecipante_id')
+		.eq('group_id', realBody.group_id);
+	if (participantsError) {
+		console.error("Errore nell'ottenimento: ", participantsError);
+		// È fondamentale uscire qui se l'inserimento fallisce
+		return { data: null, error: participantsError };
+	}
+	const participantsIds = participantsData.reduce((acc, participant) => {
+		acc[participant.partecipante_id] = participant;
+		return acc;
+	});
+	const answersToInsert = participantsData.map((participant) => {
+		// Determina lo stato: 'accepted' per il creatore, 'pending' per gli altri
+		const status =
+			participant.partecipante_id === user_id ? 'accepted' : 'pending';
+		return {
+			event_id: eventId,
+			user_id: participant.partecipante_id,
+			status: status,
+			is_creator: participant.user_id === user_id,
+		};
+	});
+	const { data: asnwerInsert, error: answerError } = await supabase
+		.from('risposte_eventi')
+		.insert(answersToInsert);
+	if (answerError) {
+		console.error("Errore nell'ottenimento: ", answerError);
+		// È fondamentale uscire qui se l'inserimento fallisce
+		return { data: null, error: answerError };
+	}
+	return {
+		data: {
+			event_id: eventId,
+			event_details: {
+				...messageData[0].eventi,
+				event_imgs: imageMap[eventId],
+			},
+		},
+		error: null,
+	};
 };
 const modifyResponse = async (req) => {
 	const { status, event_id } = req.body;

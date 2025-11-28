@@ -84,7 +84,7 @@ const CreateEventForm = () => {
 	const { currentGroup, currentGroupData } = useChat();
 
 	const [imageError, setImageError] = useState(false); // Stato per l'errore
-	const sendEvent = (event_id) => {
+	const sendEvent = (event_id, event_details) => {
 		socketRef.current.emit(
 			'send_event',
 			event_id,
@@ -103,6 +103,7 @@ const CreateEventForm = () => {
 						sent_at: Date.now(),
 						isUser: true,
 						event_id,
+						event_details,
 						type: 'event',
 					},
 				],
@@ -187,7 +188,8 @@ const CreateEventForm = () => {
 				.eq('event_id', newEventId);
 			if (coverError) throw coverError;
 			console.log('Tutte le immagini caricate con successo!');
-			sendEvent(newEventId);
+			const newEventDetails = { ...result.event_details, cover_img: cover_url };
+			sendEvent(newEventId, newEventDetails);
 			closeModal(); // Chiudi solo se tutto è andato bene
 		} catch (error) {
 			console.error('Errore durante il processo:', error);

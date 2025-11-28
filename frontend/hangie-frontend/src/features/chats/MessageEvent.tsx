@@ -3,6 +3,7 @@ import MapIcon from '@/assets/icons/MapIcon';
 import ParticipantsIcon from '@/assets/icons/ParticipantsIcon';
 import { useChat } from '@/components/Layouts/desktop/chats/ChatContext';
 import ProfileIcon from '@/components/ProfileIcon';
+import { useAuth } from '@/contexts/AuthContext';
 import { useModal } from '@/contexts/ModalContext';
 import {
 	Calendar,
@@ -13,11 +14,12 @@ import {
 	Users,
 	XCircle,
 } from 'lucide-react';
-import React, { useMemo } from 'react';
-
+import React, { useMemo, useState } from 'react';
 const MessageEvent = ({ event_details }) => {
-	// const { currentChatData } = useChat();
+	console.log(event_details);
+	const [buttonContent, setButtonContent] = useState(null);
 	const { openModal } = useModal();
+	const { session } = useAuth();
 	const formatDate = (dateString) => {
 		if (!dateString) return 'Data non definita';
 		try {
@@ -41,81 +43,84 @@ const MessageEvent = ({ event_details }) => {
 			event_details.data_scadenza &&
 			new Date(event_details.data_scadenza) < new Date()
 		);
-	}, [event_details.data_scadenza]);
+	}, [event_details?.data_scadenza || null]);
 
 	// --- Icona Placeholder per Profilo (sostituisce ProfileIcon) ---
 
 	// --- Logica Contenuto Bottone ---
-	let buttonContent;
-
-	if (isDeadlinePassed) {
-		buttonContent = (
-			<button
-				disabled
-				className="w-full px-6 py-3 bg-gray-100 text-gray-700 border border-gray-300 font-bold rounded-xl
+	const getButtonContent = () => {
+		if (session.user.id === event_details.utenti.user_id) {
+			return null;
+		}
+		if (isDeadlinePassed) {
+			return (
+				<button
+					disabled
+					className="w-full px-6 py-3 bg-gray-100 text-gray-700 border border-gray-300 font-bold rounded-xl
                   transition-colors duration-300 text-lg shadow-inner cursor-not-allowed opacity-80"
-			>
-				Evento Concluso / Scaduto
-			</button>
-		);
-	} else if (' d' === 'partecipo') {
-		buttonContent = (
-			<div className="w-full flex flex-col gap-2">
-				<div className="flex items-center justify-center w-full px-6 py-3 bg-green-500 text-white font-bold rounded-xl shadow-lg">
-					<Check className="w-5 h-5 mr-2" />
-					Hai Conferato la tua partecipazione
-				</div>
-				<button
-					onClick={(e) => {
-						e.stopPropagation();
-					}}
-					className="w-full text-sm py-2 text-gray-600 hover:text-red-500 transition-colors duration-200"
 				>
-					Annulla la partecipazione
+					Evento Concluso / Scaduto
 				</button>
-			</div>
-		);
-	} else if (' d' === 'non_partecipo') {
-		buttonContent = (
-			<div className="w-full flex flex-col gap-2">
-				<div className="flex items-center justify-center w-full px-6 py-3 bg-red-100 text-red-600 border border-red-300 font-bold rounded-xl shadow-lg">
-					<XCircle className="w-5 h-5 mr-2" />
-					Hai Rifiutato l'Invito
+			);
+		} else if (' d' === 'partecipo') {
+			return (
+				<div className="w-full flex flex-col gap-2">
+					<div className="flex items-center justify-center w-full px-6 py-3 bg-green-500 text-white font-bold rounded-xl shadow-lg">
+						<Check className="w-5 h-5 mr-2" />
+						Hai Conferato la tua partecipazione
+					</div>
+					<button
+						onClick={(e) => {
+							e.stopPropagation();
+						}}
+						className="w-full text-sm py-2 text-gray-600 hover:text-red-500 transition-colors duration-200"
+					>
+						Annulla la partecipazione
+					</button>
 				</div>
-				<button
-					onClick={(e) => {
-						e.stopPropagation();
-					}}
-					className="w-full text-sm py-2 text-gray-600 hover:text-green-600 transition-colors duration-200"
-				>
-					Cambia idea e partecipa
-				</button>
-			</div>
-		);
-	} else {
-		buttonContent = (
-			<div className="w-full flex flex-row gap-4">
-				<button
-					onClick={(e) => {
-						e.stopPropagation();
-					}}
-					className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-bold
+			);
+		} else if (' d' === 'non_partecipo') {
+			return (
+				<div className="w-full flex flex-col gap-2">
+					<div className="flex items-center justify-center w-full px-6 py-3 bg-red-100 text-red-600 border border-red-300 font-bold rounded-xl shadow-lg">
+						<XCircle className="w-5 h-5 mr-2" />
+						Hai Rifiutato l'Invito
+					</div>
+					<button
+						onClick={(e) => {
+							e.stopPropagation();
+						}}
+						className="w-full text-sm py-2 text-gray-600 hover:text-green-600 transition-colors duration-200"
+					>
+						Cambia idea e partecipa
+					</button>
+				</div>
+			);
+		} else {
+			return (
+				<div className="w-full flex flex-row gap-4">
+					<button
+						onClick={(e) => {
+							e.stopPropagation();
+						}}
+						className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-bold
                      hover:bg-primary/80 transition-colors duration-300 shadow-md"
-				>
-					Accetta Invito
-				</button>
-				<button
-					onClick={(e) => {
-						e.stopPropagation();
-					}}
-					className="flex-1 px-6 py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-xl font-bold
+					>
+						Accetta Invito
+					</button>
+					<button
+						onClick={(e) => {
+							e.stopPropagation();
+						}}
+						className="flex-1 px-6 py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-xl font-bold
                      hover:bg-gray-100 hover:border-gray-500 transition-colors duration-300 shadow-sm"
-				>
-					Rifiuta
-				</button>
-			</div>
-		);
-	}
+					>
+						Rifiuta
+					</button>
+				</div>
+			);
+		}
+	};
 
 	return (
 		<>
@@ -240,7 +245,7 @@ const MessageEvent = ({ event_details }) => {
 					</div>
 
 					{/* Bottoni di Risposta (Sezione 4) */}
-					<div className="flex gap-2   ">{buttonContent}</div>
+					<div className="flex gap-2   ">{getButtonContent()}</div>
 				</div>
 			</div>
 		</>

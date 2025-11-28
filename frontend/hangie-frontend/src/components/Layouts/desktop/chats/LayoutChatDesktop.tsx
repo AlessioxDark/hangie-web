@@ -158,7 +158,7 @@ const LayoutChatDesktop = ({}) => {
 				</div>
 			);
 		}
-		if (currentChatData && currentGroupData) {
+		if (currentChatData && currentGroupData && currentChatData.messaggi) {
 			console.log('sto renderizzando chat');
 			console.log(currentChatData);
 			// return currentChatData.map((chat, chatIndex) => {

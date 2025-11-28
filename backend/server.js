@@ -47,28 +47,28 @@ io.on('connection', (socket) => {
 			`Utente ${socket.id} ha inviato un messaggio: ${eventId} con room ${room}`
 		);
 
-		const {
-			data: { user },
-			error: tokenError,
-		} = await supabase.auth.getUser(token);
-		console.log(user);
+		// const {
+		// 	data: { user },
+		// 	error: tokenError,
+		// } = await supabase.auth.getUser(token);
+		// console.log(user);
 
-		const { data: messageData, error: errorMessage } = await supabase
-			.from('messaggi')
-			.insert([
-				{
-					type: 'event',
-					event_id: eventId,
-					user_id: user.id,
-					group_id: room,
-				},
-			])
-			.select('*,eventi(*)');
+		// const { data: messageData, error: errorMessage } = await supabase
+		// 	.from('messaggi')
+		// 	.insert([
+		// 		{
+		// 			type: 'event',
+		// 			event_id: eventId,
+		// 			user_id: user.id,
+		// 			group_id: room,
+		// 		},
+		// 	])
+		// 	.select('*,eventi(*)');
 
-		if (errorMessage) {
-			console.error("Errore nell'inserimento:", errorMessage);
-		}
-		socket.to(room).emit('receive_event', messageData);
+		// if (errorMessage) {
+		// 	console.error("Errore nell'inserimento:", errorMessage);
+		// }
+		// socket.to(room).emit('receive_event', messageData);
 	});
 
 	socket.on('join_room', (room_id) => {
