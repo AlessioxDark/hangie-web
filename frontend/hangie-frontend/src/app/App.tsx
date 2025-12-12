@@ -3,8 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./pages/desktop/Login";
 import SignUp from "./pages/desktop/SignUp";
 
-import { ChatProvider } from "@/components/Layouts/desktop/chats/ChatContext";
-import LayoutChatDesktop from "@/components/Layouts/desktop/chats/LayoutChatDesktop";
+import { ChatProvider } from "@/contexts/ChatContext";
+import LayoutChatDesktop from "@/components/Layouts/chats/LayoutChatDesktop";
 import EventDetailsModal from "@/features/modal/EventDetailsModal";
 import ModalHandler from "@/features/modal/ModalHandler";
 import { AuthContextProvider } from "../contexts/AuthContext";
@@ -12,7 +12,7 @@ import { ModalContext, ModalProvider } from "../contexts/ModalContext";
 import Chats from "./pages/Chats";
 import EventsSuspended from "./pages/EventsSuspended";
 import Home from "./pages/Home";
-import ResponsiveLayoutWrapper from "./pages/ResponsiveLayoutWrapper";
+import ResponsiveLayoutWrapper from "../components/Layouts/ResponsiveLayoutWrapper";
 import { ScreenProvider } from "@/contexts/ScreenContext";
 function App() {
   return (
@@ -24,7 +24,12 @@ function App() {
               <Routes>
                 <Route path="/signup" element={<SignUp />}></Route>
                 <Route path="/login" element={<Login />}></Route>
-                <Route path="/chats" element={<LayoutChatDesktop />}></Route>
+                <Route
+                  path="/chats"
+                  element={
+                    <ResponsiveLayoutWrapper layoutType="chat"></ResponsiveLayoutWrapper>
+                  }
+                ></Route>
 
                 <Route
                   path="/"

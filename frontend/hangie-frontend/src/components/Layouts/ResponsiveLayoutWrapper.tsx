@@ -1,8 +1,7 @@
-import LayoutChatDesktop from "@/components/Layouts/desktop/chats/LayoutChatDesktop";
 import LayoutDesktop from "@/components/Layouts/desktop/LayoutDesktop";
 import LayoutMobile from "@/components/Layouts/mobile/LayoutMobile";
+import ResponsiveLayoutChat from "@/components/Layouts/chats/ResponsiveLayoutChat";
 import { useScreen } from "@/contexts/ScreenContext";
-import useMediaQuery from "@/hooks/IsDekstop";
 import { useEffect, useState } from "react";
 const ResponsiveLayoutWrapper = ({ children, layoutType = "standard" }) => {
   // L'hook è chiamato correttamente qui, al top-level del componente wrapper.
@@ -19,10 +18,10 @@ const ResponsiveLayoutWrapper = ({ children, layoutType = "standard" }) => {
     }
   }, [currentScreen]);
   // Se desktop, usa il LayoutDesktop
-  if (isDesktop) {
-    if (layoutType == "chat") {
-      return <LayoutChatDesktop></LayoutChatDesktop>;
-    }
+  if (layoutType == "chat") {
+    return <ResponsiveLayoutChat />;
+  }
+  if (isDesktop && layoutType !== "chat") {
     return <LayoutDesktop>{children}</LayoutDesktop>;
   }
 
