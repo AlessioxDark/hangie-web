@@ -1,81 +1,77 @@
-import SidebarIcons from '@/utils/SidebarIcons';
-import React from 'react';
-import { Link } from 'react-router-dom';
+import SidebarIcons from "@/utils/SidebarIcons";
+import React from "react";
+import { Link } from "react-router-dom";
 
 const BottomNav = () => {
-	type ValidPath = `/${string}`;
+  type ValidPath = `/${string}`;
 
-	const isLinkActive = (linkPath: ValidPath): boolean => {
-		// Gestione più robusta del path attivo
-		if (linkPath === '/') {
-			return location.pathname === '/';
-		}
-		return location.pathname.startsWith(linkPath);
-	};
-	type SidebarLinksType = {
-		id: number;
-		title: 'Home' | 'Chats' | 'Profilo' | 'Amici';
-		link: ValidPath;
-		description: string;
-	};
-	const sidebarLinks: SidebarLinksType[] = [
-		{
-			id: 1,
-			title: 'Home',
-			link: '/',
-			description: 'Scopri nuovi eventi',
-		},
-		{
-			id: 2,
-			title: 'Chats',
+  const isLinkActive = (linkPath: ValidPath): boolean => {
+    // Gestione più robusta del path attivo
+    if (linkPath === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(linkPath);
+  };
+  type SidebarLinksType = {
+    id: number;
+    title: "Home" | "Chats" | "Profilo" | "Amici";
+    link: ValidPath;
+    description: string;
+  };
+  const sidebarLinks: SidebarLinksType[] = [
+    {
+      id: 1,
+      title: "Home",
+      link: "/",
+      description: "Scopri nuovi eventi",
+    },
+    {
+      id: 2,
+      title: "Chats",
 
-			link: '/chats',
-			description: 'I tuoi messaggi',
-		},
-		{
-			id: 3,
-			title: 'Amici',
-			link: '/Friends',
-			description: 'I tuoi eventi',
-		},
-		{
-			id: 4,
-			title: 'Profilo',
-			link: '/profile',
-			description: 'Impostazioni account',
-		},
-	];
-	return (
-		<div className=" bottom-0 fixed w-full h-24 border-t border-text-2/80 bg-bg-1 flex flex-row  items-center justify-around">
-			{sidebarLinks.map((link) => {
-				const isActive = isLinkActive(link.link);
+      link: "/chats",
+      description: "I tuoi messaggi",
+    },
+    {
+      id: 3,
+      title: "Amici",
+      link: "/Friends",
+      description: "I tuoi eventi",
+    },
+    {
+      id: 4,
+      title: "Profilo",
+      link: "/profile",
+      description: "Impostazioni account",
+    },
+  ];
+  return (
+    <div className=" bottom-0 fixed w-full h-16 border-t border-text-2/80 bg-bg-1 flex flex-row  items-center justify-around">
+      {sidebarLinks.map((link) => {
+        const isActive = isLinkActive(link.link);
 
-				return (
-					<Link
-						to={link.link}
-						key={link.id}
-						className={`
-								flex items-center flex-col  gap-1 ${
-									isActive ? ' text-primary  ' : ' text-text-2 bg-bg-1 '
-								} 
+        return (
+          <Link
+            to={link.link}
+            key={link.id}
+            className={`
+								flex items-center flex-col  gap-2.5 ${
+                  isActive ? " text-primary  " : " text-text-2 bg-bg-1 "
+                } 
 							`}
-						aria-label={link.description}
-						aria-current={isActive ? 'page' : undefined}
-					>
-						<SidebarIcons
-							size={'mobile'}
-							isActive={isActive}
-							title={link.title}
-						/>
+            aria-label={link.description}
+            aria-current={isActive ? "page" : undefined}
+          >
+            <SidebarIcons isActive={isActive} title={link.title} />
 
-						<span className="font-body font-semibold text-lg ">
-							{link.title}
-						</span>
-					</Link>
-				);
-			})}
-		</div>
-	);
+            <span className="font-body font-medium text-base leading-2 ">
+              {link.title}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
 };
 
 export default BottomNav;

@@ -169,34 +169,21 @@ const Home = () => {
             {eventsData.pending.length > 0 ? (
               <div
                 className="grid 
-   xs:grid-cols-1          
+   grid-cols-1          
     lg:grid-cols-2 
-    xl:grid-cols-2 
-    grid-rows-1      
-    gap-8"
+    grid-rows-1    
+    
+    gap-4
+    2xl:gap-8"
               >
                 {eventsData &&
                   eventsData.pending.slice(0, 3).map((event) => (
-                    <div
-                      className="w-full xl:min-width-[30rem] xl:max-w-[37rem]"
-                      key={event.event_id}
-                    >
+                    <div className="w-full " key={event.event_id}>
                       <EventCardSuspended {...event} />
                     </div>
                   ))}
               </div>
             ) : (
-              // <div className="flex xs:flex-col lg:flex-row gap-8 ">
-              // 	{eventsData &&
-              // 		eventsData.pending.slice(0, 3).map((event) => (
-              // 			<div
-              // 				className="w-full  xl:max-w-[37rem]"
-              // 				key={event.event_id}
-              // 			>
-              // 				<EventCardSuspendedDesktop {...event} />
-              // 			</div>
-              // 		))}
-              // </div>
               <RenderEmptyState />
             )}
           </div>
@@ -211,10 +198,11 @@ const Home = () => {
               grid 
               grid-cols-1
               md:grid-cols-2
-              lg:grid-cols-2
+             
               2xl:grid-cols-4
          
-              gap-8
+            gap-4
+    2xl:gap-8
               "
               >
                 {eventsData.accepted.map((event) => {
@@ -249,47 +237,49 @@ const Home = () => {
           <div className=" flex flex-col gap-16">
             {/* EVENTI IN SOSPESO */}
             <section>
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex justify-between items-center mb-8 2xl:mb-8">
                 <div className="w-full">
                   <div className="w-full justify-between flex flex-row ">
-                    <h2 className="text-4xl font-bold font-body text-gray-900 mb-2">
+                    <h2 className="text-2xl 2xl:text-4xl font-bold font-body text-gray-900 mb-2">
                       Eventi in Sospeso
                     </h2>
 
                     <Link
                       to={"/events/suspended/all"}
-                      className="flex flex-row gap-1 items-center cursor-pointer"
+                      className="flex flex-row 2xl:gap-1 items-center cursor-pointer"
                     >
-                      <span className="text-primary font-semibold text-2xl font-body w-full ">
+                      <span className="text-primary font-semibold text-base 2xl:text-2xl font-body">
                         Vedi Tutti
                       </span>
-                      <div className="w-10 h-10 flex items-center">
+                      <div className="w-5 h-5 2xl:w-10  2xl:h-10 flex items-center">
                         <ChevronRight />
                       </div>
                     </Link>
                   </div>
-                  <p className="text-lg font-body text-gray-600">
+                  <p className="text-lg font-body text-text-2 leading-4">
                     Hai{" "}
                     <span className="font-semibold text-primary font-body">
-                      2 inviti
+                      {eventsData.pending.length} invit
+                      {eventsData.pending.length > 1 ? "i" : "o"}
                     </span>{" "}
                     in attesa
                   </p>
                 </div>
               </div>
-              <div className="w-fit">{renderContent("pending")}</div>
+              {renderContent("pending")}
             </section>
 
             {/* EVENTI FUTURI */}
             <section>
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex justify-between items-center mb-8 2xl:mb-8">
                 <div>
-                  <h2 className="text-4xl font-bold text-gray-900 mb-2 font-body">
+                  <h2 className="text-2xl 2xl:text-4xl font-bold text-text-1 mb-2 font-body">
                     I tuoi Prossimi Eventi
                   </h2>
-                  <p className="text-lg text-gray-600 font-body">
+                  <p className="text-lg text-text-2 leading-4 font-body">
                     <span className="font-semibold text-gray-900 font-body">
-                      {eventsData.accepted.length} eventi
+                      {eventsData.accepted.length} event
+                      {eventsData.accepted.length > 1 ? "i" : "o"}
                     </span>{" "}
                     nelle prossime settimane
                   </p>

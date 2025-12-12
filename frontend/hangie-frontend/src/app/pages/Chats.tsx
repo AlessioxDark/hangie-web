@@ -12,6 +12,7 @@ const Chats = ({ messaggi }) => {
   const { currentGroupData, setCurrentChatData, currentChatData, socketRef } =
     useChat();
   const [chatInput, setChatInput] = useState<string>("");
+  const [showEvents, setShowEvents] = useState(false);
   const messagesEndRef = useRef(null);
   // const socketRef = useRef<any>(null);
   const chatInputRef = useRef<any>(null);
@@ -99,8 +100,8 @@ const Chats = ({ messaggi }) => {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto  relative">
-        <div className="fixed top-1/2 right-1 cursor-pointer   z-20">
-          <ChevronLeft />
+        <div className="fixed top-1/2 right-3 p-1 bg-primary flex items-center justify-center rounded-full hover:bg-primary/80 cursor-pointer z-20">
+          <ChevronLeft color={"#ffffff"} />
         </div>
         <div className="flex flex-col gap-2 mt-8  px-8">
           {messaggi.map((mess) => {

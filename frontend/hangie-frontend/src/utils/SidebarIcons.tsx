@@ -214,12 +214,12 @@ const ICON_MAP = {
   Profilo: { Outline: ProfileIconOutline, Solid: ProfileIconSolid },
 } as const;
 const ICON_SIZES = {
-  "2xl": "30px",
-  xl: "35px",
-  lg: "35px",
-  md: "35px",
-  sm: "35px",
-  xs: "35px",
+  "2xl": "30",
+  xl: "35",
+  lg: "35",
+  md: "35",
+  sm: "35",
+  xs: "25",
 };
 // ==================== COMPONENT ====================
 interface SidebarIconsProps {
@@ -248,7 +248,7 @@ const SidebarIcons: React.FC<SidebarIconsProps> = ({
       <IconComponent
         // className={` transition-colors duration-200 `}
         aria-hidden="true"
-        size={ICON_SIZES[currentScreen]}
+        size={`${ICON_SIZES[currentScreen]}px`}
       />
     </div>
   );
