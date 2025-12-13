@@ -226,7 +226,7 @@ const Home = () => {
   );
 
   return (
-    <div className="min-h-screen  flex">
+    <div className="min-h-screen  flex ">
       {/* Sidebar qui se ce l'hai */}
 
       <div className="flex-1">
@@ -237,10 +237,10 @@ const Home = () => {
           <div className=" flex flex-col gap-16">
             {/* EVENTI IN SOSPESO */}
             <section>
-              <div className="flex justify-between items-center mb-8 2xl:mb-8">
+              <div className="flex justify-between items-center mb-5 2xl:mb-8">
                 <div className="w-full">
                   <div className="w-full justify-between flex flex-row ">
-                    <h2 className="text-2xl 2xl:text-4xl font-bold font-body text-gray-900 mb-2">
+                    <h2 className="text-xl 2xl:text-4xl font-bold font-body text-text-1 mb-1 2xl:mb-2">
                       Eventi in Sospeso
                     </h2>
 
@@ -256,9 +256,9 @@ const Home = () => {
                       </div>
                     </Link>
                   </div>
-                  <p className="text-lg font-body text-text-2 leading-4">
+                  <p className="text-sm 2xl:text-lg font-body text-text-2 leading-4">
                     Hai{" "}
-                    <span className="font-semibold text-primary font-body">
+                    <span className=" font-semibold text-primary font-body">
                       {eventsData.pending.length} invit
                       {eventsData.pending.length > 1 ? "i" : "o"}
                     </span>{" "}
@@ -271,13 +271,13 @@ const Home = () => {
 
             {/* EVENTI FUTURI */}
             <section>
-              <div className="flex justify-between items-center mb-8 2xl:mb-8">
+              <div className="flex justify-between items-center mb-4 2xl:mb-8">
                 <div>
-                  <h2 className="text-2xl 2xl:text-4xl font-bold text-text-1 mb-2 font-body">
+                  <h2 className="text-xl 2xl:text-4xl font-bold font-body text-text-1 mb-1 2xl:mb-2">
                     I tuoi Prossimi Eventi
                   </h2>
-                  <p className="text-lg text-text-2 leading-4 font-body">
-                    <span className="font-semibold text-gray-900 font-body">
+                  <p className="text-sm 2xl:text-lg text-text-2 leading-4 font-body">
+                    <span className="font-semibold text-text-1 font-body">
                       {eventsData.accepted.length} event
                       {eventsData.accepted.length > 1 ? "i" : "o"}
                     </span>{" "}

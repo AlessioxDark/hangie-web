@@ -2,13 +2,7 @@ import React from "react";
 
 const ChevronLeft = ({ color }) => {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="#000000"
-      width={"30px"}
-      height={"30px"}
-    >
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000000">
       <g id="SVGRepo_iconCarrier">
         {" "}
         <title></title>{" "}

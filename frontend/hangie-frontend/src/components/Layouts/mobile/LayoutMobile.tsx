@@ -1,6 +1,6 @@
 import BottomNav from "@/app/pages/mobile/BottomNav";
 import React from "react";
-const LayoutMobile = ({ children }) => {
+const LayoutMobile = ({ children, type }) => {
   return (
     <div className="h-screen w-full flex flex-col justify-between ">
       <div className="">
@@ -12,7 +12,9 @@ const LayoutMobile = ({ children }) => {
             <h1 className="font-body font-bold text-3xl text-text-1">HANGIE</h1>
           </header>
         </div>
-        <div className="p-4 pt-2.5">{children}</div>
+        <div className={`${type !== "chat" && "p-4 pt-2.5 pb-20"}`}>
+          {children}
+        </div>
       </div>
       <BottomNav />
     </div>

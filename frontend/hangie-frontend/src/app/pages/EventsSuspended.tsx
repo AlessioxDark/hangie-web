@@ -5,6 +5,7 @@ import { AlertCircle, Calendar, Loader2 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { supabase } from "../../config/db";
+import { useScreen } from "@/contexts/ScreenContext";
 const EVENTSINPAGE = 12;
 
 const EventsSuspended = () => {
@@ -13,6 +14,7 @@ const EventsSuspended = () => {
   const [dataError, setDataError] = useState(false);
   const sliderRef = useRef(null);
   const [offset, setOffset] = useState<number>(0);
+  const { currentScreen } = useScreen();
   const fetchEvents = useCallback(async (): Promise<void> => {
     if (isLoading) return;
 
@@ -130,7 +132,8 @@ const EventsSuspended = () => {
               lg:grid-cols-2
               xl:grid-cols-2
               2xl:grid-cols-4
-              gap-8
+              gap-4
+              2xl:gap-8
               "
           >
             {eventsData.map((event) => {
@@ -149,21 +152,29 @@ const EventsSuspended = () => {
     );
   }, [fetchEvents, eventsData, dataError, isLoading]);
   return (
-    <div ref={sliderRef}>
-      <div className="flex flex-row gap-1 items-center">
-        <ChevronLeft />
-        <Link
-          to={"/"}
-          className="flex flex-row gap-1 items-center cursor-pointer"
-        >
-          <span className="text-primary font-semibold text-2xl font-body ">
-            Indietro
-          </span>
-        </Link>
+    <div ref={sliderRef} className="">
+      <div className="flex flex-row 2xl:flex-col ">
+        <div className="flex items-center gap-2">
+          <Link
+            to={"/"}
+            className="flex flex-row gap-1 items-center cursor-pointer"
+          >
+            <div className="w-6 h-6">
+              <ChevronLeft />
+            </div>
+
+            {currentScreen !== "xs" && (
+              <span className="text-primary font-semibold text-base 2xl:text-2xl font-body ">
+                Indietro
+              </span>
+            )}
+          </Link>
+        </div>
+
+        <h1 className="font-body text-text-1 text-xl 2xl:text-4xl font-bold my-2.5 2xl:my-6">
+          Eventi in sospeso
+        </h1>
       </div>
-      <h1 className="font-body text-text-1 text-4xl font-bold my-6">
-        Eventi in sospeso
-      </h1>
 
       {renderContent()}
     </div>

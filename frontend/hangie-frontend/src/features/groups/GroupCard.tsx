@@ -1,4 +1,5 @@
 import { useChat } from "@/contexts/ChatContext";
+import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContextProvider";
 import React, { useEffect } from "react";
 import { Link } from "react-router";
 
@@ -13,6 +14,8 @@ const GroupCard = ({
   partecipanti,
 }) => {
   const { setCurrentGroup, setCurrentGroupData } = useChat();
+  const { setMobileView } = useMobileLayoutChat();
+
   const formatTime = (dateString) => {
     const date = new Date(dateString);
     // Mostra l'ora se è oggi, altrimenti la data breve
@@ -36,6 +39,7 @@ const GroupCard = ({
     border-b border-gray-200
    "
       onClick={() => {
+        setMobileView("chat");
         setCurrentGroup(group_id);
         setCurrentGroupData({
           nome,
@@ -46,52 +50,13 @@ const GroupCard = ({
         });
       }}
     >
-      {/* <div className="flex flex-row items-center justify-between w-full h-full">
-        <div className="flex flex-row gap-4 w-full items-center">
-          <img src={group_cover_img} className="h-16 w-16" alt="" />
-          <div className="flex flex-col gap-0">
-            <p className="text-text-2 font-body text-lg line-clamp-1">
-              {ultimoMessaggio?.type == "event"
-                ? `evento`
-                : ultimoMessaggio?.content}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-col items-end ml-4 ">
-          <p className=" text-text-2 font-body mb-1 text-base">
-            {formatTime(ultimoMessaggio?.sent_at | created_at)}
-          </p>
-
-          {-1 > 0 && (
-            <div className="bg-primary flex items-center justify-center w-7 h-7 text-center font-bold text-white rounded-full text-lg font-body"></div>
-          )}
-        </div>
-      </div> */}
       <div className="flex flex-row items-stretch w-full h-full gap-4">
         <img
           src={group_cover_img}
-          className="rounded-full h-16 w-16 flex-shrink-0" // Correzione Sizing
+          className="rounded-full w-14 h-14 2xl:h-16 2xl:w-16 flex-shrink-0" // Correzione Sizing
           alt="Group cover"
         />
-        {/* <div className="w-full h-full flex flex-col items-between ">
-          <div className="flex flex-row justify-between">
-            <h1 className="font-bold font-body text-xl">{nome}</h1>
-            <p className=" text-text-2 font-body text-base">
-              {formatTime(ultimoMessaggio?.sent_at | created_at)}
-            </p>
-          </div>
-          <div className="flex flex-row justify-between items-center">
-            <p className="text-text-2 font-body text-lg line-clamp-1">
-              {ultimoMessaggio?.type == "event"
-                ? `evento`
-                : ultimoMessaggio?.content}
-            </p>
 
-            <div className="bg-primary flex items-center justify-center w-7 h-7 text-center font-bold text-white rounded-full text-lg font-body">
-              3
-            </div>
-          </div>
-        </div> */}
         <div className="flex-1 min-w-0 flex flex-col gap-1.5 justify-center">
           <div className="flex justify-between items-center">
             <h1 className="font-bold font-body text-lg leading-4">{nome}</h1>
@@ -103,7 +68,7 @@ const GroupCard = ({
 
           {/* Riga 2: Anteprima Messaggio e Badge (Bottom) */}
           <div className="flex justify-between items-center">
-            <span className="text-text-2 font-body text-lg leading-4 line-clamp-1 mr-2">
+            <span className="text-text-2 font-body 2xl:text-lg leading-5 line-clamp-1 mr-2">
               {ultimoMessaggio?.type == "event"
                 ? `evento`
                 : ultimoMessaggio?.content}

@@ -7,7 +7,6 @@ const ChatsSidebar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<null | string>("");
   const [groupsData, setGroupsData] = useState([]);
-
   const fetchGroups = async () => {
     if (isLoading) return;
     try {
@@ -103,8 +102,8 @@ const ChatsSidebar = () => {
   return (
     <div className="h-screen bg-bg-1 xl:w-5/12 2xl:w-1/4">
       <div className="flex flex-col xl:gap-0 2xl:gap-12">
-        <div className="flex flex-row gap-28 items-center xl:p-6 2xl:p-14">
-          <h1 className="font-body font-bold text-text-1 xl:text-3xl 2xl:text-5xl">
+        <div className="pl-4 py-2 flex flex-row gap-28 items-center xl:p-6 2xl:p-14">
+          <h1 className="font-body font-bold text-text-1 text-xl xl:text-3xl 2xl:text-5xl">
             Messaggi
           </h1>
           {/* <div className="bg-text-2 rounded-full px-5 py-2 flex items-center justify-center">

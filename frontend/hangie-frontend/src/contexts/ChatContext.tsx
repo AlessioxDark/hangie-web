@@ -32,40 +32,7 @@ export const ChatProvider = ({ children }) => {
   const [currentGroup, setCurrentGroup] = useState(null);
   const [currentGroupData, setCurrentGroupData] = useState(null);
   const socketRef = useRef(null);
-  // Si può aggiungere un check per assicurarsi che l'hook venga usato all'interno del Provider
-  // const sendEvent = async () => {
-  // 	console.log('messaggio inviato');
-  // 	const trimmedInput = chatInput.trim();
-  // 	socketRef.current.emit(
-  // 		'send_event',
-  // 		trimmedInput,
-  // 		currentGroupData?.group_id,
-  // 		session.access_token
-  // 	);
 
-  // 	console.log('risposta avviata gestendo dato');
-
-  // 	setCurrentChatData((prevData) => {
-  // 		return prevData.map((dato) => {
-  // 			return dato.group_id === currentGroupData.group_id
-  // 				? {
-  // 						...dato,
-  // 						messaggi: [
-  // 							...dato.messaggi,
-  // 							{
-  // 								// mettere tutti i dati per questo da errore es nome, pfpf ecc.
-  // 								content: trimmedInput,
-  // 								group_id: currentGroupData.group_id,
-  // 								user_id: session.user.id,
-  // 								sent_at: Date.now(),
-  // 								isUser: true,
-  // 							},
-  // 						],
-  // 				  }
-  // 				: dato;
-  // 		});
-  // 	});
-  // };
   useEffect(() => {
     const SERVER_URL = "http://localhost:3000";
 

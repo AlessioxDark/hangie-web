@@ -58,7 +58,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
         minute: "2-digit",
       })
     : "";
-
   const partecipantiArray = gruppo?.partecipanti_gruppo || [];
   const avatarsToDisplay = partecipantiArray.slice(0, 3);
   const remainingCount = Math.max(0, partecipantiArray.length - 3);
@@ -151,7 +150,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
         {/* ✅ BADGE GRUPPO - Sinistra */}
         {gruppo && (
           <div className=" max-w-[90%]">
-            <div className="px-3 py-2 bg-black/60 backdrop-blur-md rounded-xl shadow-lg">
+            <div className="px-3 py-1.5 2xl:py-2 bg-black/60 backdrop-blur-md rounded-xl shadow-lg">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6">
                   <img src={gruppo.group_cover_img} alt="" />
@@ -198,33 +197,36 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
       {/* ═══════════════════════════════════════════════════
           CONTENT - Info Evento
       ════════════════════════════════════════════════════ */}
-      <div className="2xl:p-6 p-4 flex flex-col justify-between h-full ">
+      <div className="2xl:p-6 p-4 pt-2.5 flex flex-col justify-between h-full ">
         {/* Data + Titolo */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2 2xl:gap-4">
           <div className="flex flex-col ">
-            <time className="text-sm 2xl:text-base block text-primary font-bold uppercase tracking-wider">
+            <time className="text-xs 2xl:text-base block text-primary font-semibold uppercase tracking-wider">
               {formattedTime}
             </time>
             <h3
-              className={`text-base 2xl:text-2xl font-bold text-gray-900 leading-tight ${line_clamp}`}
+              className={`text-base 2xl:text-2xl font-bold text-text-1 leading-tight ${line_clamp}`}
             >
               {titolo}
             </h3>
           </div>
 
           {/* Partecipanti */}
-          <div className="ml-2">
-            <div className="flex items-center gap-4 ">
-              <div className="w-5 h-5 flex-shrink-0 text-gray-400">
-                <ParticipantsIcon />
+          <div className="ml-1 2xl:ml-2">
+            <div className="flex items-center gap-2 2xl:gap-4 ">
+              <div className=" 2xl:w-7 2xl:h-7 w-5 h-5 flex-shrink-0 text-gray-400">
+                <ParticipantsIcon color={"#64748b"} />
               </div>
 
               {partecipantiArray.length > 0 ? (
-                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                <div className="flex items-center 2xl:gap-2.5 gap-1.5 flex-1 min-w-0">
                   <div className="flex -space-x-2 flex-shrink-0">
                     {avatarsToDisplay.map((partecipante, index) => (
-                      <div className="w-7 h-7" key={partecipante.user_id}>
-                        <ProfileIcon />
+                      <div
+                        className="2xl:w-7 2xl:h-7 w-5 h-5"
+                        key={partecipante.user_id}
+                      >
+                        <ProfileIcon user_id={partecipante.partecipante_id} />
                       </div>
                     ))}
 
@@ -237,7 +239,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                     )}
                   </div>
 
-                  <span className="text-base text-text-2 font-medium truncate">
+                  <span className="text-sm 2xl:text-base text-text-2 font-medium truncate">
                     {partecipantiArray.length} partecipant
                     {partecipantiArray.length !== 1 ? "i" : "e"}
                   </span>
@@ -255,25 +257,26 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
             ORGANIZZATORE
         ════════════════════════════════════════════════════ */}
         <div>
-          <div className=" pb-2 pt-4  ">
+          <div className="pb-1 pt-3 2xl:pb-2 2xl:pt-4  ">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 flex-shrink-0">
-                <ProfileIcon />
+              <div className="2xl:w-12 2xl:h-12 w-8 h-8 flex-shrink-0">
+                <ProfileIcon user_id={utente.user_id} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-base font-semibold text-text-2 truncate">
+                <p className="text-sm 2xl:text-base font-semibold text-text-2 truncate">
                   {utente.nome}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="pt-5  border-t border-gray-100 ">
+          <div className="pt-2.5 2xl:pt-5  border-t border-gray-100 ">
             <div className="flex gap-3">
               <button
                 className="
                 flex-1
-                px-6 py-3
+                2xl:px-6 2xl:py-3
+                px-3 py-2.5
                 bg-primary text-bg-1
                 rounded-xl
                 font-bold 
@@ -281,7 +284,8 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                 transition-colors
                 duration-300 
 
-                 text-lg  
+                 2xl:text-lg
+                 text-sm  
                  cursor-pointer 
               "
               >
@@ -290,7 +294,8 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
               <button
                 className="
                 flex-1
-                px-6 py-3
+               2xl:px-6 2xl:py-3
+                px-3 py-2.5
                 bg-bg-1 text-text-2
                 border-2 border-text-3/60
                 rounded-xl
@@ -299,7 +304,8 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                 hover:border-text-2/80
                 transition-colors 
                 duration-300 
-                text-lg  
+                text-sm
+                2xl:text-lg  
                 cursor-pointer       
               "
               >
