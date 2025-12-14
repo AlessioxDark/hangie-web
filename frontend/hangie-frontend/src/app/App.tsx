@@ -14,6 +14,7 @@ import EventsSuspended from "./pages/EventsSuspended";
 import Home from "./pages/Home";
 import ResponsiveLayoutWrapper from "../components/Layouts/ResponsiveLayoutWrapper";
 import { ScreenProvider } from "@/contexts/ScreenContext";
+import { MobileLayoutChatProvider } from "@/contexts/MobileLayoutChatContext";
 function App() {
   return (
     <BrowserRouter>

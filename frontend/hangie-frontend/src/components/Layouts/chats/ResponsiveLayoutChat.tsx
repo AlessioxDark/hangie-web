@@ -3,6 +3,7 @@ import React from "react";
 import LayoutChatDesktop from "./LayoutChatDesktop";
 import LayoutChatMedium from "./LayoutChatMedium";
 import LayoutChatMobile from "./LayoutChatMobile";
+import { MobileLayoutChatProvider } from "@/contexts/MobileLayoutChatContext";
 
 const ResponsiveLayoutChat = () => {
   const { currentScreen } = useScreen();
@@ -15,7 +16,11 @@ const ResponsiveLayoutChat = () => {
   }
 
   if (currentScreen == "xs") {
-    return <LayoutChatMobile />;
+    return (
+      <MobileLayoutChatProvider>
+        <LayoutChatMobile />
+      </MobileLayoutChatProvider>
+    );
   }
 };
 

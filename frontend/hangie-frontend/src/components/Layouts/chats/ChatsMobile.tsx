@@ -1,14 +1,11 @@
-import SendIcon from "@/assets/icons/SendIcon.js";
-import { useChat } from "@/contexts/ChatContext.js";
-import MessageCard from "@/components/messaggi/MessageCard.js";
-import { useAuth } from "@/contexts/AuthContext.js";
-import ChatInput from "@/features/chats/ChatInput.js";
-import MessageEvent from "@/features/chats/MessageEvent.js";
-import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
-import { supabase } from "../../config/db.js";
-import ChevronLeft from "@/assets/icons/ChevronLeft.js";
-const Chats = ({ messaggi }) => {
+import MessageCard from "@/components/messaggi/MessageCard";
+import { useAuth } from "@/contexts/AuthContext";
+import { useChat } from "@/contexts/ChatContext";
+import ChatInput from "@/features/chats/ChatInput";
+import { ChevronLeft } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+
+const ChatsMobile = ({ messaggi }) => {
   const { currentGroupData, setCurrentChatData, currentChatData, socketRef } =
     useChat();
   const [chatInput, setChatInput] = useState<string>("");
@@ -103,7 +100,7 @@ const Chats = ({ messaggi }) => {
         <div className="fixed top-1/2 right-3 p-1 bg-primary flex items-center justify-center rounded-full hover:bg-primary/80 cursor-pointer z-20">
           <ChevronLeft color={"#ffffff"} />
         </div>
-        <div className="flex flex-col gap-2 mt-8  px-2 2xl:px-8">
+        <div className="flex flex-col gap-2 mt-8  px-8">
           {messaggi.map((mess) => {
             if (mess.type == "event") {
               return (
@@ -131,4 +128,4 @@ const Chats = ({ messaggi }) => {
   );
 };
 
-export default Chats;
+export default ChatsMobile;

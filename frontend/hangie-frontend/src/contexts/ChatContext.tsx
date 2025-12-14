@@ -27,6 +27,7 @@ export const useChat = () => {
 
   return context;
 };
+
 export const ChatProvider = ({ children }) => {
   const [currentChatData, setCurrentChatData] = useState(null);
   const [currentGroup, setCurrentGroup] = useState(null);

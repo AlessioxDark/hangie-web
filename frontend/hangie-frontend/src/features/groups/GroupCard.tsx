@@ -1,5 +1,5 @@
 import { useChat } from "@/contexts/ChatContext";
-import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContextProvider";
+import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import React, { useEffect } from "react";
 import { Link } from "react-router";
 
@@ -39,6 +39,7 @@ const GroupCard = ({
     border-b border-gray-200
    "
       onClick={() => {
+        console.log(setMobileView);
         setMobileView("chat");
         setCurrentGroup(group_id);
         setCurrentGroupData({

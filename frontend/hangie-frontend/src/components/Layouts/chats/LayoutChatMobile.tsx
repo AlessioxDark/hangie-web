@@ -7,8 +7,10 @@ import ChatsSidebar from "@/features/chats/ChatsSidebar";
 import {
   MobileLayoutChatProvider,
   useMobileLayoutChat,
-} from "@/contexts/MobileLayoutChatContextProvider.js";
+} from "@/contexts/MobileLayoutChatContext.js";
 import ChatsEvents from "@/features/chats/ChatsEvents.js";
+import Chats from "@/app/pages/Chats.js";
+import BottomNav from "@/app/pages/mobile/BottomNav.js";
 const LayoutChatMobile = () => {
   const {
     currentGroup,
@@ -129,7 +131,6 @@ const LayoutChatMobile = () => {
       fetchFirstGroup();
     }
   }, []);
-
   useEffect(() => {
     console.log("mobile view cambiato", mobileView);
   }, [mobileView]);
@@ -173,26 +174,17 @@ const LayoutChatMobile = () => {
       return <ChatsSidebar />;
     }
     if (mobileView == "events") {
-      return <p>eventi</p>;
+      return <ChatsEvents />;
     }
     if (mobileView == "chat") {
-      return <p>chat</p>;
+      return <Chats messaggi={currentChatData?.messaggi} />;
     }
     return (
       <p className="p-4 text-center text-gray-500">
         Vista non valida. {`${mobileView}`}
       </p>
     );
-  }, [
-    currentChatData,
-    fetchChat,
-    currentGroupData,
-    currentGroup,
-    error,
-    isLoading,
-    fetchFirstGroup,
-    mobileView,
-  ]);
+  }, [fetchChat, error, isLoading, mobileView]);
   return (
     // <div className="h-screen w-full flex flex-row">
     //   <Sidebar />
@@ -204,13 +196,12 @@ const LayoutChatMobile = () => {
     //   </div>
     //   {/* <ChatsEvents /> */}
     // </div>
-    <LayoutMobile type={"chat"}>
-      <MobileLayoutChatProvider>
-        {renderContent()}
-        {/* <p>ciaoooo</p> */}
-        {/* <ChatsSidebar /> */}
-      </MobileLayoutChatProvider>
-    </LayoutMobile>
+    <div className="h-screen w-full flex flex-col justify-between ">
+      <div className="overflow-hidden">{renderContent()}</div>
+      <div>
+        <BottomNav />
+      </div>
+    </div>
   );
 };
 
