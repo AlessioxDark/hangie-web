@@ -171,7 +171,16 @@ const LayoutChatMobile = () => {
     }
 
     if (mobileView == "groups") {
-      return <ChatsSidebar />;
+      return (
+        <>
+          <div className="overflow-hidden">
+            <ChatsSidebar />
+          </div>
+          <div>
+            <BottomNav />
+          </div>
+        </>
+      );
     }
     if (mobileView == "events") {
       return <ChatsEvents />;
@@ -197,10 +206,11 @@ const LayoutChatMobile = () => {
     //   {/* <ChatsEvents /> */}
     // </div>
     <div className="h-screen w-full flex flex-col justify-between ">
-      <div className="overflow-hidden">{renderContent()}</div>
+      {/* <div className="overflow-hidden">{renderContent()}</div>
       <div>
         <BottomNav />
-      </div>
+      </div> */}
+      {renderContent()}
     </div>
   );
 };

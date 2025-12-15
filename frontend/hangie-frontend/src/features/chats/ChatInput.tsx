@@ -60,13 +60,13 @@ const ChatInput = ({
       className="
             bg-white border-t border-gray-200
                     flex items-center justify-center 
-                    p-4 shadow-2xl 
+                    p-2 2xl:p-4 shadow-2xl 
 					w-full
         "
       style={{ borderWidth: "0.1px", borderLeft: "0px" }}
     >
       {/* Contenitore Input Interno */}
-      <div className="flex flex-row w-full  gap-4 items-center">
+      <div className="flex flex-row w-full  gap-1.5 2xl:gap-4 items-center">
         <div
           className="
           bg-gray-100 flex-1 
@@ -76,14 +76,16 @@ const ChatInput = ({
                             p-1 shadow-inner transition-shadow
                             flex items-center
                              gap-0.5
+                             
+                           
                             
           "
         >
           <div
-            className=" relative transition-all self-start ml-1 hover:bg-bg-3 rounded-full h-12 w-12 flex items-center justify-center"
+            className=" relative transition-all ml-2 hover:bg-bg-3 rounded-full w-6 h-full 2xl:h-12 2xl:w-12 flex items-center justify-center"
             ref={dropdownRef}
           >
-            <div className="w-6 h-6" onClick={toggleDropdown}>
+            <div className="w-5 h-5 2xl:w-6 2xl:h-6" onClick={toggleDropdown}>
               <ClipIcon />
             </div>
             {isDropdownOpen && (
@@ -111,7 +113,7 @@ const ChatInput = ({
                             max-h-32
                            
                             w-full py-2 px-1 pr-3 outline-none 
-                            text-lg text-text-1 font-body
+                            text-sm 2xl:text-lg text-text-1 font-body
                             overflow-y-auto 
                             transition-opacity duration-200
                            
@@ -135,7 +137,7 @@ const ChatInput = ({
           onClick={isSendActive ? sendMessage : undefined}
           disabled={!isSendActive}
           className={`
-                        w-11 h-11 
+                        w-10 h-10 2xl:w-11 2xl:h-11 
                         flex items-center justify-center 
                         rounded-full 
                         transition-all duration-150

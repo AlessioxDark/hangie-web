@@ -126,8 +126,8 @@ const MessageEvent = ({ event_details }) => {
     <>
       <div
         className="flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden
-      shadow-xl transition-all duration-300   hover:shadow-2xl
-      min-w-sm max-w-sm  my-2 cursor-pointer"
+      shadow-xl transition-all duration-300   hover:shadow-2xl max-w-[80%]
+       2xl:min-w-sm  my-2 cursor-pointer "
         onClick={() => {
           openModal({
             type: "EVENT_MODAL",
@@ -136,10 +136,10 @@ const MessageEvent = ({ event_details }) => {
         }}
       >
         {/* Immagine di Copertina */}
-        <div className="w-full  bg-gray-300 relative cursor-pointer">
+        <div className="w-56 2xl:w-full  relative cursor-pointer aspect-square 2xl:aspect-[16/9]">
           {/* L'immagine deve avere una dimensione fissa o responsive */}
           <img
-            className="w-full h-full object-cover aspect-[16/9] "
+            className="w-full h-full object-cover  "
             src={event_details.cover_img}
             alt={event_details.titolo || "Event Cover"}
           />
@@ -157,45 +157,47 @@ const MessageEvent = ({ event_details }) => {
         </div>
 
         {/* Contenuto della Card */}
-        <div className="p-5 flex flex-col gap-3">
+        <div className="p-2.5 2xl:p-5 flex flex-col gap-3">
           {/* Titolo e Data Evento */}
           <div className="flex flex-col ">
-            <h1 className="font-bold text-2xl text-text-1 leading-snug mb-2">
+            <h1 className="font-bold text-base 2xl:text-2xl text-text-1 leading-snug mb-2">
               {event_details.titolo}
             </h1>
             {/* Data Evento in alto a destra */}
-            <div className="flex items-center gap-2 text-primary text-sm font-semibold">
+            <div className="flex items-center gap-1 2xl:gap-2 text-primary text-sm font-semibold">
               <Calendar className="w-4 h-4" />
-              <span className="font-body text-primary text-sm font-semibold">
+              <span className="font-body text-primary text-xs 2xl:text-sm font-semibold">
                 {formatDate(event_details.data) || "Data non specificata"}
               </span>
             </div>
           </div>
 
           {/* Dettagli (Luogo, Costo, Creatore) */}
-          <div className="flex flex-col gap-2.5">
-            <div className="flex flex-col gap-2.5 border-gray-200 ">
+          <div className="flex flex-col gap-1 2xl:gap-2.5">
+            <div className="flex flex-col gap-1 2xl:gap-2.5 border-gray-200 ">
               {/* Luogo e Indirizzo */}
 
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 flex-shrink-0">
+              <div className="flex items-center gap-1 2xl:gap-2">
+                <div className="w-5 h-5 2xl:w-6 2xl:h-6 flex-shrink-0">
                   {/* Usa la Sostituzione MapIcon */}
                   <MapIcon color={"#64758b"} />
                 </div>
-                <span className={`font-body truncate text-text-2`}>
+                <span
+                  className={`font-body truncate text-xs 2xl:text-base text-text-2`}
+                >
                   {event_details.luoghi.nome}
                 </span>
               </div>
 
               {/* Costo */}
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 flex-shrink-0">
+              <div className="flex items-center gap-1 2xl:gap-2">
+                <div className="w-5 h-5 2xl:w-6 2xl:h-6 flex-shrink-0">
                   {/* Usa la Sostituzione DollarIcon */}
                   <DollarIcon
                     color={event_details.costo == 0 ? "#16a34a" : "#64748b"}
                   />
                 </div>
-                <span className="font-body font-bold ">
+                <span className="font-body font-bold text-xs 2xl:text-base ">
                   {event_details.costo > 0 ? (
                     <span className="text-green-600">
                       {event_details.costo}€
@@ -210,10 +212,10 @@ const MessageEvent = ({ event_details }) => {
             <div className="">
               <div className="col-span-2 flex items-center gap-2 pt-3 border-t border-gray-200 font-body">
                 {/* <Users className="w-4 h-4 text-blue-600" /> */}
-                <div className="w-6 h-6">
+                <div className="w-5 h-5 2xl:w-6 2xl:h-6">
                   <ParticipantsIcon color={"#64758b"} />
                 </div>
-                <span className="font-body text-text-2">
+                <span className="text-xs 2xl:text-base font-body text-text-2">
                   <span className="font-bold text-text-2 ">
                     {event_details.partecipanti_count} 3
                   </span>{" "}
@@ -226,13 +228,13 @@ const MessageEvent = ({ event_details }) => {
 
               <div className="flex justify-between items-center pt-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 flex-shrink-0">
+                  <div className="w-8 h-8 2xl:w-12 2xl:h-12 flex-shrink-0">
                     {/* Usa la Sostituzione ProfileIcon */}
                     <ProfileIcon user_id={event_details.utenti?.user_id} />
                   </div>
-                  <span className="font-medium text-sm text-text-2 font-body truncate">
+                  <span className="font-medium text-xs 2xl:text-sm text-text-2 font-body truncate">
                     Creato da:
-                    <span className="font-semibold block text-base text-text-1 leading-none">
+                    <span className="font-semibold block text-sm 2xl:text-base text-text-1 leading-none">
                       {event_details.utenti?.creatore}
                     </span>
                   </span>

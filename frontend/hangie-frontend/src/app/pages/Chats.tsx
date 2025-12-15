@@ -8,12 +8,16 @@ import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { supabase } from "../../config/db.js";
 import ChevronLeft from "@/assets/icons/ChevronLeft.js";
+import { useScreen } from "@/contexts/ScreenContext.js";
+import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
 const Chats = ({ messaggi }) => {
   const { currentGroupData, setCurrentChatData, currentChatData, socketRef } =
     useChat();
   const [chatInput, setChatInput] = useState<string>("");
   const [showEvents, setShowEvents] = useState(false);
   const messagesEndRef = useRef(null);
+  const { currentScreen } = useScreen();
+  const { setMobileView } = useMobileLayoutChat();
   // const socketRef = useRef<any>(null);
   const chatInputRef = useRef<any>(null);
   const { session } = useAuth();
@@ -74,28 +78,41 @@ const Chats = ({ messaggi }) => {
   console.log(currentGroupData);
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="bg-bg-1 p-4 flex flex-row items-center gap-6">
-        <img
-          src={currentGroupData?.group_cover_img}
-          className="w-16 h-16"
-          alt=""
-        />{" "}
-        <div className="">
-          <span className="text-text-1 font-bold font-body text-3xl">
-            {currentGroupData?.nome}
-          </span>
-          <div>
-            {currentGroupData?.partecipanti_gruppo?.map(
-              (partecipante, iPart) => {
-                return (
-                  <span key={partecipante.utenti.user_id}>
-                    {partecipante.utenti.nome}{" "}
-                    {iPart !==
-                      currentGroupData?.partecipanti_gruppo?.length - 1 && ", "}
-                  </span>
-                );
-              }
-            )}
+      <div className="bg-bg-1 p-2 2xl:p-4  border-b border-gray-400 flex flex-row items-center gap-2">
+        {currentScreen == "xs" && (
+          <div
+            className="w-7 h-7"
+            onClick={() => {
+              setMobileView("groups");
+            }}
+          >
+            <ChevronLeft color={"#2463eb"} />
+          </div>
+        )}
+        <div className="flex flex-row items-center gap-3 2xl:gap-6">
+          <img
+            src={currentGroupData?.group_cover_img}
+            className="w-10 h-10 2xl:w-16 2xl:h-16"
+            alt=""
+          />{" "}
+          <div className="">
+            <span className="text-text-1 font-bold font-body text-xl 2xl:text-3xl">
+              {currentGroupData?.nome}
+            </span>
+            <div>
+              {currentGroupData?.partecipanti_gruppo?.map(
+                (partecipante, iPart) => {
+                  return (
+                    <span key={partecipante.utenti.user_id}>
+                      {partecipante.utenti.nome}{" "}
+                      {iPart !==
+                        currentGroupData?.partecipanti_gruppo?.length - 1 &&
+                        ", "}
+                    </span>
+                  );
+                }
+              )}
+            </div>
           </div>
         </div>
       </div>
