@@ -10,10 +10,11 @@ const GroupCard = ({
   index,
   group_id,
   created_at,
-
-  partecipanti,
+  messaggi,
+  partecipanti_gruppo,
 }) => {
-  const { setCurrentGroup, setCurrentGroupData } = useChat();
+  const { setCurrentGroup, setCurrentGroupData, setCurrentChatData } =
+    useChat();
   const { setMobileView } = useMobileLayoutChat();
 
   const formatTime = (dateString) => {
@@ -39,15 +40,14 @@ const GroupCard = ({
     border-b border-gray-200
    "
       onClick={() => {
-        console.log(setMobileView);
-        setMobileView("chat");
         setCurrentGroup(group_id);
+        console.log("part gruppo", partecipanti_gruppo);
         setCurrentGroupData({
           nome,
           group_id,
           created_at,
           group_cover_img,
-          partecipanti,
+          partecipanti_gruppo,
         });
       }}
     >

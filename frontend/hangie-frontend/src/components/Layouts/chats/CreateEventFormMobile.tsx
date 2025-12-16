@@ -1,26 +1,19 @@
-import { useChat } from "@/contexts/ChatContext.js";
 import { useAuth } from "@/contexts/AuthContext";
+import { useChat } from "@/contexts/ChatContext";
 import { useModal } from "@/contexts/ModalContext";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
-
-// Componente Textarea
-import { supabase } from "../../config/db.js";
-import FormInputCollection from "../CreateEventForm/FormInputCollection.js";
-import ChevronLeft from "@/assets/icons/ChevronLeft.js";
-import ChevronRight from "@/assets/icons/ChevronRight.js";
-
-const CreateEventForm = () => {
+import { supabase } from "../../../config/db.js";
+import { X } from "lucide-react";
+import FormInputCollection from "@/features/CreateEventForm/FormInputCollection";
+const CreateEventFormMobile = () => {
   const IMAGE_LIMIT = 4;
   const { closeModal } = useModal();
   const { session } = useAuth();
   const { socketRef, setCurrentChatData } = useChat();
   const [images, setImages] = useState([]);
-  const [currentStep, setCurrentStep] = useState(1);
   const schema = z
     .object({
       titolo: z.string().min(1, "il titolo è obbligatorio"),
@@ -197,23 +190,18 @@ const CreateEventForm = () => {
         }}
       >
         {/* Intestazione */}
-        <div className={`2xl:px-8 2xl:pt-8 p-2 2xl:pb-4 border-b border-bg-3`}>
+        <div className={`px-8 pt-8 pb-4 border-b border-bg-3`}>
           <div className="flex justify-between items-center">
-            <h1
-              className={`text-text-1 font-body font-bold text-lg 2xl:text-4xl`}
-            >
+            <h1 className={`text-text-1 font-body font-bold text-4xl`}>
               Crea Evento
             </h1>
             <button
               type="button"
-              className={`text-text-2 cursor-pointer transition-colors 2xl:p-1 rounded-full hover:bg-bg-3`}
+              className={`text-text-2 cursor-pointer transition-colors p-1 rounded-full hover:bg-bg-3`}
               onClick={closeModal}
               aria-label="Chiudi Modale"
             >
-              {/* <X width={25} height={25} /> */}
-              <div className="w-6 h-6">
-                <ChevronRight color="#64748b" />
-              </div>
+              <X width={30} height={30} />
             </button>
           </div>
         </div>
@@ -243,5 +231,4 @@ const CreateEventForm = () => {
     </div>
   );
 };
-
-export default CreateEventForm;
+export default CreateEventFormMobile;

@@ -1,6 +1,9 @@
 import ClipIcon from "@/assets/icons/ClipIcon";
 import SendIcon from "@/assets/icons/SendIcon";
+import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
+import { useScreen } from "@/contexts/ScreenContext";
+import { Calendar, Plus } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const ChatInput = ({
@@ -13,6 +16,8 @@ const ChatInput = ({
   const dropdownRef = useRef(null);
   const debounceTimerRef = useRef(null);
   const { openModal } = useModal();
+  const { currentScreen } = useScreen();
+  const { setMobileView } = useMobileLayoutChat();
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
   };
@@ -76,6 +81,7 @@ const ChatInput = ({
                             p-1 shadow-inner transition-shadow
                             flex items-center
                              gap-0.5
+                             min-h-11
                              
                            
                             
@@ -88,20 +94,51 @@ const ChatInput = ({
             <div className="w-5 h-5 2xl:w-6 2xl:h-6" onClick={toggleDropdown}>
               <ClipIcon />
             </div>
-            {isDropdownOpen && (
-              <div className="absolute bottom-12 w-32 min-h-12 bg-bg-1 transition-all rounded-xl ">
-                <div className="w-full text-center hover:bg-bg-3/60 py-2 cursor-pointer transition-all rounded-t-xl">
-                  <span
-                    className="text-text-1 font-body font-medium  w-full"
-                    onClick={() => {
-                      handleDropdownChoice("CREATE_EVENT_MODAL");
-                    }}
-                  >
-                    Crea Evento
-                  </span>
+            {isDropdownOpen &&
+              (currentScreen !== "xs" ? (
+                <div
+                  className={`absolute bottom-12 w-32 min-h-12 bg-bg-1 transition-all rounded-xl `}
+                >
+                  <div className="w-full text-center hover:bg-bg-3/60 py-2 cursor-pointer transition-all rounded-t-xl">
+                    <span
+                      className="text-text-1 font-body font-medium  w-full"
+                      onClick={() => {
+                        handleDropdownChoice("CREATE_EVENT_MODAL");
+                      }}
+                    >
+                      Crea Evento
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div
+                  className={`absolute -left-5 bottom-10 w-screen  min-h-12 transition-all bg-bg-3 duration-500 rounded-t-xl flex flex-row gap-2 py-2 px-2 `}
+                >
+                  <div
+                    onClick={() => {
+                      setMobileView("CREATE_EVENT");
+                    }}
+                    className="flex flex-col items-center gap-1"
+                  >
+                    <div className="p-2 rounded-full bg-primary">
+                      <Plus className="text-bg-1" />
+                    </div>
+                    <span className="text-xs font-body text-text-1">
+                      Crea Evento
+                    </span>
+                  </div>
+                  {/* <div className="w-full text-center hover:bg-bg-3/60 py-2 cursor-pointer transition-all rounded-t-xl">
+                    <span
+                      className="text-text-1 font-body font-medium  w-full"
+                      onClick={() => {
+                        handleDropdownChoice("CREATE_EVENT_MODAL");
+                      }}
+                    >
+                      Crea Evento
+                    </span>
+                  </div> */}
+                </div>
+              ))}
           </div>
 
           <div

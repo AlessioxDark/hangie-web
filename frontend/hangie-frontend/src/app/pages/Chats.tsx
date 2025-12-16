@@ -11,8 +11,13 @@ import ChevronLeft from "@/assets/icons/ChevronLeft.js";
 import { useScreen } from "@/contexts/ScreenContext.js";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
 const Chats = ({ messaggi }) => {
-  const { currentGroupData, setCurrentChatData, currentChatData, socketRef } =
-    useChat();
+  const {
+    currentGroupData,
+    setCurrentGroup,
+    setCurrentChatData,
+    currentChatData,
+    socketRef,
+  } = useChat();
   const [chatInput, setChatInput] = useState<string>("");
   const [showEvents, setShowEvents] = useState(false);
   const messagesEndRef = useRef(null);
@@ -22,7 +27,7 @@ const Chats = ({ messaggi }) => {
   const chatInputRef = useRef<any>(null);
   const { session } = useAuth();
   useEffect(() => {
-    console.log("aperto chat");
+    console.log("aperto chat", messaggi);
   }, []);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
@@ -78,12 +83,13 @@ const Chats = ({ messaggi }) => {
   console.log(currentGroupData);
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="bg-bg-1 p-2 2xl:p-4  border-b border-gray-400 flex flex-row items-center gap-2">
+      <div className="bg-bg-1 p-2 items-center 2xl:p-4  border-b border-gray-400 flex flex-row  gap-2">
         {currentScreen == "xs" && (
           <div
             className="w-7 h-7"
             onClick={() => {
               setMobileView("groups");
+              setCurrentGroup(null);
             }}
           >
             <ChevronLeft color={"#2463eb"} />
@@ -95,24 +101,25 @@ const Chats = ({ messaggi }) => {
             className="w-10 h-10 2xl:w-16 2xl:h-16"
             alt=""
           />{" "}
-          <div className="">
-            <span className="text-text-1 font-bold font-body text-xl 2xl:text-3xl">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-text-1 font-bold font-body text-xl 2xl:text-3xl leading-4">
               {currentGroupData?.nome}
             </span>
-            <div>
-              {currentGroupData?.partecipanti_gruppo?.map(
-                (partecipante, iPart) => {
-                  return (
-                    <span key={partecipante.utenti.user_id}>
-                      {partecipante.utenti.nome}{" "}
-                      {iPart !==
-                        currentGroupData?.partecipanti_gruppo?.length - 1 &&
-                        ", "}
-                    </span>
-                  );
-                }
-              )}
-            </div>
+
+            {currentGroupData?.partecipanti_gruppo?.map(
+              (partecipante, iPart) => {
+                return (
+                  <span
+                    key={partecipante.utenti.user_id}
+                    className=" font-body text-text-1 text-xs "
+                  >
+                    {partecipante.utenti.nome}{" "}
+                    {iPart !==
+                      currentGroupData?.partecipanti_gruppo?.length - 1 && ", "}
+                  </span>
+                );
+              }
+            )}
           </div>
         </div>
       </div>
@@ -120,7 +127,7 @@ const Chats = ({ messaggi }) => {
         <div className="fixed top-1/2 right-3 p-1 bg-primary flex items-center justify-center rounded-full hover:bg-primary/80 cursor-pointer z-20">
           <ChevronLeft color={"#ffffff"} />
         </div>
-        <div className="flex flex-col gap-2 mt-8  px-2 2xl:px-8">
+        <div className="flex flex-col gap-1.5 2xl:gap-2 mt-8  px-2 2xl:px-8">
           {messaggi.map((mess) => {
             if (mess.type == "event") {
               return (
