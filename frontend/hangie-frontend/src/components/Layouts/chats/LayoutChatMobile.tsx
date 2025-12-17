@@ -12,7 +12,6 @@ import ChatsEvents from "@/features/chats/ChatsEvents.js";
 import Chats from "@/app/pages/Chats.js";
 import BottomNav from "@/app/pages/mobile/BottomNav.js";
 import CreateEventForm from "@/features/events/CreateEventForm.js";
-import CreateEventFormMobile from "./CreateEventFormMobile.js";
 const LayoutChatMobile = () => {
   const {
     currentGroup,
