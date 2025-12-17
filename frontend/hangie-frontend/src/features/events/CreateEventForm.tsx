@@ -20,7 +20,6 @@ const CreateEventForm = () => {
   const { session } = useAuth();
   const { socketRef, setCurrentChatData } = useChat();
   const [images, setImages] = useState([]);
-  const [currentStep, setCurrentStep] = useState(1);
   const schema = z
     .object({
       titolo: z.string().min(1, "il titolo è obbligatorio"),
@@ -229,16 +228,6 @@ const CreateEventForm = () => {
           setImages={setImages}
         />
         {/* Footer e Pulsante Crea */}
-        <div className={`flex justify-center p-4 bg-bg-2 border-t border-bg-3`}>
-          <button
-            type="submit" // Uso type="button" e chiamo la funzione che gestisce la validazione e l'invio
-            className={`px-9 py-4 bg-primary text-white font-bold rounded-xl 
-                        hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-lg cursor-pointer`}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Creazione..." : "Crea e Pubblica Evento"}
-          </button>
-        </div>
       </form>
     </div>
   );
