@@ -1,6 +1,6 @@
 import React from "react";
 
-const ChevronRight = () => {
+const ChevronRight = ({ color }) => {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -14,7 +14,7 @@ const ChevronRight = () => {
           fill="none"
           id="Right"
           points="8.5 5 15.5 12 8.5 19"
-          stroke="#2463eb"
+          stroke={color}
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"

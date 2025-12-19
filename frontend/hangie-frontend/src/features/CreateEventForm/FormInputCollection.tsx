@@ -11,8 +11,8 @@ const FormInputCollection = ({
   setImageError,
   images,
   setImages,
+  currentStep,
 }) => {
-  const [currentStep, setCurrentStep] = useState(2);
   const { currentScreen } = useScreen();
   const renderCurrentStep = () => {
     if (currentScreen == "xs") {
@@ -20,7 +20,7 @@ const FormInputCollection = ({
       switch (currentStep) {
         case 1:
           return (
-            <div className="p-4 2xl:p-8 flex flex-col gap-3">
+            <div className="p-4 2xl:p-8 flex flex-col gap-3 h-full">
               <ImageInput
                 imageError={imageError}
                 setImageError={setImageError}
@@ -116,23 +116,10 @@ const FormInputCollection = ({
                   </div>
                 </div>
               </div>
-              <div
-                className={`flex justify-center p-3 bg-bg-2 border-t border-bg-3`}
-              >
-                <button
-                  type="submit" // Uso type="button" e chiamo la funzione che gestisce la validazione e l'invio
-                  className={`px-4 py-3 bg-primary text-white font-bold rounded-xl 
-                hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-base cursor-pointer`}
-                  // disabled={isSubmitting}
-                >
-                  {/* {isSubmitting ? "Creazione..." : "Crea e Pubblica Evento"} */}
-                  Crea e Pubblica Evento
-                </button>
-              </div>
             </div>
           );
         default:
-          return <p>default {currentStep}</p>;
+          return <p>{currentStep}</p>;
       }
     } else {
       return (
@@ -234,18 +221,6 @@ const FormInputCollection = ({
             </div>
           </div>
           {/* Indirizzo */}
-          <div
-            className={`flex justify-center p-4 bg-bg-2 border-t border-bg-3`}
-          >
-            <button
-              type="submit" // Uso type="button" e chiamo la funzione che gestisce la validazione e l'invio
-              className={`px-9 py-4 bg-primary text-white font-bold rounded-xl 
-                hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-lg cursor-pointer`}
-              // disabled={isSubmitting}
-            >
-              {/* {isSubmitting ? "Creazione..." : "Crea e Pubblica Evento"} */}
-            </button>
-          </div>
         </>
       );
     }

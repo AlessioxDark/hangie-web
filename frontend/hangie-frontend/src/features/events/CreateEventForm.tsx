@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useModal } from "@/contexts/ModalContext";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
+import { CheckIcon, X } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -13,6 +13,8 @@ import { supabase } from "../../config/db.js";
 import FormInputCollection from "../CreateEventForm/FormInputCollection.js";
 import ChevronLeft from "@/assets/icons/ChevronLeft.js";
 import ChevronRight from "@/assets/icons/ChevronRight.js";
+import { useScreen } from "@/contexts/ScreenContext.js";
+import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
 
 const CreateEventForm = () => {
   const IMAGE_LIMIT = 4;
@@ -66,11 +68,15 @@ const CreateEventForm = () => {
   const {
     register,
     handleSubmit,
+    getValues,
+    trigger,
     formState: { errors, isSubmitting },
     setError,
   } = methods;
   const { currentGroup, currentGroupData } = useChat();
-
+  const { currentScreen } = useScreen();
+  const { setMobileView } = useMobileLayoutChat();
+  const [currentStep, setCurrentStep] = useState(1);
   const [imageError, setImageError] = useState(false); // Stato per l'errore
   const sendEvent = (event_id, event_details) => {
     socketRef.current.emit(
@@ -186,10 +192,10 @@ const CreateEventForm = () => {
   };
   return (
     <div
-      className={`w-full max-w-4xl mx-auto rounded-2xl shadow-2xl overflow-hidden bg-bg-1`}
+      className={`w-full max-w-4xl mx-auto rounded-2xl shadow-2xl overflow-hidden bg-bg-1 relative`}
     >
       <form
-        className="flex flex-col"
+        className="flex flex-col h-screen"
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit(onSubmit)();
@@ -198,37 +204,154 @@ const CreateEventForm = () => {
         {/* Intestazione */}
         <div className={`2xl:px-8 2xl:pt-8 p-2 2xl:pb-4 border-b border-bg-3`}>
           <div className="flex justify-between items-center">
-            <h1
-              className={`text-text-1 font-body font-bold text-lg 2xl:text-4xl`}
-            >
-              Crea Evento
-            </h1>
+            <div className="flex flex-row gap-1 items-center">
+              {currentScreen == "xs" && (
+                <div
+                  className="w-6 h-6"
+                  onClick={() => {
+                    //
+                    if (currentStep == 2) {
+                      setCurrentStep(1);
+                    } else {
+                      setMobileView("chat");
+                    }
+                  }}
+                >
+                  <ChevronLeft color="#64748b" />
+                </div>
+              )}
+              <h1
+                className={`text-text-1 font-body font-bold text-lg 2xl:text-4xl`}
+              >
+                Crea Evento
+              </h1>
+            </div>
             <button
               type="button"
               className={`text-text-2 cursor-pointer transition-colors 2xl:p-1 rounded-full hover:bg-bg-3`}
               onClick={closeModal}
               aria-label="Chiudi Modale"
             >
-              {/* <X width={25} height={25} /> */}
-              <div className="w-6 h-6">
-                <ChevronRight color="#64748b" />
-              </div>
+              {currentScreen !== "xs" && <X width={25} height={25} />}
+              {/* {currentScreen == "xs" ? (
+                currentStep == 1 ? (
+                  <div
+                    className=" flex flex-row items-center font-body text-xs text-primary"
+                    onClick={async () => {
+                      // valida form
+                      const result = await trigger(["titolo", "descrizione"]);
+                      if (images.length == 0) {
+                        setImageError({
+                          message: "inserisci almeno un'immagine",
+                        });
+                      }
+                      if (result && !imageError) {
+                        setCurrentStep(2);
+                      } else {
+                        if (errors.titolo) {
+                          setError("titolo", {
+                            message: errors.titolo.message,
+                          });
+                        }
+                        if (errors.descrizione) {
+                          setError("descrizione", {
+                            message: errors.descrizione.message,
+                          });
+                        }
+                        if (imageError) {
+                          setError("root", {
+                            message: imageError,
+                          });
+                        }
+                      }
+                    }}
+                  >
+                    Avanti{" "}
+                    <div className="w-6 h-6">
+                      <ChevronRight color="#2463eb" />
+                    </div>
+                  </div>
+                ) : (
+                  <></>
+                )
+              ) : (
+                <X width={25} height={25} />
+              )} */}
             </button>
           </div>
         </div>
 
         {/* Contenuto del Form (Step 1) */}
-
-        <FormInputCollection
-          register={register}
-          errors={errors}
-          imageError={imageError}
-          setImageError={setImageError}
-          images={images}
-          setImages={setImages}
-        />
+        <div className={`${currentScreen == "xs" && "pb-32 overflow-y-auto"}`}>
+          <FormInputCollection
+            register={register}
+            errors={errors}
+            imageError={imageError}
+            setImageError={setImageError}
+            images={images}
+            setImages={setImages}
+            currentStep={currentStep}
+          />
+        </div>
         {/* Footer e Pulsante Crea */}
+        {currentScreen == "xs" && (
+          <div
+            className="fixed bottom-5 right-5 flex items-center justify-center  font-body text-xs text-primary bg-primary p-3 rounded-full"
+            onClick={async () => {
+              //aggiustare layout form nel secondo step magari fare un terzostep e gestire meglio i vari input per rendere il tutto più uniforme
+              if (currentStep == 1) {
+                const result = await trigger(["titolo", "descrizione"]);
+                if (images.length == 0) {
+                  setImageError({
+                    message: "inserisci almeno un'immagine",
+                  });
+                }
+                if (result && !imageError) {
+                  setCurrentStep(2);
+                } else {
+                  if (errors.titolo) {
+                    setError("titolo", {
+                      message: errors.titolo.message,
+                    });
+                  }
+                  if (errors.descrizione) {
+                    setError("descrizione", {
+                      message: errors.descrizione.message,
+                    });
+                  }
+                  if (imageError) {
+                    setError("root", {
+                      message: imageError,
+                    });
+                  }
+                }
+              }
+            }}
+          >
+            {currentStep == 1 ? (
+              <div className="w-6 h-6">
+                <ChevronRight color="#ffffff" />
+              </div>
+            ) : (
+              <button type="submit" className="w-6 h-6">
+                <CheckIcon color="#ffffff" />
+              </button>
+            )}
+          </div>
+        )}
       </form>
+      {currentScreen !== "xs" && (
+        <div className={`flex justify-center p-4 bg-bg-2 border-t border-bg-3`}>
+          <button
+            type="submit" // Uso type="button" e chiamo la funzione che gestisce la validazione e l'invio
+            className={`px-9 py-4 bg-primary text-white font-bold rounded-xl 
+                hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-lg cursor-pointer`}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creazione..." : "Crea e Pubblica Evento"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

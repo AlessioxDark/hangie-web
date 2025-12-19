@@ -2,6 +2,7 @@ import {
   closestCenter,
   DndContext,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -12,6 +13,7 @@ import {
 } from "@dnd-kit/sortable";
 import React, { useCallback, useRef } from "react";
 import SortableImg from "./SortableImg";
+import { useScreen } from "@/contexts/ScreenContext";
 
 const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 const ImageInput = ({
@@ -40,7 +42,8 @@ const ImageInput = ({
       return;
     }
     for (let i = 0; i < files.length; i++) {
-      const ext = files[i].name.split(".")[1];
+      const ext = files[i].type.split("/")[1];
+      console.log(ext, files[i].type);
       console.log(ext);
       if (!ACCEPTED_EXTENSIONS.includes(ext)) {
         setImageError({
@@ -49,6 +52,7 @@ const ImageInput = ({
         event.target.value = null;
         return;
       }
+      setImageError(null);
     }
     // Convertiamo i file selezionati in URL temporanei
     const newImages = Array.from(files).map((file, index) => ({
@@ -100,9 +104,19 @@ const ImageInput = ({
       });
     }
   };
-  const sensors = useSensors(
+  const desktopSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }) // Consente un leggero movimento prima di attivare il D&D
   );
+  const mobileSensors = useSensors(
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 100, // FONDAMENTALE: devi tenere premuto per 250ms prima che parta il drag
+        tolerance: 8,
+      },
+    }) // Consente un leggero movimento prima di attivare il D&D
+  );
+
+  const { currentScreen } = useScreen();
   return (
     <div className="flex flex-col gap-1.5 2xl:gap-3">
       <input
@@ -118,54 +132,55 @@ const ImageInput = ({
       >
         Carosello immagini <span className="text-red-500 text-sm">*</span>
       </h1>
-
-      <div className="flex flex-row  gap-2 2xl:gap-4 overflow-x-auto pb-2 2xl:pb-4 items-end">
-        {/* Bottone Aggiungi Immagine */}
-        <div
-          className={`bg-bg-2 rounded-xl border-2 ${
-            imageError
-              ? "border-red-500 ring-4 ring-red-100"
-              : `border-text-2 border-dashed`
-          } 
+      <div className="flex flex-col gap-0.5">
+        <div className="flex flex-row  gap-2 2xl:gap-4 overflow-x-auto pb-2 2xl:pb-4 items-end">
+          {/* Bottone Aggiungi Immagine */}
+          <div
+            className={`bg-bg-2 rounded-xl border-2 ${
+              imageError
+                ? "border-red-500 ring-4 ring-red-100"
+                : `border-text-2 border-dashed`
+            } 
                                     aspect-square minw-[80px] w-24 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
                                     hover:bg-bg-3 transition-all duration-200 shadow-inner`}
-          onClick={handleButtonClick}
-          aria-label="Aggiungi Immagine"
-        >
-          <span
-            className={`font-body font-bold text-text-2 text-4xl 2xl:text-6xl`}
+            onClick={handleButtonClick}
+            aria-label="Aggiungi Immagine"
           >
-            +
-          </span>
-        </div>
+            <span
+              className={`font-body font-bold text-text-2 text-4xl 2xl:text-6xl`}
+            >
+              +
+            </span>
+          </div>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter} // Strategia di collisione
-          onDragEnd={handleDragEnd} // Funzione di callback
-        >
-          {/* Il SortableContext contiene gli elementi da trascinare */}
-          <SortableContext
-            items={images.map((img) => img.url)} // Array di ID (URL) degli elementi trascinabili
-            strategy={horizontalListSortingStrategy}
+          <DndContext
+            sensors={currentScreen == "xs" ? mobileSensors : desktopSensors}
+            collisionDetection={closestCenter} // Strategia di collisione
+            onDragEnd={handleDragEnd} // Funzione di callback
           >
-            <div className="flex flex-row gap-4">
-              {images.map((image, index) => (
-                <SortableImg
-                  key={image.url}
-                  image={image}
-                  index={index}
-                  removeImg={removeImg}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-        {/* Anteprime Immagini */}
+            {/* Il SortableContext contiene gli elementi da trascinare */}
+            <SortableContext
+              items={images.map((img) => img.url)} // Array di ID (URL) degli elementi trascinabili
+              strategy={horizontalListSortingStrategy}
+            >
+              <div className="flex flex-row gap-2 2xl:gap-4">
+                {images.map((image, index) => (
+                  <SortableImg
+                    key={image.url}
+                    image={image}
+                    index={index}
+                    removeImg={removeImg}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+          {/* Anteprime Immagini */}
+        </div>
+        {imageError && (
+          <p className="text-sm  text-red-600 -mt-2">{imageError.message}</p>
+        )}
       </div>
-      {imageError && (
-        <p className="text-sm  text-red-600 -mt-2">{imageError.message}</p>
-      )}
     </div>
   );
 };
