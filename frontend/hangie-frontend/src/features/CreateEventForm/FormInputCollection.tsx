@@ -16,7 +16,6 @@ const FormInputCollection = ({
   const { currentScreen } = useScreen();
   const renderCurrentStep = () => {
     if (currentScreen == "xs") {
-      console.log(currentStep);
       switch (currentStep) {
         case 1:
           return (
@@ -48,7 +47,6 @@ const FormInputCollection = ({
               </div>
             </div>
           );
-
         case 2:
           return (
             <div className="p-4 2xl:p-8 flex flex-col gap-3">
@@ -76,50 +74,47 @@ const FormInputCollection = ({
                   error={errors.costo}
                 />
               </div>
+            </div>
+          );
+        case 3:
+          return (
+            <div className="p-4 flex flex-col gap-3">
               <div className="flex flex-col gap-3">
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-row gap-4">
-                    <FormInput
-                      id="nome_luogo"
-                      label="Nome Luogo"
-                      placeholder="Casa di Marco"
-                      type="text"
-                      register={register}
-                      error={errors.nome_luogo}
-                    />
-                    <FormInput
-                      id="indirizzo"
-                      label="Indirizzo / Luogo"
-                      placeholder="Via Roma, 12, 00100 Roma"
-                      type="text"
-                      register={register}
-                      error={errors.indirizzo}
-                    />
-                  </div>
-                  <div className="flex flex-row gap-4">
-                    <FormInput
-                      id="citta"
-                      label="Citta / Provincia"
-                      placeholder="Roma"
-                      type="text"
-                      register={register}
-                      error={errors.citta}
-                    />
-                    <FormInput
-                      id="cap"
-                      label="CAP"
-                      placeholder="00100"
-                      type="text"
-                      register={register}
-                      error={errors.cap}
-                    />
-                  </div>
-                </div>
+                <FormInput
+                  id="nome_luogo"
+                  label="Nome Luogo"
+                  placeholder="Casa di Marco"
+                  type="text"
+                  register={register}
+                  error={errors.nome_luogo}
+                />
+                <FormInput
+                  id="indirizzo"
+                  label="Indirizzo / Luogo"
+                  placeholder="Via Roma, 12, 00100 Roma"
+                  type="text"
+                  register={register}
+                  error={errors.indirizzo}
+                />
+                <FormInput
+                  id="citta"
+                  label="Citta / Provincia"
+                  placeholder="Roma"
+                  type="text"
+                  register={register}
+                  error={errors.citta}
+                />
+                <FormInput
+                  id="cap"
+                  label="CAP"
+                  placeholder="00100"
+                  type="text"
+                  register={register}
+                  error={errors.cap}
+                />
               </div>
             </div>
           );
-        default:
-          return <p>{currentStep}</p>;
       }
     } else {
       return (
@@ -220,7 +215,6 @@ const FormInputCollection = ({
               </div>
             </div>
           </div>
-          {/* Indirizzo */}
         </>
       );
     }

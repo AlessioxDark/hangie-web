@@ -210,8 +210,8 @@ const CreateEventForm = () => {
                   className="w-6 h-6"
                   onClick={() => {
                     //
-                    if (currentStep == 2) {
-                      setCurrentStep(1);
+                    if (currentStep >= 2) {
+                      setCurrentStep((lastStep) => lastStep - 1);
                     } else {
                       setMobileView("chat");
                     }
@@ -307,7 +307,35 @@ const CreateEventForm = () => {
                   });
                 }
                 if (result && !imageError) {
-                  setCurrentStep(2);
+                  setCurrentStep((lastStep) => lastStep + 1);
+                } else {
+                  if (errors.titolo) {
+                    setError("titolo", {
+                      message: errors.titolo.message,
+                    });
+                  }
+                  if (errors.descrizione) {
+                    setError("descrizione", {
+                      message: errors.descrizione.message,
+                    });
+                  }
+                  if (imageError) {
+                    setError("root", {
+                      message: imageError,
+                    });
+                  }
+                }
+              }
+
+              if (currentStep == 2) {
+                const result = await trigger([
+                  "data",
+                  "data_scadenza",
+                  "costo",
+                ]);
+
+                if (result) {
+                  setCurrentStep((lastStep) => lastStep + 1);
                 } else {
                   if (errors.titolo) {
                     setError("titolo", {
@@ -328,7 +356,7 @@ const CreateEventForm = () => {
               }
             }}
           >
-            {currentStep == 1 ? (
+            {currentStep <= 2 ? (
               <div className="w-6 h-6">
                 <ChevronRight color="#ffffff" />
               </div>

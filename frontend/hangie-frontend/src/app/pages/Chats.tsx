@@ -10,6 +10,8 @@ import { supabase } from "../../config/db.js";
 import ChevronLeft from "@/assets/icons/ChevronLeft.js";
 import { useScreen } from "@/contexts/ScreenContext.js";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
+import { Calendar } from "lucide-react";
+import CalendarIcon from "@/assets/icons/CalendarIcon.js";
 const Chats = ({ messaggi }) => {
   const {
     currentGroupData,
@@ -83,44 +85,67 @@ const Chats = ({ messaggi }) => {
   console.log(currentGroupData);
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="bg-bg-1 p-2 items-center 2xl:p-4  border-b border-gray-400 flex flex-row  gap-2">
-        {currentScreen == "xs" && (
-          <div
-            className="w-7 h-7"
-            onClick={() => {
-              setMobileView("groups");
-              setCurrentGroup(null);
-            }}
-          >
-            <ChevronLeft color={"#2463eb"} />
-          </div>
-        )}
-        <div className="flex flex-row items-center gap-3 2xl:gap-6">
-          <img
-            src={currentGroupData?.group_cover_img}
-            className="w-10 h-10 2xl:w-16 2xl:h-16"
-            alt=""
-          />{" "}
-          <div className="flex flex-col gap-0.5">
-            <span className="text-text-1 font-bold font-body text-xl 2xl:text-3xl leading-4">
-              {currentGroupData?.nome}
-            </span>
+      <div className="bg-bg-1 p-2 items-center 2xl:p-4  border-b border-gray-400 flex flex-row  justify-between">
+        <div className="flex flex-row gap-1 items-center">
+          {currentScreen == "xs" && (
+            <div
+              className="w-7 h-7"
+              onClick={() => {
+                setMobileView("groups");
+                setCurrentGroup(null);
+              }}
+            >
+              <ChevronLeft color={"#2463eb"} />
+            </div>
+          )}
+          <div className="flex flex-row items-center gap-3 2xl:gap-6">
+            <img
+              src={currentGroupData?.group_cover_img}
+              className="w-10 h-10 2xl:w-16 2xl:h-16"
+              alt=""
+            />{" "}
+            <div className="flex flex-col gap-0.5">
+              <span className="text-text-1 font-bold font-body text-xl 2xl:text-3xl leading-4">
+                {currentGroupData?.nome}
+              </span>
 
-            {currentGroupData?.partecipanti_gruppo?.map(
-              (partecipante, iPart) => {
-                return (
-                  <span
-                    key={partecipante.utenti.user_id}
-                    className=" font-body text-text-1 text-xs "
-                  >
-                    {partecipante.utenti.nome}{" "}
-                    {iPart !==
-                      currentGroupData?.partecipanti_gruppo?.length - 1 && ", "}
-                  </span>
-                );
-              }
-            )}
+              {currentGroupData?.partecipanti_gruppo?.map(
+                (partecipante, iPart) => {
+                  return (
+                    <span
+                      key={partecipante.utenti.user_id}
+                      className=" font-body text-text-1 text-xs "
+                    >
+                      {partecipante.utenti.nome}{" "}
+                      {iPart !==
+                        currentGroupData?.partecipanti_gruppo?.length - 1 &&
+                        ", "}
+                    </span>
+                  );
+                }
+              )}
+            </div>
           </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setMobileView("events")}
+            className="relative p-2.5 rounded-full bg-[#D9EAFF] active:bg-indigo-100 transition-all group"
+            title="Vedi Eventi"
+          >
+            {/* <Calendar
+              size={22}
+              className="text-primary group-active:scale-90 transition-transform"
+            /> */}
+            <div className="w-6 h-6">
+              <CalendarIcon color={"#2463eb"} />
+            </div>
+
+            {/* <span className="absolute top-2 right-2 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-600 border-2 border-white"></span>
+            </span> */}
+          </button>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto  relative">

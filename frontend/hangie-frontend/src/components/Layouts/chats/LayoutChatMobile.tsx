@@ -154,21 +154,7 @@ const LayoutChatMobile = () => {
     );
   };
   return (
-    // <div className="h-screen w-full flex flex-row">
-    //   <Sidebar />
-    //   <ChatsSidebar />
-    //   <div className="flex flex-col h-screen w-full bg-bg-2">
-    //     <main className="flex-grow h-screen overflow-y-auto">
-    //       {renderContent()}
-    //     </main>
-    //   </div>
-    //   {/* <ChatsEvents /> */}
-    // </div>
     <div className="h-screen w-full flex flex-col justify-between ">
-      {/* <div className="overflow-hidden">{renderContent()}</div>
-      <div>
-        <BottomNav />
-      </div> */}
       {renderContent()}
     </div>
   );

@@ -112,15 +112,17 @@ const ChatsEvents = ({}) => {
   }, [groupEventsData, currentFilter, query, session?.user.id]);
 
   return (
-    <div className="min-w-1/5 max-w-1/5 h-full">
-      <div className="p-6 flex flex-col gap-8">
+    <div className="2xl:min-w-1/5 2xl:max-w-1/5 h-full">
+      <div className="p-3 2xl:p-6 flex flex-col gap-3 2xl:gap-8">
         <div className="flex flex-row justify-between items-center w-full">
-          <h1 className="font-body font-bold text-2xl">Eventi Gruppo</h1>
+          <h1 className="font-body font-bold text-base 2xl:text-2xl">
+            Eventi Gruppo
+          </h1>
           {/* <span className="text-text-2 text-sm font-body">
 						{groupEventsData?.all.length || 0} eventi
 					</span> */}
         </div>
-        <div className="w-full flex flex-col gap-4">
+        <div className="w-full flex flex-col gap-2 2xl:gap-4">
           <SearchBar query={query} setQuery={setQuery} />
 
           <div className="flex w-full flex-row gap-3 items-center">
@@ -134,14 +136,14 @@ const ChatsEvents = ({}) => {
                       setCurrentFilter(filter);
                     }
                   }}
-                  className={`px-5 py-2 ${
+                  className={`px-3 py-1 2xl:px-4 2xl:py-2 ${
                     currentFilter == filter
                       ? "bg-primary text-bg-1 shadow-lg shadow-primary/50"
                       : "bg-bg-2 text-text-2 border border-text-2 hover:bg-bg-3 hover:shadow-md"
-                  } font-body   text-xl cursor-pointer
+                  } font-body   text-base 2xl:text-xl cursor-pointer
                 
                 
-                px-4 py-2 
+                
              
               font-semibold 
               rounded-full 
