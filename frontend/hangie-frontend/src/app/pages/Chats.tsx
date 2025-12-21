@@ -149,9 +149,9 @@ const Chats = ({ messaggi }) => {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto  relative">
-        <div className="fixed top-1/2 right-3 p-1 bg-primary flex items-center justify-center rounded-full hover:bg-primary/80 cursor-pointer z-20">
+        {/* <div className="fixed top-1/2 right-3 p-1 bg-primary flex items-center justify-center rounded-full hover:bg-primary/80 cursor-pointer z-20">
           <ChevronLeft color={"#ffffff"} />
-        </div>
+        </div> */}
         <div className="flex flex-col gap-1.5 2xl:gap-2 mt-8  px-2 2xl:px-8">
           {messaggi.map((mess) => {
             if (mess.type == "event") {

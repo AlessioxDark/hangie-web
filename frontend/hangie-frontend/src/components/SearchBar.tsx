@@ -7,7 +7,7 @@ const SearchBar = ({ query, setQuery }) => {
   };
   return (
     <div
-      className="border border-bg-3 p-1 px-3  2xl:p-3 h-1 rounded-4xl flex flex-row justify-between items-center  bg-bg-2 w-full mx-auto focus-within:ring-2 focus-within:ring-primary
+      className="border border-bg-3 p-1.5 px-3  2xl:p-3 h-1 rounded-4xl flex flex-row justify-between items-center  bg-bg-2 w-full mx-auto focus-within:ring-2 focus-within:ring-primary
       flex-1 shadow-inner transition-shadow
     
     "
@@ -18,7 +18,7 @@ const SearchBar = ({ query, setQuery }) => {
         </div>
         <input
           type="text"
-          className="w-full h-full text-base 2xl:text-lg outline-none  flex items-center placeholder-text-2 focus:outline-none font-body text-text-1 min-h-10 max-h-32 whitespace-pre-wrap "
+          className="w-full h-full text-base 2xl:text-lg outline-none  flex items-center placeholder-text-2 focus:outline-none font-body text-text-1 min-h-8 2xl:min-h-10 max-h-32 whitespace-pre-wrap "
           placeholder="Cerca..."
           onInput={(e) => {
             setQuery(e.target.value);

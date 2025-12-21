@@ -3,6 +3,7 @@ import MapIcon from "@/assets/icons/MapIcon";
 import ParticipantsIcon from "@/assets/icons/ParticipantsIcon";
 import ProfileIcon from "@/components/ProfileIcon";
 import { useModal } from "@/contexts/ModalContext";
+import { useScreen } from "@/contexts/ScreenContext";
 import React from "react";
 import { Link } from "react-router";
 
@@ -81,6 +82,7 @@ const GroupEventCard = ({
   };
 
   const { openModal } = useModal();
+  const { currentScreen } = useScreen();
   return (
     <div
       className={`flex flex-col p-3 2xl:p-4   border border-[#E2E8F0] rounded-xl cursor-pointer group
@@ -118,27 +120,29 @@ const GroupEventCard = ({
                     className={`
                       
 		      flex items-center gap-2
-		      2xl:px-3 2xl:py-2
-		     2xl:bg-primary
+		      px-3 py-2
+		     bg-primary
 		      rounded-xl
 		      flex-shrink-0
 
 		    `}
                   >
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="text-xs font-body font-bold text-primary 2xl:text-white whitespace-nowrap ">
+                    {currentScreen != "xs" && (
+                      <svg
+                        className="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    )}
+                    <span className="text-xs font-body font-bold text-bg-1 whitespace-nowrap ">
                       {getUrgencyText()}
                     </span>
                   </div>

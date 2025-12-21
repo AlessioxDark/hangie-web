@@ -252,7 +252,7 @@ const Home = () => {
                         Vedi Tutti
                       </span>
                       <div className="w-5 h-5 2xl:w-10  2xl:h-10 flex items-center">
-                        <ChevronRight />
+                        <ChevronRight color={"#2463eb"} />
                       </div>
                     </Link>
                   </div>

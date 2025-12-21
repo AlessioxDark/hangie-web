@@ -5,6 +5,9 @@ import GroupEventCard from "@/features/groups/GroupEventCard";
 import { AlertCircle, Calendar, Loader2 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useScreen } from "@/contexts/ScreenContext";
+import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
+import ChevronLeft from "@/assets/icons/ChevronLeft";
 
 const FILTER_TYPES = ["accepted", "pending", "archive"];
 const ChatsEvents = ({}) => {
@@ -15,6 +18,9 @@ const ChatsEvents = ({}) => {
   const { currentGroup } = useChat();
   const [query, setQuery] = useState("");
   const { session } = useAuth();
+  const { currentScreen } = useScreen();
+  const { setMobileView } = useMobileLayoutChat();
+
   const fetchGroupEvents = async () => {
     console.log("Fetch inziata");
     if (isLoading) return;
@@ -114,18 +120,20 @@ const ChatsEvents = ({}) => {
   return (
     <div className="2xl:min-w-1/5 2xl:max-w-1/5 h-full">
       <div className="p-3 2xl:p-6 flex flex-col gap-3 2xl:gap-8">
-        <div className="flex flex-row justify-between items-center w-full">
-          <h1 className="font-body font-bold text-base 2xl:text-2xl">
+        <div className="flex flex-row gap-1 items-center w-full">
+          {currentScreen == "xs" && (
+            <div className="w-6 h-6" onClick={() => setMobileView("chat")}>
+              <ChevronLeft color="#2463eb" />
+            </div>
+          )}
+          <h1 className="font-body font-bold text-lg 2xl:text-2xl">
             Eventi Gruppo
           </h1>
-          {/* <span className="text-text-2 text-sm font-body">
-						{groupEventsData?.all.length || 0} eventi
-					</span> */}
         </div>
-        <div className="w-full flex flex-col gap-2 2xl:gap-4">
+        <div className="w-full flex flex-col gap-3 2xl:gap-4">
           <SearchBar query={query} setQuery={setQuery} />
 
-          <div className="flex w-full flex-row gap-3 items-center">
+          <div className="flex w-full flex-row gap-2 2xl:gap-3 items-center">
             {FILTER_TYPES.map((filter) => {
               return (
                 <div

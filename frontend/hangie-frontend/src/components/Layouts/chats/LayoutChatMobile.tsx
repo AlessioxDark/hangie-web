@@ -12,6 +12,7 @@ import ChatsEvents from "@/features/chats/ChatsEvents.js";
 import Chats from "@/app/pages/Chats.js";
 import BottomNav from "@/app/pages/mobile/BottomNav.js";
 import CreateEventForm from "@/features/events/CreateEventForm.js";
+import CreateGroupForm from "@/features/chats/CreateGroupForm.js";
 const LayoutChatMobile = () => {
   const {
     currentGroup,
@@ -146,6 +147,9 @@ const LayoutChatMobile = () => {
     }
     if (mobileView == "CREATE_EVENT") {
       return <CreateEventForm />;
+    }
+    if (mobileView == "CREATE_GROUP") {
+      return <CreateGroupForm />;
     }
     return (
       <p className="p-4 text-center text-gray-500">
