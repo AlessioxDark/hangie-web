@@ -7,9 +7,11 @@ import FriendCard from "../friends/FriendCard";
 const AddParticipantsGroup = ({
   setIsParticipantsAdd,
   setCurrentParticipants,
+  currentParticipants,
 }) => {
   const [query, setQuery] = useState("");
-  const [friendsData, setFriendsData] = useState(null);
+  const [friendsData, setFriendsData] = useState([]);
+  const [currentFriendsData, setCurrentFriendsData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
   const { session } = useAuth();
@@ -26,6 +28,7 @@ const AddParticipantsGroup = ({
               : friend.user_2;
           });
           setFriendsData(newData);
+          setCurrentFriendsData(newData);
         });
     } catch (error) {
       console.log(error);
@@ -37,8 +40,24 @@ const AddParticipantsGroup = ({
   useEffect(() => {
     fetchFriends();
   }, []);
+
+  // useEffect(()=>)
+  useEffect(() => {
+    if (query) {
+      setCurrentFriendsData((prevData) => {
+        return prevData.filter((friend) => {
+          const pattern = new RegExp(`^${query}`, "i");
+          if (friend.handle.match(pattern)) return friend;
+        });
+      });
+    } else {
+      setCurrentFriendsData(friendsData);
+    }
+  }, [query]);
+  const [localParticipants, setLocalParticipants] =
+    useState(currentParticipants);
   return (
-    <div>
+    <div className="flex flex-col gap-3">
       {/* <div className="flex flex-row gap-1">
         <div
           className="w-6 h-6"
@@ -50,7 +69,7 @@ const AddParticipantsGroup = ({
         </div>
         <h3>Partecipanti</h3>
       </div> */}
-      <div className="w-full  p-2 border-b border-bg-3 items-center">
+      <div className="w-full  p-2 border-b border-bg-3 items-center flex flex-row justify-between">
         <div className="flex flex-row gap-1 items-center">
           <div
             className="w-6 h-6"
@@ -64,6 +83,20 @@ const AddParticipantsGroup = ({
             Aggiungi partecipanti
           </h1>
         </div>
+
+        <button
+          className="px-2 py-1 rounded-md font-body text-bg-1 text-sm bg-primary disabled:bg-primary/75"
+          disabled={localParticipants.length == 0}
+          onClick={() => {
+            console.log(localParticipants);
+            setCurrentParticipants((prevParticipants) => {
+              return [...localParticipants];
+            });
+            setIsParticipantsAdd(false);
+          }}
+        >
+          Invia
+        </button>
       </div>
       <div className="w-full flex flex-col gap-3 2xl:gap-4 px-3">
         <SearchBar query={query} setQuery={setQuery} />
@@ -71,9 +104,15 @@ const AddParticipantsGroup = ({
           {isLoading ? (
             <p>loading</p>
           ) : (
-            <div>
-              {friendsData?.map((friend) => {
-                return <FriendCard {...friend} />;
+            <div className="flex flex-col gap-2">
+              {currentFriendsData?.map((friend) => {
+                return (
+                  <FriendCard
+                    friend={friend}
+                    localParticipants={localParticipants}
+                    setLocalParticipants={setLocalParticipants}
+                  />
+                );
               })}
             </div>
           )}

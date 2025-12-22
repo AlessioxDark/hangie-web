@@ -6,9 +6,10 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import FormInput from "../CreateEventForm/FormInput";
 import FormTextarea from "../CreateEventForm/FormTextarea";
-import { Divide, Plus } from "lucide-react";
+import { Divide, Plus, Trash, X } from "lucide-react";
 import AddParticipantsGroup from "./AddParticipantsGroup";
 import FriendCard from "../friends/FriendCard";
+import ParticipantCard from "./ParticipantCard";
 const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 
 const CreateGroupForm = () => {
@@ -27,6 +28,7 @@ const CreateGroupForm = () => {
   });
   const [groupImage, setGroupImage] = useState(null);
   const [imageError, setImageError] = useState(null);
+  const [participantsError, setParticipantsError] = useState(null);
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const [currentParticipants, setCurrentParticipants] = useState([]);
   const fileInputRef = useRef(null);
@@ -45,108 +47,33 @@ const CreateGroupForm = () => {
     setGroupImage(newImage);
   };
   const handleButtonClick = useCallback(() => {
-    console.log("cliccato");
     fileInputRef.current.click();
   }, []);
 
   const handleParticipantsAdd = () => {
-    console.log("metto true");
     setIsParticipantsAdd(true);
   };
 
   const {
     register,
     handleSubmit,
-    getValues,
-    trigger,
     formState: { errors, isSubmitting },
     setError,
   } = methods;
-  return (
-    <div className="flex flex-col gap-2">
-      {/* <div className="flex flex-col gap-2 px-3 pt-4 ">
-        <div className="w-full flex items-center flex-col gap-2">
-          <input
-            type="file"
-            style={{ display: "none" }}
-            accept="image/*"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-          />
-          {groupImage == null ? (
-            <div
-              className={`bg-bg-2 border-2 rounded-full border-text-2 border-dashed
-                                    aspect-square minw-[80px] w-30 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
-                                    hover:bg-bg-3 transition-all duration-200 shadow-inner`}
-              onClick={handleButtonClick}
-              aria-label="Aggiungi Immagine"
-            >
-              <span
-                className={`font-body font-bold text-text-2 text-4xl 2xl:text-6xl`}
-              >
-                +
-              </span>
-            </div>
-          ) : (
-            <div className="w-30" onClick={handleButtonClick}>
-              <img
-                src={groupImage.url}
-                alt=""
-                className="w-full h-full aspect-square rounded-full"
-              />
-            </div>
-          )}
-          <span className=" text-sm font-body text-primary font-semibold">
-            Inserisci un immagine di copertina
-          </span>
-        </div>
-        <FormInput
-          error={errors.nome}
-          label={"Nome gruppo"}
-          placeholder={"Nome del gruppo"}
-          register={register}
-          id="nome"
-          type={"text"}
-        />
-        <FormTextarea
-          id="descrizione"
-          label="Descrizione"
-          placeholder="Descrizione del gruppo"
-          register={register}
-          error={errors.descrizione}
-        />
-        <div className="flex flex-col gap-1.5">
-          <h3 className="text-text-1 font-body text-sm font-medium ">
-            Partecipanti Gruppo
-          </h3>
-          <div>
-            <div className="overflow-x-auto flex flex-row gap-2">
-              <div
-                className={`bg-bg-2 border-2 rounded-full border-text-2 border-dashed
-                                    aspect-square minw-[80px] w-16 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
-                                    hover:bg-bg-3 transition-all duration-200 shadow-inner`}
-                // onClick={handleButtonClick}
-                onClick={handleParticipantsAdd}
-                aria-label="Aggiungi Immagine"
-              >
-                <span
-                  className={`font-body font-bold text-text-2 text-3xl 2xl:text-6xl`}
-                >
-                  +
-                </span>
-              </div>
-              {currentParticipants.map((participant) => {
-                return <span>{participant.name}</span>;
-              })}
-            </div>
-          </div>
-        </div>
-      </div> */}
 
+  const onSubmit = async () => {
+    if (currentParticipants.length < 2) {
+      setParticipantsError({ message: "inserisci almeno 2 partecipanti" });
+    }
+    setParticipantsError(null);
+  };
+  return (
+    <div className="flex flex-col gap-2 pb-10">
       {isParticipantsAdd ? (
         <AddParticipantsGroup
           setIsParticipantsAdd={setIsParticipantsAdd}
           setCurrentParticipants={setCurrentParticipants}
+          currentParticipants={currentParticipants}
         />
       ) : (
         // <p>true</p>
@@ -167,87 +94,124 @@ const CreateGroupForm = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 px-3 pt-4 ">
-            <div className="w-full flex items-center flex-col gap-2">
-              <input
-                type="file"
-                style={{ display: "none" }}
-                accept="image/*"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-              />
-              {groupImage == null ? (
-                <div
-                  className={`bg-bg-2 border-2 rounded-full border-text-2 border-dashed
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(onSubmit)();
+            }}
+          >
+            <div className="flex flex-col gap-2 px-3 pt-4 ">
+              <div className="w-full flex items-center flex-col gap-2">
+                <input
+                  type="file"
+                  style={{ display: "none" }}
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                />
+                {groupImage == null ? (
+                  <>
+                    <div
+                      className={`bg-bg-2 border-2 rounded-full border-text-2 border-dashed
                                     aspect-square minw-[80px] w-30 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
                                     hover:bg-bg-3 transition-all duration-200 shadow-inner`}
-                  onClick={handleButtonClick}
-                  aria-label="Aggiungi Immagine"
-                >
-                  <span
-                    className={`font-body font-bold text-text-2 text-4xl 2xl:text-6xl`}
-                  >
-                    +
-                  </span>
-                </div>
-              ) : (
-                <div className="w-30" onClick={handleButtonClick}>
-                  <img
-                    src={groupImage.url}
-                    alt=""
-                    className="w-full h-full aspect-square rounded-full"
-                  />
-                </div>
-              )}
-              <span className=" text-sm font-body text-primary font-semibold">
-                Inserisci un immagine di copertina
-              </span>
-            </div>
-            <FormInput
-              error={errors.nome}
-              label={"Nome gruppo"}
-              placeholder={"Nome del gruppo"}
-              register={register}
-              id="nome"
-              type={"text"}
-            />
-            <FormTextarea
-              id="descrizione"
-              label="Descrizione"
-              placeholder="Descrizione del gruppo"
-              register={register}
-              error={errors.descrizione}
-            />
-            <div className="flex flex-col gap-1.5">
-              <h3 className="text-text-1 font-body text-sm font-medium ">
-                Partecipanti Gruppo
-              </h3>
-              <div>
-                <div className="overflow-x-auto flex flex-row gap-2">
-                  <div
-                    className={`bg-bg-2 border-2 rounded-full border-text-2 border-dashed
-                                    aspect-square minw-[80px] w-16 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
-                                    hover:bg-bg-3 transition-all duration-200 shadow-inner`}
-                    // onClick={handleButtonClick}
-                    onClick={handleParticipantsAdd}
-                    aria-label="Aggiungi Immagine"
-                  >
-                    <span
-                      className={`font-body font-bold text-text-2 text-3xl 2xl:text-6xl`}
+                      onClick={handleButtonClick}
+                      aria-label="Aggiungi Immagine"
                     >
-                      +
+                      <span
+                        className={`font-body font-bold text-text-2 text-4xl 2xl:text-6xl`}
+                      >
+                        +
+                      </span>
+                    </div>
+                    <span className=" text-sm font-body text-primary font-semibold">
+                      Inserisci un immagine di copertina
                     </span>
+                  </>
+                ) : (
+                  <div
+                    className="w-30 relative"
+                    onClick={() => {
+                      setGroupImage(null);
+                    }}
+                  >
+                    <img
+                      src={groupImage.url}
+                      alt=""
+                      className="w-full h-full aspect-square rounded-full"
+                    />
+                    <div className="absolute top-1 -right-3 p-1.5 bg-text-2/40 rounded-full">
+                      {/* <X size={14} /> */}
+
+                      <Trash size={14} className="" />
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    {currentParticipants.map((participant) => {
-                      return <span>{participant.nome}</span>;
-                      // return <FriendCard {...participant} />;
-                    })}
+                )}
+              </div>
+              <FormInput
+                error={errors.nome}
+                label={"Nome gruppo"}
+                placeholder={"Nome del gruppo"}
+                register={register}
+                id="nome"
+                type={"text"}
+              />
+              <FormTextarea
+                id="descrizione"
+                label="Descrizione"
+                placeholder="Descrizione del gruppo"
+                register={register}
+                error={errors.descrizione}
+              />
+              <div className="flex flex-col gap-1.5">
+                <h3 className="text-text-1 font-body text-sm font-medium ">
+                  Partecipanti Gruppo
+                </h3>
+                <div>
+                  <div className="overflow-x-auto flex flex-row gap-2 pb-2 items-startP">
+                    <div
+                      className={`bg-bg-2 border-2 rounded-full border-text-2 border-dashed
+                                    aspect-square minw-[80px] w-16 min-h-16 max-h-16 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
+                                    hover:bg-bg-3 transition-all duration-200 shadow-inner`}
+                      // onClick={handleButtonClick}
+                      onClick={handleParticipantsAdd}
+                      aria-label="Aggiungi Immagine"
+                    >
+                      <span
+                        className={`font-body font-bold text-text-2 text-3xl 2xl:text-6xl`}
+                      >
+                        +
+                      </span>
+                    </div>
+                    <div className="flex flex-row gap-1">
+                      {currentParticipants.map((participant) => {
+                        return (
+                          <ParticipantCard
+                            {...participant}
+                            setCurrentParticipants={setCurrentParticipants}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
+
+                  {participantsError !== null && (
+                    <p>{participantsError.message}</p>
+                  )}
                 </div>
               </div>
+              <div className="w-full flex justify-center mt-2.5">
+                <button
+                  type="submit"
+                  className="font-body text-white font-bold bg-primary  rounded-xl px-8 py-3.5  
+                hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-base cursor-pointer"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Creazione..." : "Crea Gruppo"}
+                </button>
+              </div>
             </div>
-          </div>
+          </form>
         </>
       )}
       {/* nome_gruppo, immagine_gruppo, descrizione_gruppo, partecipanti_guppo */}
