@@ -1,7 +1,7 @@
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import FormInput from "../CreateEventForm/FormInput";
@@ -10,6 +10,9 @@ import { Divide, Plus, Trash, X } from "lucide-react";
 import AddParticipantsGroup from "./AddParticipantsGroup";
 import FriendCard from "../friends/FriendCard";
 import ParticipantCard from "./ParticipantCard";
+import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "../../config/db.js";
 const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 
 const CreateGroupForm = () => {
@@ -31,20 +34,34 @@ const CreateGroupForm = () => {
   const [participantsError, setParticipantsError] = useState(null);
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const [currentParticipants, setCurrentParticipants] = useState([]);
+  const { session } = useAuth();
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    console.log(file);
+    if (!file) return;
     const ext = file.type.split("/")[1];
+    console.log(file.name);
     if (!ACCEPTED_EXTENSIONS.includes(ext)) {
       setImageError({
         message: `Accettiamo solo ${ACCEPTED_EXTENSIONS.join(", ")}`,
       });
+
       event.target.value = null;
+      return;
+    } else {
+      setImageError(null);
     }
-    const newImage = { ...file, url: URL.createObjectURL(file) };
-    setGroupImage(newImage);
+    console.log(file.name.split(".").pop());
+    setGroupImage({
+      file: file, // <--- Qui salviamo l'oggetto File integro
+      type: file.type,
+      ext: file.name.split(".").pop(),
+
+      name: "cover",
+      url: URL.createObjectURL(file),
+    });
+    event.target.value = null;
   };
   const handleButtonClick = useCallback(() => {
     fileInputRef.current.click();
@@ -61,12 +78,80 @@ const CreateGroupForm = () => {
     setError,
   } = methods;
 
-  const onSubmit = async () => {
+  const onSubmit = async (data) => {
+    console.log("inviato", currentParticipants);
     if (currentParticipants.length < 2) {
       setParticipantsError({ message: "inserisci almeno 2 partecipanti" });
+      return;
+    } else {
+      setParticipantsError(null);
     }
-    setParticipantsError(null);
+
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/groups/add/newGroup",
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            ...data,
+
+            participants: currentParticipants,
+          }),
+        }
+      );
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.log("male");
+        throw new Error(result.error || "Errore creazione evento");
+      }
+      console.log(result);
+      console.log("ok");
+      console.log("gruppo creato");
+      const groupId = result.group_id;
+      if (groupImage) {
+        console.log(groupImage);
+        console.log(groupImage.file);
+        const fileName = `${groupId}/cover.${groupImage.ext}`;
+        const filePath = `${fileName}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("group_cover_pics")
+          .upload(filePath, groupImage.file, {
+            upsert: true,
+            contentType: groupImage.type,
+            cacheControl: "3600",
+          });
+        if (uploadError) {
+          setError("root", { message: uploadError });
+          return;
+        }
+        const { data: urlData } = supabase.storage
+          .from("group_cover_pics")
+          .getPublicUrl(uploadData.path);
+
+        const { data: coverData, error: coverError } = await supabase
+          .from("gruppi")
+          .update({ group_cover_img: urlData.publicUrl })
+          .eq("group_id", groupId);
+        if (coverError) setError("root", { message: coverError });
+        console.log("Tutte le immagini caricate con successo!");
+      }
+      setMobileView("groups");
+    } catch (error) {
+      console.error("Errore durante il processo:", error);
+      // Qui puoi gestire l'errore (es. mostrare un toast notification)
+    }
   };
+
+  useEffect(() => {
+    if (currentParticipants) {
+      console.log(currentParticipants);
+    }
+  }, [currentParticipants]);
   return (
     <div className="flex flex-col gap-2 pb-10">
       {isParticipantsAdd ? (
@@ -78,7 +163,7 @@ const CreateGroupForm = () => {
       ) : (
         // <p>true</p>
         <>
-          <div className="w-full  p-2 border-b border-bg-3 items-center">
+          <div className="w-full  p-2 border-b border-bg-3 items-center fixed top-0 bg-white">
             <div className="flex flex-row gap-1 items-center">
               <div
                 className="w-6 h-6"
@@ -88,7 +173,7 @@ const CreateGroupForm = () => {
               >
                 <ChevronLeft color={"#2463eb"} />
               </div>
-              <h1 className="text-lg text-text-1 font-body font-bold">
+              <h1 className="text-lg text-text-1 font-body font-bold ">
                 Crea un gruppo
               </h1>
             </div>
@@ -100,7 +185,7 @@ const CreateGroupForm = () => {
               handleSubmit(onSubmit)();
             }}
           >
-            <div className="flex flex-col gap-2 px-3 pt-4 ">
+            <div className="flex flex-col gap-2 px-3 pt-14 ">
               <div className="w-full flex items-center flex-col gap-2">
                 <input
                   type="file"
@@ -109,44 +194,49 @@ const CreateGroupForm = () => {
                   ref={fileInputRef}
                   onChange={handleFileChange}
                 />
-                {groupImage == null ? (
-                  <>
-                    <div
-                      className={`bg-bg-2 border-2 rounded-full border-text-2 border-dashed
-                                    aspect-square minw-[80px] w-30 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
-                                    hover:bg-bg-3 transition-all duration-200 shadow-inner`}
-                      onClick={handleButtonClick}
-                      aria-label="Aggiungi Immagine"
-                    >
-                      <span
-                        className={`font-body font-bold text-text-2 text-4xl 2xl:text-6xl`}
+                <div className="flex flex-col gap-3 items-center w-full">
+                  {groupImage == null ? (
+                    <>
+                      <div
+                        className="w-30 h-30"
+                        onClick={handleButtonClick}
+                        aria-label="Aggiungi Immagine"
                       >
-                        +
+                        <DefaultGroupIcon />
+                      </div>
+                      <span
+                        className=" text-sm font-body text-primary font-semibold leading-3"
+                        onClick={handleButtonClick}
+                        aria-label="Aggiungi Immagine"
+                      >
+                        Inserisci un immagine di copertina
                       </span>
-                    </div>
-                    <span className=" text-sm font-body text-primary font-semibold">
-                      Inserisci un immagine di copertina
-                    </span>
-                  </>
-                ) : (
-                  <div
-                    className="w-30 relative"
-                    onClick={() => {
-                      setGroupImage(null);
-                    }}
-                  >
-                    <img
-                      src={groupImage.url}
-                      alt=""
-                      className="w-full h-full aspect-square rounded-full"
-                    />
-                    <div className="absolute top-1 -right-3 p-1.5 bg-text-2/40 rounded-full">
-                      {/* <X size={14} /> */}
+                    </>
+                  ) : (
+                    <div className="w-30 h-30 relative">
+                      <img
+                        src={groupImage.url}
+                        alt=""
+                        className="w-full h-full aspect-square rounded-full"
+                      />
+                      <div
+                        className="absolute top-1 -right-3 p-1.5 bg-text-2/40 rounded-full"
+                        onClick={() => {
+                          setGroupImage(null);
+                        }}
+                      >
+                        {/* <X size={14} /> */}
 
-                      <Trash size={14} className="" />
+                        <Trash size={14} className="" />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                  {imageError && (
+                    <p className="text-sm font-body  text-red-500 leading-2 ">
+                      {imageError.message}
+                    </p>
+                  )}
+                </div>
               </div>
               <FormInput
                 error={errors.nome}
@@ -170,7 +260,11 @@ const CreateGroupForm = () => {
                 <div>
                   <div className="overflow-x-auto flex flex-row gap-2 pb-2 items-startP">
                     <div
-                      className={`bg-bg-2 border-2 rounded-full border-text-2 border-dashed
+                      className={`bg-bg-2 border-2 rounded-full ${
+                        participantsError
+                          ? "border-red-500 ring-4 ring-red-100"
+                          : `border-text-2 border-dashed`
+                      }  
                                     aspect-square minw-[80px] w-16 min-h-16 max-h-16 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
                                     hover:bg-bg-3 transition-all duration-200 shadow-inner`}
                       // onClick={handleButtonClick}
@@ -178,7 +272,9 @@ const CreateGroupForm = () => {
                       aria-label="Aggiungi Immagine"
                     >
                       <span
-                        className={`font-body font-bold text-text-2 text-3xl 2xl:text-6xl`}
+                        className={`font-body font-bold ${
+                          participantsError ? "text-red-500" : `text-text-2`
+                        }   text-3xl 2xl:text-6xl`}
                       >
                         +
                       </span>
@@ -196,7 +292,9 @@ const CreateGroupForm = () => {
                   </div>
 
                   {participantsError !== null && (
-                    <p>{participantsError.message}</p>
+                    <p className="text-sm font-body  text-red-500 ">
+                      {participantsError.message}
+                    </p>
                   )}
                 </div>
               </div>

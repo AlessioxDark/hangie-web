@@ -12,6 +12,7 @@ import { useScreen } from "@/contexts/ScreenContext.js";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
 import { Calendar } from "lucide-react";
 import CalendarIcon from "@/assets/icons/CalendarIcon.js";
+import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon.js";
 const Chats = ({ messaggi }) => {
   const {
     currentGroupData,
@@ -99,31 +100,35 @@ const Chats = ({ messaggi }) => {
             </div>
           )}
           <div className="flex flex-row items-center gap-3 2xl:gap-6">
-            <img
-              src={currentGroupData?.group_cover_img}
-              className="w-10 h-10 2xl:w-16 2xl:h-16"
-              alt=""
-            />{" "}
+            {currentGroupData?.group_cover_img ? (
+              <img
+                src={currentGroupData?.group_cover_img}
+                className="w-10 h-10 2xl:w-16 2xl:h-16"
+                alt=""
+              />
+            ) : (
+              <div className="w-10 h-10 2xl:w-16 2xl:h-16">
+                <DefaultGroupIcon />
+              </div>
+            )}
             <div className="flex flex-col gap-0.5">
               <span className="text-text-1 font-bold font-body text-xl 2xl:text-3xl leading-4">
                 {currentGroupData?.nome}
               </span>
-
-              {currentGroupData?.partecipanti_gruppo?.map(
-                (partecipante, iPart) => {
-                  return (
-                    <span
-                      key={partecipante.utenti.user_id}
-                      className=" font-body text-text-1 text-xs "
-                    >
-                      {partecipante.utenti.nome}{" "}
-                      {iPart !==
-                        currentGroupData?.partecipanti_gruppo?.length - 1 &&
-                        ", "}
-                    </span>
-                  );
-                }
-              )}
+              <div className="flex flex-row">
+                <span className="font-body text-text-1 text-xs">
+                  {currentGroupData?.partecipanti_gruppo?.map(
+                    (partecipante, iPart) => {
+                      return `${partecipante.utenti.nome}${
+                        iPart !==
+                        currentGroupData?.partecipanti_gruppo?.length - 1
+                          ? ", "
+                          : ""
+                      }`;
+                    }
+                  )}
+                </span>
+              </div>
             </div>
           </div>
         </div>

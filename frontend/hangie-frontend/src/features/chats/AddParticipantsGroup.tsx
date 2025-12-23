@@ -1,7 +1,7 @@
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 import SearchBar from "@/components/SearchBar";
 import { useAuth } from "@/contexts/AuthContext";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import FriendCard from "../friends/FriendCard";
 
 const AddParticipantsGroup = ({
@@ -15,7 +15,7 @@ const AddParticipantsGroup = ({
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
   const { session } = useAuth();
-  const fetchFriends = () => {
+  const fetchFriends = useCallback(() => {
     try {
       setIsLoading(true);
       console.log(session.user.id);
@@ -35,7 +35,7 @@ const AddParticipantsGroup = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchFriends();
@@ -44,8 +44,8 @@ const AddParticipantsGroup = ({
   // useEffect(()=>)
   useEffect(() => {
     if (query) {
-      setCurrentFriendsData((prevData) => {
-        return prevData.filter((friend) => {
+      setCurrentFriendsData(() => {
+        return friendsData.filter((friend) => {
           const pattern = new RegExp(`^${query}`, "i");
           if (friend.handle.match(pattern)) return friend;
         });

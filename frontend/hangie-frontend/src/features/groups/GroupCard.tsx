@@ -1,3 +1,4 @@
+import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import React, { useEffect } from "react";
@@ -52,12 +53,22 @@ const GroupCard = ({
       }}
     >
       <div className="flex flex-row items-stretch w-full h-full gap-4">
-        <img
+        {/* <img
           src={group_cover_img}
           className="rounded-full w-14 h-14 2xl:h-16 2xl:w-16 flex-shrink-0" // Correzione Sizing
           alt="Group cover"
-        />
-
+        /> */}
+        {group_cover_img == null ? (
+          <div className="rounded-full w-12 h-12 2xl:h-16 2xl:w-16 flex-shrink-0">
+            <DefaultGroupIcon />
+          </div>
+        ) : (
+          <img
+            src={group_cover_img}
+            className="rounded-full w-12 h-12 2xl:h-16 2xl:w-16 flex-shrink-0" // Correzione Sizing
+            alt="Group cover"
+          />
+        )}
         <div className="flex-1 min-w-0 flex flex-col gap-1.5 justify-center">
           <div className="flex justify-between items-center">
             <h1 className="font-bold font-body text-lg leading-4">{nome}</h1>
