@@ -31,6 +31,7 @@ io.on("connection", (socket) => {
       console.log(
         `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
       );
+      console.log(partecipanti);
       console.log("eccoli oh", partecipanti);
       const {
         data: { user },
@@ -55,11 +56,19 @@ io.on("connection", (socket) => {
       if (callback) {
         callback({ message_id: messageId });
       }
+
+      const { data: userInfo, error: userError } = await supabase
+        .from("utenti")
+        .select("*")
+        .eq("user_id", user.id);
+      const sender = userInfo[0];
+      console.log("sender", sender);
       socket.to(room).emit("receive_message", {
         message: message,
         message_id: messageId,
         group_id: room, // AGGIUNGI QUESTO: fondamentale per il Context
         sender_id: user.id, // AGGIUNGI QUESTO: utile per la UI
+        sender: sender,
       });
     }
   );
@@ -67,19 +76,46 @@ io.on("connection", (socket) => {
     // console.log(
     //   `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
     // );
-
+    console.log("avviato message arrived");
     const { data: messageStatus, error: errorStatus } = await supabase
       .from("messaggi_status")
       .update({ status: "delivered" })
       .eq("user_id", user_id)
       .eq("message_id", message_id);
-    const { count } = await supabase
+
+    const { count, error: countError } = await supabase
       .from("messaggi_status")
       .select("*", { count: "exact", head: true })
       .eq("message_id", message_id)
       .eq("status", "sent");
+
+    console.log(count, countError);
+
     if (count == 0) {
       io.to(room).emit("message_arrived", { message_id });
+    }
+  });
+  socket.on("message_read", async (message_id, user_id, room) => {
+    // console.log(
+    //   `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
+    // );
+    console.log("avviato message arrived");
+    const { data: messageStatus, error: errorStatus } = await supabase
+      .from("messaggi_status")
+      .update({ status: "read" })
+      .eq("user_id", user_id)
+      .eq("message_id", message_id);
+
+    const { count, error: countError } = await supabase
+      .from("messaggi_status")
+      .select("*", { count: "exact", head: true })
+      .eq("message_id", message_id)
+      .eq("status", "delivered");
+
+    console.log(count, countError);
+
+    if (count == 0) {
+      io.to(room).emit("message_read", { message_id });
     }
   });
   socket.on("send_event", async (eventId, room, token) => {

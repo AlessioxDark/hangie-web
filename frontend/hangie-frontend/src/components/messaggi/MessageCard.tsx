@@ -3,14 +3,31 @@ import TickIcon from "@/assets/icons/TickIcon";
 import ProfileIcon from "@/components/ProfileIcon";
 import { useState } from "react";
 
-const MessageCard = ({ isUser, content, utenti, user_id, sent_at, isSent }) => {
+const MessageCard = ({
+  isUser,
+  content,
+  utenti,
+  user_id,
+  sent_at,
+  isSent,
+  isRead,
+}) => {
   const formatDate = (date) => {
     return new Date(date).toLocaleTimeString("it-IT", {
       hour: "2-digit",
       minute: "2-digit",
     });
   };
-
+  const renderTick = () => {
+    if (!isUser) return;
+    if (!isSent) {
+      return <TickIcon color={"#64748b"} />;
+    }
+    if (isRead) {
+      return <DoubleTick color={"#ffffff"} />;
+    }
+    return <DoubleTick color={"#e2e8f0"} />;
+  };
   return (
     <div
       className={`flex flex-row ${
@@ -62,11 +79,12 @@ const MessageCard = ({ isUser, content, utenti, user_id, sent_at, isSent }) => {
             >
               {formatDate(sent_at)}
             </span>
-            {isUser && (
+            {/* {isUser && (
               <div className="w-5 h-4.5">
                 {isSent ? <DoubleTick /> : <TickIcon color={"#ffffff"} />}
               </div>
-            )}
+            )} */}
+            <div className="w-5 h-4.5">{renderTick()}</div>
           </div>
         </div>
       </div>

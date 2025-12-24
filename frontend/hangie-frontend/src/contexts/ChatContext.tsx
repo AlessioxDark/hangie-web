@@ -67,7 +67,7 @@ export const ChatProvider = ({ children }) => {
         // 2. AGGIORNA LA CHAT SE È APERTA
         setCurrentChatData((prevData) => {
           // Se non ho una chat aperta o è un altro gruppo, non fare nulla qui
-          if (!prevData || prevData.group_id !== data.group_id) return prevData;
+          // if (!prevData || prevData.group_id !== data.group_id) return prevData;
 
           // Se è la chat che sto guardando, aggiungi il messaggio
           return {
@@ -81,7 +81,8 @@ export const ChatProvider = ({ children }) => {
                 user_id: data.sender_id,
                 sent_at: Date.now(),
                 isUser: false,
-                isSent: true,
+                // isSent: true,
+                utenti: data.sender,
               },
             ],
           };
@@ -100,14 +101,67 @@ export const ChatProvider = ({ children }) => {
           };
         });
       });
+
+      // socketRef.current.on("message_arrived", (data) => {
+      //   setCurrentChatData((prevData) => {
+      //     if (!prevData) return prevData;
+      //     return {
+      //       ...prevData,
+      //       messaggi: prevData.messaggi.map((m) =>
+      //         m.message_id === data.message_id ? { ...m, isSent: true } : m
+      //       ),
+      //     };
+      //   });
+      // });
+      // if (currentGroup) {
+      //   currentGroupData?.messaggi?.map((mess) => {
+      //     socketRef.current.emit(
+      //       "message_read",
+      //       mess.message_id,
+      //       session.user.id,
+      //       currentGroup
+      //     );
+      //   });
+      // }
+
+      socketRef.current.on("message_read", (data) => {
+        setCurrentChatData((prevData) => {
+          if (!prevData) return prevData;
+          return {
+            ...prevData,
+            messaggi: prevData.messaggi.map((m) =>
+              m.message_id === data.message_id ? { ...m, isRead: true } : m
+            ),
+          };
+        });
+      });
     }
 
     return () => {
       if (socketRef.current) {
         socketRef.current.off("receive_message");
+        socketRef.current.off("message_arrived");
+        socketRef.current.off("message_read");
       }
     };
-  }, [socketRef.current, session?.user?.id]);
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (currentGroup && currentChatData?.messaggi) {
+      const unreadMessages = currentChatData.messaggi.filter(
+        (m) => !m.isRead && m.user_id !== session.user.id
+      );
+
+      unreadMessages.forEach((m) => {
+        socketRef.current.emit(
+          "message_read",
+          m.message_id,
+          session.user.id,
+          currentGroup
+        );
+      });
+    }
+  }, [currentGroup, currentChatData?.messaggi?.length]); // Solo quando cambia
   return (
     <ChatContext.Provider
       value={{

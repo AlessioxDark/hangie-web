@@ -37,13 +37,14 @@ const Chats = ({ messaggi }) => {
   });
   console.log(currentGroupData);
   const sendMessage = async () => {
-    console.log("messaggio inviato");
+    console.log("messaggio inviato", currentGroupData);
     const trimmedInput = chatInput.trim();
     const partecipantiNoUtente = currentGroupData?.partecipanti_gruppo.filter(
       (partecipante) => {
         return partecipante.partecipante_id !== session.user.id;
       }
     );
+    console.log(partecipantiNoUtente);
 
     socketRef.current.emit(
       "send_message",
@@ -66,6 +67,7 @@ const Chats = ({ messaggi }) => {
                 sent_at: Date.now(),
                 isUser: true,
                 isSent: false,
+                isRead: false,
               },
             ],
           };

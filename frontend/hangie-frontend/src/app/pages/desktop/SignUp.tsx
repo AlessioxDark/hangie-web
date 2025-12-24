@@ -164,7 +164,7 @@ const SignUp = () => {
         body: JSON.stringify(finalData),
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${authData.session.access_token}`,
         },
         method: "POST",
       })
