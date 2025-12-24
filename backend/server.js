@@ -14,7 +14,6 @@ const profileRoutes = require("./routes/profileRoutes");
 const placesRoutes = require("./routes/placesRoutes");
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
-
 const io = new Server(server, {
   cors: {
     origin: "*", // Permette richieste da qualsiasi origine (per lo sviluppo).
@@ -26,49 +25,67 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("nuovo utente collegato al server", socket.id);
 
-  socket.on("send_message", async (message, room, token) => {
-    console.log(
-      `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
-    );
+  socket.on(
+    "send_message",
+    async (message, room, partecipanti, token, callback) => {
+      console.log(
+        `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
+      );
+      console.log("eccoli oh", partecipanti);
+      const {
+        data: { user },
+        error: tokenError,
+      } = await supabase.auth.getUser(token);
+      console.log(user);
+      const { data: messageData, error } = await supabase
+        .from("messaggi")
+        .insert([{ content: message, user_id: user.id, group_id: room }])
+        .select("message_id");
+      const messageId = messageData[0].message_id;
+      const rowStatus = partecipanti.map((partecipante) => {
+        return { message_id: messageId, user_id: partecipante.partecipante_id };
+      });
+      console.log("questi sono gli status delle row", rowStatus);
+      // 1. Devi mettere AWAIT qui
+      const { data: messageStatus, error: errorStatus } = await supabase
+        .from("messaggi_status")
+        .insert(rowStatus)
+        .select(); // Il select serve a popolare messageStatus dopo l'inserimento
 
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    console.log(user);
-    const { data, error } = await supabase
-      .from("messaggi")
-      .insert([{ content: message, user_id: user.id, group_id: room }]);
+      if (callback) {
+        callback({ message_id: messageId });
+      }
+      socket.to(room).emit("receive_message", {
+        message: message,
+        message_id: messageId,
+        group_id: room, // AGGIUNGI QUESTO: fondamentale per il Context
+        sender_id: user.id, // AGGIUNGI QUESTO: utile per la UI
+      });
+    }
+  );
+  socket.on("message_arrived", async (message_id, user_id, room) => {
+    // console.log(
+    //   `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
+    // );
 
-    socket.to(room).emit("receive_message", message);
+    const { data: messageStatus, error: errorStatus } = await supabase
+      .from("messaggi_status")
+      .update({ status: "delivered" })
+      .eq("user_id", user_id)
+      .eq("message_id", message_id);
+    const { count } = await supabase
+      .from("messaggi_status")
+      .select("*", { count: "exact", head: true })
+      .eq("message_id", message_id)
+      .eq("status", "sent");
+    if (count == 0) {
+      io.to(room).emit("message_arrived", { message_id });
+    }
   });
   socket.on("send_event", async (eventId, room, token) => {
     console.log(
       `Utente ${socket.id} ha inviato un messaggio: ${eventId} con room ${room}`
     );
-
-    // const {
-    // 	data: { user },
-    // 	error: tokenError,
-    // } = await supabase.auth.getUser(token);
-    // console.log(user);
-
-    // const { data: messageData, error: errorMessage } = await supabase
-    // 	.from('messaggi')
-    // 	.insert([
-    // 		{
-    // 			type: 'event',
-    // 			event_id: eventId,
-    // 			user_id: user.id,
-    // 			group_id: room,
-    // 		},
-    // 	])
-    // 	.select('*,eventi(*)');
-
-    // if (errorMessage) {
-    // 	console.error("Errore nell'inserimento:", errorMessage);
-    // }
-    // socket.to(room).emit('receive_event', messageData);
   });
 
   socket.on("join_room", (room_id) => {

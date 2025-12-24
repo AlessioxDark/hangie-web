@@ -35,35 +35,46 @@ const Chats = ({ messaggi }) => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
   });
-
+  console.log(currentGroupData);
   const sendMessage = async () => {
     console.log("messaggio inviato");
     const trimmedInput = chatInput.trim();
+    const partecipantiNoUtente = currentGroupData?.partecipanti_gruppo.filter(
+      (partecipante) => {
+        return partecipante.partecipante_id !== session.user.id;
+      }
+    );
+
     socketRef.current.emit(
       "send_message",
       trimmedInput,
       currentGroupData?.group_id,
-      session.access_token
+      partecipantiNoUtente,
+      session.access_token,
+      (response) => {
+        setCurrentChatData((prevData) => {
+          return {
+            ...prevData,
+            messaggi: [
+              ...prevData.messaggi,
+              {
+                message_id: response.message_id,
+                // mettere tutti i dati per questo da errore es nome, pfpf ecc.
+                content: trimmedInput,
+                group_id: currentGroupData.group_id,
+                user_id: session.user.id,
+                sent_at: Date.now(),
+                isUser: true,
+                isSent: false,
+              },
+            ],
+          };
+        });
+      }
     );
 
     console.log("risposta avviata gestendo dato");
 
-    setCurrentChatData((prevData) => {
-      return {
-        ...prevData,
-        messaggi: [
-          ...prevData.messaggi,
-          {
-            // mettere tutti i dati per questo da errore es nome, pfpf ecc.
-            content: trimmedInput,
-            group_id: currentGroupData.group_id,
-            user_id: session.user.id,
-            sent_at: Date.now(),
-            isUser: true,
-          },
-        ],
-      };
-    });
     setChatInput("");
     if (chatInputRef.current) {
       // Pulisce l'elemento DOM (l'input visibile)
@@ -75,12 +86,33 @@ const Chats = ({ messaggi }) => {
     if (currentGroupData) {
       socketRef.current.emit("join_room", currentChatData?.group_id);
 
-      socketRef.current.on("receive_message", (data) => {
-        console.log("messaggio ricevuto: ", data);
-      });
+      // socketRef.current.on("receive_message", (data) => {
+      //   console.log("messaggio ricevuto: ", data);
+
+      //   socketRef.current.emit(
+      //     "message_arrived",
+      //     data.message_id,
+      //     session.user.id,
+      //     currentGroupData?.group_id
+      //   );
+      // });
+
       socketRef.current.on("receive_event", (data) => {
         console.log("evento ricevuto: ", data);
       });
+      // socketRef.current.on("message_arrived", (data) => {
+      //   console.log("messaggio arrivato a me");
+      //   setCurrentChatData((prevData) => {
+      //     return {
+      //       ...prevData,
+      //       messaggi: prevData.messaggi.map((prevmess) => {
+      //         return prevmess.message_id == data.message_id
+      //           ? { ...prevmess, isSent: true }
+      //           : prevmess;
+      //       }),
+      //     };
+      //   });
+      // });
     }
   }, []);
   console.log(currentGroupData);

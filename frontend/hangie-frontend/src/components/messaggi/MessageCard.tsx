@@ -1,13 +1,16 @@
 import DoubleTick from "@/assets/icons/DoubleTick";
+import TickIcon from "@/assets/icons/TickIcon";
 import ProfileIcon from "@/components/ProfileIcon";
+import { useState } from "react";
 
-const MessageCard = ({ isUser, content, utenti, user_id, sent_at }) => {
+const MessageCard = ({ isUser, content, utenti, user_id, sent_at, isSent }) => {
   const formatDate = (date) => {
     return new Date(date).toLocaleTimeString("it-IT", {
       hour: "2-digit",
       minute: "2-digit",
     });
   };
+
   return (
     <div
       className={`flex flex-row ${
@@ -61,7 +64,7 @@ const MessageCard = ({ isUser, content, utenti, user_id, sent_at }) => {
             </span>
             {isUser && (
               <div className="w-5 h-4.5">
-                <DoubleTick />
+                {isSent ? <DoubleTick /> : <TickIcon color={"#ffffff"} />}
               </div>
             )}
           </div>
