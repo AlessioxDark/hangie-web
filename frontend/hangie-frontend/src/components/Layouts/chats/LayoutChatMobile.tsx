@@ -14,6 +14,7 @@ import BottomNav from "@/app/pages/mobile/BottomNav.js";
 import CreateEventForm from "@/features/events/CreateEventForm.js";
 import CreateGroupForm from "@/features/chats/CreateGroupForm.js";
 import AddParticipantsGroup from "@/features/chats/AddParticipantsGroup.js";
+import GroupDetails from "@/features/chats/GroupDetails.js";
 const LayoutChatMobile = () => {
   const {
     currentGroup,
@@ -151,6 +152,9 @@ const LayoutChatMobile = () => {
     }
     if (mobileView == "CREATE_GROUP") {
       return <CreateGroupForm />;
+    }
+    if (mobileView == "GROUP_DETAILS") {
+      return <GroupDetails />;
     }
     // if (mobileView == "ADD_PARTICIPANTS") {
     //   return <AddParticipantsGroup />;

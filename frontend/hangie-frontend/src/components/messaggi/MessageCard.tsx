@@ -21,12 +21,24 @@ const MessageCard = ({
   const renderTick = () => {
     if (!isUser) return;
     if (!isSent) {
-      return <TickIcon color={"#64748b"} />;
+      return (
+        <div className="w-5 h-4.5">
+          <TickIcon color={"#64748b"} />
+        </div>
+      );
     }
     if (isRead) {
-      return <DoubleTick color={"#ffffff"} />;
+      return (
+        <div className="w-5 h-4.5">
+          <DoubleTick color={"#ffffff"} />
+        </div>
+      );
     }
-    return <DoubleTick color={"#e2e8f0"} />;
+    return (
+      <div className="w-5 h-4.5">
+        <DoubleTick color={"#e2e8f0"} />
+      </div>
+    );
   };
   return (
     <div
@@ -84,7 +96,7 @@ const MessageCard = ({
                 {isSent ? <DoubleTick /> : <TickIcon color={"#ffffff"} />}
               </div>
             )} */}
-            <div className="w-5 h-4.5">{renderTick()}</div>
+            {renderTick()}
           </div>
         </div>
       </div>

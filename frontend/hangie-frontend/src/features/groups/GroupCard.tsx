@@ -13,6 +13,7 @@ const GroupCard = ({
   created_at,
   messaggi,
   partecipanti_gruppo,
+  descrizione,
 }) => {
   const { setCurrentGroup, setCurrentGroupData, setCurrentChatData } =
     useChat();
@@ -49,6 +50,7 @@ const GroupCard = ({
           created_at,
           group_cover_img,
           partecipanti_gruppo,
+          descrizione,
         });
       }}
     >

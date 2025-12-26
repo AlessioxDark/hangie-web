@@ -55,7 +55,7 @@ const getGroup = async (req) => {
   // FASE 2: Query separata per i messaggi (CORREZIONE APPLICATA)
   const { data: messagesData, error: messagesError } = await supabase
     .from("messaggi")
-    .select("*,utenti(*)")
+    .select("*,utenti(*),messaggi_status(*)")
     .eq("group_id", group_id)
     .order("sent_at", { ascending: true }); // Ordina cronologicamente
 
@@ -130,7 +130,29 @@ const getGroup = async (req) => {
     return message;
   });
 
-  // CORREZIONE: Restituiamo un SINGOLO oggetto contenente tutti i dati del gruppo
+  // const {data:statusData,error:statusError} = await supabase.from("messaggi_status").select("*").eq
+  const definitiveMessages = finalMessages.map((m) => {
+    const isUser = m.user_id === user.id;
+    const statuses = m.messaggi_status || [];
+
+    const isRead =
+      statuses.length > 0 && statuses.every((s) => s.status === "read");
+
+    // DOPPIA SPUNTA GRIGIA: Tutti i destinatari devono aver ricevuto (delivered o read)
+    const isSent =
+      statuses.length > 0 &&
+      statuses.every((s) => s.status === "delivered" || s.status === "read");
+
+    return {
+      ...m,
+      isUser,
+      isSent,
+      isRead,
+      // Possiamo anche passare i dati dell'utente per la UI
+      utenti: m.utenti,
+    };
+  });
+
   console.log("i dati finali sono", {
     data: {
       // Estraiamo i dati effettivi del gruppo dall'oggetto participantData
@@ -144,7 +166,7 @@ const getGroup = async (req) => {
     data: {
       // Estraiamo i dati effettivi del gruppo dall'oggetto participantData
       ...groupDetails,
-      messaggi: finalMessages,
+      messaggi: definitiveMessages,
       partecipanti_gruppo: participantRow.utenti, // Assumo che 'utenti' qui sia l'elenco dei partecipanti
     },
     error: null,

@@ -121,7 +121,7 @@ const Chats = ({ messaggi }) => {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="bg-bg-1 p-2 items-center 2xl:p-4  border-b border-gray-400 flex flex-row  justify-between">
-        <div className="flex flex-row gap-1 items-center">
+        <div className="flex flex-row gap-1 items-center flex-1">
           {currentScreen == "xs" && (
             <div
               className="w-7 h-7"
@@ -133,7 +133,10 @@ const Chats = ({ messaggi }) => {
               <ChevronLeft color={"#2463eb"} />
             </div>
           )}
-          <div className="flex flex-row items-center gap-3 2xl:gap-6">
+          <div
+            className="flex flex-row items-center gap-3 2xl:gap-6  flex-grow"
+            onClick={() => setMobileView("GROUP_DETAILS")}
+          >
             {currentGroupData?.group_cover_img ? (
               <img
                 src={currentGroupData?.group_cover_img}
