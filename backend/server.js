@@ -17,7 +17,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*", // Permette richieste da qualsiasi origine (per lo sviluppo).
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Permette tutti i metodi che usi. 'OPTIONS' è fondamentale.
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"], // Permette tutti i metodi che usi. 'OPTIONS' è fondamentale.
     allowedHeaders: ["Content-Type", "Authorization", "body"], // Specifica gli header che sono permessi.
   },
 });
@@ -133,7 +133,7 @@ io.on("connection", (socket) => {
 app.use(
   cors({
     origin: "*", // Permette richieste da qualsiasi origine (per lo sviluppo).
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Permette tutti i metodi che usi. 'OPTIONS' è fondamentale.
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"], // Permette tutti i metodi che usi. 'OPTIONS' è fondamentale.
     allowedHeaders: ["Content-Type", "Authorization", "body"], // Specifica gli header che sono permessi.
   })
 );

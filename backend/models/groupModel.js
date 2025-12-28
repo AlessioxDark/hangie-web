@@ -255,10 +255,67 @@ const newGroup = async (req) => {
 const modify = async (req) => {
   const { group_id } = req.params;
   const body = req.body;
+
   const { data, error } = await supabase
     .from("gruppi")
     .update([{ ...body }])
     .eq("group_id", group_id);
   return { data, error };
 };
-module.exports = { getAll, getGroup, getEvent, newGroup, modify, getEvents };
+
+const leave = async (req) => {
+  console.log("abbandonando...");
+  const { group_id } = req.params;
+  const token = req.headers.authorization.split(" ")[1];
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser(token);
+
+  const { data, error } = await supabase
+    .from("partecipanti_gruppo")
+    .delete("*")
+    .eq("group_id", group_id)
+    .eq("partecipante_id", user.id);
+  return { data, error };
+};
+const addParticipants = async (req) => {
+  const { group_id } = req.params;
+  const participantsIds = req.body;
+
+  const participantsInsert = participantsIds.map((participant) => {
+    return {
+      group_id,
+      partecipante_id: participant.user_id,
+      role: "boh",
+    };
+  });
+  const { data, error } = await supabase
+    .from("partecipanti_gruppo")
+    .insert(participantsInsert);
+  return { data, error };
+};
+const removeParticipant = async (req) => {
+  const { group_id } = req.params;
+  const { user_id } = req.body;
+
+  const { data, error } = await supabase
+    .from("partecipanti_gruppo")
+    .delete()
+    .eq("group_id", group_id)
+    .eq("partecipante_id", user_id);
+  return { data, error };
+};
+
+module.exports = {
+  getAll,
+  getGroup,
+  getEvent,
+  newGroup,
+  modify,
+  getEvents,
+  leave,
+  addParticipants,
+  removeParticipant,
+};

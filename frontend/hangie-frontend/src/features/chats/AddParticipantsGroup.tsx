@@ -8,6 +8,8 @@ const AddParticipantsGroup = ({
   setIsParticipantsAdd,
   setCurrentParticipants,
   currentParticipants,
+  onConfirm,
+  isGroup,
 }) => {
   const [query, setQuery] = useState("");
   const [friendsData, setFriendsData] = useState([]);
@@ -92,6 +94,7 @@ const AddParticipantsGroup = ({
             setCurrentParticipants((prevParticipants) => {
               return [...localParticipants];
             });
+            if (isGroup) onConfirm(localParticipants);
             setIsParticipantsAdd(false);
           }}
         >

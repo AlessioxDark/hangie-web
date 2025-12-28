@@ -110,6 +110,33 @@ const modifyGroup = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const leaveGroup = async (req, res) => {
+  try {
+    const { data, error } = await Group.leave(req); // Chiama il modello per ottenere gli eventi
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+const addParticipants = async (req, res) => {
+  try {
+    const { data, error } = await Group.addParticipants(req); // Chiama il modello per ottenere gli eventi
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+const removeParticipant = async (req, res) => {
+  try {
+    const { data, error } = await Group.removeParticipant(req); // Chiama il modello per ottenere gli eventi
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 module.exports = {
   getAllGroups,
   getSpecificGroup,
@@ -117,4 +144,7 @@ module.exports = {
   getSpecificGroupEvent,
   addNewGroup,
   modifyGroup,
+  leaveGroup,
+  addParticipants,
+  removeParticipant,
 };

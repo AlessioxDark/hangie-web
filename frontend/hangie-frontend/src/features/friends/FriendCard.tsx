@@ -10,6 +10,8 @@ const FriendCard = ({
 
   setLocalParticipants,
 }) => {
+  console.log("local", localParticipants);
+  console.log("friend", friend);
   const isSelected = useMemo(
     () => localParticipants.some((p) => p.user_id === friend.user_id),
     [localParticipants, friend.user_id]
