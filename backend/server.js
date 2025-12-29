@@ -46,6 +46,18 @@ io.on("connection", (socket) => {
       const rowStatus = partecipanti.map((partecipante) => {
         return { message_id: messageId, user_id: partecipante.partecipante_id };
       });
+      const notificationInsert = partecipanti
+        .filter((p) => p.partecipante_id !== user.id)
+        .map((partecipante) => {
+          return {
+            type: "new_message",
+            sender_id: user.id,
+            is_read: false,
+            group_id: room,
+            user_id: partecipante.partecipante_id,
+            message_id: messageId,
+          };
+        });
       console.log("questi sono gli status delle row", rowStatus);
       // 1. Devi mettere AWAIT qui
       const { data: messageStatus, error: errorStatus } = await supabase
@@ -63,6 +75,10 @@ io.on("connection", (socket) => {
         .eq("user_id", user.id);
       const sender = userInfo[0];
       console.log("sender", sender);
+
+      const { data: notificationData, error: errorNotification } =
+        await supabase.from("notifiche").insert(notificationInsert);
+
       socket.to(room).emit("receive_message", {
         message: message,
         message_id: messageId,

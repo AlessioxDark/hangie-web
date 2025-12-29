@@ -29,6 +29,11 @@ const Chats = ({ messaggi }) => {
   // const socketRef = useRef<any>(null);
   const chatInputRef = useRef<any>(null);
   const { session } = useAuth();
+  const displayImage = currentGroupData.group_cover_img
+    ? `${currentGroupData.group_cover_img}?v=${
+        currentGroupData.updated_at || Date.now()
+      }`
+    : null;
   useEffect(() => {
     console.log("aperto chat", messaggi);
   }, []);
@@ -137,9 +142,9 @@ const Chats = ({ messaggi }) => {
             className="flex flex-row items-center gap-3 2xl:gap-6  flex-grow"
             onClick={() => setMobileView("GROUP_DETAILS")}
           >
-            {currentGroupData?.group_cover_img ? (
+            {displayImage ? (
               <img
-                src={currentGroupData?.group_cover_img}
+                src={displayImage}
                 className="w-10 h-10 2xl:w-16 2xl:h-16 rounded-full"
                 alt=""
               />

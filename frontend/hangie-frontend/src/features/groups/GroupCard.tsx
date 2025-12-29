@@ -15,11 +15,14 @@ const GroupCard = ({
   partecipanti_gruppo,
   descrizione,
   createdBy,
+  updated_at,
 }) => {
   const { setCurrentGroup, setCurrentGroupData, setCurrentChatData } =
     useChat();
+  const displayImage = group_cover_img
+    ? `${group_cover_img}?v=${updated_at || Date.now()}`
+    : null;
   const { setMobileView } = useMobileLayoutChat();
-
   const formatTime = (dateString) => {
     const date = new Date(dateString);
     // Mostra l'ora se è oggi, altrimenti la data breve
@@ -53,6 +56,7 @@ const GroupCard = ({
           partecipanti_gruppo,
           descrizione,
           createdBy,
+          updated_at,
         });
       }}
     >
@@ -62,13 +66,14 @@ const GroupCard = ({
           className="rounded-full w-14 h-14 2xl:h-16 2xl:w-16 flex-shrink-0" // Correzione Sizing
           alt="Group cover"
         /> */}
-        {group_cover_img == null ? (
+        {displayImage == null ? (
           <div className="rounded-full w-12 h-12 2xl:h-16 2xl:w-16 flex-shrink-0">
             <DefaultGroupIcon />
           </div>
         ) : (
           <img
-            src={group_cover_img}
+            // src={group_cover_img}
+            src={displayImage}
             className="rounded-full w-12 h-12 2xl:h-16 2xl:w-16 flex-shrink-0" // Correzione Sizing
             alt="Group cover"
           />

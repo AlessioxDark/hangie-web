@@ -12,9 +12,10 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
         {label} <span className="text-red-500 text-sm">*</span>
       </label>
       <div className="flex flex-col gap-0.5">
+        {/* bg-bg-2  */}
         <div
           className={`flex items-center
-		                         bg-bg-2 rounded-xl
+		                         bg-bg-1 rounded-xl
 		                         transition-all duration-200
 		                         ${
                                error

@@ -45,6 +45,9 @@ const GroupDetails = () => {
       }) || []
     );
   });
+  const displayImage = currentGroupImg
+    ? `${currentGroupImg}?v=${currentGroupData.updated_at || Date.now()}`
+    : null;
 
   const handleLeaveGroup = async () => {
     console.log(currentGroupData);
@@ -351,7 +354,8 @@ const GroupDetails = () => {
                         </div>
                       ) : (
                         <img
-                          src={currentGroupImg}
+                          // src={currentGroupImg}
+                          src={displayImage}
                           alt=""
                           className="w-48 h-48 rounded-full"
                         />

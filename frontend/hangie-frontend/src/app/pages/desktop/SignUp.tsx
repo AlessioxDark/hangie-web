@@ -260,29 +260,29 @@ const SignUp = () => {
   };
 
   return (
-    <div className="h-screen w-full p-5 flex justify-center items-center flex-col relative bg-neutral-white-2">
+    <div className="h-max w-full 2xl:p-5 flex justify-center items-center flex-col relative bg-bg-2">
       {/* 60% - Primary dominance in header */}
-      <div className="absolute top-5 flex w-full h-1/4 justify-center items-center">
-        <h1 className="font-bold font-title text-center text-3xl text-primary">
+      {/* <div className="absolute 2xl:top-5 flex w-full 2xl:h-1/4 justify-center items-center">
+        <h1 className="font-bold font-title text-center text-sm 2xl:text-3xl text-primary">
           Benvenuto ad Hangie
         </h1>
-      </div>
+      </div> */}
 
       {/* 30% - Neutral base */}
-      <div className="w-3/10 flex flex-col items-center gap-8 rounded-lg shadow-lg bg-white p-8">
+      <div className="w-full h-max 2xl:w-3/10 flex flex-col items-center gap-8 rounded-lg shadow-lg bg-white p-8 pt-4 2xl:pt-8">
         <h1 className="font-bold font-title text-center text-4xl text-black">
           Registrati
         </h1>
 
-        <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col gap-2 2xl:gap-6 w-full">
           <FormProvider {...methods}>
             <form
               onSubmit={handleFormSubmit}
-              className="flex flex-col gap-6 w-full"
+              className="flex flex-col gap-2 2xl:gap-6 w-full"
             >
               {/* Progress Steps - 60% Primary */}
               <div className="flex w-full flex-col items-center">
-                <div className="flex items-center justify-between w-full relative 4">
+                <div className="flex items-center justify-between w-full relative">
                   <div className="absolute top-1/2 transform -translate-y-1/2 w-full px-8">
                     <div className="h-1 rounded-full transition-all duration-300 bg-[#e5e7eb]">
                       <div
