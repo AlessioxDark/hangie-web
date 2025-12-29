@@ -7,8 +7,9 @@ import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import { Edit, Edit2, Plus, X } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AddParticipantsGroup from "./AddParticipantsGroup";
+import { supabase } from "../../config/db.js";
 
 const GroupDetails = () => {
   const { currentScreen } = useScreen();
@@ -26,6 +27,11 @@ const GroupDetails = () => {
     currentGroupData.descrizione
   );
   const [currentTitle, setCurrentTitle] = useState(currentGroupData.nome);
+  const [currentGroupImg, setCurrentGroupImg] = useState(
+    currentGroupData.group_cover_img
+  );
+  const fileInputRef = useRef(null);
+
   const [currentParticipants, setCurrentParticipants] = useState(() => {
     return (
       currentGroupData?.partecipanti_gruppo?.map((partecipante) => {
@@ -59,7 +65,72 @@ const GroupDetails = () => {
       console.log("error", error);
     }
   };
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    try {
+      const ext = file.name.split(".").pop();
+      const fileName = `${currentGroup}/cover.${ext}`;
+      const filePath = `${fileName}`;
 
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("group_cover_pics")
+        .update(filePath, file, {
+          upsert: true,
+          contentType: file.type,
+          cacheControl: "3600",
+        });
+      if (uploadError) {
+        console.log(uploadError);
+        // setError("root", { message: uploadError });
+        return;
+      }
+      const { data: urlData } = supabase.storage
+        .from("group_cover_pics")
+        .getPublicUrl(uploadData.path);
+      const { data: coverData, error: coverError } = await supabase
+        .from("gruppi")
+        .update({ group_cover_img: urlData.publicUrl })
+        .eq("group_id", currentGroup);
+      if (coverError) console.log(coverError);
+      // if (coverError) setError("root", { message: coverError });
+
+      setCurrentGroupImg(URL.createObjectURL(file));
+      setCurrentGroupData((prevData) => {
+        return { ...prevData, group_cover_img: URL.createObjectURL(file) };
+      });
+      console.log("Tutte le immagini caricate con successo!");
+    } catch (error) {
+      console.log(error);
+    }
+    // try {
+    //   const response = await fetch(
+    //     `http://localhost:3000/api/groups/modify/${currentGroup}`,
+    //     {
+    //       method: "PATCH",
+    //       body: JSON.stringify({
+    //         [field]: field == "descrizione" ? currentDescription : currentTitle,
+    //       }),
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         Authorization: `Bearer ${session.access_token}`,
+    //       },
+    //     }
+    //   );
+
+    //   if (response.ok) {
+    //     // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
+
+    //     setCurrentGroupData((prevData) => {
+    //       return {
+    //         ...prevData,
+    //         [field]: field == "descrizione" ? currentDescription : currentTitle,
+    //       };
+    //     });
+    //   }
+    // } catch (error) {
+    //   console.error("Errore durante l'invio:", error);
+    // }
+  };
   const handleParticipantsAdd = () => {
     setIsParticipantsAdd(true);
   };
@@ -258,17 +329,34 @@ const GroupDetails = () => {
               <div className="flex flex-col gap-5">
                 <div className="w-full flex justify-center">
                   <div className="flex flex-col gap-6 items-center">
-                    {currentGroupData.group_cover_img == null ? (
-                      <div className="rounded-full w-48 h-48 ">
-                        <DefaultGroupIcon />
+                    <div className="relative">
+                      <div
+                        className="absolute top-0 right-4 p-1.5 bg-primary rotate-270 rounded-full"
+                        onClick={() => {
+                          fileInputRef.current.click();
+                        }}
+                      >
+                        <Edit2 fill="#ffffff" stroke="#ffffff" size={12} />
                       </div>
-                    ) : (
-                      <img
-                        src={currentGroupData?.group_cover_img}
-                        alt=""
-                        className="w-48 h-48"
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        style={{ display: "none" }}
+                        accept="image/*"
                       />
-                    )}
+                      {currentGroupImg == null ? (
+                        <div className="rounded-full w-48 h-48 ">
+                          <DefaultGroupIcon />
+                        </div>
+                      ) : (
+                        <img
+                          src={currentGroupImg}
+                          alt=""
+                          className="w-48 h-48 rounded-full"
+                        />
+                      )}
+                    </div>
                     <div className="flex flex-col text-center font-body">
                       <div className="relative">
                         {isCreator && (
@@ -311,7 +399,7 @@ const GroupDetails = () => {
                     </div>
                   </div>
                 </div>
-                <div className="px-3">
+                <div className="px-4">
                   <div className="w-full flex flex-row justify-between">
                     <h3 className="text-xs font-bold font-body text-text-2 uppercase tracking-wide mb-1">
                       Descrizione

@@ -8,6 +8,7 @@ import z from "zod";
 import { supabase } from "../../../config/db.js";
 import { X } from "lucide-react";
 import FormInputCollection from "@/features/CreateEventForm/FormInputCollection";
+import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
 const CreateEventFormMobile = () => {
   const IMAGE_LIMIT = 4;
   const { closeModal } = useModal();
@@ -64,7 +65,7 @@ const CreateEventFormMobile = () => {
     setError,
   } = methods;
   const { currentGroup, currentGroupData } = useChat();
-
+  const { setMobileView } = useMobileLayoutChat();
   const [imageError, setImageError] = useState(false); // Stato per l'errore
   const sendEvent = (event_id, event_details) => {
     socketRef.current.emit(
@@ -172,7 +173,10 @@ const CreateEventFormMobile = () => {
       console.log("Tutte le immagini caricate con successo!");
       const newEventDetails = { ...result.event_details, cover_img: cover_url };
       sendEvent(newEventId, newEventDetails);
-      closeModal(); // Chiudi solo se tutto è andato bene
+      // setmobi
+      setMobileView("chat");
+
+      // closeModal(); // Chiudi solo se tutto è andato bene
     } catch (error) {
       console.error("Errore durante il processo:", error);
       // Qui puoi gestire l'errore (es. mostrare un toast notification)

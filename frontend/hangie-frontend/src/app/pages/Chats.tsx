@@ -140,11 +140,11 @@ const Chats = ({ messaggi }) => {
             {currentGroupData?.group_cover_img ? (
               <img
                 src={currentGroupData?.group_cover_img}
-                className="w-10 h-10 2xl:w-16 2xl:h-16"
+                className="w-10 h-10 2xl:w-16 2xl:h-16 rounded-full"
                 alt=""
               />
             ) : (
-              <div className="w-10 h-10 2xl:w-16 2xl:h-16">
+              <div className="w-10 h-10 2xl:w-16 2xl:h-16 rounded-full">
                 <DefaultGroupIcon />
               </div>
             )}
