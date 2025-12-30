@@ -132,6 +132,7 @@ io.on("connection", (socket) => {
       .update({ status: "read" })
       .eq("user_id", user_id)
       .eq("message_id", message_id);
+
     const { data: notificationData, error: errorNotification } = await supabase
       .from("notifiche")
       .update({ is_read: "true" })
@@ -143,12 +144,14 @@ io.on("connection", (socket) => {
       .from("messaggi_status")
       .select("*", { count: "exact", head: true })
       .eq("message_id", message_id)
-      .eq("status", "delivered");
+      .neq("status", "read");
+    // .or("status", "sent");
 
     console.log(count, countError);
     // console.log()
     if (count == 0) {
-      io.to(room).emit("message_read", { message_id });
+      console.log("il conto è zero mando read", room);
+      io.to(room).emit("give_read", { message_id });
     }
   });
   socket.on("send_event", async (eventId, room, token) => {

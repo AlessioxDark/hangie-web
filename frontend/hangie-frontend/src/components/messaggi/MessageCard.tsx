@@ -12,9 +12,6 @@ const MessageCard = ({
   isSent,
   isRead,
 }) => {
-  useEffect(() => {
-    console.log(`Messaggio ${content} - isRead:`, isRead);
-  }, [isRead]);
   const formatDate = (date) => {
     return new Date(date).toLocaleTimeString("it-IT", {
       hour: "2-digit",

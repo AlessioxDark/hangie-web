@@ -124,9 +124,23 @@ export const SocketProvider = ({ children }) => {
         };
       });
     });
-    socket.on("message_read", (data) => {
-      // notifica
 
+    return () => {
+      console.log("Pulizia socket e rimozione listener...");
+      socket.off("receive_message");
+      socket.off("message_arrived");
+      socket.off("give_read");
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [session?.user?.id, setCurrentChatData]);
+
+  useEffect(() => {
+    if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
+
+    currentSocket.on("give_read", (data) => {
+      // notifica
+      console.log("DENTRO GIVING READ! ID messaggio:", data.message_id);
       setCurrentChatData((prevData) => {
         if (!prevData) return prevData;
         return {
@@ -137,27 +151,10 @@ export const SocketProvider = ({ children }) => {
         };
       });
     });
-
     return () => {
-      console.log("Pulizia socket e rimozione listener...");
-      socket.off("receive_message");
-      socket.off("message_arrived");
-      socket.off("message_read");
-      socket.disconnect();
-      socketRef.current = null;
+      currentSocket?.off("give_read");
     };
-  }, [session?.user?.id, setCurrentChatData]);
-
-  //   useEffect(() => {
-  //     return () => {
-  //       if (socketRef.current) {
-  //         socketRef.current.off("receive_message");
-  //         socketRef.current.off("message_arrived");
-  //         socketRef.current.off("message_read");
-  //       }
-  //     };
-  //   }, [socketRef.current]);
-
+  }, [currentSocket, setCurrentChatData, currentChatData?.messaggi?.length]);
   useEffect(() => {
     if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
 
@@ -175,21 +172,21 @@ export const SocketProvider = ({ children }) => {
         );
       });
 
-      // Aggiorna localmente per non ri-emettere subito
+      // Aggiorno localmente per evitare loop
       setCurrentChatData((prev) => ({
         ...prev,
-        messaggi: prev.messaggi.map((m) => ({ ...m, isRead: true })),
+        messaggi: prev.messaggi.map((m) =>
+          m.user_id !== session?.user?.id && !m.isRead
+            ? { ...m, isRead: true }
+            : m
+        ),
       }));
+      // Aggiorna localmente per non ri-emettere subito
     }
     return () => {
       currentSocket?.off("message_read");
     };
-  }, [
-    currentChatData?.messaggi?.length,
-    currentGroup,
-    currentSocket,
-    currentGroupData.group_id,
-  ]); // Solo quando cambia
+  }, [currentChatData?.messaggi?.length, currentGroup, currentSocket]); // Solo quando cambia
 
   return (
     <SocketContext.Provider value={{ currentSocket, socketRef }}>
