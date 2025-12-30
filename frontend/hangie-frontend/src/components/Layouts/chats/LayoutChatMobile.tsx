@@ -145,7 +145,7 @@ const LayoutChatMobile = () => {
       return <ChatsEvents />;
     }
     if (mobileView == "chat") {
-      return <Chats messaggi={currentChatData?.messaggi} />;
+      return <Chats />;
     }
     if (mobileView == "CREATE_EVENT") {
       return <CreateEventForm />;

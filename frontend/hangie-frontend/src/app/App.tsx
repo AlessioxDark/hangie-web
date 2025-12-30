@@ -15,45 +15,51 @@ import Home from "./pages/Home";
 import ResponsiveLayoutWrapper from "../components/Layouts/ResponsiveLayoutWrapper";
 import { ScreenProvider } from "@/contexts/ScreenContext";
 import { MobileLayoutChatProvider } from "@/contexts/MobileLayoutChatContext";
+import { SocketProvider } from "@/contexts/SocketContext";
+// import { NotificationProvider } from "@/contexts/NotificationContext";
 function App() {
   return (
     <BrowserRouter>
-      <ScreenProvider>
-        <AuthContextProvider>
-          <ChatProvider>
-            <ModalProvider>
-              <Routes>
-                <Route path="/signup" element={<SignUp />}></Route>
-                <Route path="/login" element={<Login />}></Route>
-                <Route
-                  path="/chats"
-                  element={
-                    <ResponsiveLayoutWrapper layoutType="chat"></ResponsiveLayoutWrapper>
-                  }
-                ></Route>
+      <AuthContextProvider>
+        <ChatProvider>
+          <SocketProvider>
+            {/* <NotificationProvider> */}
+            <ScreenProvider>
+              <ModalProvider>
+                <Routes>
+                  <Route path="/signup" element={<SignUp />}></Route>
+                  <Route path="/login" element={<Login />}></Route>
+                  <Route
+                    path="/chats"
+                    element={
+                      <ResponsiveLayoutWrapper layoutType="chat"></ResponsiveLayoutWrapper>
+                    }
+                  ></Route>
 
-                <Route
-                  path="/"
-                  element={
-                    <ResponsiveLayoutWrapper>
-                      <Home />
-                    </ResponsiveLayoutWrapper>
-                  }
-                />
-                <Route
-                  path="/events/suspended/all"
-                  element={
-                    <ResponsiveLayoutWrapper>
-                      <EventsSuspended />
-                    </ResponsiveLayoutWrapper>
-                  }
-                />
-              </Routes>
-              <ModalHandler />
-            </ModalProvider>
-          </ChatProvider>
-        </AuthContextProvider>
-      </ScreenProvider>
+                  <Route
+                    path="/"
+                    element={
+                      <ResponsiveLayoutWrapper>
+                        <Home />
+                      </ResponsiveLayoutWrapper>
+                    }
+                  />
+                  <Route
+                    path="/events/suspended/all"
+                    element={
+                      <ResponsiveLayoutWrapper>
+                        <EventsSuspended />
+                      </ResponsiveLayoutWrapper>
+                    }
+                  />
+                </Routes>
+                <ModalHandler />
+              </ModalProvider>
+            </ScreenProvider>
+            {/* </NotificationProvider> */}
+          </SocketProvider>
+        </ChatProvider>
+      </AuthContextProvider>
     </BrowserRouter>
   );
 }

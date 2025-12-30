@@ -64,8 +64,9 @@ io.on("connection", (socket) => {
         .from("messaggi_status")
         .insert(rowStatus)
         .select(); // Il select serve a popolare messageStatus dopo l'inserimento
-
+      console.log("controllo se c'è callback", callback);
       if (callback) {
+        console.log("c'è, esecuzione");
         callback({ message_id: messageId });
       }
 
@@ -79,12 +80,22 @@ io.on("connection", (socket) => {
       const { data: notificationData, error: errorNotification } =
         await supabase.from("notifiche").insert(notificationInsert);
 
-      socket.to(room).emit("receive_message", {
+      io.to(room).emit("receive_message", {
         message: message,
         message_id: messageId,
         group_id: room, // AGGIUNGI QUESTO: fondamentale per il Context
         sender_id: user.id, // AGGIUNGI QUESTO: utile per la UI
         sender: sender,
+      });
+
+      notificationInsert.forEach((notif) => {
+        // Invia alla stanza privata dell'utente (se l'hai creata)
+        // o semplicemente usa socket.to(room) se vuoi gestire tutto lato client
+        io.to(room).emit("new_notification", {
+          type: "new_message",
+          group_id: room,
+          user_id: notif.user_id, // Il client filtrerà se è per lui
+        });
       });
     }
   );
@@ -121,6 +132,12 @@ io.on("connection", (socket) => {
       .update({ status: "read" })
       .eq("user_id", user_id)
       .eq("message_id", message_id);
+    const { data: notificationData, error: errorNotification } = await supabase
+      .from("notifiche")
+      .update({ is_read: "true" })
+      .eq("user_id", user_id)
+      .eq("group_id", room)
+      .eq("is_read", false);
 
     const { count, error: countError } = await supabase
       .from("messaggi_status")

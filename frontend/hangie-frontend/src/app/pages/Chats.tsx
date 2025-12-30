@@ -13,14 +13,11 @@ import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
 import { Calendar } from "lucide-react";
 import CalendarIcon from "@/assets/icons/CalendarIcon.js";
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon.js";
-const Chats = ({ messaggi }) => {
-  const {
-    currentGroupData,
-    setCurrentGroup,
-    setCurrentChatData,
-    currentChatData,
-    socketRef,
-  } = useChat();
+import { useSocket } from "@/contexts/SocketContext.js";
+const Chats = () => {
+  const { currentGroupData, setCurrentGroup, currentChatData } = useChat();
+  const messaggi = currentChatData?.messaggi;
+  const { socketRef, currentSocket } = useSocket();
   const [chatInput, setChatInput] = useState<string>("");
   const [showEvents, setShowEvents] = useState(false);
   const messagesEndRef = useRef(null);
@@ -43,6 +40,10 @@ const Chats = ({ messaggi }) => {
   console.log(currentGroupData);
   const sendMessage = async () => {
     console.log("messaggio inviato", currentGroupData);
+    if (!currentSocket) {
+      console.error("Socket non ancora connesso!");
+      return;
+    }
     const trimmedInput = chatInput.trim();
     const partecipantiNoUtente = currentGroupData?.partecipanti_gruppo.filter(
       (partecipante) => {
@@ -51,63 +52,28 @@ const Chats = ({ messaggi }) => {
     );
     console.log(partecipantiNoUtente);
 
-    socketRef.current.emit(
+    currentSocket.emit(
       "send_message",
-      trimmedInput,
-      currentGroupData?.group_id,
-      partecipantiNoUtente,
-      session.access_token,
-      (response) => {
-        setCurrentChatData((prevData) => {
-          return {
-            ...prevData,
-            messaggi: [
-              ...prevData.messaggi,
-              {
-                message_id: response.message_id,
-                // mettere tutti i dati per questo da errore es nome, pfpf ecc.
-                content: trimmedInput,
-                group_id: currentGroupData.group_id,
-                user_id: session.user.id,
-                sent_at: Date.now(),
-                isUser: true,
-                isSent: false,
-                isRead: false,
-              },
-            ],
-          };
-        });
-      }
+      trimmedInput, // 1. message
+      currentGroupData.group_id,
+      partecipantiNoUtente, // 3. partecipanti
+      session.access_token // 4. token
     );
 
     console.log("risposta avviata gestendo dato");
 
     setChatInput("");
-    if (chatInputRef.current) {
-      // Pulisce l'elemento DOM (l'input visibile)
-      chatInputRef.current.textContent = "";
-    }
+    if (chatInputRef.current) chatInputRef.current.textContent = "";
   };
 
   useEffect(() => {
-    if (currentGroupData) {
-      socketRef.current.emit("join_room", currentChatData?.group_id);
+    if (currentGroupData && currentSocket) {
+      currentSocket.emit("join_room", currentChatData?.group_id);
 
-      // socketRef.current.on("receive_message", (data) => {
-      //   console.log("messaggio ricevuto: ", data);
-
-      //   socketRef.current.emit(
-      //     "message_arrived",
-      //     data.message_id,
-      //     session.user.id,
-      //     currentGroupData?.group_id
-      //   );
-      // });
-
-      socketRef.current.on("receive_event", (data) => {
+      currentSocket.on("receive_event", (data) => {
         console.log("evento ricevuto: ", data);
       });
-      // socketRef.current.on("message_arrived", (data) => {
+      // currentSocket.on("message_arrived", (data) => {
       //   console.log("messaggio arrivato a me");
       //   setCurrentChatData((prevData) => {
       //     return {
@@ -121,7 +87,7 @@ const Chats = ({ messaggi }) => {
       //   });
       // });
     }
-  }, []);
+  }, [currentGroupData, currentSocket]);
   console.log(currentGroupData);
   return (
     <div className="w-full h-full flex flex-col">
