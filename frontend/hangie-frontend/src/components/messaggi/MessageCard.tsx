@@ -1,7 +1,7 @@
 import DoubleTick from "@/assets/icons/DoubleTick";
 import TickIcon from "@/assets/icons/TickIcon";
 import ProfileIcon from "@/components/ProfileIcon";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const MessageCard = ({
   isUser,
@@ -12,6 +12,9 @@ const MessageCard = ({
   isSent,
   isRead,
 }) => {
+  useEffect(() => {
+    console.log(`Messaggio ${content} - isRead:`, isRead);
+  }, [isRead]);
   const formatDate = (date) => {
     return new Date(date).toLocaleTimeString("it-IT", {
       hour: "2-digit",
@@ -20,25 +23,28 @@ const MessageCard = ({
   };
   const renderTick = () => {
     if (!isUser) return;
-    if (!isSent) {
-      return (
-        <div className="w-5 h-4.5">
-          <TickIcon color={"#64748b"} />
-        </div>
-      );
-    }
     if (isRead) {
       return (
         <div className="w-5 h-4.5">
-          <DoubleTick color={"#ffffff"} />
+          <DoubleTick color="#ffffff" />
         </div>
       );
     }
+    if (isSent) {
+      return (
+        <div className="w-5 h-4.5">
+          <DoubleTick color="#94a3b8" />
+        </div>
+      );
+    }
+
     return (
       <div className="w-5 h-4.5">
-        <DoubleTick color={"#e2e8f0"} />
+        <TickIcon color="#94a3b8" />
       </div>
     );
+
+    // BLU
   };
   return (
     <div
@@ -91,6 +97,7 @@ const MessageCard = ({
             >
               {formatDate(sent_at)}
             </span>
+
             {/* {isUser && (
               <div className="w-5 h-4.5">
                 {isSent ? <DoubleTick /> : <TickIcon color={"#ffffff"} />}

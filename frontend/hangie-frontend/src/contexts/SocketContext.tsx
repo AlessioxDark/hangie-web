@@ -29,7 +29,12 @@ export const useSocket = () => {
 
 export const SocketProvider = ({ children }) => {
   const [currentSocket, setCurrentSocket] = useState(null); // Usiamo lo stato invece di useRef per la disponibilità
-  const { setCurrentChatData } = useChat();
+  const {
+    setCurrentChatData,
+    currentGroup,
+    currentChatData,
+    currentGroupData,
+  } = useChat();
   const { session } = useAuth();
   const socketRef = useRef(null);
   const SERVER_URL = "http://localhost:3000";
@@ -53,11 +58,9 @@ export const SocketProvider = ({ children }) => {
     socket.on("receive_message", (data) => {
       console.log("Messaggio intercettato globalmente:", data);
 
-      // 1. FA LA SPIA (Conferma ricezione per doppia spunta)
-
-      // 2. AGGIORNA LA CHAT SE È APERTA
-
       console.log("sto per aggiornare");
+      const isMe = data.sender_id === session?.user?.id;
+
       setCurrentChatData((prevData) => {
         if (!prevData) {
           console.log("Nessuna chat aperta (prevData è null)");
@@ -67,11 +70,15 @@ export const SocketProvider = ({ children }) => {
         // Usiamo String() per evitare conflitti tra tipi Number e String
         const currentId = String(prevData.group_id);
         const incomingId = String(data.group_id);
+        if (!prevData || String(prevData.group_id) !== String(data.group_id))
+          return prevData;
 
+        // BLOCCA DUPLICATI: Se il messaggio esiste già (perché lo hai inviato tu ottimisticamente), non aggiungerlo
+        if (prevData.messaggi.some((m) => m.message_id === data.message_id))
+          return prevData;
         console.log(
           `Confronto ID: Locale(${currentId}) vs In arrivo(${incomingId})`
         );
-
         // Aggiungiamo il messaggio all'array
         return {
           ...prevData,
@@ -83,18 +90,24 @@ export const SocketProvider = ({ children }) => {
               group_id: data.group_id,
               user_id: data.sender_id,
               sent_at: Date.now(),
-              isUser: data.sender_id === session.user.id,
+              isUser: isMe,
+              isSent: isMe ? false : true, // Se è mio, aspetto la conferma (message_arrived). Se è altrui, per me è già arrivato.
+              isRead: false,
               utenti: data.sender,
             },
           ],
         };
       });
-      socket.emit(
-        "message_arrived",
-        data.message_id,
-        session?.user?.id,
-        data.group_id
-      );
+      console.log("sono me?", isMe);
+      if (!isMe) {
+        console.log("non sono me faccio sent");
+        socket.emit(
+          "message_sent",
+          data.message_id,
+          session?.user?.id,
+          data.group_id
+        );
+      }
     });
 
     // 3. ASCOLTA QUANDO I TUOI MESSAGGI ARRIVANO AGLI ALTRI (Doppia spunta per te)
@@ -111,8 +124,9 @@ export const SocketProvider = ({ children }) => {
         };
       });
     });
-
     socket.on("message_read", (data) => {
+      // notifica
+
       setCurrentChatData((prevData) => {
         if (!prevData) return prevData;
         return {
@@ -144,22 +158,38 @@ export const SocketProvider = ({ children }) => {
   //     };
   //   }, [socketRef.current]);
 
-  //   useEffect(() => {
-  //     if (currentGroup && currentChatData?.messaggi) {
-  //       const unreadMessages = currentChatData.messaggi.filter(
-  //         (m) => !m.isRead && m.user_id !== session.user.id
-  //       );
+  useEffect(() => {
+    if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
 
-  //       unreadMessages.forEach((m) => {
-  //         socketRef.current.emit(
-  //           "message_read",
-  //           m.message_id,
-  //           session.user.id,
-  //           currentGroup
-  //         );
-  //       });
-  //     }
-  //   }, [currentGroup, currentChatData?.messaggi?.length]); // Solo quando cambia
+    const unreadMessages = currentChatData.messaggi.filter(
+      (m) => !m.isRead && m.user_id !== session.user.id
+    );
+
+    if (unreadMessages.length > 0) {
+      unreadMessages.forEach((m) => {
+        currentSocket.emit(
+          "message_read",
+          m.message_id,
+          session.user.id,
+          currentGroup
+        );
+      });
+
+      // Aggiorna localmente per non ri-emettere subito
+      setCurrentChatData((prev) => ({
+        ...prev,
+        messaggi: prev.messaggi.map((m) => ({ ...m, isRead: true })),
+      }));
+    }
+    return () => {
+      currentSocket?.off("message_read");
+    };
+  }, [
+    currentChatData?.messaggi?.length,
+    currentGroup,
+    currentSocket,
+    currentGroupData.group_id,
+  ]); // Solo quando cambia
 
   return (
     <SocketContext.Provider value={{ currentSocket, socketRef }}>

@@ -99,7 +99,7 @@ io.on("connection", (socket) => {
       });
     }
   );
-  socket.on("message_arrived", async (message_id, user_id, room) => {
+  socket.on("message_sent", async (message_id, user_id, room) => {
     // console.log(
     //   `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
     // );
@@ -126,7 +126,7 @@ io.on("connection", (socket) => {
     // console.log(
     //   `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
     // );
-    console.log("avviato message arrived");
+    console.log("avviato message read");
     const { data: messageStatus, error: errorStatus } = await supabase
       .from("messaggi_status")
       .update({ status: "read" })
@@ -146,7 +146,7 @@ io.on("connection", (socket) => {
       .eq("status", "delivered");
 
     console.log(count, countError);
-
+    // console.log()
     if (count == 0) {
       io.to(room).emit("message_read", { message_id });
     }
