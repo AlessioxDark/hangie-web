@@ -56,7 +56,7 @@ const Chats = () => {
       "send_message",
       trimmedInput, // 1. message
       currentGroupData.group_id,
-      partecipantiNoUtente, // 3. partecipanti
+      currentGroupData?.partecipanti_gruppo,
       session.access_token, // 4. token
       {
         group_cover_img: currentGroupData.group_cover_img,
@@ -70,28 +70,28 @@ const Chats = () => {
     if (chatInputRef.current) chatInputRef.current.textContent = "";
   };
 
-  useEffect(() => {
-    if (currentGroupData && currentSocket) {
-      currentSocket.emit("join_room", currentChatData?.group_id);
+  // useEffect(() => {
+  //   if (currentGroupData && currentSocket) {
+  //     currentSocket.emit("join_room", currentChatData?.group_id);
 
-      currentSocket.on("receive_event", (data) => {
-        console.log("evento ricevuto: ", data);
-      });
-      // currentSocket.on("message_arrived", (data) => {
-      //   console.log("messaggio arrivato a me");
-      //   setCurrentChatData((prevData) => {
-      //     return {
-      //       ...prevData,
-      //       messaggi: prevData.messaggi.map((prevmess) => {
-      //         return prevmess.message_id == data.message_id
-      //           ? { ...prevmess, isSent: true }
-      //           : prevmess;
-      //       }),
-      //     };
-      //   });
-      // });
-    }
-  }, [currentGroupData, currentSocket]);
+  //     currentSocket.on("receive_event", (data) => {
+  //       console.log("evento ricevuto: ", data);
+  //     });
+  //     currentSocket.on("message_arrived", (data) => {
+  //       console.log("messaggio arrivato a me");
+  //       setCurrentChatData((prevData) => {
+  //         return {
+  //           ...prevData,
+  //           messaggi: prevData.messaggi.map((prevmess) => {
+  //             return prevmess.message_id == data.message_id
+  //               ? { ...prevmess, isSent: true }
+  //               : prevmess;
+  //           }),
+  //         };
+  //       });
+  //     });
+  //   }
+  // }, [currentGroupData, currentSocket]);
   console.log(currentGroupData);
   return (
     <div className="w-full h-full flex flex-col">

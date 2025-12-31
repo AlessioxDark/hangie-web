@@ -46,9 +46,15 @@ io.on("connection", (socket) => {
         .insert([{ content: message, user_id: user.id, group_id: room }])
         .select("message_id");
       const messageId = messageData[0].message_id;
-      const rowStatus = partecipanti.map((partecipante) => {
-        return { message_id: messageId, user_id: partecipante.partecipante_id };
-      });
+      const rowStatus = partecipanti
+        .filter((p) => p.partecipante_id !== user.id)
+        .map((partecipante) => {
+          return {
+            message_id: messageId,
+            user_id: partecipante.partecipante_id,
+          };
+        });
+
       const notificationInsert = partecipanti
         .filter((p) => p.partecipante_id !== user.id)
         .map((partecipante) => {
@@ -67,7 +73,7 @@ io.on("connection", (socket) => {
         .from("messaggi_status")
         .insert(rowStatus)
         .select(); // Il select serve a popolare messageStatus dopo l'inserimento
-
+      console.log("da aggiungere a messsaggi_stauts", rowStatus);
       const { data: userInfo, error: userError } = await supabase
         .from("utenti")
         .select("*")
@@ -78,13 +84,30 @@ io.on("connection", (socket) => {
       const { data: notificationData, error: errorNotification } =
         await supabase.from("notifiche").insert(notificationInsert);
 
-      io.to(room).emit("receive_message", {
+      partecipanti.forEach((p) => {
+        io.to(p.partecipante_id).emit("receive_message", {
+          message: message,
+          message_id: messageId,
+          group_id: room, // AGGIUNGI QUESTO: fondamentale per il Context
+          sender_id: user.id, // AGGIUNGI QUESTO: utile per la UI
+          sender: sender,
+        });
+      });
+      io.to(user.id).emit("receive_message", {
         message: message,
         message_id: messageId,
         group_id: room, // AGGIUNGI QUESTO: fondamentale per il Context
         sender_id: user.id, // AGGIUNGI QUESTO: utile per la UI
         sender: sender,
       });
+
+      // io.to(room).emit("receive_message", {
+      //   message: message,
+      //   message_id: messageId,
+      //   group_id: room, // AGGIUNGI QUESTO: fondamentale per il Context
+      //   sender_id: user.id, // AGGIUNGI QUESTO: utile per la UI
+      //   sender: sender,
+      // });
       console.log("invia notifiche");
       const receiverData = partecipanti
         .filter((p) => p.partecipante_id !== user.id)
@@ -93,7 +116,7 @@ io.on("connection", (socket) => {
         });
       receiverData.forEach((receiver) => {
         // Invia alla stanza privata dell'utente (se l'hai creata)
-        io.to(room).emit("new_notification", {
+        io.to(receiver.partecipante_id).emit("new_notification", {
           type: "new_message",
           sender: sender,
           receiver: receiver,
@@ -103,6 +126,16 @@ io.on("connection", (socket) => {
           user_id: receiver.partecipante_id, // Il client filtrerà se è per lui
           created_at: new Date(),
         });
+        // io.to(room).emit("new_notification", {
+        //   type: "new_message",
+        //   sender: sender,
+        //   receiver: receiver,
+        //   group_id: room,
+        //   messaggio: { content: message },
+        //   gruppo: groupData,
+        //   user_id: receiver.partecipante_id, // Il client filtrerà se è per lui
+        //   created_at: new Date(),
+        // });
       });
     }
   );
@@ -110,6 +143,10 @@ io.on("connection", (socket) => {
     // console.log(
     //   `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
     // );
+    const { data: partecipantiDB } = await supabase
+      .from("partecipanti_gruppo")
+      .select("partecipante_id")
+      .eq("group_id", room);
     console.log("avviato message arrived");
     const { data: messageStatus, error: errorStatus } = await supabase
       .from("messaggi_status")
@@ -126,13 +163,19 @@ io.on("connection", (socket) => {
     console.log(count, countError);
 
     if (count == 0) {
-      io.to(room).emit("message_arrived", { message_id });
+      partecipantiDB.forEach((p) => {
+        io.to(p.partecipante_id).emit("message_arrived", { message_id });
+      });
     }
   });
   socket.on("message_read", async (message_id, user_id, room) => {
     // console.log(
     //   `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
     // );
+    const { data: partecipantiDB } = await supabase
+      .from("partecipanti_gruppo")
+      .select("partecipante_id")
+      .eq("group_id", room);
     console.log("avviato message read");
     const { data: messageStatus, error: errorStatus } = await supabase
       .from("messaggi_status")
@@ -153,8 +196,7 @@ io.on("connection", (socket) => {
         `Pulizia di ${notificationData.length} notifiche per l'utente`
       );
 
-      // Invia al socket dell'utente corrente l'ordine di pulire
-      socket.emit("clear_notifications_count", {
+      socket.to(user_id).emit("clear_notifications_count", {
         group_id: room,
         user_id,
       });
@@ -170,7 +212,9 @@ io.on("connection", (socket) => {
     // console.log()
     if (count == 0) {
       console.log("il conto è zero mando read", room);
-      io.to(room).emit("give_read", { message_id });
+      partecipantiDB.forEach((p) => {
+        io.to(p.partecipante_id).emit("give_read", { message_id });
+      });
     }
   });
   socket.on("send_event", async (eventId, room, token) => {

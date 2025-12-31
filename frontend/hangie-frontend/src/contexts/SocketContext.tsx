@@ -53,7 +53,7 @@ export const SocketProvider = ({ children }) => {
       socketRef.current = socket;
       setCurrentSocket(socket); // Questo scatena il re-render dei figli
     });
-
+    socket.emit("identify_user", session.user.id);
     // ASCOLTATORE GLOBALE
     socket.on("receive_message", (data) => {
       console.log("Messaggio intercettato globalmente:", data);
