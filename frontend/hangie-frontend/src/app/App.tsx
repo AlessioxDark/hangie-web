@@ -17,6 +17,7 @@ import { ScreenProvider } from "@/contexts/ScreenContext";
 import { MobileLayoutChatProvider } from "@/contexts/MobileLayoutChatContext";
 import { SocketProvider } from "@/contexts/SocketContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import Notification from "./pages/Notification";
 function App() {
   return (
     <BrowserRouter>
@@ -29,6 +30,14 @@ function App() {
                   <Routes>
                     <Route path="/signup" element={<SignUp />}></Route>
                     <Route path="/login" element={<Login />}></Route>
+                    <Route
+                      path="/notifications"
+                      element={
+                        <ResponsiveLayoutWrapper>
+                          <Notification />
+                        </ResponsiveLayoutWrapper>
+                      }
+                    ></Route>
                     <Route
                       path="/chats"
                       element={

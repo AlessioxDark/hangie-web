@@ -57,7 +57,11 @@ const Chats = () => {
       trimmedInput, // 1. message
       currentGroupData.group_id,
       partecipantiNoUtente, // 3. partecipanti
-      session.access_token // 4. token
+      session.access_token, // 4. token
+      {
+        group_cover_img: currentGroupData.group_cover_img,
+        nome: currentGroupData.nome,
+      }
     );
 
     console.log("risposta avviata gestendo dato");

@@ -27,7 +27,7 @@ io.on("connection", (socket) => {
 
   socket.on(
     "send_message",
-    async (message, room, partecipanti, token, callback) => {
+    async (message, room, partecipanti, token, groupData) => {
       console.log(
         `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
       );
@@ -64,11 +64,6 @@ io.on("connection", (socket) => {
         .from("messaggi_status")
         .insert(rowStatus)
         .select(); // Il select serve a popolare messageStatus dopo l'inserimento
-      console.log("controllo se c'è callback", callback);
-      if (callback) {
-        console.log("c'è, esecuzione");
-        callback({ message_id: messageId });
-      }
 
       const { data: userInfo, error: userError } = await supabase
         .from("utenti")
@@ -87,14 +82,23 @@ io.on("connection", (socket) => {
         sender_id: user.id, // AGGIUNGI QUESTO: utile per la UI
         sender: sender,
       });
-
-      notificationInsert.forEach((notif) => {
+      console.log("invia notifiche");
+      const receiverData = partecipanti
+        .filter((p) => p.partecipante_id !== user.id)
+        .map((partecipante) => {
+          return partecipante;
+        });
+      receiverData.forEach((receiver) => {
         // Invia alla stanza privata dell'utente (se l'hai creata)
-        // o semplicemente usa socket.to(room) se vuoi gestire tutto lato client
         io.to(room).emit("new_notification", {
           type: "new_message",
+          sender: sender,
+          receiver: receiver,
           group_id: room,
-          user_id: notif.user_id, // Il client filtrerà se è per lui
+          messaggio: { content: message },
+          gruppo: groupData,
+          user_id: receiver.partecipante_id, // Il client filtrerà se è per lui
+          created_at: new Date(),
         });
       });
     }
@@ -138,8 +142,20 @@ io.on("connection", (socket) => {
       .update({ is_read: "true" })
       .eq("user_id", user_id)
       .eq("group_id", room)
-      .eq("is_read", false);
+      .eq("is_read", false)
+      .select("*");
 
+    if (notificationData && notificationData.length > 0) {
+      console.log(
+        `Pulizia di ${notificationData.length} notifiche per l'utente`
+      );
+
+      // Invia al socket dell'utente corrente l'ordine di pulire
+      socket.emit("clear_notifications_count", {
+        group_id: room,
+        user_id,
+      });
+    }
     const { count, error: countError } = await supabase
       .from("messaggi_status")
       .select("*", { count: "exact", head: true })
