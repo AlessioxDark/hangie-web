@@ -81,9 +81,6 @@ io.on("connection", (socket) => {
       const sender = userInfo[0];
       console.log("sender", sender);
 
-      const { data: notificationData, error: errorNotification } =
-        await supabase.from("notifiche").insert(notificationInsert);
-
       partecipanti.forEach((p) => {
         io.to(p.partecipante_id).emit("receive_message", {
           message: message,
@@ -101,19 +98,12 @@ io.on("connection", (socket) => {
         sender: sender,
       });
 
-      // io.to(room).emit("receive_message", {
-      //   message: message,
-      //   message_id: messageId,
-      //   group_id: room, // AGGIUNGI QUESTO: fondamentale per il Context
-      //   sender_id: user.id, // AGGIUNGI QUESTO: utile per la UI
-      //   sender: sender,
-      // });
-      console.log("invia notifiche");
-      const receiverData = partecipanti
-        .filter((p) => p.partecipante_id !== user.id)
-        .map((partecipante) => {
-          return partecipante;
-        });
+      const { data: notificationData, error: errorNotification } =
+        await supabase.from("notifiche").insert(notificationInsert);
+      const receiverData = partecipanti.filter(
+        (p) => p.partecipante_id !== user.id
+      );
+      console.log("invio notifiche a", receiverData);
       receiverData.forEach((receiver) => {
         // Invia alla stanza privata dell'utente (se l'hai creata)
         io.to(receiver.partecipante_id).emit("new_notification", {
@@ -125,17 +115,8 @@ io.on("connection", (socket) => {
           gruppo: groupData,
           user_id: receiver.partecipante_id, // Il client filtrerà se è per lui
           created_at: new Date(),
+          is_read: false,
         });
-        // io.to(room).emit("new_notification", {
-        //   type: "new_message",
-        //   sender: sender,
-        //   receiver: receiver,
-        //   group_id: room,
-        //   messaggio: { content: message },
-        //   gruppo: groupData,
-        //   user_id: receiver.partecipante_id, // Il client filtrerà se è per lui
-        //   created_at: new Date(),
-        // });
       });
     }
   );

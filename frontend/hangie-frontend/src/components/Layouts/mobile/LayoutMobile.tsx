@@ -1,8 +1,10 @@
 import BottomNav from "@/app/pages/mobile/BottomNav";
+import { useNotification } from "@/contexts/NotificationContext";
 import { Bell } from "lucide-react";
 import React from "react";
 import { Link } from "react-router";
 const LayoutMobile = ({ children }) => {
+  const { currentNotifications } = useNotification();
   return (
     <div className="h-screen w-full flex flex-col justify-between ">
       <div className="">
@@ -18,7 +20,10 @@ const LayoutMobile = ({ children }) => {
                 HANGIE
               </h1>
             </div>
-            <Link to="/notifications">
+            <Link to="/notifications" className="relative">
+              {currentNotifications.unread.length > 0 && (
+                <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-red-500 border-2 border-white" />
+              )}
               <Bell size={26} />
             </Link>
           </header>

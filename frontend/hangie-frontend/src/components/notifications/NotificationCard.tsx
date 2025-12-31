@@ -9,16 +9,16 @@ const NotificationCard = ({
   messaggio,
   created_at,
   gruppo,
+  is_read,
 }) => {
-  const message = {
-    new_message: `${sender.handle} ti ha Inviato un messaggio`,
-  };
-  console.log(gruppo);
   return (
     <div
       className={`flex items-center p-4 mb-2 cursor-pointer transition-all duration-200 rounded-xl border
         bg-blue-50 border-blue-100 shadow-sm`}
     >
+      <div className="w-2 h-2 mr-3">
+        {!is_read && <div className="w-2 h-2 bg-red-500 rounded-full" />}
+      </div>
       <div className="relative flex-shrink-0">
         {/* <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-inner">
            {sender?.nome?.charAt(0).toUpperCase()}

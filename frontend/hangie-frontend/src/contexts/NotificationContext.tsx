@@ -14,6 +14,7 @@ import { useChat } from "./ChatContext.js";
 const NotificationContext = createContext({
   currentNotifications: null,
   setCurrentNotifications: (arg) => arg,
+  markAllAsRead: () => {},
 });
 
 export const useNotification = () => {
@@ -32,10 +33,13 @@ export const useNotification = () => {
 // all'inizio non è send sui messaggi perchè non esiste dati di chat
 
 export const NotificationProvider = ({ children }) => {
-  const [currentNotifications, setCurrentNotifications] = useState([]);
+  const [currentNotifications, setCurrentNotifications] = useState({
+    unread: [],
+    read: [],
+  });
   const { session } = useAuth();
   const { currentSocket } = useSocket();
-  const { currentChatData } = useChat();
+  const { currentChatData, setCurrentChatData } = useChat();
   const getDbNotifications = async () => {
     if (!session?.user?.id) return;
     const { data: notificationData, error: notificationError } = await supabase
@@ -62,14 +66,20 @@ export const NotificationProvider = ({ children }) => {
     messaggio:messaggi!notifiche_message_id_fkey (
     content
     ),
-    created_at`
+    created_at,
+    is_read`
       )
-      .eq("is_read", false)
       .eq("user_id", session.user.id)
       .order("created_at", { ascending: false });
     console.log(notificationData);
     if (notificationError) return;
-    setCurrentNotifications(notificationData);
+    const read = notificationData.filter((notif) => {
+      if (notif.is_read) return notif;
+    });
+    const unread = notificationData.filter((notif) => {
+      if (!notif.is_read) return notif;
+    });
+    setCurrentNotifications({ read, unread });
   };
   useEffect(() => {
     getDbNotifications();
@@ -90,13 +100,7 @@ export const NotificationProvider = ({ children }) => {
         if (data.user_id === session.user.id) {
           console.log("è mia");
           setCurrentNotifications((prev) => {
-            // // Evitiamo duplicati se il socket invia messaggi ripetuti
-            // const exists = prev.some((n) => n.message_id === data.message_id);
-            // console.log("è exist", exists);
-            // if (exists) return prev;
-            console.log("allora invio:", [data, ...prev]);
-
-            return [data, ...prev];
+            return { read: prev.read, unread: [data, ...prev.unread] };
           });
         }
       });
@@ -105,7 +109,19 @@ export const NotificationProvider = ({ children }) => {
 
         if (data.user_id === session.user.id) {
           setCurrentNotifications((prev) => {
-            return prev.filter((noti) => noti.group_id !== data.group_id);
+            const newlyRead = prev.unread.filter(
+              (n) => n.group_id === data.group_id
+            );
+            const remainingUnread = prev.unread.filter(
+              (n) => n.group_id !== data.group_id
+            );
+            return {
+              read: [
+                ...newlyRead.map((n) => ({ ...n, is_read: true })),
+                ...prev.read,
+              ],
+              unread: remainingUnread,
+            };
           });
         }
       });
@@ -114,18 +130,48 @@ export const NotificationProvider = ({ children }) => {
     return () => {
       if (currentSocket) {
         currentSocket.off("new_notification");
-        currentSocket.off("clear_notification_count");
+        currentSocket.off("clear_notifications_count");
       }
     };
-  }, [session?.user?.id, currentChatData]);
+  }, [
+    session?.user?.id,
+    setCurrentChatData,
+    currentChatData?.messaggi?.length,
+    currentNotifications,
+    setCurrentNotifications,
+    currentSocket,
+  ]);
   useEffect(() => {
     console.log("cambio notifiche", currentNotifications);
   }, [currentNotifications]);
+
+  const markAllAsRead = async () => {
+    if (!session?.user?.id) return;
+
+    const { error } = await supabase
+      .from("notifiche")
+      .update({ is_read: true })
+      .eq("user_id", session.user.id)
+      .eq("is_read", false);
+
+    if (error) return;
+
+    setCurrentNotifications((prev) => {
+      return {
+        unread: [],
+        read: [
+          ...(prev.unread || []).map((n) => ({ ...n, is_read: true })),
+          ...(prev.read || []),
+        ],
+      };
+    });
+  };
   return (
     <NotificationContext.Provider
       value={{
         currentNotifications,
         setCurrentNotifications,
+        markAllAsRead,
       }}
     >
       {children}

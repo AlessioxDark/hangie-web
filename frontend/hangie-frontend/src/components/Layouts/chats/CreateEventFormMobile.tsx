@@ -9,11 +9,12 @@ import { supabase } from "../../../config/db.js";
 import { X } from "lucide-react";
 import FormInputCollection from "@/features/CreateEventForm/FormInputCollection";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
+import { useSocket } from "@/contexts/SocketContext.js";
 const CreateEventFormMobile = () => {
   const IMAGE_LIMIT = 4;
   const { closeModal } = useModal();
   const { session } = useAuth();
-  const { socketRef, setCurrentChatData } = useChat();
+  const { setCurrentChatData } = useChat();
   const [images, setImages] = useState([]);
   const schema = z
     .object({
@@ -65,10 +66,11 @@ const CreateEventFormMobile = () => {
     setError,
   } = methods;
   const { currentGroup, currentGroupData } = useChat();
+  const { currentSocket } = useSocket();
   const { setMobileView } = useMobileLayoutChat();
   const [imageError, setImageError] = useState(false); // Stato per l'errore
   const sendEvent = (event_id, event_details) => {
-    socketRef.current.emit(
+    currentSocket.emit(
       "send_event",
       event_id,
       currentGroupData?.group_id,
