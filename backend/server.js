@@ -24,7 +24,10 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   console.log("nuovo utente collegato al server", socket.id);
-
+  socket.on("identify_user", (userId) => {
+    socket.join(userId);
+    console.log(`Utente ${userId} connesso alla sua stanza privata`);
+  });
   socket.on(
     "send_message",
     async (message, room, partecipanti, token, groupData) => {

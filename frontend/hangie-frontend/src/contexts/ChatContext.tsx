@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
-
+import { supabase } from "../config/db.js";
+import { useMobileLayoutChat } from "./MobileLayoutChatContext.js";
 export const ChatContext = createContext({
   currentChatData: null, // dati chat corrente
   setCurrentChatData: (arg) => arg, // impostare dati chat
@@ -9,6 +10,12 @@ export const ChatContext = createContext({
   setCurrentGroup: (arg) => arg, // impostare id chat
   currentGroupData: null,
   setCurrentGroupData: (arg) => arg,
+  groupsData: null,
+  error: null,
+  isGroupsLoading: false,
+  isChatLoading: false,
+  isEventsLoading: false,
+  groupEventsData: [],
 });
 
 export const useChat = () => {
@@ -26,139 +33,156 @@ export const ChatProvider = ({ children }) => {
   const [currentChatData, setCurrentChatData] = useState(null);
   const [currentGroup, setCurrentGroup] = useState(null);
   const [currentGroupData, setCurrentGroupData] = useState(null);
-  // useEffect(() => {
-  //   const SERVER_URL = "http://localhost:3000";
+  const [groupsData, setGroupsData] = useState(null);
+  const [error, setError] = useState(null);
+  const [groupEventsData, setGroupEventsData] = useState(null);
+  const [isGroupsLoading, setIsGroupsLoading] = useState(false); // Loader specifico per Sidebar
+  const [isChatLoading, setIsChatLoading] = useState(false); // Loader specifico per Messaggi
+  const [isEventsLoading, setIsEventsLoading] = useState(false); // Loader specifico per Messaggi
+  const { setMobileView } = useMobileLayoutChat();
+  const fetchGroupEvents = async () => {
+    console.log("Fetch inziata");
+    if (isEventsLoading) return;
+    try {
+      setIsEventsLoading(true);
+      const response = await fetch(
+        `http://localhost:3000/api/groups/${currentGroup}/group-events`,
+        {
+          method: "GET",
+          // body: JSON.stringify({ offset: offset }),
+          headers: {
+            "Content-Type": "application/json",
+            // Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+      // console.log(response);
+      if (!response.ok) {
+        console.log(response);
+        setError(response.statusText || "Errore nel caricamento degli eventi");
+      }
+      const data = await response.json();
+      console.log(data);
+      setGroupEventsData(data);
+    } catch (err: any) {
+      console.error("Errore fetch eventi:", err);
+      setError(err.message || "Errore nel caricamento degli eventi");
+    } finally {
+      setIsEventsLoading(false);
+    }
+  };
+  const fetchGroups = async () => {
+    if (isGroupsLoading) return;
+    try {
+      setError(null);
+      setIsGroupsLoading(true);
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      if (session) {
+        const response = await fetch("http://localhost:3000/api/groups/", {
+          method: "GET",
+          // body: JSON.stringify({ offset: offset }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+        if (!response.ok) {
+          console.log(response);
+          setError(
+            response.statusText || "Errore nel caricamento degli eventi"
+          );
+        }
 
-  //   // Stabilisce la connessione con il server
-  //   const socket = io(SERVER_URL);
-  //   socketRef.current = socket;
-  //   socket.on("connect", () => {
-  //     console.log("Socket.IO Connesso! ID:", socket.id);
-  //   });
+        const data = await response.json();
 
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
+        console.log(data);
 
-  // useEffect(() => {
-  //   if (socketRef.current) {
-  //     // ASCOLTATORE GLOBALE
-  //     socketRef.current.on("receive_message", (data) => {
-  //       console.log("Messaggio intercettato globalmente:", data);
+        setGroupsData((prevData) => {
+          return data;
+        });
+      }
+    } catch (err: any) {
+      console.error("Errore fetch eventi:", err);
+      setError(err.message || "Errore nel caricamento degli eventi");
+    } finally {
+      setIsGroupsLoading(false);
+    }
+  };
+  const fetchChat = async (groupId) => {
+    if (isChatLoading || !groupId) return;
 
-  //       // 1. FA LA SPIA (Conferma ricezione per doppia spunta)
-  //       socketRef.current.emit(
-  //         "message_arrived",
-  //         data.message_id,
-  //         session.user.id,
-  //         data.group_id
-  //       );
+    try {
+      setError(null);
+      setIsChatLoading(true);
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      if (session) {
+        const response = await fetch(
+          `http://localhost:3000/api/groups/${currentGroup}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }
+        );
 
-  //       // 2. AGGIORNA LA CHAT SE È APERTA
-  //       setCurrentChatData((prevData) => {
-  //         // Se non ho una chat aperta o è un altro gruppo, non fare nulla qui
-  //         // if (!prevData || prevData.group_id !== data.group_id) return prevData;
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          setError(
+            errorData.error?.message ||
+              response.statusText ||
+              "Errore nel caricamento della chat"
+          );
+          return;
+        }
 
-  //         // Se è la chat che sto guardando, aggiungi il messaggio
-  //         return {
-  //           ...prevData,
-  //           messaggi: [
-  //             ...prevData.messaggi,
-  //             {
-  //               message_id: data.message_id,
-  //               content: data.message,
-  //               group_id: data.group_id,
-  //               user_id: data.sender_id,
-  //               sent_at: Date.now(),
-  //               isUser: false,
-  //               // isSent: true,
-  //               utenti: data.sender,
-  //             },
-  //           ],
-  //         };
-  //       });
-  //     });
-
-  //     // 3. ASCOLTA QUANDO I TUOI MESSAGGI ARRIVANO AGLI ALTRI (Doppia spunta per te)
-  //     socketRef.current.on("message_arrived", (data) => {
-  //       // notifica
-
-  //       setCurrentChatData((prevData) => {
-  //         if (!prevData) return prevData;
-  //         return {
-  //           ...prevData,
-  //           messaggi: prevData.messaggi.map((m) =>
-  //             m.message_id === data.message_id ? { ...m, isSent: true } : m
-  //           ),
-  //         };
-  //       });
-  //     });
-
-  //     // socketRef.current.on("message_arrived", (data) => {
-  //     //   setCurrentChatData((prevData) => {
-  //     //     if (!prevData) return prevData;
-  //     //     return {
-  //     //       ...prevData,
-  //     //       messaggi: prevData.messaggi.map((m) =>
-  //     //         m.message_id === data.message_id ? { ...m, isSent: true } : m
-  //     //       ),
-  //     //     };
-  //     //   });
-  //     // });
-  //     // if (currentGroup) {
-  //     //   currentGroupData?.messaggi?.map((mess) => {
-  //     //     socketRef.current.emit(
-  //     //       "message_read",
-  //     //       mess.message_id,
-  //     //       session.user.id,
-  //     //       currentGroup
-  //     //     );
-  //     //   });
-  //     // }
-
-  //     socketRef.current.on("message_read", (data) => {
-  //       setCurrentChatData((prevData) => {
-  //         if (!prevData) return prevData;
-  //         return {
-  //           ...prevData,
-  //           messaggi: prevData.messaggi.map((m) =>
-  //             m.message_id === data.message_id ? { ...m, isRead: true } : m
-  //           ),
-  //         };
-  //       });
-  //     });
-  //   }
-
-  //   return () => {
-  //     if (socketRef.current) {
-  //       socketRef.current.off("receive_message");
-  //       socketRef.current.off("message_arrived");
-  //       socketRef.current.off("message_read");
-  //     }
-  //   };
-  // }, [session?.user?.id]);
-
-  // useEffect(() => {
-  //   if (currentGroup && currentChatData?.messaggi) {
-  //     const unreadMessages = currentChatData.messaggi.filter(
-  //       (m) => !m.isRead && m.user_id !== session.user.id
-  //     );
-
-  //     unreadMessages.forEach((m) => {
-  //       socketRef.current.emit(
-  //         "message_read",
-  //         m.message_id,
-  //         session.user.id,
-  //         currentGroup
-  //       );
-  //     });
-  //   }
-  // }, [currentGroup, currentChatData?.messaggi?.length]); // Solo quando cambia
+        const result = await response.json();
+        const groupData = result;
+        console.log(result);
+        if (groupData) {
+          const mappedMessages = groupData.messaggi.map((mess) => ({
+            ...mess,
+            isUser: mess.user_id === session.user.id,
+          }));
+          console.log(mappedMessages);
+          setCurrentChatData({
+            ...groupData,
+            messaggi: mappedMessages,
+          });
+        } else {
+          setError("Dati del gruppo non trovati.");
+        }
+      }
+    } catch (err: any) {
+      console.error("Errore fetch eventi:", err);
+      setError(err.message || "Errore nel caricamento degli eventi");
+    } finally {
+      setIsChatLoading(false);
+      setMobileView("chat");
+    }
+  };
+  useEffect(() => {
+    console.log("currentgruop", currentGroup);
+    if (currentGroup != null) {
+      console.log("fetching chat");
+      fetchChat(currentGroup);
+    }
+  }, [currentGroup]);
+  useEffect(() => {
+    fetchGroups();
+  }, []);
 
   useEffect(() => {
-    console.log("currentchatData cambiato", currentChatData);
-  }, [currentChatData]);
+    console.log("fetching...");
+    if (currentGroup !== null) fetchGroupEvents();
+  }, [currentGroup]);
   return (
     <ChatContext.Provider
       value={{
@@ -168,6 +192,12 @@ export const ChatProvider = ({ children }) => {
         setCurrentGroup, // impostare id chat
         currentGroupData,
         setCurrentGroupData,
+        groupsData,
+        error,
+        groupEventsData,
+        isGroupsLoading,
+        isChatLoading,
+        isEventsLoading,
       }}
     >
       {children}

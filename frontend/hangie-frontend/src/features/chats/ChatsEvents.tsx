@@ -10,47 +10,14 @@ import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 
 const FILTER_TYPES = ["accepted", "pending", "archive"];
-const ChatsEvents = ({}) => {
-  const [groupEventsData, setGroupEventsData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+const ChatsEvents = () => {
   const [currentFilter, setCurrentFilter] = useState("");
-  const { currentGroup } = useChat();
+  const { isEventsLoading, groupEventsData } = useChat();
   const [query, setQuery] = useState("");
   const { session } = useAuth();
   const { currentScreen } = useScreen();
   const { setMobileView } = useMobileLayoutChat();
 
-  const fetchGroupEvents = async () => {
-    console.log("Fetch inziata");
-    if (isLoading) return;
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/groups/${currentGroup}/group-events`,
-        {
-          method: "GET",
-          // body: JSON.stringify({ offset: offset }),
-          headers: {
-            "Content-Type": "application/json",
-            // Authorization: `Bearer ${session.access_token}`,
-          },
-        }
-      );
-      // console.log(response);
-      if (!response.ok) {
-        console.log(response);
-        setError(response.statusText || "Errore nel caricamento degli eventi");
-      }
-      const data = await response.json();
-      console.log(data);
-      setGroupEventsData(data);
-    } catch (err: any) {
-      console.error("Errore fetch eventi:", err);
-      setError(err.message || "Errore nel caricamento degli eventi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
   const getEventStatus = (event) => {
     console.log("eventStatus");
     if (event?.created_by === session.user.id) {
@@ -67,10 +34,6 @@ const ChatsEvents = ({}) => {
       return userResponse.status;
     }
   };
-  useEffect(() => {
-    console.log("fetching...");
-    if (currentGroup !== null) fetchGroupEvents();
-  }, [currentGroup]);
 
   const filteredEvents = useMemo(() => {
     const allEvents = groupEventsData || [];

@@ -4,61 +4,64 @@ import { AlertCircle, Loader2, Plus } from "lucide-react";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { supabase } from "../../config/db.js";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
+import { useChat } from "@/contexts/ChatContext.js";
 const ChatsSidebar = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<null | string>("");
-  const [groupsData, setGroupsData] = useState([]);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [error, setError] = useState<null | string>("");
+  // const [groupsData, setGroupsData] = useState([]);
   const { setMobileView } = useMobileLayoutChat();
+  const { groupsData, error, isGroupsLoading } = useChat();
 
-  const fetchGroups = async () => {
-    if (isLoading) return;
-    try {
-      setError(null);
-      setIsLoading(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-      if (session) {
-        const response = await fetch("http://localhost:3000/api/groups/", {
-          method: "GET",
-          // body: JSON.stringify({ offset: offset }),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-        if (!response.ok) {
-          console.log(response);
-          setError(
-            response.statusText || "Errore nel caricamento degli eventi"
-          );
-        }
+  // const fetchGroups = async () => {
+  //   if (isLoading) return;
+  //   try {
+  //     setError(null);
+  //     setIsLoading(true);
+  //     const {
+  //       data: { session },
+  //       error,
+  //     } = await supabase.auth.getSession();
+  //     if (session) {
+  //       const response = await fetch("http://localhost:3000/api/groups/", {
+  //         method: "GET",
+  //         // body: JSON.stringify({ offset: offset }),
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${session.access_token}`,
+  //         },
+  //       });
+  //       if (!response.ok) {
+  //         console.log(response);
+  //         setError(
+  //           response.statusText || "Errore nel caricamento degli eventi"
+  //         );
+  //       }
 
-        const data = await response.json();
+  //       const data = await response.json();
 
-        console.log(data);
+  //       console.log(data);
 
-        setGroupsData((prevData) => {
-          return data;
-        });
-      }
-    } catch (err: any) {
-      console.error("Errore fetch eventi:", err);
-      setError(err.message || "Errore nel caricamento degli eventi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //       setGroupsData((prevData) => {
+  //         return data;
+  //       });
+  //     }
+  //   } catch (err: any) {
+  //     console.error("Errore fetch eventi:", err);
+  //     setError(err.message || "Errore nel caricamento degli eventi");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchGroups();
-  }, []);
+  // useEffect(() => {
+  //   fetchGroups();
+  // }, []);
+
   useEffect(() => {
     console.log("groupsData", groupsData);
   }, [groupsData]);
   const renderContent = useCallback(() => {
-    if (isLoading) {
+    if (isGroupsLoading) {
       return (
         <div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">
           <div className=" rounded-full flex items-center justify-center mb-6">
@@ -101,7 +104,7 @@ const ChatsSidebar = () => {
       });
     }
     return <p>c'è stato un errore</p>;
-  }, [fetchGroups, error, isLoading]);
+  }, [error, isGroupsLoading]);
   return (
     <div className="h-screen bg-bg-1 xl:w-5/12 2xl:w-1/4">
       <div className="flex flex-col xl:gap-0 2xl:gap-12">

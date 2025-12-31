@@ -16,85 +16,12 @@ import CreateGroupForm from "@/features/chats/CreateGroupForm.js";
 import AddParticipantsGroup from "@/features/chats/AddParticipantsGroup.js";
 import GroupDetails from "@/features/chats/GroupDetails.js";
 const LayoutChatMobile = () => {
-  const {
-    currentGroup,
-    setCurrentGroup,
-    currentGroupData,
-    setCurrentGroupData,
-    currentChatData,
-    setCurrentChatData,
-  } = useChat();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<null | string>("");
-  const { mobileView, setMobileView } = useMobileLayoutChat();
+  const { error, isChatLoading } = useChat();
 
-  const fetchChat = async () => {
-    if (isLoading) return;
-    try {
-      setError(null);
-      setIsLoading(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-      if (session) {
-        const response = await fetch(
-          `http://localhost:3000/api/groups/${currentGroup}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          setError(
-            errorData.error?.message ||
-              response.statusText ||
-              "Errore nel caricamento della chat"
-          );
-          return;
-        }
-
-        const result = await response.json();
-        const groupData = result;
-        console.log(result);
-        if (groupData) {
-          const mappedMessages = groupData.messaggi.map((mess) => ({
-            ...mess,
-            isUser: mess.user_id === session.user.id,
-          }));
-          console.log(mappedMessages);
-          setCurrentChatData({
-            ...groupData,
-            messaggi: mappedMessages,
-          });
-        } else {
-          setError("Dati del gruppo non trovati.");
-        }
-      }
-    } catch (err: any) {
-      console.error("Errore fetch eventi:", err);
-      setError(err.message || "Errore nel caricamento degli eventi");
-    } finally {
-      setIsLoading(false);
-      setMobileView("chat");
-    }
-  };
-
-  useEffect(() => {
-    console.log("currentgruop", currentGroup);
-    if (currentGroup != null) {
-      console.log("fetching chat");
-      fetchChat();
-    }
-  }, [currentGroup]);
+  const { mobileView } = useMobileLayoutChat();
 
   const renderContent = () => {
-    if (isLoading) {
+    if (isChatLoading) {
       return (
         <div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">
           <div className=" rounded-full flex items-center justify-center mb-6">

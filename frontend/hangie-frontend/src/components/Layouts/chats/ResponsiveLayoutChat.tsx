@@ -11,16 +11,11 @@ const ResponsiveLayoutChat = () => {
     return <LayoutChatDesktop></LayoutChatDesktop>;
   }
   if (currentScreen == "xl") {
-    // return
     return <LayoutChatMedium />;
   }
 
   if (currentScreen == "xs") {
-    return (
-      <MobileLayoutChatProvider>
-        <LayoutChatMobile />
-      </MobileLayoutChatProvider>
-    );
+    return <LayoutChatMobile />;
   }
 };
 
