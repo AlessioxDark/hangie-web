@@ -104,7 +104,7 @@ const ChatsSidebar = () => {
       });
     }
     return <p>c'è stato un errore</p>;
-  }, [error, isGroupsLoading]);
+  }, [error, isGroupsLoading, groupsData]);
   return (
     <div className="h-screen bg-bg-1 xl:w-5/12 2xl:w-1/4">
       <div className="flex flex-col xl:gap-0 2xl:gap-12">

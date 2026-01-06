@@ -16,6 +16,7 @@ export const ChatContext = createContext({
   isChatLoading: false,
   isEventsLoading: false,
   groupEventsData: [],
+  setGroupsData: (arg) => arg,
 });
 
 export const useChat = () => {
@@ -198,6 +199,7 @@ export const ChatProvider = ({ children }) => {
         isGroupsLoading,
         isChatLoading,
         isEventsLoading,
+        setGroupsData,
       }}
     >
       {children}

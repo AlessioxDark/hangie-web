@@ -34,6 +34,9 @@ export const SocketProvider = ({ children }) => {
     currentGroup,
     currentChatData,
     currentGroupData,
+    setGroupsData,
+    groupsData,
+    setCurrentGroupData,
   } = useChat();
   const { session } = useAuth();
   const socketRef = useRef(null);
@@ -125,15 +128,199 @@ export const SocketProvider = ({ children }) => {
       });
     });
 
+    socket.on(
+      "added_new_group",
+      (groupId, data, participants, imgUrl, sender) => {
+        // notifica
+        console.log(data);
+        const nuoviPartecipanti = participants.map((p) => {
+          return {
+            utenti: { nome: p.nome, handle: p.handle, user_id: p.user_id },
+            ...p,
+          };
+        });
+        console.log("aggiorno data perchè intercettato", {
+          group_id: groupId,
+          group_cover_img: imgUrl,
+          ...data.groupData,
+          partecipanti_gruppo: nuoviPartecipanti,
+        });
+
+        setGroupsData((prev) => {
+          return [
+            ...prev,
+            {
+              group_id: groupId,
+              group_cover_img: imgUrl,
+              ...data.groupData,
+              partecipanti_gruppo: nuoviPartecipanti,
+            },
+          ];
+        });
+
+        // participants.forEach((p) => {
+        //   socket.to.emit("new_notification", {
+        //     type: "new_group",
+        //     sender: sender,
+        //     receiver: p,
+        //     group_id: groupId,
+        //     // messaggio: { content: message },
+        //     gruppo: data,
+        //     user_id: p.partecipante_id, // Il client filtrerà se è per lui
+        //     created_at: new Date(),
+        //     is_read: false,
+        //   });
+        // });
+      }
+    );
+
+    socket.on("left_group", (groupId, userId) => {
+      // notifica
+      console.log("ricevuto left group");
+      if (session.user.id == userId) {
+        console.log("sono quello uscito");
+        setGroupsData((prev) => {
+          return prev.filter((group) => group.group_id !== groupId);
+        });
+      } else {
+        console.log("sono quello non uscito");
+        setGroupsData((prev) => {
+          return prev.map((group) => {
+            if (group.group_id == groupId) {
+              const newParticipants = group.partecipanti_gruppo.filter(
+                (p) => p.partecipante_id !== userId
+              );
+              return { ...group, partecipanti_gruppo: newParticipants };
+            }
+            return group;
+          });
+        });
+        console.log("mi trovo in", currentGroupData.group_id);
+        console.log("qualcuno è uscito in ", groupId);
+        if (currentGroupData.group_id == groupId) {
+          console.log(
+            "non sono quello uscito e mi trovo nel gruppo che qualcuno ha abbandonato"
+          );
+          setCurrentGroupData((prev) => {
+            const newParticipants = prev.partecipanti_gruppo.filter(
+              (p) => p.partecipante_id !== userId
+            );
+            return { ...prev, partecipanti_gruppo: newParticipants };
+          });
+        }
+      }
+    });
+    socket.on("removed_participant", (data) => {
+      console.log("arrivato removed_participant al frontend");
+      console.log("dati dal socket", data);
+      console.log("groupsData", groupsData);
+      console.log("currentGroupData", currentGroupData);
+      setGroupsData((prev) => {
+        // Usiamo MAP per creare un nuovo array, non forEach
+        return prev.map((group) => {
+          if (group.group_id === data.group_id) {
+            const newParticipants = group.partecipanti_gruppo.filter(
+              (p) => p.partecipante_id !== data.participant.partecipante_id // Verifica se la chiave è user_id o partecipante_id
+            );
+            return { ...group, partecipanti_gruppo: newParticipants };
+          }
+          return group;
+        });
+      });
+      if (currentGroupData.group_id == data.group_id) {
+        setCurrentGroupData((prev) => {
+          const newParticipants = prev.partecipanti_gruppo.filter(
+            (p) => p.partecipante_id !== data.participant.partecipante_id // Verifica se la chiave è user_id o partecipante_id
+          );
+          return { ...prev, partecipanti_gruppo: newParticipants };
+        });
+      }
+    });
+    socket.on("added_participants", (data) => {
+      console.log("arrivato added_participatns al frontend");
+      console.log("dati dal socket", data);
+      console.log("groupsData", groupsData);
+      console.log("currentGroupData", currentGroupData);
+      setGroupsData((prev) => {
+        // Usiamo MAP per creare un nuovo array, non forEach
+        return prev.map((group) => {
+          if (group.group_id === data.group_id) {
+            return {
+              ...group,
+              partecipanti_gruppo: [
+                ...group.partecipanti_gruppo,
+                ...data.addedParticipants,
+              ],
+            };
+          }
+          return group;
+        });
+      });
+      if (currentGroupData.group_id == data.group_id) {
+        setCurrentGroupData((prev) => {
+          return {
+            ...prev,
+            partecipanti_gruppo: [
+              ...prev.partecipanti_gruppo,
+              ...data.addedParticipants,
+            ],
+          };
+        });
+      }
+    });
+
+    socket.on("edited_field", (data) => {
+      console.log("arrivato edited_field al frontend");
+      console.log("dati dal socket", data);
+      console.log("groupsData", groupsData);
+      console.log("currentGroupData", currentGroupData);
+      setGroupsData((prev) => {
+        // Usiamo MAP per creare un nuovo array, non forEach
+        return prev.map((group) => {
+          if (group.group_id === data.group_id) {
+            return {
+              ...group,
+              [data.field]: data.fieldValue,
+            };
+          }
+          return group;
+        });
+      });
+      console.log(
+        "non mi trovo nel gruppo",
+        currentGroupData.group_id,
+        data.group_id
+      );
+      if (currentGroupData.group_id == data.group_id) {
+        console.log(
+          "mi trovo nel gruppo",
+          currentGroupData.group_id,
+          data.group_id
+        );
+        console.log("aggiorno campo con valore", data.field, data.fieldValue);
+        setCurrentGroupData((prev) => {
+          return {
+            ...prev,
+            [data.field]: data.fieldValue,
+          };
+        });
+      }
+    });
+
     return () => {
       console.log("Pulizia socket e rimozione listener...");
       socket.off("receive_message");
       socket.off("message_arrived");
+      socket.off("added_new_group");
+      socket.off("edited_field");
+      socket.off("left_group");
+      socket.off("added_participants");
+      socket.off("removed_participant");
       socket.off("give_read");
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [session?.user?.id, setCurrentChatData]);
+  }, [session?.user?.id, setCurrentChatData, currentGroupData, currentGroup]);
 
   useEffect(() => {
     if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
@@ -155,6 +342,7 @@ export const SocketProvider = ({ children }) => {
       currentSocket?.off("give_read");
     };
   }, [currentSocket, setCurrentChatData, currentChatData?.messaggi?.length]);
+
   useEffect(() => {
     if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
 

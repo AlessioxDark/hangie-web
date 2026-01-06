@@ -3,6 +3,8 @@ import SearchBar from "@/components/SearchBar";
 import { useAuth } from "@/contexts/AuthContext";
 import React, { useCallback, useEffect, useState } from "react";
 import FriendCard from "../friends/FriendCard";
+import { useSocket } from "@/contexts/SocketContext";
+import { useChat } from "@/contexts/ChatContext";
 
 const AddParticipantsGroup = ({
   setIsParticipantsAdd,
@@ -15,6 +17,8 @@ const AddParticipantsGroup = ({
   const [friendsData, setFriendsData] = useState([]);
   const [currentFriendsData, setCurrentFriendsData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { currentSocket } = useSocket();
+  const { currentGroup } = useChat();
   const [fetchError, setFetchError] = useState(null);
   const { session } = useAuth();
   const fetchFriends = useCallback(() => {
@@ -24,13 +28,16 @@ const AddParticipantsGroup = ({
       fetch(`http://localhost:3000/api/friends/${session.user.id}`)
         .then((res) => res.json())
         .then((data) => {
-          const newData = data.map((friend) => {
-            return friend.user_1.isUser == false
-              ? friend.user_1
-              : friend.user_2;
-          });
-          setFriendsData(newData);
-          setCurrentFriendsData(newData);
+          // const newData = data.map((friend) => {
+          //   return friend.user_1.isUser == false
+          //     ? friend.user_1
+          //     : friend.user_2;
+          // });
+
+          setFriendsData(data);
+          setCurrentFriendsData(data);
+          // setFriendsData(newData);
+          // setCurrentFriendsData(newData);
         });
     } catch (error) {
       console.log(error);
@@ -94,7 +101,16 @@ const AddParticipantsGroup = ({
             setCurrentParticipants((prevParticipants) => {
               return [...localParticipants];
             });
-            if (isGroup) onConfirm(localParticipants);
+            if (isGroup) {
+              onConfirm(localParticipants);
+
+              currentSocket.emit(
+                "add_participants",
+                currentGroup,
+                localParticipants,
+                currentParticipants
+              );
+            }
             setIsParticipantsAdd(false);
           }}
         >

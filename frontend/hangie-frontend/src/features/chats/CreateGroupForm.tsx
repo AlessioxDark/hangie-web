@@ -13,6 +13,7 @@ import ParticipantCard from "./ParticipantCard";
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "../../config/db.js";
+import { useSocket } from "@/contexts/SocketContext.js";
 const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 
 const CreateGroupForm = () => {
@@ -35,6 +36,7 @@ const CreateGroupForm = () => {
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const [currentParticipants, setCurrentParticipants] = useState([]);
   const { session } = useAuth();
+  const { currentSocket } = useSocket();
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -104,7 +106,7 @@ const CreateGroupForm = () => {
         }
       );
       const result = await response.json();
-
+      let finalImgUrl = null;
       if (!response.ok) {
         console.log("male");
         throw new Error(result.error || "Errore creazione evento");
@@ -139,7 +141,20 @@ const CreateGroupForm = () => {
           .eq("group_id", groupId);
         if (coverError) setError("root", { message: coverError });
         console.log("Tutte le immagini caricate con successo!");
+
+        finalImgUrl = urlData.publicUrl;
       }
+      currentSocket.emit(
+        "add_new_group",
+        groupId,
+        result,
+        currentParticipants,
+        finalImgUrl,
+        session.user.id
+      );
+
+      console.log("invio socket new group");
+
       setMobileView("groups");
     } catch (error) {
       console.error("Errore durante il processo:", error);

@@ -1,4 +1,6 @@
 const Group = require("../models/groupModel");
+// definire supabase e provare
+const supabase = require("../config/db");
 
 const getAllGroups = async (req, res) => {
   try {
@@ -95,7 +97,52 @@ const addNewGroup = async (req, res) => {
     if (error) {
       console.log(error);
     }
-    console.log(data);
+    // fkfkfk
+    const { groupData, participants, creator } = data;
+    const notificationInsert = participants
+      .filter((p) => p.partecipante_id !== creator.id)
+      .map((p) => {
+        return {
+          type: "new_group",
+          is_read: false,
+          group_id: groupData.group_id,
+          created_at: new Date().toISOString(),
+          sender_id: creator.id,
+          user_id: p.partecipante_id,
+        };
+      });
+    const { data: notificationData, error: notificanError } = supabase
+      .from("notifiche")
+      .insert(notificationInsert);
+
+    const io = req.io;
+
+    //     participants.forEach((p) => {
+    //     // 1. Evento specifico per la logica delle Chat
+
+    // });
+    //     participants
+    //       .filter((p) => p.partecipante_id !== creator.id)
+    //       .forEach((p) => {
+    //           io.to(p.partecipante_id).emit("added_to_group", groupData);
+
+    //     // 2. Evento generico per le Notifiche (il campanellino)
+    //     io.to(p.partecipante_id).emit("new_notification", {
+    //         type: "group_invite",
+    //         sender: creator,
+    //         text: `Ti ha aggiunto al gruppo ${groupData.nome}`
+    //     });
+    //         io.to(p.partecipante_id).emit("new_notification", {
+    //           type: "new_group",
+    //           sender: creator,
+    //           group_id: groupData.group_id,
+    //           gruppo: { nome: groupData.nome },
+    //           user_id: p.partecipante_id,
+    //           created_at: new Date().toISOString(),
+    //           is_read: false,
+    //         });
+    //       });
+
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });

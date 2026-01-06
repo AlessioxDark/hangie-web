@@ -10,19 +10,30 @@ import { Edit, Edit2, Plus, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import AddParticipantsGroup from "./AddParticipantsGroup";
 import { supabase } from "../../config/db.js";
+import { useSocket } from "@/contexts/SocketContext.js";
 
 const GroupDetails = () => {
   const { currentScreen } = useScreen();
   const { session } = useAuth();
 
-  const { currentGroupData, currentGroup, setCurrentGroupData } = useChat();
+  const { currentGroupData, currentGroup, setCurrentGroupData, setGroupsData } =
+    useChat();
   const { setMobileView } = useMobileLayoutChat();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const [isEditingParticipants, setIsEditingParticipants] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const isCreator = currentGroupData?.createdBy == session.user.id;
+  const isAdmin =
+    currentGroupData?.partecipanti_gruppo?.some(
+      (p) =>
+        p.role === "admin" &&
+        (p.partecipante_id || p.user_id) === session.user.id &&
+        p.group_id == currentGroup
+    ) || false;
+
+  // const isCreator = currentGroupData?.createdBy == session.user.id;
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const { currentSocket } = useSocket();
   const [currentDescription, setCurrentDescription] = useState(
     currentGroupData.descrizione
   );
@@ -51,7 +62,7 @@ const GroupDetails = () => {
 
   const handleLeaveGroup = async () => {
     console.log(currentGroupData);
-
+    console.log("invio l'abbandono");
     try {
       fetch(`http://localhost:3000/api/groups/leave/${currentGroup}/`, {
         method: "DELETE",
@@ -63,6 +74,15 @@ const GroupDetails = () => {
         .then((res) => res.json())
         .then((data) => {
           console.log(data);
+          setMobileView("groups");
+          console.log("invio emit leave group");
+
+          currentSocket.emit(
+            "leave_group",
+            currentGroup,
+            session.user.id,
+            currentParticipants
+          );
         });
     } catch (error) {
       console.log("error", error);
@@ -97,42 +117,29 @@ const GroupDetails = () => {
       if (coverError) console.log(coverError);
       // if (coverError) setError("root", { message: coverError });
 
-      setCurrentGroupImg(URL.createObjectURL(file));
+      setCurrentGroupImg(urlData.publicUrl);
       setCurrentGroupData((prevData) => {
-        return { ...prevData, group_cover_img: URL.createObjectURL(file) };
+        return { ...prevData, group_cover_img: urlData.publicUrl };
       });
+      setGroupsData((prevData) => {
+        return prevData.map((group) => {
+          if (group.group_id == currentGroup) {
+            return { ...group, group_cover_img: urlData.publicUrl };
+          }
+          return group;
+        });
+      });
+      currentSocket.emit(
+        "edit_field",
+        currentGroup,
+        "group_cover_img",
+        urlData.publicUrl,
+        currentParticipants
+      );
       console.log("Tutte le immagini caricate con successo!");
     } catch (error) {
       console.log(error);
     }
-    // try {
-    //   const response = await fetch(
-    //     `http://localhost:3000/api/groups/modify/${currentGroup}`,
-    //     {
-    //       method: "PATCH",
-    //       body: JSON.stringify({
-    //         [field]: field == "descrizione" ? currentDescription : currentTitle,
-    //       }),
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: `Bearer ${session.access_token}`,
-    //       },
-    //     }
-    //   );
-
-    //   if (response.ok) {
-    //     // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
-
-    //     setCurrentGroupData((prevData) => {
-    //       return {
-    //         ...prevData,
-    //         [field]: field == "descrizione" ? currentDescription : currentTitle,
-    //       };
-    //     });
-    //   }
-    // } catch (error) {
-    //   console.error("Errore durante l'invio:", error);
-    // }
   };
   const handleParticipantsAdd = () => {
     setIsParticipantsAdd(true);
@@ -173,26 +180,26 @@ const GroupDetails = () => {
 
       if (response.ok) {
         // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
-        setCurrentParticipants(updatedList);
-        setIsParticipantsAdd(false);
-        console.log("aggiorno stato globale con:", newParticipants);
-        const newParticipantsForGlobalState = newParticipants.map((p) => ({
-          partecipante_id: p.user_id, // Assicurati che il nome della chiave sia corretto per il tuo DB
-          utenti: {
-            user_id: p.user_id,
-            nome: p.nome,
-            handle: p.handle,
-          },
-        }));
-        setCurrentGroupData((prevData) => {
-          return {
-            ...prevData,
-            partecipanti_gruppo: [
-              ...prevData.partecipanti_gruppo,
-              ...newParticipantsForGlobalState,
-            ],
-          };
-        });
+        // setCurrentParticipants(updatedList);
+        // setIsParticipantsAdd(false);
+        // console.log("aggiorno stato globale con:", newParticipants);
+        // const newParticipantsForGlobalState = newParticipants.map((p) => ({
+        //   partecipante_id: p.user_id, // Assicurati che il nome della chiave sia corretto per il tuo DB
+        //   utenti: {
+        //     user_id: p.user_id,
+        //     nome: p.nome,
+        //     handle: p.handle,
+        //   },
+        // }));
+        // setCurrentGroupData((prevData) => {
+        //   return {
+        //     ...prevData,
+        //     partecipanti_gruppo: [
+        //       ...prevData.partecipanti_gruppo,
+        //       ...newParticipantsForGlobalState,
+        //     ],
+        //   };
+        // });
         // Nota: qui potresti voler chiamare una funzione dal tuo Context per rinfrescare i dati globali
       }
     } catch (error) {
@@ -203,7 +210,25 @@ const GroupDetails = () => {
   const handleModifyParticipants = () => {
     setIsEditingParticipants((prev) => !prev);
   };
-
+  useEffect(() => {
+    if (currentGroupData.partecipanti_gruppo) {
+      console.log(
+        "il nuovo partecipanti",
+        currentGroupData.partecipanti_gruppo
+      );
+      setCurrentParticipants(
+        currentGroupData?.partecipanti_gruppo?.map((partecipante) => {
+          const { utenti, ...resto } = partecipante;
+          return {
+            ...resto,
+            nome: utenti.nome,
+            handle: utenti.handle,
+            user_id: utenti.user_id,
+          };
+        })
+      );
+    }
+  }, [currentGroupData.partecipanti_gruppo]);
   useEffect(() => {
     if (
       !isEditingDescription &&
@@ -218,6 +243,15 @@ const GroupDetails = () => {
     }
   }, [isEditingTitle]);
 
+  useEffect(() => {
+    setCurrentDescription(currentGroupData.descrizione);
+  }, [currentGroupData.descrizione]);
+  useEffect(() => {
+    setCurrentGroupImg(currentGroupData.group_cover_img);
+  }, [currentGroupData.group_cover_img]);
+  useEffect(() => {
+    setCurrentTitle(currentGroupData.nome);
+  }, [currentGroupData.nome]);
   const editField = async (field) => {
     try {
       const response = await fetch(
@@ -243,6 +277,26 @@ const GroupDetails = () => {
             [field]: field == "descrizione" ? currentDescription : currentTitle,
           };
         });
+
+        setGroupsData((prevData) => {
+          return prevData.map((group) => {
+            if (group.group_id == currentGroup) {
+              return {
+                ...group,
+                [field]:
+                  field == "descrizione" ? currentDescription : currentTitle,
+              };
+            }
+            return group;
+          });
+        });
+        currentSocket.emit(
+          "edit_field",
+          currentGroup,
+          field,
+          field == "descrizione" ? currentDescription : currentTitle,
+          currentParticipants
+        );
       }
     } catch (error) {
       console.error("Errore durante l'invio:", error);
@@ -264,6 +318,13 @@ const GroupDetails = () => {
       );
 
       if (response.ok) {
+        console.log("invio il socket a tutti tranne me");
+        currentSocket.emit(
+          "remove_participant",
+          currentGroup,
+          partecipante,
+          currentParticipants
+        );
         // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
         setCurrentParticipants((prev) =>
           prev.filter((p) => p.user_id !== partecipante.user_id)
@@ -363,7 +424,7 @@ const GroupDetails = () => {
                     </div>
                     <div className="flex flex-col text-center font-body">
                       <div className="relative">
-                        {isCreator && (
+                        {isAdmin && (
                           <div
                             className="absolute rounded-full -top-1.5 -right-4 rotate-270 p-1.5 bg-primary"
                             onClick={() => {
@@ -408,7 +469,7 @@ const GroupDetails = () => {
                     <h3 className="text-xs font-bold font-body text-text-2 uppercase tracking-wide mb-1">
                       Descrizione
                     </h3>
-                    {isCreator && (
+                    {isAdmin && (
                       <h3
                         className="text-xs font-bold font-body text-primary uppercase tracking-wide mb-1"
                         onClick={() => setIsEditingDescription((prev) => !prev)}
@@ -451,7 +512,7 @@ const GroupDetails = () => {
                     {currentParticipants.length} Partecipanti
                   </h3>
 
-                  {isCreator && (
+                  {isAdmin && (
                     <h3
                       className="px-6 text-xs font-bold font-body text-primary uppercase tracking-wide cursor-pointer"
                       onClick={handleModifyParticipants}
@@ -470,7 +531,7 @@ const GroupDetails = () => {
                       } `}
                     >
                       {isEditingParticipants &&
-                        isCreator &&
+                        isAdmin &&
                         partecipante.user_id !== session.user.id && (
                           <div
                             className="absolute top-1.5 right-1.5 p-0.5 bg-primary rounded-full"
@@ -481,6 +542,7 @@ const GroupDetails = () => {
                             <X size={13} className="text-white" />
                           </div>
                         )}
+
                       <div className="w-13 h-13 shrink-0 ">
                         <ProfileIcon user_id={partecipante.user_id} />
                       </div>
@@ -490,12 +552,17 @@ const GroupDetails = () => {
                             {partecipante.nome}
                           </span>
 
-                          {session.user.id == partecipante.user_id &&
-                            isCreator && (
-                              <span className="text-primary text-[10px] py-0.5 px-1 rounded-xl font-medium">
-                                CREATORE
-                              </span>
-                            )}
+                          {currentGroupData.createdBy ==
+                            partecipante.partecipante_id && (
+                            <span className="text-primary text-[10px] py-0.5 px-1 rounded-xl font-medium">
+                              CREATORE
+                            </span>
+                          )}
+                          {partecipante.role == "admin" && (
+                            <span className="text-primary text-[10px] py-0.5 px-1 rounded-xl font-medium">
+                              ADMIN
+                            </span>
+                          )}
                         </div>
                         <span className="text-text-2 text-sm truncate">
                           @{partecipante.handle}
@@ -506,12 +573,14 @@ const GroupDetails = () => {
                       </div>
                     </div>
                   ))}
-                  <button
-                    className="w-full bg-primary text-white font-body px-2.5 py-3 flex justify-center"
-                    onClick={handleParticipantsAdd}
-                  >
-                    <Plus className="text-white font-bold " size={30} />
-                  </button>
+                  {isAdmin && (
+                    <button
+                      className="w-full bg-primary text-white font-body px-2.5 py-3 flex justify-center"
+                      onClick={handleParticipantsAdd}
+                    >
+                      <Plus className="text-white font-bold " size={30} />
+                    </button>
+                  )}
                 </div>
               </section>
             </div>

@@ -25,7 +25,7 @@ const Notification = () => {
     <div>
       <div>
         <h1>Tutte le notifiche</h1>
-        <div className="space-y-2">
+        <div className="space-y-2 overflow-y-auto">
           {allNotifications.length > 0 ? (
             allNotifications.map((notification, index) => (
               <NotificationCard

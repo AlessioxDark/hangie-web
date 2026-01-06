@@ -1,7 +1,8 @@
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
-import React, { useEffect } from "react";
+import { useNotification } from "@/contexts/NotificationContext";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 
 const GroupCard = ({
@@ -19,10 +20,12 @@ const GroupCard = ({
 }) => {
   const { setCurrentGroup, setCurrentGroupData, setCurrentChatData } =
     useChat();
+  const { currentNotifications } = useNotification();
   const displayImage = group_cover_img
     ? `${group_cover_img}?v=${updated_at || Date.now()}`
     : null;
   const { setMobileView } = useMobileLayoutChat();
+
   const formatTime = (dateString) => {
     const date = new Date(dateString);
     // Mostra l'ora se è oggi, altrimenti la data breve
@@ -37,6 +40,10 @@ const GroupCard = ({
       month: "2-digit",
     });
   };
+
+  const unreadMsgNotifications = currentNotifications.unread.filter((n) => {
+    if (n.type == "new_message" && n.group_id == group_id) return n;
+  }).length;
   return (
     <div
       className="bg-bg-2 p-3 flex items-center w-full 
@@ -95,9 +102,9 @@ const GroupCard = ({
                 : ultimoMessaggio?.content}
             </span>
             {/* Badge Messaggi Non Letti */}
-            {3 > 0 && (
+            {unreadMsgNotifications > 0 && (
               <div className="bg-primary  flex items-center justify-center w-6 h-6 text-center font-bold text-white rounded-full text-base flex-shrink-0">
-                {3}
+                {unreadMsgNotifications}
               </div>
             )}
           </div>

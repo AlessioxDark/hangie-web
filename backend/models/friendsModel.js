@@ -10,16 +10,21 @@ const getAll = async (req) => {
     user_2:utenti!amicizie_amico_id_fkey(*)
   `
     )
-    .eq("user_id", user_id)
-    // .or("amico_id", user_id)
+    .or(`user_id.eq.${user_id},amico_id.eq.${user_id}`)
     .eq("status", "accepted");
-  const newData = data.map((friend) => {
-    friend.user_1.user_id == user_id
-      ? (friend.user_1["isUser"] = true)
-      : (friend.user_2["isUser"] = true);
-    return friend;
+  const friendsOnly = data.map((rel) => {
+    // Se user_1 sono io, l'amico è user_2. Altrimenti è user_1.
+    const isUser1Me = rel.user_1.user_id === user_id;
+    const profiloAmico = isUser1Me ? rel.user_2 : rel.user_1;
+
+    return {
+      ...profiloAmico,
+      friendship_id: rel.id, // Utile per gestire l'amicizia (es. rimuoverla)
+      joined_at: rel.created_at, // Utile per sapere da quanto siete amici
+    };
   });
-  return { data: newData, error };
+
+  return { data: friendsOnly, error: null };
 };
 const getPending = async (req) => {
   const { user_id } = req.params;

@@ -39,7 +39,8 @@ export const NotificationProvider = ({ children }) => {
   });
   const { session } = useAuth();
   const { currentSocket } = useSocket();
-  const { currentChatData, setCurrentChatData } = useChat();
+  const { currentChatData, setCurrentChatData, setGroupsData, groupsData } =
+    useChat();
   const getDbNotifications = async () => {
     if (!session?.user?.id) return;
     const { data: notificationData, error: notificationError } = await supabase
@@ -140,6 +141,8 @@ export const NotificationProvider = ({ children }) => {
     currentNotifications,
     setCurrentNotifications,
     currentSocket,
+    setGroupsData,
+    groupsData,
   ]);
   useEffect(() => {
     console.log("cambio notifiche", currentNotifications);
