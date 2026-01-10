@@ -404,49 +404,6 @@ export const SocketProvider = ({ children }) => {
     // currentChatData?.messaggi?.length,
   ]);
 
-  // useEffect(() => {
-  //   if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
-
-  //   currentSocket.on("give_read", (data) => {
-  //     // notifica
-  //     console.log("DENTRO GIVING READ! ID messaggio:", data.message_id);
-  //     setCurrentChatData((prevData) => {
-  //       if (!prevData) return prevData;
-  //       return {
-  //         ...prevData,
-  //         messaggi: prevData.messaggi.map((m) =>
-  //           m.message_id === data.message_id ? { ...m, isRead: true } : m
-  //         ),
-  //       };
-  //     });
-  //   });
-  //   return () => {
-  //     currentSocket?.off("give_read");
-  //   };
-  // }, [currentSocket, setCurrentChatData, currentChatData?.messaggi?.length]);
-
-  // useEffect(() => {
-  //   if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
-
-  //   currentSocket.on("sent_event", (data) => {
-  //     console.log("dati dall'invio eventi al socket", data);
-  //     // setCurrentChatData((prev)=>{
-  //     //   return [...prev,data]
-  //     // })
-  //   });
-  //   return () => {
-  //     currentSocket?.off("sent_event");
-  //   };
-  // }, [
-  //   currentChatData?.messaggi?.length,
-  //   currentGroup,
-  //   currentSocket,
-  //   session?.user?.id,
-  //   setCurrentChatData,
-  //   currentGroupData,
-  //   currentChatData?.messaggi,
-  // ]); // Solo quando cambia
-
   useEffect(() => {});
   return (
     <SocketContext.Provider value={{ currentSocket, socketRef }}>

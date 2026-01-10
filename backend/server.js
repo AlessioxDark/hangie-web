@@ -180,7 +180,7 @@ io.on("connection", (socket) => {
         `Pulizia di ${notificationData.length} notifiche per l'utente`
       );
 
-      socket.to(user_id).emit("clear_notifications_count", {
+      io.to(user_id).emit("clear_notifications_count", {
         group_id: room,
         user_id,
       });

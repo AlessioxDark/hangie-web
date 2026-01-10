@@ -137,7 +137,7 @@ export const NotificationProvider = ({ children }) => {
   }, [
     session?.user?.id,
     setCurrentChatData,
-    currentChatData?.messaggi?.length,
+    // currentChatData?.messaggi?.length,
     currentNotifications,
     setCurrentNotifications,
     currentSocket,
