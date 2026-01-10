@@ -8,14 +8,27 @@ const getAll = async (req) => {
 
   const { data, error } = await supabase
     .from("partecipanti_gruppo")
-    .select("gruppi(*,messaggi(*),partecipanti_gruppo(*,utenti(*)))")
+    .select(
+      `
+      gruppi(
+      *,
+      messaggi(*),
+      partecipanti_gruppo(*,
+      utenti(nome, handle, user_id, profile_pic
+      )
+    )
+  )  
+      `
+      // "gruppi(*
+      // ,messaggi(*),partecipanti_gruppo(*,utenti(nome,handle,user_id, profile_pic)))"
+    )
     .eq("partecipante_id", user.id);
-  console.log("uid", user.id);
   if (error) {
-    console.log(error);
+    return {
+      data: null,
+      error: error,
+    };
   }
-  console.log(data);
-
   return { data, error };
 };
 const getGroup = async (req) => {
@@ -418,6 +431,17 @@ const removeParticipant = async (req) => {
 
   return { data, error };
 };
+const modifyParticipant = async (req) => {
+  const { group_id } = req.params;
+  const { user_id } = req.body;
+  const { data, error } = await supabase
+    .from("partecipanti_gruppo")
+    .update({ role: "admin" })
+    .eq("group_id", group_id)
+    .eq("partecipante_id", user_id);
+
+  return { data, error };
+};
 
 module.exports = {
   getAll,
@@ -429,4 +453,5 @@ module.exports = {
   leave,
   addParticipants,
   removeParticipant,
+  modifyParticipant,
 };

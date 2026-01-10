@@ -3,20 +3,68 @@ import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { supabase } from "../config/db.js";
 import { useMobileLayoutChat } from "./MobileLayoutChatContext.js";
+type UUID = string;
+interface GroupData {
+  nome: string;
+  partecipanti_gruppo: Participant[];
+  group_id: UUID;
+  descrizione: string;
+  createdBy: UUID;
+  created_at: string;
+  group_cover_img: string | null;
+  event_id: UUID | null;
+  updated_at: string | null;
+}
+
+interface User {
+  user_id: UUID;
+  nome: string;
+  handle: string;
+  profile_pic: string | null;
+}
+interface UserFull extends User {
+  biografia: string;
+  privacy_profilo: "private" | "public";
+  email: string;
+}
+interface Participant {
+  correlation_id: UUID;
+  role: "admin" | "member";
+  joinedAt: string;
+  group_id: UUID;
+  user: User;
+}
+interface Message {
+  message_id: UUID;
+  type: "event" | "message";
+  event_id?: UUID;
+  sent_at: string;
+  isRead?: boolean;
+  isSent?: boolean;
+  isUser?: boolean;
+  group_id: UUID;
+  user_id: UUID;
+  user: User;
+  content: string;
+}
+type ChatCache = {
+  [groupId: string]: GroupData;
+};
 export const ChatContext = createContext({
-  currentChatData: null, // dati chat corrente
-  setCurrentChatData: (arg) => arg, // impostare dati chat
-  currentGroup: null, // id chat corrente
-  setCurrentGroup: (arg) => arg, // impostare id chat
-  currentGroupData: null,
-  setCurrentGroupData: (arg) => arg,
-  groupsData: null,
-  error: null,
-  isGroupsLoading: false,
-  isChatLoading: false,
-  isEventsLoading: false,
-  groupEventsData: [],
-  setGroupsData: (arg) => arg,
+  // currentChatData: null, // dati chat corrente
+  // setCurrentChatData: (arg) => arg, // impostare dati chat
+  // currentGroup: null, // id chat corrente
+  // setCurrentGroup: (arg) => arg, // impostare id chat
+  // currentGroupData: {},
+  // setCurrentGroupData: (arg) => arg,
+  // groupsData: [],
+  // error: null,
+  // isGroupsLoading: false,
+  // isChatLoading: false,
+  // isEventsLoading: false,
+  // groupEventsData: [],
+  // setGroupsData: (arg) => arg,
+  // fetchGroups: () => {},
 });
 
 export const useChat = () => {
@@ -31,19 +79,26 @@ export const useChat = () => {
 };
 
 export const ChatProvider = ({ children }) => {
-  const [currentChatData, setCurrentChatData] = useState(null);
-  const [currentGroup, setCurrentGroup] = useState(null);
-  const [currentGroupData, setCurrentGroupData] = useState(null);
-  const [groupsData, setGroupsData] = useState(null);
+  const [currentChatData, setCurrentChatData] = useState<Message[] | null>(
+    null
+  );
+  const [currentGroup, setCurrentGroup] = useState<UUID | null>(null);
+  const [currentGroupData, setCurrentGroupData] = useState<GroupData | null>(
+    null
+  );
+  const [groupsData, setGroupsData] = useState<GroupData[] | null>(null);
   const [error, setError] = useState(null);
   const [groupEventsData, setGroupEventsData] = useState(null);
   const [isGroupsLoading, setIsGroupsLoading] = useState(false); // Loader specifico per Sidebar
   const [isChatLoading, setIsChatLoading] = useState(false); // Loader specifico per Messaggi
   const [isEventsLoading, setIsEventsLoading] = useState(false); // Loader specifico per Messaggi
+  const [chatsCache, setChatsCache] = useState<ChatCache>({}); // Loader specifico per Messaggi
   const { setMobileView } = useMobileLayoutChat();
+  const { session } = useAuth();
   const fetchGroupEvents = async () => {
     console.log("Fetch inziata");
     if (isEventsLoading) return;
+
     try {
       setIsEventsLoading(true);
       const response = await fetch(
@@ -112,16 +167,17 @@ export const ChatProvider = ({ children }) => {
       setIsGroupsLoading(false);
     }
   };
-  const fetchChat = async (groupId) => {
-    if (isChatLoading || !groupId) return;
-
+  const fetchChat = async (groupId: UUID) => {
+    if (!groupId) return;
+    if (chatsCache[groupId]) {
+      console.log("Dati in cache: li mostro subito");
+      setCurrentChatData(chatsCache[groupId]);
+    } else {
+      setIsChatLoading(true);
+    }
     try {
       setError(null);
-      setIsChatLoading(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+
       if (session) {
         const response = await fetch(
           `http://localhost:3000/api/groups/${currentGroup}`,
@@ -153,10 +209,19 @@ export const ChatProvider = ({ children }) => {
             isUser: mess.user_id === session.user.id,
           }));
           console.log(mappedMessages);
+
           setCurrentChatData({
             ...groupData,
             messaggi: mappedMessages,
           });
+          setChatsCache((prev) => ({
+            ...prev,
+            [groupId]: {
+              ...groupData,
+              messaggi: mappedMessages,
+            },
+          }));
+          setMobileView("chat");
         } else {
           setError("Dati del gruppo non trovati.");
         }
@@ -200,6 +265,7 @@ export const ChatProvider = ({ children }) => {
         isChatLoading,
         isEventsLoading,
         setGroupsData,
+        fetchGroups,
       }}
     >
       {children}

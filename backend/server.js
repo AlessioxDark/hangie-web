@@ -229,15 +229,24 @@ io.on("connection", (socket) => {
         await supabase.from("notifiche").insert(insertNotification);
       const newParticipants = [
         ...participants,
-        { user_id: creatorId, handle: sender[0].handle, nome: sender[0].nome },
+        {
+          user_id: creatorId,
+          handle: sender[0].handle,
+          nome: sender[0].nome,
+        },
       ];
+      const participantsWithRoles = newParticipants.map((p) => {
+        return p.user_id == creatorId
+          ? { ...p, role: "admin" }
+          : { ...p, role: "member" };
+      });
       newParticipants.forEach((p) => {
         console.log("invio added new group a", p.user_id);
         io.to(p.user_id).emit(
           "added_new_group",
           groupId,
           groupData,
-          newParticipants,
+          participantsWithRoles,
           imgUrl,
           sender[0]
         );
@@ -274,7 +283,7 @@ io.on("connection", (socket) => {
       console.log("ricevuto remove participant server.js");
       // manca creatore gruppo in participants
       allParticipants.forEach((p) => {
-        io.to(p.partecipante_id).emit("removed_participant", {
+        io.to(p.partecipante_id || p.user_id).emit("removed_participant", {
           group_id: groupId,
           participant,
         });
@@ -322,6 +331,18 @@ io.on("connection", (socket) => {
         group_id: groupId,
         field,
         fieldValue,
+      });
+    });
+  });
+  socket.on("admin_participant", async (groupId, participant, participants) => {
+    console.log("ricevuto admin participant server.js");
+    // manca creatore gruppo in participants
+    console.log(participant, participants);
+    participants.forEach((p) => {
+      io.to(p.user_id || p.partecipante_id).emit("admined_participant", {
+        group_id: groupId,
+        participant,
+        participants,
       });
     });
   });

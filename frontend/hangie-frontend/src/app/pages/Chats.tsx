@@ -17,9 +17,9 @@ import { useSocket } from "@/contexts/SocketContext.js";
 const Chats = () => {
   const { currentGroupData, setCurrentGroup, currentChatData } = useChat();
   const messaggi = currentChatData?.messaggi;
-  const { socketRef, currentSocket } = useSocket();
+  const { currentSocket } = useSocket();
   const [chatInput, setChatInput] = useState<string>("");
-  const [showEvents, setShowEvents] = useState(false);
+  // const [showEvents, setShowEvents] = useState(false);
   const messagesEndRef = useRef(null);
   const { currentScreen } = useScreen();
   const { setMobileView } = useMobileLayoutChat();

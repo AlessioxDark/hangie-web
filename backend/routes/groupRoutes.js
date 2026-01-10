@@ -13,6 +13,10 @@ router.patch(
   "/remove/participants/:group_id",
   groupController.removeParticipant
 );
+router.patch(
+  "/modify/participants/:group_id",
+  groupController.modifyParticipant
+);
 router.delete("/leave/:group_id", groupController.leaveGroup);
 
 module.exports = router;

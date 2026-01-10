@@ -220,7 +220,8 @@ export const SocketProvider = ({ children }) => {
         return prev.map((group) => {
           if (group.group_id === data.group_id) {
             const newParticipants = group.partecipanti_gruppo.filter(
-              (p) => p.partecipante_id !== data.participant.partecipante_id // Verifica se la chiave è user_id o partecipante_id
+              (p) =>
+                (p.partecipante_id || p.user_id) !== data.participant.user_id // Verifica se la chiave è user_id o partecipante_id
             );
             return { ...group, partecipanti_gruppo: newParticipants };
           }
@@ -230,7 +231,7 @@ export const SocketProvider = ({ children }) => {
       if (currentGroupData.group_id == data.group_id) {
         setCurrentGroupData((prev) => {
           const newParticipants = prev.partecipanti_gruppo.filter(
-            (p) => p.partecipante_id !== data.participant.partecipante_id // Verifica se la chiave è user_id o partecipante_id
+            (p) => (p.partecipante_id || p.user_id) !== data.participant.user_id // Verifica se la chiave è user_id o partecipante_id
           );
           return { ...prev, partecipanti_gruppo: newParticipants };
         });
@@ -306,6 +307,54 @@ export const SocketProvider = ({ children }) => {
         });
       }
     });
+    socket.on("admined_participant", (data) => {
+      console.log("arrivato admined_field al frontend");
+      console.log("dati dal socket", data);
+      console.log("groupsData", groupsData);
+      console.log("currentGroupData", currentGroupData);
+      setGroupsData((prev) => {
+        // Usiamo MAP per creare un nuovo array, non forEach
+        return prev.map((group) => {
+          if (group.group_id === data.group_id) {
+            const nuoviPartecipantiGruppo = group.partecipanti_gruppo.map(
+              (p) => {
+                return p.partecipante_id == data.participant.partecipante_id
+                  ? { ...p, role: "admin" }
+                  : p;
+              }
+            );
+            return {
+              ...group,
+              partecipanti_gruppo: nuoviPartecipantiGruppo,
+            };
+          }
+          return group;
+        });
+      });
+      console.log(
+        "non mi trovo nel gruppo",
+        currentGroupData.group_id,
+        data.group_id
+      );
+      if (currentGroupData.group_id == data.group_id) {
+        console.log(
+          "mi trovo nel gruppo",
+          currentGroupData.group_id,
+          data.group_id
+        );
+        setCurrentGroupData((prev) => {
+          const nuoviPartecipantiGruppo = prev.partecipanti_gruppo.map((p) => {
+            return p.partecipante_id == data.participant.partecipante_id
+              ? { ...p, role: "admin" }
+              : p;
+          });
+          return {
+            ...prev,
+            partecipanti_gruppo: nuoviPartecipantiGruppo,
+          };
+        });
+      }
+    });
 
     return () => {
       console.log("Pulizia socket e rimozione listener...");
@@ -316,6 +365,7 @@ export const SocketProvider = ({ children }) => {
       socket.off("left_group");
       socket.off("added_participants");
       socket.off("removed_participant");
+      socket.off("admined_participant");
       socket.off("give_read");
       socket.disconnect();
       socketRef.current = null;

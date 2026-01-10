@@ -18,13 +18,11 @@ const GroupCard = ({
   createdBy,
   updated_at,
 }) => {
-  const { setCurrentGroup, setCurrentGroupData, setCurrentChatData } =
-    useChat();
+  const { setCurrentGroup, setCurrentGroupData } = useChat();
   const { currentNotifications } = useNotification();
   const displayImage = group_cover_img
     ? `${group_cover_img}?v=${updated_at || Date.now()}`
     : null;
-  const { setMobileView } = useMobileLayoutChat();
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
@@ -68,40 +66,32 @@ const GroupCard = ({
       }}
     >
       <div className="flex flex-row items-stretch w-full h-full gap-4">
-        {/* <img
-          src={group_cover_img}
-          className="rounded-full w-14 h-14 2xl:h-16 2xl:w-16 flex-shrink-0" // Correzione Sizing
-          alt="Group cover"
-        /> */}
         {displayImage == null ? (
           <div className="rounded-full w-12 h-12 2xl:h-16 2xl:w-16 flex-shrink-0">
             <DefaultGroupIcon />
           </div>
         ) : (
           <img
-            // src={group_cover_img}
             src={displayImage}
             className="rounded-full w-12 h-12 2xl:h-16 2xl:w-16 flex-shrink-0" // Correzione Sizing
             alt="Group cover"
           />
         )}
-        <div className="flex-1 min-w-0 flex flex-col gap-1.5 justify-center">
-          <div className="flex justify-between items-center">
+        <div className="flex-1 min-w-0 flex flex-col gap-1.5 ">
+          <div className="flex justify-between ">
             <h1 className="font-bold font-body text-lg leading-4">{nome}</h1>
 
-            <span className="text-text-3 text-sm flex-shrink-0 ml-4">
+            <span className="text-text-3 text-sm flex-shrink-0 ml-4 font-body">
               {formatTime(ultimoMessaggio?.sent_at || created_at)}
             </span>
           </div>
 
-          {/* Riga 2: Anteprima Messaggio e Badge (Bottom) */}
           <div className="flex justify-between items-center">
             <span className="text-text-2 font-body 2xl:text-lg leading-5 line-clamp-1 mr-2">
               {ultimoMessaggio?.type == "event"
                 ? `evento`
                 : ultimoMessaggio?.content}
             </span>
-            {/* Badge Messaggi Non Letti */}
             {unreadMsgNotifications > 0 && (
               <div className="bg-primary  flex items-center justify-center w-6 h-6 text-center font-bold text-white rounded-full text-base flex-shrink-0">
                 {unreadMsgNotifications}

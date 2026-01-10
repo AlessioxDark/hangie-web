@@ -6,7 +6,7 @@ const getAllGroups = async (req, res) => {
   try {
     const { data, error } = await Group.getAll(req); // Chiama il modello per ottenere gli eventi
     if (error) {
-      console.log(error);
+      throw new Error(error);
     }
     const formattedData = data.map((row) => {
       let ultimoMessaggio = null;
@@ -184,6 +184,15 @@ const removeParticipant = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const modifyParticipant = async (req, res) => {
+  try {
+    const { data, error } = await Group.modifyParticipant(req); // Chiama il modello per ottenere gli eventi
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 module.exports = {
   getAllGroups,
   getSpecificGroup,
@@ -194,4 +203,5 @@ module.exports = {
   leaveGroup,
   addParticipants,
   removeParticipant,
+  modifyParticipant,
 };

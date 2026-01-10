@@ -19,7 +19,15 @@ const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 const CreateGroupForm = () => {
   const { setMobileView } = useMobileLayoutChat();
   const schema = z.object({
-    nome: z.string().min(1, "il nome del gruppo è obbligatorio"),
+    nome: z
+      .string()
+      .min(1, "il nome è obbligatorio")
+      .min(3, " il nome deve avere minimo 3 caratteri")
+      .max(20, "il nome è troppo lungo")
+      .regex(
+        /^[a-zA-Z0-9\s\u00C0-\u017F!?.()\-@#&]+$/u,
+        "Il nome contiene caratteri non validi"
+      ),
     descrizione: z
       .string()
       .min(1, "la descrizione è obbligatoria")

@@ -6,11 +6,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { useScreen } from "@/contexts/ScreenContext";
-import { Edit, Edit2, Plus, X } from "lucide-react";
+import { Edit, Edit2, Handshake, Plus, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import AddParticipantsGroup from "./AddParticipantsGroup";
 import { supabase } from "../../config/db.js";
 import { useSocket } from "@/contexts/SocketContext.js";
+import { useModal } from "@/contexts/ModalContext.js";
+const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 
 const GroupDetails = () => {
   const { currentScreen } = useScreen();
@@ -21,15 +23,15 @@ const GroupDetails = () => {
   const { setMobileView } = useMobileLayoutChat();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
-  const [isEditingParticipants, setIsEditingParticipants] = useState(false);
+  const [formError, setFormError] = useState(null);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const isAdmin =
+  const [isAdmin, setIsAdmin] = useState(
     currentGroupData?.partecipanti_gruppo?.some(
       (p) =>
         p.role === "admin" &&
-        (p.partecipante_id || p.user_id) === session.user.id &&
-        p.group_id == currentGroup
-    ) || false;
+        (p.partecipante_id || p.user_id) === session.user.id
+    ) || false
+  );
 
   // const isCreator = currentGroupData?.createdBy == session.user.id;
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -37,6 +39,7 @@ const GroupDetails = () => {
   const [currentDescription, setCurrentDescription] = useState(
     currentGroupData.descrizione
   );
+  const { openModal } = useModal();
   const [currentTitle, setCurrentTitle] = useState(currentGroupData.nome);
   const [currentGroupImg, setCurrentGroupImg] = useState(
     currentGroupData.group_cover_img
@@ -94,7 +97,13 @@ const GroupDetails = () => {
       const ext = file.name.split(".").pop();
       const fileName = `${currentGroup}/cover.${ext}`;
       const filePath = `${fileName}`;
-
+      if (!ACCEPTED_EXTENSIONS.includes(ext)) {
+        setFormError({
+          type: "img",
+          message: `inserire solo file tipi: ${ACCEPTED_EXTENSIONS.join(", ")}`,
+        });
+        return;
+      }
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("group_cover_pics")
         .update(filePath, file, {
@@ -207,9 +216,6 @@ const GroupDetails = () => {
     }
   };
 
-  const handleModifyParticipants = () => {
-    setIsEditingParticipants((prev) => !prev);
-  };
   useEffect(() => {
     if (currentGroupData.partecipanti_gruppo) {
       console.log(
@@ -225,7 +231,7 @@ const GroupDetails = () => {
             handle: utenti.handle,
             user_id: utenti.user_id,
           };
-        })
+        }) || []
       );
     }
   }, [currentGroupData.partecipanti_gruppo]);
@@ -249,6 +255,19 @@ const GroupDetails = () => {
   useEffect(() => {
     setCurrentGroupImg(currentGroupData.group_cover_img);
   }, [currentGroupData.group_cover_img]);
+  useEffect(() => {
+    setCurrentTitle(currentGroupData.nome);
+  }, [currentGroupData.nome]);
+  useEffect(() => {
+    if (currentGroupData.partecipanti_gruppo && !isAdmin) {
+      currentGroupData.partecipanti_gruppo.forEach((p) => {
+        if (p.partecipante_id == session.user.id && p.role == "admin") {
+          setIsAdmin(true);
+        }
+      });
+    }
+    setCurrentTitle(currentGroupData.nome);
+  }, [currentGroupData.partecipanti_gruppo]);
   useEffect(() => {
     setCurrentTitle(currentGroupData.nome);
   }, [currentGroupData.nome]);
@@ -326,32 +345,78 @@ const GroupDetails = () => {
           currentParticipants
         );
         // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
-        setCurrentParticipants((prev) =>
-          prev.filter((p) => p.user_id !== partecipante.user_id)
-        );
+        // setCurrentParticipants((prev) =>
+        //   prev.filter((p) => p.user_id !== partecipante.user_id)
+        // );
 
-        const participantsForGlobalState = currentParticipants.filter(
-          (p) => p.user_id !== partecipante.user_id
+        // const participantsForGlobalState = currentParticipants.filter(
+        //   (p) => p.user_id !== partecipante.user_id
+        // );
+        // const newParticipantsForGlobalState = participantsForGlobalState.map(
+        //   (p) => {
+        //     // return {...partici}
+        //     return {
+        //       partecipante_id: p.user_id, // Assicurati che il nome della chiave sia corretto per il tuo DB
+        //       utenti: {
+        //         user_id: p.user_id,
+        //         nome: p.nome,
+        //         handle: p.handle,
+        //       },
+        //     };
+        //   }
+        // );
+        // setCurrentGroupData((prevData) => {
+        //   return {
+        //     ...prevData,
+        //     partecipanti_gruppo: newParticipantsForGlobalState,
+        //   };
+        // });
+        // setGroupsData((prevData) => {
+        //   return prevData.map((group) => {
+        //     if (group.group_id == currentGroup) {
+        //       return {
+        //         ...prevData,
+        //         partecipanti_gruppo: newParticipantsForGlobalState,
+        //       };
+        //     }return group
+        //   });
+        // });
+        // Nota: qui potresti voler chiamare una funzione dal tuo Context per rinfrescare i dati globali
+      }
+    } catch (error) {
+      console.error("Errore durante l'invio:", error);
+    }
+  };
+  const handleMakeAdmin = async (partecipante) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/groups/modify/participants/${currentGroup}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ user_id: partecipante.user_id }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        console.log("invio il socket a tutti con me");
+        currentSocket.emit(
+          "admin_participant",
+          currentGroup,
+          partecipante,
+          currentParticipants
         );
-        const newParticipantsForGlobalState = participantsForGlobalState.map(
-          (p) => {
-            // return {...partici}
-            return {
-              partecipante_id: p.user_id, // Assicurati che il nome della chiave sia corretto per il tuo DB
-              utenti: {
-                user_id: p.user_id,
-                nome: p.nome,
-                handle: p.handle,
-              },
-            };
-          }
-        );
-        setCurrentGroupData((prevData) => {
-          return {
-            ...prevData,
-            partecipanti_gruppo: newParticipantsForGlobalState,
-          };
-        });
+        // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
+
+        // setCurrentGroupData((prevData) => {
+        //   return {
+        //     ...prevData,
+        //     partecipanti_gruppo: newParticipantsForGlobalState,
+        //   };
+        // });
         // Nota: qui potresti voler chiamare una funzione dal tuo Context per rinfrescare i dati globali
       }
     } catch (error) {
@@ -394,14 +459,6 @@ const GroupDetails = () => {
                 <div className="w-full flex justify-center">
                   <div className="flex flex-col gap-6 items-center">
                     <div className="relative">
-                      <div
-                        className="absolute top-0 right-4 p-1.5 bg-primary rotate-270 rounded-full"
-                        onClick={() => {
-                          fileInputRef.current.click();
-                        }}
-                      >
-                        <Edit2 fill="#ffffff" stroke="#ffffff" size={12} />
-                      </div>
                       <input
                         type="file"
                         ref={fileInputRef}
@@ -409,18 +466,33 @@ const GroupDetails = () => {
                         style={{ display: "none" }}
                         accept="image/*"
                       />
-                      {currentGroupImg == null ? (
-                        <div className="rounded-full w-48 h-48 ">
-                          <DefaultGroupIcon />
-                        </div>
-                      ) : (
-                        <img
-                          // src={currentGroupImg}
-                          src={displayImage}
-                          alt=""
-                          className="w-48 h-48 rounded-full"
-                        />
-                      )}
+                      <div className="flex flex-col gap-2 w-full items-center">
+                        {currentGroupImg == null ? (
+                          <div
+                            className="rounded-full w-48 h-48 "
+                            onClick={() => {
+                              fileInputRef.current.click();
+                            }}
+                          >
+                            <DefaultGroupIcon />
+                          </div>
+                        ) : (
+                          <img
+                            // src={currentGroupImg}
+                            src={displayImage}
+                            alt=""
+                            className="w-48 h-48 rounded-full"
+                            onClick={() => {
+                              fileInputRef.current.click();
+                            }}
+                          />
+                        )}
+                        {formError && formError.type == "img" && (
+                          <span className="text-sm font-body  text-red-500 ">
+                            {formError.message}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex flex-col text-center font-body">
                       <div className="relative">
@@ -442,15 +514,23 @@ const GroupDetails = () => {
                             )}
                           </div>
                         )}
+
                         {isEditingTitle ? (
-                          <input
-                            className="text-2xl font-bold text-text-1 leading-tight p-1 focus:outline-none text-center"
-                            autoFocus
-                            value={currentTitle}
-                            onChange={(e) => {
-                              setCurrentTitle(e.target.value);
-                            }}
-                          />
+                          <div className="flex-flex-col gap-2 ">
+                            <input
+                              className="text-2xl font-bold text-text-1 leading-tight p-1 focus:outline-none text-center"
+                              autoFocus
+                              value={currentTitle}
+                              onChange={(e) => {
+                                setCurrentTitle(e.target.value);
+                              }}
+                            />
+                            {formError && formError.type == "title" && (
+                              <span className="text-sm font-body  text-red-500 ">
+                                {formError.message}
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <h1 className="text-2xl font-bold text-text-1 leading-tight">
                             {currentTitle}
@@ -511,15 +591,6 @@ const GroupDetails = () => {
                   <h3 className="px-8 text-xs font-bold font-body text-text-2 uppercase tracking-wide">
                     {currentParticipants.length} Partecipanti
                   </h3>
-
-                  {isAdmin && (
-                    <h3
-                      className="px-6 text-xs font-bold font-body text-primary uppercase tracking-wide cursor-pointer"
-                      onClick={handleModifyParticipants}
-                    >
-                      {isEditingParticipants ? "Fine" : "Modifica"}
-                    </h3>
-                  )}
                 </div>
                 <div className="mx-4 bg-bg-1 rounded-2xl border border-bg-3 overflow-hidden shadow-sm shadow-slate-200/50">
                   {currentParticipants.map((partecipante, idx) => (
@@ -530,7 +601,7 @@ const GroupDetails = () => {
                         "border-b border-bg-3"
                       } `}
                     >
-                      {isEditingParticipants &&
+                      {/* {isEditingParticipants &&
                         isAdmin &&
                         partecipante.user_id !== session.user.id && (
                           <div
@@ -542,33 +613,82 @@ const GroupDetails = () => {
                             <X size={13} className="text-white" />
                           </div>
                         )}
+                      {isEditingParticipants &&
+                        partecipante.role != "admin" &&
+                        partecipante.user_id !== session.user.id && (
+                          <div
+                            className="absolute top-1.5 right-10 p-0.5 bg-primary rounded-full"
+                            onClick={() => handleMakeAdmin(partecipante)}
+                          >
+                            <Handshake size={13} className="text-white" />
+                          </div>
+                        )} */}
 
-                      <div className="w-13 h-13 shrink-0 ">
+                      <div
+                        className="w-13 h-13 shrink-0 "
+                        onClick={() => {
+                          // apri profilo
+                          console.log("apro profilo di", partecipante.nome);
+                        }}
+                      >
                         <ProfileIcon user_id={partecipante.user_id} />
                       </div>
-                      <div className="flex flex-col min-w-0 flex-1">
+                      <div
+                        className="flex flex-col min-w-0 flex-1"
+                        onClick={() => {
+                          // apri modal con varie opzioni
+                          if (partecipante.user_id !== session.user.id) {
+                            console.log(
+                              "apro action sheet di",
+                              partecipante.nome
+                            );
+                            openModal({
+                              type: "PARTICIPANT_ACTIONS",
+                              data: {
+                                partecipante,
+                                handleMakeAdmin,
+                                handleRemoveParticipants,
+                                isAdmin,
+                              },
+                            });
+                          }
+                        }}
+                      >
                         <div className="flex flex-row gap-1 items-end">
                           <span className="text-text-1 font-semibold truncate leading-tight">
                             {partecipante.nome}
                           </span>
 
-                          {currentGroupData.createdBy ==
-                            partecipante.partecipante_id && (
+                          {(currentGroupData.createdBy ==
+                            partecipante.partecipante_id ||
+                            currentGroupData.createdBy ==
+                              partecipante.user_id) && (
                             <span className="text-primary text-[10px] py-0.5 px-1 rounded-xl font-medium">
                               CREATORE
                             </span>
                           )}
-                          {partecipante.role == "admin" && (
-                            <span className="text-primary text-[10px] py-0.5 px-1 rounded-xl font-medium">
-                              ADMIN
-                            </span>
-                          )}
+                          {partecipante.role == "admin" &&
+                            !(
+                              currentGroupData.createdBy ==
+                                partecipante.partecipante_id ||
+                              currentGroupData.createdBy == partecipante.user_id
+                            ) && (
+                              <span className="text-primary text-[10px] py-0.5 px-1 rounded-xl font-medium">
+                                ADMIN
+                              </span>
+                            )}
                         </div>
                         <span className="text-text-2 text-sm truncate">
                           @{partecipante.handle}
                         </span>
                       </div>
-                      <div className="w-5 h-5">
+                      <div
+                        className="w-5 h-5"
+                        onClick={() => {
+                          // apri profilo
+                          console.log("apro profilo di", partecipante.nome);
+                        }}
+                      >
                         <ChevronRight color={"#64748b"} />
                       </div>
                     </div>

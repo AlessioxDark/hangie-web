@@ -16,7 +16,7 @@ import CreateGroupForm from "@/features/chats/CreateGroupForm.js";
 import AddParticipantsGroup from "@/features/chats/AddParticipantsGroup.js";
 import GroupDetails from "@/features/chats/GroupDetails.js";
 const LayoutChatMobile = () => {
-  const { error, isChatLoading } = useChat();
+  const { error, isChatLoading, fetchGroups } = useChat();
 
   const { mobileView } = useMobileLayoutChat();
 
@@ -31,7 +31,7 @@ const LayoutChatMobile = () => {
             Caricamento della chat...
           </h3>
           <p className="text-gray-500 text-center text-lg ">
-            Stiamo cercaando la chat per te
+            Stiamo cercando la chat per te
           </p>
         </div>
       );
@@ -47,7 +47,7 @@ const LayoutChatMobile = () => {
           </h3>
           <p className="text-gray-500 mb-6 text-center text-lg">{error}</p>
           <button
-            // onClick={() => fetchChat()}
+            onClick={() => fetchGroups()}
             className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
           >
             Riprova
@@ -83,9 +83,6 @@ const LayoutChatMobile = () => {
     if (mobileView == "GROUP_DETAILS") {
       return <GroupDetails />;
     }
-    // if (mobileView == "ADD_PARTICIPANTS") {
-    //   return <AddParticipantsGroup />;
-    // }
     return (
       <p className="p-4 text-center text-gray-500">
         Vista non valida. {`${mobileView}`}
