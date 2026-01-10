@@ -128,6 +128,7 @@ io.on("connection", (socket) => {
     // console.log(
     //   `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
     // );
+    console.log("arrivato message_sent a server");
     const { data: partecipantiDB } = await supabase
       .from("partecipanti_gruppo")
       .select("partecipante_id")
@@ -154,9 +155,7 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("message_read", async (message_id, user_id, room) => {
-    // console.log(
-    //   `Utente ${socket.id} ha inviato un messaggio: ${message} con room ${room}`
-    // );
+    console.log(`sto leggendo nel servers`);
     const { data: partecipantiDB } = await supabase
       .from("partecipanti_gruppo")
       .select("partecipante_id")
@@ -193,20 +192,35 @@ io.on("connection", (socket) => {
       .neq("status", "read");
     // .or("status", "sent");
 
-    console.log(count, countError);
+    console.log("il conto del read è", count, countError);
     // console.log()
     if (count == 0) {
       console.log("il conto è zero mando read", room);
       partecipantiDB.forEach((p) => {
+        console.log("mando read a", p.partecipante_id);
         io.to(p.partecipante_id).emit("give_read", { message_id });
       });
     }
   });
-  socket.on("send_event", async (eventId, room, token) => {
-    console.log(
-      `Utente ${socket.id} ha inviato un messaggio: ${eventId} con room ${room}`
-    );
-  });
+  socket.on(
+    "send_event",
+    async (eventId, room, token, eventDetails, messageDetails) => {
+      const { data: participants, error: participantsError } = await supabase
+        .from("partecipanti_gruppo")
+        .select("*")
+        .eq("group_id", room);
+      console.log("partecipanti", participants);
+      participants.forEach((p) => {
+        io.to(p.partecipante_id).emit("sent_event", {
+          event: { ...eventDetails, event_id: eventId },
+          messageDetails,
+        });
+      });
+      console.log(
+        `Utente ${socket.id} ha inviato un messaggio: ${eventId} con room ${room}`
+      );
+    }
+  );
   socket.on(
     "add_new_group",
     async (groupId, groupData, participants, imgUrl, creatorId) => {

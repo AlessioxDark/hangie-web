@@ -15,12 +15,14 @@ import ChevronLeft from "@/assets/icons/ChevronLeft.js";
 import ChevronRight from "@/assets/icons/ChevronRight.js";
 import { useScreen } from "@/contexts/ScreenContext.js";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
+import { useSocket } from "@/contexts/SocketContext.js";
 
 const CreateEventForm = () => {
   const IMAGE_LIMIT = 4;
   const { closeModal } = useModal();
   const { session } = useAuth();
-  const { socketRef, setCurrentChatData } = useChat();
+  const { setCurrentChatData } = useChat();
+  const { currentSocket } = useSocket();
   const [images, setImages] = useState([]);
   const schema = z
     .object({
@@ -32,20 +34,41 @@ const CreateEventForm = () => {
         .max(350, "La descrizione può essere massimo 350 caratteri"),
       data: z
         .string()
-        .min(1, "La data di iscrizione è obbligatoria")
+        .min(1, "La data dell'evento è obbligatoria")
         .pipe(z.coerce.date()) // Trasforma la stringa (data HTML) in Date object
         .refine((date) => date > new Date(), {
-          message: "La data di scadenza deve essere futura.",
+          message: "La data dell'evento deve essere futura.",
         }),
       data_scadenza: z
         .string()
-        .min(1, "La data di iscrizione è obbligatoria")
+        .min(1, "La data di scadenza è obbligatoria")
         .pipe(z.coerce.date()) // Trasforma la stringa (data HTML) in Date object
         .refine((date) => date > new Date(), {
           message: "La data di scadenza deve essere futura.",
         }),
       indirizzo: z.string().min(1, "l'indirizzo è obbligatorio"),
-      costo: z.number().min(0, "il costo non può essere negativo"),
+      costo: z
+        .any() // Accettiamo inizialmente qualsiasi cosa (stringa vuota o numero)
+        .refine((val) => val !== "" && val !== undefined && val !== null, {
+          message: "Il costo è obbligatorio",
+        })
+        .transform((val) => Number(val)) // Convertiamo in numero
+        .refine((val) => !isNaN(val), {
+          message: "Deve essere un numero valido",
+        })
+        .refine((val) => val >= 0, {
+          message: "Non può essere negativo",
+        })
+        .refine((val) => val === 0 || val >= 1, {
+          message: "Minimo 1€ (o 0 per gratis)",
+        }),
+      // costo: z
+      //   .number({
+      //     required_error: "L'età è obbligatoria",
+      //     invalid_type_error: "Devi inserire un numero",
+      //   })
+      //   .positive("Il prezzo deve essere maggiore di 0") // Non permette 0 o numeri negativi
+      //   .min(0.01, "Inserisci un importo valido"),
       cap: z
         .string()
         .min(5, "il cap deve essere composto da 5 cifre")
@@ -54,7 +77,7 @@ const CreateEventForm = () => {
       nome_luogo: z.string().min(1, "è obbligatorio dare un nome al luogo"),
     })
     // 3. REGOLA COMPOSITA: Confronta data evento e scadenza
-    .refine((data) => data.data < data.data_scadenza, {
+    .refine((data) => data.data > data.data_scadenza, {
       message:
         "La data dell'evento deve essere successiva alla scadenza iscrizione.",
       // Indica a React Hook Form di associare l'errore al campo 'data'
@@ -78,12 +101,14 @@ const CreateEventForm = () => {
   const { setMobileView } = useMobileLayoutChat();
   const [currentStep, setCurrentStep] = useState(1);
   const [imageError, setImageError] = useState(false); // Stato per l'errore
-  const sendEvent = (event_id, event_details) => {
-    socketRef.current.emit(
+  const sendEvent = (event_id, event_details, message_details) => {
+    currentSocket.emit(
       "send_event",
       event_id,
-      currentGroupData?.group_id,
-      session.access_token
+      currentGroup,
+      session.access_token,
+      event_details,
+      message_details
     );
 
     setCurrentChatData((prevData) => {
@@ -183,8 +208,9 @@ const CreateEventForm = () => {
       if (coverError) throw coverError;
       console.log("Tutte le immagini caricate con successo!");
       const newEventDetails = { ...result.event_details, cover_img: cover_url };
-      sendEvent(newEventId, newEventDetails);
-      closeModal(); // Chiudi solo se tutto è andato bene
+      const messageDetails = result.messageDetails;
+      sendEvent(newEventId, newEventDetails, messageDetails);
+      setMobileView("chat");
     } catch (error) {
       console.error("Errore durante il processo:", error);
       // Qui puoi gestire l'errore (es. mostrare un toast notification)
@@ -233,50 +259,6 @@ const CreateEventForm = () => {
               aria-label="Chiudi Modale"
             >
               {currentScreen !== "xs" && <X width={25} height={25} />}
-              {/* {currentScreen == "xs" ? (
-                currentStep == 1 ? (
-                  <div
-                    className=" flex flex-row items-center font-body text-xs text-primary"
-                    onClick={async () => {
-                      // valida form
-                      const result = await trigger(["titolo", "descrizione"]);
-                      if (images.length == 0) {
-                        setImageError({
-                          message: "inserisci almeno un'immagine",
-                        });
-                      }
-                      if (result && !imageError) {
-                        setCurrentStep(2);
-                      } else {
-                        if (errors.titolo) {
-                          setError("titolo", {
-                            message: errors.titolo.message,
-                          });
-                        }
-                        if (errors.descrizione) {
-                          setError("descrizione", {
-                            message: errors.descrizione.message,
-                          });
-                        }
-                        if (imageError) {
-                          setError("root", {
-                            message: imageError,
-                          });
-                        }
-                      }
-                    }}
-                  >
-                    Avanti{" "}
-                    <div className="w-6 h-6">
-                      <ChevronRight color="#2463eb" />
-                    </div>
-                  </div>
-                ) : (
-                  <></>
-                )
-              ) : (
-                <X width={25} height={25} />
-              )} */}
             </button>
           </div>
         </div>

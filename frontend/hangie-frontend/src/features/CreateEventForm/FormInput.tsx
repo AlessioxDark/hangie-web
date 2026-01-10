@@ -56,7 +56,7 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
                                  }
 		                             `}
             // Uso corretto della funzione register
-            {...register(id, { valueAsNumber: type === "number" })}
+            {...register(id)}
           />
         </div>
         {/* L'errore viene mostrato se esiste */}

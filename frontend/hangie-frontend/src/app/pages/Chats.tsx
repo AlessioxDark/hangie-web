@@ -15,7 +15,8 @@ import CalendarIcon from "@/assets/icons/CalendarIcon.js";
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon.js";
 import { useSocket } from "@/contexts/SocketContext.js";
 const Chats = () => {
-  const { currentGroupData, setCurrentGroup, currentChatData } = useChat();
+  const { currentGroupData, setCurrentGroup, currentChatData, currentGroup } =
+    useChat();
   const messaggi = currentChatData?.messaggi;
   const { currentSocket } = useSocket();
   const [chatInput, setChatInput] = useState<string>("");
@@ -69,29 +70,29 @@ const Chats = () => {
     setChatInput("");
     if (chatInputRef.current) chatInputRef.current.textContent = "";
   };
+  useEffect(() => {
+    if (currentChatData) {
+      console.log("controllo messaggi non letti");
+      const messaggiDaLeggere = currentChatData?.messaggi?.filter(
+        (m) => !m.isRead && m.user_id !== session?.user?.id
+      );
 
-  // useEffect(() => {
-  //   if (currentGroupData && currentSocket) {
-  //     currentSocket.emit("join_room", currentChatData?.group_id);
+      if (currentSocket && messaggiDaLeggere?.length > 0) {
+        console.log(`Segno come letti ${messaggiDaLeggere.length} messaggi`);
 
-  //     currentSocket.on("receive_event", (data) => {
-  //       console.log("evento ricevuto: ", data);
-  //     });
-  //     currentSocket.on("message_arrived", (data) => {
-  //       console.log("messaggio arrivato a me");
-  //       setCurrentChatData((prevData) => {
-  //         return {
-  //           ...prevData,
-  //           messaggi: prevData.messaggi.map((prevmess) => {
-  //             return prevmess.message_id == data.message_id
-  //               ? { ...prevmess, isSent: true }
-  //               : prevmess;
-  //           }),
-  //         };
-  //       });
-  //     });
-  //   }
-  // }, [currentGroupData, currentSocket]);
+        // Inviamo un singolo evento pers l'intero gruppo
+        console.log("invio give read");
+        messaggiDaLeggere.forEach((mess) => {
+          currentSocket.emit(
+            "message_read",
+            mess.message_id,
+            session.user.id,
+            currentGroup
+          );
+        });
+      }
+    }
+  }, [currentChatData.messaggi.length, currentSocket]);
   console.log(currentGroupData);
   return (
     <div className="w-full h-full flex flex-col">
@@ -150,18 +151,9 @@ const Chats = () => {
             className="relative p-2.5 rounded-full bg-[#D9EAFF] active:bg-indigo-100 transition-all group"
             title="Vedi Eventi"
           >
-            {/* <Calendar
-              size={22}
-              className="text-primary group-active:scale-90 transition-transform"
-            /> */}
             <div className="w-6 h-6">
               <CalendarIcon color={"#2463eb"} />
             </div>
-
-            {/* <span className="absolute top-2 right-2 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-600 border-2 border-white"></span>
-            </span> */}
           </button>
         </div>
       </div>

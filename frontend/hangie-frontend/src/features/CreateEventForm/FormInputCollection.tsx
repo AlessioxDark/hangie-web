@@ -19,7 +19,10 @@ const FormInputCollection = ({
       switch (currentStep) {
         case 1:
           return (
-            <div className="p-4 2xl:p-8 flex flex-col gap-3 h-full">
+            <div
+              className="p-4 2xl:p-8 flex flex-col gap-3 h-full"
+              key="step-1"
+            >
               <ImageInput
                 imageError={imageError}
                 setImageError={setImageError}
@@ -49,7 +52,7 @@ const FormInputCollection = ({
           );
         case 2:
           return (
-            <div className="p-4 2xl:p-8 flex flex-col gap-3">
+            <div className="p-4 2xl:p-8 flex flex-col gap-3" key="step-2">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <FormInput
                   id="data"
@@ -78,7 +81,7 @@ const FormInputCollection = ({
           );
         case 3:
           return (
-            <div className="p-4 flex flex-col gap-3">
+            <div className="p-4 flex flex-col gap-3" key="step-3">
               <div className="flex flex-col gap-3">
                 <FormInput
                   id="nome_luogo"

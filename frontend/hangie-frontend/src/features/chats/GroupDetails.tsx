@@ -104,6 +104,8 @@ const GroupDetails = () => {
         });
         return;
       }
+      setFormError(null);
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("group_cover_pics")
         .update(filePath, file, {
@@ -498,9 +500,33 @@ const GroupDetails = () => {
                       <div className="relative">
                         {isAdmin && (
                           <div
-                            className="absolute rounded-full -top-1.5 -right-4 rotate-270 p-1.5 bg-primary"
+                            className="absolute rounded-full -top-2.5 -right-5 rotate-270 p-1.5 bg-primary"
                             onClick={() => {
-                              setIsEditingTitle((prev) => !prev);
+                              console.log("voglio modificare il titolo");
+                              if (isEditingTitle == false) {
+                                console.log("era false lo metto true");
+                                setIsEditingTitle(true);
+                              } else {
+                                console.log("era true facci ocontrolli");
+                                if (currentTitle.length < 3) {
+                                  setFormError({
+                                    type: "title",
+                                    message:
+                                      "il titolo deve avere almeno 3 caratteri",
+                                  });
+                                  return;
+                                }
+                                if (currentTitle.length > 20) {
+                                  setFormError({
+                                    type: "title",
+                                    message:
+                                      "il titolo può avere massimo 20 caratteri",
+                                  });
+                                  return;
+                                }
+                                setFormError(null);
+                                setIsEditingTitle(false);
+                              }
                             }}
                           >
                             {isEditingTitle ? (
@@ -516,7 +542,7 @@ const GroupDetails = () => {
                         )}
 
                         {isEditingTitle ? (
-                          <div className="flex-flex-col gap-2 ">
+                          <div className="flex flex-col gap-2 ">
                             <input
                               className="text-2xl font-bold text-text-1 leading-tight p-1 focus:outline-none text-center"
                               autoFocus
@@ -552,20 +578,53 @@ const GroupDetails = () => {
                     {isAdmin && (
                       <h3
                         className="text-xs font-bold font-body text-primary uppercase tracking-wide mb-1"
-                        onClick={() => setIsEditingDescription((prev) => !prev)}
+                        onClick={() => {
+                          console.log("voglio modificare il titolo");
+                          if (isEditingDescription == false) {
+                            console.log("era false lo metto true");
+                            setIsEditingDescription(true);
+                          } else {
+                            console.log("era true facci ocontrolli");
+                            if (currentDescription.length < 10) {
+                              setFormError({
+                                type: "title",
+                                message:
+                                  "la descrizione deve essere minimo 10 caratteri",
+                              });
+                              return;
+                            }
+                            if (currentTitle.length > 350) {
+                              setFormError({
+                                type: "title",
+                                message:
+                                  "La descrizione può essere massimo 350 caratteri",
+                              });
+                              return;
+                            }
+                            setFormError(null);
+                            setIsEditingDescription(false);
+                          }
+                        }}
                       >
                         {isEditingDescription ? "Fine" : "Modifica"}
                       </h3>
                     )}
                   </div>
                   {isEditingDescription ? (
-                    <textarea
-                      value={currentDescription}
-                      className="text-text-1 font-body text-sm leading-relaxed w-full p-1.5 border-2 border-primary rounded-lg focus:outline-none resize-none "
-                      onChange={(e) => setCurrentDescription(e.target.value)}
-                      rows={2}
-                      autoFocus
-                    ></textarea>
+                    <div className="flex flex-col gap-2">
+                      <textarea
+                        value={currentDescription}
+                        className="text-text-1 font-body text-sm leading-relaxed w-full p-1.5 border-2 border-primary rounded-lg focus:outline-none resize-none "
+                        onChange={(e) => setCurrentDescription(e.target.value)}
+                        rows={2}
+                        autoFocus
+                      ></textarea>
+                      {formError && formError.type == "description" && (
+                        <span className="text-sm font-body  text-red-500 ">
+                          {formError.message}
+                        </span>
+                      )}
+                    </div>
                   ) : (
                     <span className="text-text-1 font-body text-sm leading-relaxed">
                       {isExpanded

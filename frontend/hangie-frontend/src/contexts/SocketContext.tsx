@@ -116,7 +116,7 @@ export const SocketProvider = ({ children }) => {
     // 3. ASCOLTA QUANDO I TUOI MESSAGGI ARRIVANO AGLI ALTRI (Doppia spunta per te)
     socket.on("message_arrived", (data) => {
       // notifica
-
+      console.log("messa rrivato a me");
       setCurrentChatData((prevData) => {
         if (!prevData) return prevData;
         return {
@@ -355,27 +355,19 @@ export const SocketProvider = ({ children }) => {
         });
       }
     });
-
-    return () => {
-      console.log("Pulizia socket e rimozione listener...");
-      socket.off("receive_message");
-      socket.off("message_arrived");
-      socket.off("added_new_group");
-      socket.off("edited_field");
-      socket.off("left_group");
-      socket.off("added_participants");
-      socket.off("removed_participant");
-      socket.off("admined_participant");
-      socket.off("give_read");
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, [session?.user?.id, setCurrentChatData, currentGroupData, currentGroup]);
-
-  useEffect(() => {
-    if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
-
-    currentSocket.on("give_read", (data) => {
+    socket.on("sent_event", (data) => {
+      console.log("dati dall'invio eventi al socket", data);
+      const eventMessage = {
+        type: "event",
+        message_id: data.messageDetails.message_id,
+        event_details: data.messageDetails.eventi,
+        isUser: session.user.id == data.messageData.user_id,
+      };
+      setCurrentChatData((prev) => {
+        return [...prev, eventMessage];
+      });
+    });
+    socket.on("give_read", (data) => {
       // notifica
       console.log("DENTRO GIVING READ! ID messaggio:", data.message_id);
       setCurrentChatData((prevData) => {
@@ -389,43 +381,73 @@ export const SocketProvider = ({ children }) => {
       });
     });
     return () => {
-      currentSocket?.off("give_read");
+      console.log("Pulizia socket e rimozione listener...");
+      socket.off("receive_message");
+      socket.off("message_arrived");
+      socket.off("added_new_group");
+      socket.off("edited_field");
+      socket.off("left_group");
+      socket.off("added_participants");
+      socket.off("removed_participant");
+      socket.off("admined_participant");
+      socket.off("give_read");
+      socket.off("sent_event");
+      socket.disconnect();
+      socketRef.current = null;
     };
-  }, [currentSocket, setCurrentChatData, currentChatData?.messaggi?.length]);
+  }, [
+    session?.user?.id,
+    setCurrentChatData,
+    currentGroupData,
+    currentGroup,
+    // currentChatData?.messaggi,
+    // currentChatData?.messaggi?.length,
+  ]);
 
-  useEffect(() => {
-    if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
+  // useEffect(() => {
+  //   if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
 
-    const unreadMessages = currentChatData.messaggi.filter(
-      (m) => !m.isRead && m.user_id !== session.user.id
-    );
+  //   currentSocket.on("give_read", (data) => {
+  //     // notifica
+  //     console.log("DENTRO GIVING READ! ID messaggio:", data.message_id);
+  //     setCurrentChatData((prevData) => {
+  //       if (!prevData) return prevData;
+  //       return {
+  //         ...prevData,
+  //         messaggi: prevData.messaggi.map((m) =>
+  //           m.message_id === data.message_id ? { ...m, isRead: true } : m
+  //         ),
+  //       };
+  //     });
+  //   });
+  //   return () => {
+  //     currentSocket?.off("give_read");
+  //   };
+  // }, [currentSocket, setCurrentChatData, currentChatData?.messaggi?.length]);
 
-    if (unreadMessages.length > 0) {
-      unreadMessages.forEach((m) => {
-        currentSocket.emit(
-          "message_read",
-          m.message_id,
-          session.user.id,
-          currentGroup
-        );
-      });
+  // useEffect(() => {
+  //   if (!currentSocket || !currentGroup || !currentChatData?.messaggi) return;
 
-      // Aggiorno localmente per evitare loop
-      setCurrentChatData((prev) => ({
-        ...prev,
-        messaggi: prev.messaggi.map((m) =>
-          m.user_id !== session?.user?.id && !m.isRead
-            ? { ...m, isRead: true }
-            : m
-        ),
-      }));
-      // Aggiorna localmente per non ri-emettere subito
-    }
-    return () => {
-      currentSocket?.off("message_read");
-    };
-  }, [currentChatData?.messaggi?.length, currentGroup, currentSocket]); // Solo quando cambia
+  //   currentSocket.on("sent_event", (data) => {
+  //     console.log("dati dall'invio eventi al socket", data);
+  //     // setCurrentChatData((prev)=>{
+  //     //   return [...prev,data]
+  //     // })
+  //   });
+  //   return () => {
+  //     currentSocket?.off("sent_event");
+  //   };
+  // }, [
+  //   currentChatData?.messaggi?.length,
+  //   currentGroup,
+  //   currentSocket,
+  //   session?.user?.id,
+  //   setCurrentChatData,
+  //   currentGroupData,
+  //   currentChatData?.messaggi,
+  // ]); // Solo quando cambia
 
+  useEffect(() => {});
   return (
     <SocketContext.Provider value={{ currentSocket, socketRef }}>
       {children}

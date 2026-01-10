@@ -17,7 +17,7 @@ import {
 import React, { useMemo, useState } from "react";
 const MessageEvent = ({ event_details }) => {
   console.log(event_details);
-  const [buttonContent, setButtonContent] = useState(null);
+  // const [buttonContent, setButtonContent] = useState(null);
   const { openModal } = useModal();
   const { session } = useAuth();
   const formatDate = (dateString) => {
