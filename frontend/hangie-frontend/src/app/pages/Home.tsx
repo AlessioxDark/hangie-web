@@ -9,6 +9,7 @@ import { AlertCircle, Calendar, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { supabase } from "../../config/db.js";
+import { useChat } from "@/contexts/ChatContext.js";
 type Utente = {
   nome: string;
   user_id: string;
@@ -37,99 +38,101 @@ type EventDataTypesArray = {
 const EVENTSINPAGE = 12;
 const Home = () => {
   const sliderRef = useRef<HTMLDivElement>(null);
-  const [eventsData, setEventsData] = useState<EventDataTypesArray>({
-    pending: [],
-    accepted: [],
-    refused: [],
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { homeError, isHomeEventsLoading, homeEventsData, setHomeOffset } =
+    useChat();
+  // const [eventsData, setEventsData] = useState<EventDataTypesArray>({
+  //   pending: [],
+  //   accepted: [],
+  //   refused: [],
+  // });
+  // const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [error, setError] = useState<string | null>(null);
-  const [offset, setOffset] = useState<number>(0);
-  const fetchEvents = useCallback(async (): Promise<void> => {
-    if (isLoading) return;
-    try {
-      setError(null);
-      setIsLoading(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-      if (session) {
-        const response = await fetch(
-          "http://localhost:3000/api/events/discover",
-          {
-            method: "POST",
-            body: JSON.stringify({ offset: offset }),
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
-        );
-        if (!response.ok) {
-          console.log(response);
-          setError(
-            response.statusText || "Errore nel caricamento degli eventi"
-          );
-        }
+  // const [error, setError] = useState<string | null>(null);
+  // const [offset, setOffset] = useState<number>(0);
+  // const fetchEvents = useCallback(async (): Promise<void> => {
+  //   if (isLoading) return;
+  //   try {
+  //     setError(null);
+  //     setIsLoading(true);
+  //     const {
+  //       data: { session },
+  //       error,
+  //     } = await supabase.auth.getSession();
+  //     if (session) {
+  //       const response = await fetch(
+  //         "http://localhost:3000/api/events/discover",
+  //         {
+  //           method: "POST",
+  //           body: JSON.stringify({ offset: offset }),
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${session.access_token}`,
+  //           },
+  //         }
+  //       );
+  //       if (!response.ok) {
+  //         console.log(response);
+  //         setError(
+  //           response.statusText || "Errore nel caricamento degli eventi"
+  //         );
+  //       }
 
-        const data = await response.json();
-        console.log(data);
+  //       const data = await response.json();
+  //       console.log(data);
 
-        setEventsData((prevData) => {
-          const mergeAccepted = [...prevData.accepted, ...data.accepted];
+  //       setEventsData((prevData) => {
+  //         const mergeAccepted = [...prevData.accepted, ...data.accepted];
 
-          const dedupAccepted = Array.from(
-            new Map(mergeAccepted.map((item) => [item.event_id, item])).values()
-          );
+  //         const dedupAccepted = Array.from(
+  //           new Map(mergeAccepted.map((item) => [item.event_id, item])).values()
+  //         );
 
-          const mergePending = [...prevData.pending, ...data.pending];
-          const dedupPending = Array.from(
-            new Map(mergePending.map((item) => [item.event_id, item])).values()
-          );
-          const mergeRefused = [...prevData.refused, ...data.refused];
-          const dedupRefused = Array.from(
-            new Map(mergeRefused.map((item) => [item.event_id, item])).values()
-          );
+  //         const mergePending = [...prevData.pending, ...data.pending];
+  //         const dedupPending = Array.from(
+  //           new Map(mergePending.map((item) => [item.event_id, item])).values()
+  //         );
+  //         const mergeRefused = [...prevData.refused, ...data.refused];
+  //         const dedupRefused = Array.from(
+  //           new Map(mergeRefused.map((item) => [item.event_id, item])).values()
+  //         );
 
-          return {
-            pending: dedupPending,
-            accepted: dedupAccepted,
-            refused: dedupRefused, // fai uguale se ti serve
-          };
-        });
-      }
-    } catch (err: any) {
-      console.error("Errore fetch eventi:", err);
-      setError(err.message || "Errore nel caricamento degli eventi");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [offset, isLoading]);
-  useEffect(() => {
-    fetchEvents();
-  }, [offset]);
+  //         return {
+  //           pending: dedupPending,
+  //           accepted: dedupAccepted,
+  //           refused: dedupRefused, // fai uguale se ti serve
+  //         };
+  //       });
+  //     }
+  //   } catch (err: any) {
+  //     console.error("Errore fetch eventi:", err);
+  //     setError(err.message || "Errore nel caricamento degli eventi");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, [offset, isLoading]);
+  // useEffect(() => {
+  //   fetchEvents();
+  // }, [offset]);
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider) return;
 
     const onScroll = () => {
-      if (isLoading) return; // <--- QUESTA RIGA QUI
+      if (isHomeEventsLoading) return; // <--- QUESTA RIGA QUI
       const { scrollHeight, scrollTop, clientHeight } = slider;
       const distanzaDalBasso = scrollHeight - scrollTop - clientHeight;
 
       if (distanzaDalBasso < 540) {
-        setOffset((prevOffset) => prevOffset + EVENTSINPAGE);
+        setHomeOffset((prevOffset) => prevOffset + EVENTSINPAGE);
       }
     };
     slider.addEventListener("scroll", onScroll);
     return () => slider.removeEventListener("scroll", onScroll);
-  }, [isLoading]);
+  }, [isHomeEventsLoading]);
 
   const renderContent = useCallback(
     (type: string) => {
-      if (error) {
+      if (homeError) {
         return (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
@@ -138,9 +141,9 @@ const Home = () => {
             <h3 className="text-lg font-medium text-text-1 mb-2">
               Ops! Qualcosa è andato storto
             </h3>
-            <p className="text-gray-500 mb-6 text-center">{error}</p>
+            <p className="text-gray-500 mb-6 text-center">{homeError}</p>
             <button
-              onClick={() => fetchEvents()}
+              // onClick={() => fetchEvents()}
               className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
             >
               Riprova
@@ -148,7 +151,7 @@ const Home = () => {
           </div>
         );
       }
-      if (isLoading) {
+      if (isHomeEventsLoading) {
         return (
           <div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
             <div className=" rounded-full flex items-center justify-center mb-6">
@@ -166,7 +169,7 @@ const Home = () => {
       if (type == "pending") {
         return (
           <div>
-            {eventsData.pending.length > 0 ? (
+            {homeEventsData.pending.length > 0 ? (
               <div
                 className="grid 
    grid-cols-1          
@@ -176,8 +179,8 @@ const Home = () => {
     gap-4
     2xl:gap-8"
               >
-                {eventsData &&
-                  eventsData.pending.slice(0, 3).map((event) => (
+                {homeEventsData &&
+                  homeEventsData.pending.slice(0, 3).map((event) => (
                     <div className="w-full " key={event.event_id}>
                       <EventCardSuspended {...event} />
                     </div>
@@ -192,7 +195,7 @@ const Home = () => {
       if (type == "accepted") {
         return (
           <div>
-            {eventsData.accepted.length > 0 ? (
+            {homeEventsData.accepted.length > 0 ? (
               <div
                 className="
               grid 
@@ -205,7 +208,7 @@ const Home = () => {
     2xl:gap-8
               "
               >
-                {eventsData.accepted.map((event) => {
+                {homeEventsData.accepted.map((event) => {
                   // const evento = event.evento
                   return (
                     <div key={event.event_id}>
@@ -222,7 +225,12 @@ const Home = () => {
       }
       return null;
     },
-    [fetchEvents, eventsData, error, isLoading]
+    [
+      // fetchEvents,
+      homeEventsData,
+      homeError,
+      isHomeEventsLoading,
+    ]
   );
 
   return (
@@ -259,8 +267,8 @@ const Home = () => {
                   <p className="text-sm 2xl:text-lg font-body text-text-2 leading-4">
                     Hai{" "}
                     <span className=" font-semibold text-primary font-body">
-                      {eventsData.pending.length} invit
-                      {eventsData.pending.length > 1 ? "i" : "o"}
+                      {homeEventsData.pending?.length} invit
+                      {homeEventsData.pending?.length > 1 ? "i" : "o"}
                     </span>{" "}
                     in attesa
                   </p>
@@ -278,8 +286,8 @@ const Home = () => {
                   </h2>
                   <p className="text-sm 2xl:text-lg text-text-2 leading-4 font-body">
                     <span className="font-semibold text-text-1 font-body">
-                      {eventsData.accepted.length} event
-                      {eventsData.accepted.length > 1 ? "i" : "o"}
+                      {homeEventsData.accepted?.length} event
+                      {homeEventsData.accepted?.length > 1 ? "i" : "o"}
                     </span>{" "}
                     nelle prossime settimane
                   </p>

@@ -1,8 +1,15 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { supabase } from "../config/db.js";
 import { useMobileLayoutChat } from "./MobileLayoutChatContext.js";
+import { useScreen } from "./ScreenContext.js";
 type UUID = string;
 interface GroupData {
   nome: string;
@@ -47,24 +54,29 @@ interface Message {
   user: User;
   content: string;
 }
-type ChatCache = {
-  [groupId: string]: GroupData;
-};
+// type ChatCache = {
+//   [groupId: string]: GroupData;
+// };
 export const ChatContext = createContext({
-  // currentChatData: null, // dati chat corrente
-  // setCurrentChatData: (arg) => arg, // impostare dati chat
-  // currentGroup: null, // id chat corrente
-  // setCurrentGroup: (arg) => arg, // impostare id chat
-  // currentGroupData: {},
-  // setCurrentGroupData: (arg) => arg,
-  // groupsData: [],
-  // error: null,
-  // isGroupsLoading: false,
-  // isChatLoading: false,
-  // isEventsLoading: false,
-  // groupEventsData: [],
-  // setGroupsData: (arg) => arg,
-  // fetchGroups: () => {},
+  currentChatData: null, // dati chat corrente
+  setCurrentChatData: (arg) => arg, // impostare dati chat
+  currentGroup: null, // id chat corrente
+  setCurrentGroup: (arg) => arg, // impostare id chat
+  currentGroupData: {},
+  setCurrentGroupData: (arg) => arg,
+  groupsData: [],
+  error: null,
+  isGroupsLoading: false,
+  isChatLoading: false,
+  isEventsLoading: false,
+  groupEventsData: [],
+  setGroupsData: (arg) => arg,
+  fetchGroups: () => {},
+  messagesMap: null,
+  setMessagesMap: (arg) => arg,
+  homeError: null,
+  homeEventsData: [],
+  homeOffset: 0,
 });
 
 export const useChat = () => {
@@ -86,15 +98,92 @@ export const ChatProvider = ({ children }) => {
   const [currentGroupData, setCurrentGroupData] = useState<GroupData | null>(
     null
   );
+  const [messagesMap, setMessagesMap] = useState({});
+
   const [groupsData, setGroupsData] = useState<GroupData[] | null>(null);
   const [error, setError] = useState(null);
+  const [isHomeEventsLoading, setIsHomeEventsLoading] =
+    useState<boolean>(false); // NO {}, usa false
+  const [homeOffset, setHomeOffset] = useState(0);
+  const [homeError, setHomeError] = useState<string | null>(null); // NO {}, usa null
+  const [homeEventsData, setHomeEventsData] = useState<{
+    pending: any[];
+    accepted: any[];
+    refused: any[];
+  }>({
+    pending: [],
+    accepted: [],
+    refused: [],
+  });
+
   const [groupEventsData, setGroupEventsData] = useState(null);
   const [isGroupsLoading, setIsGroupsLoading] = useState(false); // Loader specifico per Sidebar
   const [isChatLoading, setIsChatLoading] = useState(false); // Loader specifico per Messaggi
   const [isEventsLoading, setIsEventsLoading] = useState(false); // Loader specifico per Messaggi
-  const [chatsCache, setChatsCache] = useState<ChatCache>({}); // Loader specifico per Messaggi
+  // const [chatsCache, setChatsCache] = useState<ChatCache>({}); // Loader specifico per Messaggi
   const { setMobileView } = useMobileLayoutChat();
+  const { currentScreen } = useScreen();
   const { session } = useAuth();
+  const fetchEvents = useCallback(async (): Promise<void> => {
+    // if (isHomeEventsLoading) return;
+
+    // 2. Se abbiamo già i dati per l'offset 0, non ricaricare tutto (evita il flickering)
+    // Sblocca la fetch solo se l'offset è aumentato (caricamento pagina successiva)
+    // if (homeOffset === 0 && homeEventsData.accepted.length > 0) return;
+    try {
+      setHomeError(null);
+      setIsHomeEventsLoading(true);
+      console.log("c'è la sessione?", session);
+
+      console.log("sessione per eventi home", session);
+      const response = await fetch(
+        "http://localhost:3000/api/events/discover",
+        {
+          method: "POST",
+          body: JSON.stringify({ offset: homeOffset }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        console.log(response);
+        setError(response.statusText || "Errore nel caricamento degli eventi");
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      setHomeEventsData((prevData) => {
+        const mergeAccepted = [...prevData.accepted, ...data.accepted];
+
+        const dedupAccepted = Array.from(
+          new Map(mergeAccepted.map((item) => [item.event_id, item])).values()
+        );
+
+        const mergePending = [...prevData.pending, ...data.pending];
+        const dedupPending = Array.from(
+          new Map(mergePending.map((item) => [item.event_id, item])).values()
+        );
+        const mergeRefused = [...prevData.refused, ...data.refused];
+        const dedupRefused = Array.from(
+          new Map(mergeRefused.map((item) => [item.event_id, item])).values()
+        );
+
+        return {
+          pending: dedupPending,
+          accepted: dedupAccepted,
+          refused: dedupRefused, // fai uguale se ti serve
+        };
+      });
+    } catch (err: any) {
+      console.error("Errore fetch eventi:", err);
+      setError(err.message || "Errore nel caricamento degli eventi");
+    } finally {
+      setIsHomeEventsLoading(false);
+    }
+  }, [homeOffset, isHomeEventsLoading, session]);
   const fetchGroupEvents = async () => {
     console.log("Fetch inziata");
     if (isEventsLoading) return;
@@ -169,9 +258,9 @@ export const ChatProvider = ({ children }) => {
   };
   const fetchChat = async (groupId: UUID) => {
     if (!groupId) return;
-    if (chatsCache[groupId]) {
+    if (messagesMap[groupId]) {
       console.log("Dati in cache: li mostro subito");
-      setCurrentChatData(chatsCache[groupId]);
+      setCurrentChatData(messagesMap[groupId]);
     } else {
       setIsChatLoading(true);
     }
@@ -214,12 +303,9 @@ export const ChatProvider = ({ children }) => {
             ...groupData,
             messaggi: mappedMessages,
           });
-          setChatsCache((prev) => ({
+          setMessagesMap((prev) => ({
             ...prev,
-            [groupId]: {
-              ...groupData,
-              messaggi: mappedMessages,
-            },
+            [groupId]: [...mappedMessages],
           }));
           setMobileView("chat");
         } else {
@@ -241,10 +327,62 @@ export const ChatProvider = ({ children }) => {
       fetchChat(currentGroup);
     }
   }, [currentGroup]);
-  useEffect(() => {
-    fetchGroups();
-  }, []);
 
+  const fetchFirstGroup = async () => {
+    if (isChatLoading) return;
+    console.log("sto fetchando first group");
+    try {
+      setError(null);
+      setIsChatLoading(true);
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      if (session) {
+        const response = await fetch(`http://localhost:3000/api/groups/`, {
+          method: "GET",
+          // body: JSON.stringify({ offset: offset }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+        if (!response.ok) {
+          console.log(response);
+          setError(
+            response.statusText || "Errore nel caricamento degli eventi"
+          );
+        }
+
+        const data = await response.json();
+        console.log(data);
+
+        setCurrentGroup(data[0].group_id);
+        setCurrentGroupData(data[0]);
+        console.log("ottenuti dati");
+      }
+    } catch (err: any) {
+      console.error("Errore fetch eventi:", err);
+      setError(err.message || "Errore nel caricamento degli eventi");
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (currentGroup == null && currentScreen != "xs") {
+      fetchFirstGroup();
+    }
+  }, []);
+  useEffect(() => {
+    if (session) {
+      fetchGroups();
+    }
+  }, [session]);
+  useEffect(() => {
+    if (session) {
+      fetchEvents();
+    }
+  }, [homeOffset, session]);
   useEffect(() => {
     console.log("fetching...");
     if (currentGroup !== null) fetchGroupEvents();
@@ -266,6 +404,12 @@ export const ChatProvider = ({ children }) => {
         isEventsLoading,
         setGroupsData,
         fetchGroups,
+        messagesMap,
+        setMessagesMap,
+        homeEventsData,
+        homeError,
+        isHomeEventsLoading,
+        setHomeOffset,
       }}
     >
       {children}

@@ -1,4 +1,5 @@
 import React, {
+  Component,
   createContext,
   useContext,
   useEffect,
@@ -9,15 +10,37 @@ import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useChat } from "./ChatContext";
 
+type UUID = string;
+interface User {
+  user_id: UUID;
+  nome: string;
+  handle: string;
+  profile_pic: string | null;
+}
+interface Participant {
+  correlation_id: UUID;
+  role: "admin" | "member";
+  joinedAt: string;
+  group_id: UUID;
+  user: User;
+}
+interface GroupData {
+  nome: string;
+  partecipanti_gruppo: Participant[];
+  group_id: UUID;
+  descrizione: string;
+  createdBy: UUID;
+  created_at: string;
+  group_cover_img: string | null;
+  event_id: UUID | null;
+  updated_at: string | null;
+}
 const SocketContext = createContext({
-  socketRef: null,
   currentSocket: null,
 });
 
 export const useSocket = () => {
   const context = useContext(SocketContext);
-
-  // Si può aggiungere un check per assicurarsi che l'hook venga usato all'interno del Provider
   if (context === undefined) {
     throw new Error(
       "useSocket deve essere usato all'interno di un ChatProvider"
@@ -26,81 +49,128 @@ export const useSocket = () => {
 
   return context;
 };
-
-export const SocketProvider = ({ children }) => {
+interface SocketProps {
+  children: Component;
+}
+export const SocketProvider = ({ children }: SocketProps) => {
   const [currentSocket, setCurrentSocket] = useState(null); // Usiamo lo stato invece di useRef per la disponibilità
   const {
     setCurrentChatData,
     currentGroup,
-    currentChatData,
     currentGroupData,
     setGroupsData,
     groupsData,
     setCurrentGroupData,
+    setMessagesMap,
   } = useChat();
   const { session } = useAuth();
-  const socketRef = useRef(null);
+
+  const currentGroupDataRef = useRef<null | GroupData>(null);
+
+  useEffect(() => {
+    currentGroupDataRef.current = currentGroupData;
+  }, [currentGroupData]);
+
   const SERVER_URL = "http://localhost:3000";
   useEffect(() => {
     if (!session?.user?.id) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
       return;
     }
 
     const socket = io(SERVER_URL);
     socket.on("connect", () => {
       console.log("Socket.IO Connesso! ID:", socket.id);
-      socketRef.current = socket;
+      socket.emit("identify_user", session.user.id);
       setCurrentSocket(socket); // Questo scatena il re-render dei figli
     });
-    socket.emit("identify_user", session.user.id);
-    // ASCOLTATORE GLOBALE
     socket.on("receive_message", (data) => {
       console.log("Messaggio intercettato globalmente:", data);
 
       console.log("sto per aggiornare");
       const isMe = data.sender_id === session?.user?.id;
+      const lastMessage = {
+        message_id: data.message_id,
+        content: data.message,
+        group_id: data.group_id,
+        user_id: data.sender_id,
+        sent_at: Date.now(),
+        isUser: isMe,
+        isSent: !isMe, // Più pulito: se non sono io, è arrivato. Se sono io, aspetto conferma.
+        isRead: false,
+        utenti: data.sender,
+      };
+      setGroupsData((prev) =>
+        prev.map((g) =>
+          String(g.group_id) === data.group_id
+            ? {
+                ...g,
+                ultimoMessaggio: lastMessage,
+                updated_at: new Date().toISOString(),
+              }
+            : g
+        )
+      );
+      setMessagesMap((messMap) => {
+        const existingMessages = messMap[data.group_id] || [];
+        console.log("exmess", existingMessages);
+        // Protezione anti-duplicati anche qui
 
-      setCurrentChatData((prevData) => {
-        if (!prevData) {
-          console.log("Nessuna chat aperta (prevData è null)");
-          return prevData;
-        }
-        // Controllo fondamentale: la chat aperta è la stessa del messaggio in arrivo?
-        // Usiamo String() per evitare conflitti tra tipi Number e String
-        const currentId = String(prevData.group_id);
-        const incomingId = String(data.group_id);
-        if (!prevData || String(prevData.group_id) !== String(data.group_id))
-          return prevData;
+        const newMessage = {
+          message_id: data.message_id,
+          content: data.message,
+          group_id: data.group_id,
+          user_id: data.sender_id,
+          sent_at: Date.now(),
+          isUser: isMe,
+          isSent: !isMe, // Più pulito: se non sono io, è arrivato. Se sono io, aspetto conferma.
+          isRead: false,
+          utenti: data.sender,
+        };
 
-        // BLOCCA DUPLICATI: Se il messaggio esiste già (perché lo hai inviato tu ottimisticamente), non aggiungerlo
-        if (prevData.messaggi.some((m) => m.message_id === data.message_id))
-          return prevData;
-        console.log(
-          `Confronto ID: Locale(${currentId}) vs In arrivo(${incomingId})`
-        );
-        // Aggiungiamo il messaggio all'array
         return {
-          ...prevData,
-          messaggi: [
-            ...prevData.messaggi,
-            {
-              message_id: data.message_id,
-              content: data.message,
-              group_id: data.group_id,
-              user_id: data.sender_id,
-              sent_at: Date.now(),
-              isUser: isMe,
-              isSent: isMe ? false : true, // Se è mio, aspetto la conferma (message_arrived). Se è altrui, per me è già arrivato.
-              isRead: false,
-              utenti: data.sender,
-            },
-          ],
+          ...messMap,
+          [data.group_id]: [...existingMessages, newMessage],
         };
       });
+      if (data.group_id == currentGroup) {
+        setCurrentChatData((prevData) => {
+          if (!prevData) {
+            console.log("Nessuna chat aperta (prevData è null)");
+            return prevData;
+          }
+          // Controllo fondamentale: la chat aperta è la stessa del messaggio in arrivo?
+          // Usiamo String() per evitare conflitti tra tipi Number e String
+          const currentId = String(prevData.group_id);
+          const incomingId = String(data.group_id);
+          if (!prevData || String(prevData.group_id) !== String(data.group_id))
+            return prevData;
+
+          // BLOCCA DUPLICATI: Se il messaggio esiste già (perché lo hai inviato tu ottimisticamente), non aggiungerlo
+          if (prevData.messaggi.some((m) => m.message_id === data.message_id))
+            return prevData;
+          console.log(
+            `Confronto ID: Locale(${currentId}) vs In arrivo(${incomingId})`
+          );
+          // Aggiungiamo il messaggio all'array
+          return {
+            ...prevData,
+            messaggi: [
+              ...prevData.messaggi,
+              {
+                message_id: data.message_id,
+                content: data.message,
+                group_id: data.group_id,
+                user_id: data.sender_id,
+                sent_at: Date.now(),
+                isUser: isMe,
+                isSent: !isMe,
+                isRead: false,
+                utenti: data.sender,
+              },
+            ],
+          };
+        });
+      }
       console.log("sono me?", isMe);
       if (!isMe) {
         console.log("non sono me faccio sent");
@@ -117,62 +187,56 @@ export const SocketProvider = ({ children }) => {
     socket.on("message_arrived", (data) => {
       // notifica
       console.log("messa rrivato a me");
-      setCurrentChatData((prevData) => {
-        if (!prevData) return prevData;
+      setMessagesMap((messMap) => {
         return {
-          ...prevData,
-          messaggi: prevData.messaggi.map((m) =>
-            m.message_id === data.message_id ? { ...m, isSent: true } : m
-          ),
+          ...messMap,
+          [data.group_id]: messMap[data.group_id]?.map((mess) => {
+            return mess.message_id === data.message_id
+              ? { ...mess, isSent: true }
+              : mess;
+          }),
         };
       });
-    });
-
-    socket.on(
-      "added_new_group",
-      (groupId, data, participants, imgUrl, sender) => {
-        // notifica
-        console.log(data);
-        const nuoviPartecipanti = participants.map((p) => {
+      if (currentGroup == data.group_id) {
+        setCurrentChatData((prevData) => {
+          if (!prevData) return prevData;
           return {
-            utenti: { nome: p.nome, handle: p.handle, user_id: p.user_id },
-            ...p,
+            ...prevData,
+            messaggi: prevData.messaggi.map((m) =>
+              m.message_id === data.message_id ? { ...m, isSent: true } : m
+            ),
           };
         });
-        console.log("aggiorno data perchè intercettato", {
-          group_id: groupId,
-          group_cover_img: imgUrl,
-          ...data.groupData,
-          partecipanti_gruppo: nuoviPartecipanti,
-        });
-
-        setGroupsData((prev) => {
-          return [
-            ...prev,
-            {
-              group_id: groupId,
-              group_cover_img: imgUrl,
-              ...data.groupData,
-              partecipanti_gruppo: nuoviPartecipanti,
-            },
-          ];
-        });
-
-        // participants.forEach((p) => {
-        //   socket.to.emit("new_notification", {
-        //     type: "new_group",
-        //     sender: sender,
-        //     receiver: p,
-        //     group_id: groupId,
-        //     // messaggio: { content: message },
-        //     gruppo: data,
-        //     user_id: p.partecipante_id, // Il client filtrerà se è per lui
-        //     created_at: new Date(),
-        //     is_read: false,
-        //   });
-        // });
       }
-    );
+    });
+
+    socket.on("added_new_group", (groupId, data, participants, imgUrl) => {
+      console.log(data);
+      const nuoviPartecipanti = participants.map((p) => {
+        return {
+          utenti: { nome: p.nome, handle: p.handle, user_id: p.user_id },
+          ...p,
+        };
+      });
+      console.log("aggiorno data perchè intercettato", {
+        group_id: groupId,
+        group_cover_img: imgUrl,
+        ...data.groupData,
+        partecipanti_gruppo: nuoviPartecipanti,
+      });
+
+      setGroupsData((prev) => {
+        return [
+          ...prev,
+          {
+            group_id: groupId,
+            group_cover_img: imgUrl,
+            ...data.groupData,
+            partecipanti_gruppo: nuoviPartecipanti,
+          },
+        ];
+      });
+    });
 
     socket.on("left_group", (groupId, userId) => {
       // notifica
@@ -370,15 +434,28 @@ export const SocketProvider = ({ children }) => {
     socket.on("give_read", (data) => {
       // notifica
       console.log("DENTRO GIVING READ! ID messaggio:", data.message_id);
-      setCurrentChatData((prevData) => {
-        if (!prevData) return prevData;
+
+      setMessagesMap((messMap) => {
         return {
-          ...prevData,
-          messaggi: prevData.messaggi.map((m) =>
-            m.message_id === data.message_id ? { ...m, isRead: true } : m
-          ),
+          ...messMap,
+          [data.group_id]: messMap[data.group_id]?.map((mess) => {
+            return mess.message_id === data.message_id
+              ? { ...mess, isRead: true }
+              : mess;
+          }),
         };
       });
+      if (currentGroup == data.group_id) {
+        setCurrentChatData((prevData) => {
+          if (!prevData) return prevData;
+          return {
+            ...prevData,
+            messaggi: prevData.messaggi.map((m) =>
+              m.message_id === data.message_id ? { ...m, isRead: true } : m
+            ),
+          };
+        });
+      }
     });
     return () => {
       console.log("Pulizia socket e rimozione listener...");
@@ -393,20 +470,12 @@ export const SocketProvider = ({ children }) => {
       socket.off("give_read");
       socket.off("sent_event");
       socket.disconnect();
-      socketRef.current = null;
     };
-  }, [
-    session?.user?.id,
-    setCurrentChatData,
-    currentGroupData,
-    currentGroup,
-    // currentChatData?.messaggi,
-    // currentChatData?.messaggi?.length,
-  ]);
+  }, [session?.user?.id, setCurrentChatData, currentGroupData, currentGroup]);
 
   useEffect(() => {});
   return (
-    <SocketContext.Provider value={{ currentSocket, socketRef }}>
+    <SocketContext.Provider value={{ currentSocket }}>
       {children}
     </SocketContext.Provider>
   );

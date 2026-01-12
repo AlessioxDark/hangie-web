@@ -18,117 +18,12 @@ const LayoutChatDesktop = ({}) => {
     setCurrentGroupData,
     currentChatData,
     setCurrentChatData,
+    error,
+    isChatLoading,
   } = useChat();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<null | string>("");
 
-  const fetchChat = async () => {
-    if (isLoading) return;
-    try {
-      setError(null);
-      setIsLoading(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-      if (session) {
-        const response = await fetch(
-          `http://localhost:3000/api/groups/${currentGroup}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          setError(
-            errorData.error?.message ||
-              response.statusText ||
-              "Errore nel caricamento della chat"
-          );
-          return;
-        }
-
-        const result = await response.json();
-        const groupData = result;
-        console.log(result);
-        if (groupData) {
-          const mappedMessages = groupData.messaggi.map((mess) => ({
-            ...mess,
-            isUser: mess.user_id === session.user.id,
-          }));
-
-          setCurrentChatData({
-            ...groupData,
-            messaggi: mappedMessages,
-          });
-        } else {
-          setError("Dati del gruppo non trovati.");
-        }
-      }
-    } catch (err: any) {
-      console.error("Errore fetch eventi:", err);
-      setError(err.message || "Errore nel caricamento degli eventi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const fetchFirstGroup = async () => {
-    if (isLoading) return;
-    console.log("sto fetchando first group");
-    try {
-      setError(null);
-      setIsLoading(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-      if (session) {
-        const response = await fetch(`http://localhost:3000/api/groups/`, {
-          method: "GET",
-          // body: JSON.stringify({ offset: offset }),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-        if (!response.ok) {
-          console.log(response);
-          setError(
-            response.statusText || "Errore nel caricamento degli eventi"
-          );
-        }
-
-        const data = await response.json();
-        console.log(data);
-
-        setCurrentGroup(data[0].group_id);
-        setCurrentGroupData(data[0]);
-        console.log("ottenuti dati");
-      }
-    } catch (err: any) {
-      console.error("Errore fetch eventi:", err);
-      setError(err.message || "Errore nel caricamento degli eventi");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  useEffect(() => {
-    if (currentGroup != null) {
-      fetchChat();
-    }
-  }, [currentGroup]);
-  useEffect(() => {
-    if (currentGroup == null) {
-      fetchFirstGroup();
-    }
-  }, []);
   const renderContent = useCallback(() => {
-    if (isLoading) {
+    if (isChatLoading) {
       return (
         <div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">
           <div className=" rounded-full flex items-center justify-center mb-6">
@@ -154,7 +49,7 @@ const LayoutChatDesktop = ({}) => {
           </h3>
           <p className="text-gray-500 mb-6 text-center text-lg">{error}</p>
           <button
-            onClick={() => fetchChat()}
+            // onClick={() => fetchChat()}
             className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
           >
             Riprova
@@ -169,17 +64,17 @@ const LayoutChatDesktop = ({}) => {
       // 	return <Chats {...chat} />;
       // });
 
-      return <Chats messaggi={currentChatData?.messaggi} />;
+      return <Chats />;
     }
     return <p>c'è stato un errore</p>;
   }, [
     currentChatData,
-    fetchChat,
+    // fetchChat,
     currentGroupData,
     currentGroup,
     error,
-    isLoading,
-    fetchFirstGroup,
+    isChatLoading,
+    // fetchFirstGroup,
   ]);
   return (
     <div className="h-screen w-full flex flex-row">

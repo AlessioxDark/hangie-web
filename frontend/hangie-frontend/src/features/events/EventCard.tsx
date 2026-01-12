@@ -3,6 +3,8 @@ import MapIcon from "@/assets/icons/MapIcon";
 import ParticipantsIcon from "@/assets/icons/ParticipantsIcon";
 import ProfileIcon from "@/components/ProfileIcon";
 import { useModal } from "@/contexts/ModalContext";
+import { useScreen } from "@/contexts/ScreenContext";
+import EventPageMobile from "./EventPageMobile";
 
 /*
 todo
@@ -33,6 +35,7 @@ const EventCard = ({
     : "";
 
   const { openModal } = useModal();
+  const { currentScreen } = useScreen();
   return (
     <article
       className="flex flex-col  border border-[#E2E8F0] rounded-xl cursor-pointer group
@@ -41,7 +44,12 @@ const EventCard = ({
 		     transition-all duration-300
 	 "
       onClick={() => {
-        openModal({ data: { event_id: event_id }, type: "EVENT_MODAL" });
+        if (currentScreen == "2xl") {
+          openModal({ data: { event_id: event_id }, type: "EVENT_MODAL" });
+        }
+        if (currentScreen == "xs") {
+          return <EventPageMobile />;
+        }
       }}
     >
       <img

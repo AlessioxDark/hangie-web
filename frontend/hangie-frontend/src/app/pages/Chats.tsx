@@ -14,13 +14,14 @@ import { Calendar } from "lucide-react";
 import CalendarIcon from "@/assets/icons/CalendarIcon.js";
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon.js";
 import { useSocket } from "@/contexts/SocketContext.js";
+import ChatsEvents from "@/features/chats/ChatsEvents.js";
 const Chats = () => {
   const { currentGroupData, setCurrentGroup, currentChatData, currentGroup } =
     useChat();
   const messaggi = currentChatData?.messaggi;
   const { currentSocket } = useSocket();
   const [chatInput, setChatInput] = useState<string>("");
-  // const [showEvents, setShowEvents] = useState(false);
+  const [showEvents, setShowEvents] = useState(false);
   const messagesEndRef = useRef(null);
   const { currentScreen } = useScreen();
   const { setMobileView } = useMobileLayoutChat();
@@ -72,7 +73,7 @@ const Chats = () => {
   };
   useEffect(() => {
     if (currentChatData) {
-      console.log("controllo messaggi non letti");
+      console.log("controllo messaggi non letti", currentChatData.messaggi);
       const messaggiDaLeggere = currentChatData?.messaggi?.filter(
         (m) => !m.isRead && m.user_id !== session?.user?.id
       );
@@ -147,7 +148,12 @@ const Chats = () => {
         </div>
         <div className="flex items-center gap-1">
           <button
-            onClick={() => setMobileView("events")}
+            onClick={() => {
+              setMobileView("events");
+              if (currentScreen == "xl") {
+                setShowEvents(true);
+              }
+            }}
             className="relative p-2.5 rounded-full bg-[#D9EAFF] active:bg-indigo-100 transition-all group"
             title="Vedi Eventi"
           >
@@ -157,34 +163,50 @@ const Chats = () => {
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto  relative">
-        {/* <div className="fixed top-1/2 right-3 p-1 bg-primary flex items-center justify-center rounded-full hover:bg-primary/80 cursor-pointer z-20">
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto  relative">
+          {/* <div className="fixed top-1/2 right-3 p-1 bg-primary flex items-center justify-center rounded-full hover:bg-primary/80 cursor-pointer z-20">
           <ChevronLeft color={"#ffffff"} />
         </div> */}
-        <div className="flex flex-col gap-1.5 2xl:gap-2 mt-8  px-2 2xl:px-8">
-          {messaggi.map((mess) => {
-            if (mess.type == "event") {
+          <div className="flex flex-col gap-1.5 2xl:gap-2 mt-8  px-2 2xl:px-8">
+            {messaggi.map((mess) => {
+              if (mess.type == "event") {
+                return (
+                  <div
+                    className={`w-full flex ${mess.isUser && "justify-end"}`}
+                  >
+                    <MessageEvent {...mess} />
+                  </div>
+                );
+              }
               return (
                 <div className={`w-full flex ${mess.isUser && "justify-end"}`}>
-                  <MessageEvent {...mess} />
+                  <MessageCard {...mess} />
                 </div>
               );
-            }
-            return (
-              <div className={`w-full flex ${mess.isUser && "justify-end"}`}>
-                <MessageCard {...mess} />
-              </div>
-            );
-          })}
-          <div ref={messagesEndRef}></div>
+            })}
+            <div ref={messagesEndRef}></div>
+          </div>
         </div>
+        <ChatInput
+          chatInputRef={chatInputRef}
+          sendMessage={sendMessage}
+          inputValue={chatInput}
+          setInputValue={setChatInput}
+        />
       </div>
-      <ChatInput
-        chatInputRef={chatInputRef}
-        sendMessage={sendMessage}
-        inputValue={chatInput}
-        setInputValue={setChatInput}
-      />
+      {showEvents && (
+        <>
+          <div
+            className="absolute inset-0 bg-black/40 z-[100] backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
+            onClick={() => setShowEvents(false)} // Chiude cliccando fuori
+          />
+
+          <div className="absolute right-0 top-0 h-full w-[85%] md:w-[400px] bg-white z-[101] shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 ease-out">
+            <ChatsEvents />
+          </div>
+        </>
+      )}
     </div>
   );
 };

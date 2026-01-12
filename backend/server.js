@@ -150,7 +150,10 @@ io.on("connection", (socket) => {
 
     if (count == 0) {
       partecipantiDB.forEach((p) => {
-        io.to(p.partecipante_id).emit("message_arrived", { message_id });
+        io.to(p.partecipante_id).emit("message_arrived", {
+          message_id,
+          group_id: room,
+        });
       });
     }
   });
@@ -198,7 +201,10 @@ io.on("connection", (socket) => {
       console.log("il conto è zero mando read", room);
       partecipantiDB.forEach((p) => {
         console.log("mando read a", p.partecipante_id);
-        io.to(p.partecipante_id).emit("give_read", { message_id });
+        io.to(p.partecipante_id).emit("give_read", {
+          message_id,
+          group_id: room,
+        });
       });
     }
   });

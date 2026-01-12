@@ -44,7 +44,7 @@ const ChatsSidebar = () => {
         </div>
       );
     }
-    if (groupsData.length == 0) {
+    if (groupsData?.length == 0) {
       return (
         <div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
