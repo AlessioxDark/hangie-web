@@ -23,10 +23,10 @@ function App() {
     <BrowserRouter>
       <AuthContextProvider>
         <MobileLayoutChatProvider>
-          <ChatProvider>
-            <SocketProvider>
-              <NotificationProvider>
-                <ScreenProvider>
+          <ScreenProvider>
+            <ChatProvider>
+              <SocketProvider>
+                <NotificationProvider>
                   <ModalProvider>
                     <Routes>
                       <Route path="/signup" element={<SignUp />}></Route>
@@ -65,10 +65,10 @@ function App() {
                     </Routes>
                     <ModalHandler />
                   </ModalProvider>
-                </ScreenProvider>
-              </NotificationProvider>
-            </SocketProvider>
-          </ChatProvider>
+                </NotificationProvider>
+              </SocketProvider>
+            </ChatProvider>
+          </ScreenProvider>
         </MobileLayoutChatProvider>
       </AuthContextProvider>
     </BrowserRouter>

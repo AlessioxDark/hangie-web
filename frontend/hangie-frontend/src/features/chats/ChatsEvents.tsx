@@ -12,7 +12,7 @@ import ChevronLeft from "@/assets/icons/ChevronLeft";
 const FILTER_TYPES = ["accepted", "pending", "archive"];
 const ChatsEvents = () => {
   const [currentFilter, setCurrentFilter] = useState("");
-  const { isEventsLoading, groupEventsData } = useChat();
+  const { loading, groupEventsData } = useChat();
   const [query, setQuery] = useState("");
   const { session } = useAuth();
   const { currentScreen } = useScreen();

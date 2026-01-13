@@ -93,7 +93,7 @@ const Chats = () => {
         });
       }
     }
-  }, [currentChatData.messaggi.length, currentSocket]);
+  }, [currentChatData.messaggi?.length, currentSocket]);
   console.log(currentGroupData);
   return (
     <div className="w-full h-full flex flex-col">
@@ -163,38 +163,36 @@ const Chats = () => {
           </button>
         </div>
       </div>
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto  relative">
-          {/* <div className="fixed top-1/2 right-3 p-1 bg-primary flex items-center justify-center rounded-full hover:bg-primary/80 cursor-pointer z-20">
+
+      <div className="flex-1 overflow-y-auto  relative">
+        {/* <div className="fixed top-1/2 right-3 p-1 bg-primary flex items-center justify-center rounded-full hover:bg-primary/80 cursor-pointer z-20">
           <ChevronLeft color={"#ffffff"} />
         </div> */}
-          <div className="flex flex-col gap-1.5 2xl:gap-2 mt-8  px-2 2xl:px-8">
-            {messaggi.map((mess) => {
-              if (mess.type == "event") {
-                return (
-                  <div
-                    className={`w-full flex ${mess.isUser && "justify-end"}`}
-                  >
-                    <MessageEvent {...mess} />
-                  </div>
-                );
-              }
+        <div className="flex flex-col gap-1.5 2xl:gap-2 mt-8  px-2 2xl:px-8">
+          {messaggi?.map((mess) => {
+            if (mess.type == "event") {
               return (
                 <div className={`w-full flex ${mess.isUser && "justify-end"}`}>
-                  <MessageCard {...mess} />
+                  <MessageEvent {...mess} />
                 </div>
               );
-            })}
-            <div ref={messagesEndRef}></div>
-          </div>
+            }
+            return (
+              <div className={`w-full flex ${mess.isUser && "justify-end"}`}>
+                <MessageCard {...mess} />
+              </div>
+            );
+          })}
+          <div ref={messagesEndRef}></div>
         </div>
-        <ChatInput
-          chatInputRef={chatInputRef}
-          sendMessage={sendMessage}
-          inputValue={chatInput}
-          setInputValue={setChatInput}
-        />
       </div>
+      <ChatInput
+        chatInputRef={chatInputRef}
+        sendMessage={sendMessage}
+        inputValue={chatInput}
+        setInputValue={setChatInput}
+      />
+
       {showEvents && (
         <>
           <div

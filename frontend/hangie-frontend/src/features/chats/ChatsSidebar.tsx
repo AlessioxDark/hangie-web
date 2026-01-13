@@ -7,10 +7,10 @@ import { useChat } from "@/contexts/ChatContext.js";
 import RenderEmptyState from "@/components/renderEmptyState";
 const ChatsSidebar = () => {
   const { setMobileView } = useMobileLayoutChat();
-  const { groupsData, error, isGroupsLoading, fetchGroups } = useChat();
+  const { groupsData, error, fetchGroups, loading } = useChat();
 
   const renderContent = useCallback(() => {
-    if (isGroupsLoading) {
+    if (loading.groups) {
       return (
         <div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">
           <div className=" rounded-full flex items-center justify-center mb-6">
@@ -25,7 +25,8 @@ const ChatsSidebar = () => {
         </div>
       );
     }
-    if (error) {
+    if (error && error.groups) {
+      console.log("errore i ngroups", error.groups);
       return (
         <div className="flex flex-col items-center justify-center py-20">
           <div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
@@ -34,7 +35,7 @@ const ChatsSidebar = () => {
           <h3 className="text-lg font-medium text-text-1 mb-2">
             Ops! Qualcosa è andato storto
           </h3>
-          <p className="text-gray-500 mb-6 text-center">{error}</p>
+          {/* <p className="text-gray-500 mb-6 text-center">{error}</p> */}
           <button
             onClick={() => fetchGroups()}
             className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
@@ -62,7 +63,7 @@ const ChatsSidebar = () => {
         return <GroupCard index={i} {...group} />;
       });
     }
-  }, [error, isGroupsLoading, groupsData, fetchGroups]);
+  }, [error, loading.groups, groupsData, fetchGroups]);
   return (
     <div className="h-screen bg-bg-1 xl:w-5/12 2xl:w-1/4">
       <div className="flex flex-col xl:gap-0 2xl:gap-12">

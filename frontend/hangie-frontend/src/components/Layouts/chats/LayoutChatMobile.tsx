@@ -1,27 +1,20 @@
-import React, { useCallback, useEffect, useState } from "react";
-import LayoutMobile from "../mobile/LayoutMobile";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
-import { supabase } from "../../../config/db.js";
 import ChatsSidebar from "@/features/chats/ChatsSidebar";
-import {
-  MobileLayoutChatProvider,
-  useMobileLayoutChat,
-} from "@/contexts/MobileLayoutChatContext.js";
+import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
 import ChatsEvents from "@/features/chats/ChatsEvents.js";
 import Chats from "@/app/pages/Chats.js";
 import BottomNav from "@/app/pages/mobile/BottomNav.js";
 import CreateEventForm from "@/features/events/CreateEventForm.js";
 import CreateGroupForm from "@/features/chats/CreateGroupForm.js";
-import AddParticipantsGroup from "@/features/chats/AddParticipantsGroup.js";
 import GroupDetails from "@/features/chats/GroupDetails.js";
 const LayoutChatMobile = () => {
-  const { error, isChatLoading, fetchGroups } = useChat();
+  const { error, fetchGroups, loading } = useChat();
 
   const { mobileView } = useMobileLayoutChat();
 
   const renderContent = () => {
-    if (isChatLoading) {
+    if (loading.chat) {
       return (
         <div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">
           <div className=" rounded-full flex items-center justify-center mb-6">
@@ -36,7 +29,7 @@ const LayoutChatMobile = () => {
         </div>
       );
     }
-    if (error) {
+    if (error && error.groups) {
       return (
         <div className="flex flex-col items-center justify-center py-20">
           <div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
@@ -45,7 +38,7 @@ const LayoutChatMobile = () => {
           <h3 className="text-2xl font-medium text-text-1 mb-2">
             Ops! Qualcosa è andato storto
           </h3>
-          <p className="text-gray-500 mb-6 text-center text-lg">{error}</p>
+          {/* <p className="text-gray-500 mb-6 text-center text-lg">{error}</p> */}
           <button
             onClick={() => fetchGroups()}
             className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"

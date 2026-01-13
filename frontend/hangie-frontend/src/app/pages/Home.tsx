@@ -38,8 +38,7 @@ type EventDataTypesArray = {
 const EVENTSINPAGE = 12;
 const Home = () => {
   const sliderRef = useRef<HTMLDivElement>(null);
-  const { homeError, isHomeEventsLoading, homeEventsData, setHomeOffset } =
-    useChat();
+  const { error, loading, homeEventsData, setHomeOffset } = useChat();
   // const [eventsData, setEventsData] = useState<EventDataTypesArray>({
   //   pending: [],
   //   accepted: [],
@@ -118,7 +117,7 @@ const Home = () => {
     if (!slider) return;
 
     const onScroll = () => {
-      if (isHomeEventsLoading) return; // <--- QUESTA RIGA QUI
+      if (loading.home) return; // <--- QUESTA RIGA QUI
       const { scrollHeight, scrollTop, clientHeight } = slider;
       const distanzaDalBasso = scrollHeight - scrollTop - clientHeight;
 
@@ -128,11 +127,11 @@ const Home = () => {
     };
     slider.addEventListener("scroll", onScroll);
     return () => slider.removeEventListener("scroll", onScroll);
-  }, [isHomeEventsLoading]);
+  }, [loading.home]);
 
   const renderContent = useCallback(
     (type: string) => {
-      if (homeError) {
+      if (error.home) {
         return (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
@@ -141,7 +140,7 @@ const Home = () => {
             <h3 className="text-lg font-medium text-text-1 mb-2">
               Ops! Qualcosa è andato storto
             </h3>
-            <p className="text-gray-500 mb-6 text-center">{homeError}</p>
+            <p className="text-gray-500 mb-6 text-center">errore</p>
             <button
               // onClick={() => fetchEvents()}
               className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
@@ -151,7 +150,7 @@ const Home = () => {
           </div>
         );
       }
-      if (isHomeEventsLoading) {
+      if (loading.home) {
         return (
           <div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
             <div className=" rounded-full flex items-center justify-center mb-6">
@@ -228,8 +227,8 @@ const Home = () => {
     [
       // fetchEvents,
       homeEventsData,
-      homeError,
-      isHomeEventsLoading,
+      error.home,
+      loading.home,
     ]
   );
 
