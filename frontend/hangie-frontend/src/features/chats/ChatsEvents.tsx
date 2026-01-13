@@ -2,7 +2,6 @@ import { useChat } from "@/contexts/ChatContext";
 import RenderEmptyState from "@/components/renderEmptyState";
 import SearchBar from "@/components/SearchBar";
 import GroupEventCard from "@/features/groups/GroupEventCard";
-import { AlertCircle, Calendar, Loader2 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useScreen } from "@/contexts/ScreenContext";

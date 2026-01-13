@@ -9,7 +9,6 @@ const GroupCard = ({
   nome,
   group_cover_img,
   ultimoMessaggio,
-  index,
   group_id,
   created_at,
   messaggi,
@@ -17,6 +16,7 @@ const GroupCard = ({
   descrizione,
   createdBy,
   updated_at,
+  fullGroup,
 }) => {
   const { setCurrentGroup, setCurrentGroupData } = useChat();
   const { currentNotifications } = useNotification();
@@ -24,9 +24,8 @@ const GroupCard = ({
     ? `${group_cover_img}?v=${updated_at || Date.now()}`
     : null;
 
-  const formatTime = (dateString) => {
+  const formatTime = (dateString: Date) => {
     const date = new Date(dateString);
-    // Mostra l'ora se è oggi, altrimenti la data breve
     if (date.toDateString() === new Date().toDateString()) {
       return date.toLocaleTimeString("it-IT", {
         hour: "2-digit",
@@ -53,16 +52,7 @@ const GroupCard = ({
       onClick={() => {
         setCurrentGroup(group_id);
         console.log("part gruppo", partecipanti_gruppo);
-        setCurrentGroupData({
-          nome,
-          group_id,
-          created_at,
-          group_cover_img,
-          partecipanti_gruppo,
-          descrizione,
-          createdBy,
-          updated_at,
-        });
+        setCurrentGroupData(fullGroup);
       }}
     >
       <div className="flex flex-row items-stretch w-full h-full gap-4">
@@ -73,7 +63,7 @@ const GroupCard = ({
         ) : (
           <img
             src={displayImage}
-            className="rounded-full w-12 h-12 2xl:h-16 2xl:w-16 flex-shrink-0" // Correzione Sizing
+            className="rounded-full w-12 h-12 2xl:h-16 2xl:w-16 flex-shrink-0"
             alt="Group cover"
           />
         )}

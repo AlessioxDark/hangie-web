@@ -49,7 +49,7 @@ export const ChatProvider = ({ children }) => {
   const [currentGroupData, setCurrentGroupData] = useState<GroupData | null>(
     null
   );
-  const [messagesMap, setMessagesMap] = useState<Message[] | null>(null);
+  const [messagesMap, setMessagesMap] = useState<Message[] | object>({});
 
   const [groupsData, setGroupsData] = useState<GroupData[] | null>(null);
 
@@ -65,8 +65,6 @@ export const ChatProvider = ({ children }) => {
     groups: null,
     events: null,
   });
-
-  // const [error, setError] = useState(null);
 
   const [homeOffset, setHomeOffset] = useState(0);
   const [homeEventsData, setHomeEventsData] = useState<{
@@ -84,84 +82,41 @@ export const ChatProvider = ({ children }) => {
   const { currentScreen } = useScreen();
   const { session } = useAuth();
 
-  const executeApiCall = async (type, fetchCall, onSuccess) => {
-    console.log(`[DEBUG] Inizio chiamata per: ${type}`);
+  const executeApiCall = useCallback(
+    async (
+      type: "chat" | "groups" | "events" | "home",
+      fetchCall,
+      onSuccess
+    ) => {
+      // if (loading[type]) return;
 
-    if (loading[type]) {
-      console.log(`[DEBUG] Chiamata ${type} annullata: sta già caricando`);
-      return;
-    }
-    try {
-      console.log(`[DEBUG] Sistemo errori e loading: ${type}`);
-      setError((prev) => ({ ...prev, [type]: null }));
-      setLoading((prev) => {
-        return { ...prev, [type]: true };
-      });
-      console.log(`[DEBUG] Chiamo fetch: ${type}`);
-      const data = await fetchCall();
-      console.log(`[DEBUG] Dati tornati: ${type}:${data}`);
-      onSuccess(data);
-    } catch (err) {
-      console.error("errore nel tipo: ", type, " :", err);
-      setError((prev) => {
-        return {
-          ...prev,
-          [type]: {
-            message: err.message || "Errore di connessione",
-            status: err.status || 500, // Se il tuo handleResponse lo passa
-            at: Date.now(),
-          },
-        };
-      });
-    } finally {
-      setLoading((prev) => {
-        return { ...prev, [type]: false };
-      });
-    }
-  };
+      try {
+        setError((prev) => ({ ...prev, [type]: null }));
+        setLoading((prev) => {
+          return { ...prev, [type]: true };
+        });
+        const data = await fetchCall();
+        onSuccess(data);
+      } catch (err: any) {
+        setError((prev) => {
+          return {
+            ...prev,
+            [type]: {
+              message: err.message || "Errore di connessione",
+              status: err.status || 500,
+              at: Date.now(),
+            },
+          };
+        });
+      } finally {
+        setLoading((prev) => {
+          return { ...prev, [type]: false };
+        });
+      }
+    },
+    []
+  );
   const fetchEvents = useCallback(async (): Promise<void> => {
-    // try {
-    //   setHomeError(null);
-    //   setLoading((prev) => {
-    //     return { ...prev, home: true };
-    //   });
-    //   // if (!response.ok) {
-    //   //   console.log(response);
-    //   //   setError(response.statusText || "Errore nel caricamento degli eventi");
-    //   // }
-    //   const data = await ApiCalls.fetchHomeEvents(
-    //     homeOffset,
-    //     session.access_token
-    //   );
-    //   console.log(data);
-    // setHomeEventsData((prevData) => {
-    //   const mergeAccepted = [...prevData.accepted, ...data.accepted];
-    //   const dedupAccepted = Array.from(
-    //     new Map(mergeAccepted.map((item) => [item.event_id, item])).values()
-    //   );
-    //   const mergePending = [...prevData.pending, ...data.pending];
-    //   const dedupPending = Array.from(
-    //     new Map(mergePending.map((item) => [item.event_id, item])).values()
-    //   );
-    //   const mergeRefused = [...prevData.refused, ...data.refused];
-    //   const dedupRefused = Array.from(
-    //     new Map(mergeRefused.map((item) => [item.event_id, item])).values()
-    //   );
-    //   return {
-    //     pending: dedupPending,
-    //     accepted: dedupAccepted,
-    //     refused: dedupRefused, // fai uguale se ti serve
-    //   };
-    // });
-    // } catch (err: any) {
-    //   console.error("Errore fetch eventi:", err);
-    //   setError(err.message || "Errore nel caricamento degli eventi");
-    // } finally {
-    //   setLoading((prev) => {
-    //     return { ...prev, home: false };
-    //   });
-    // }
-
     const saveData = (data) => {
       setHomeEventsData((prevData) => {
         const mergeAccepted = [...prevData.accepted, ...data.accepted];
@@ -190,31 +145,8 @@ export const ChatProvider = ({ children }) => {
       },
       saveData
     );
-  }, [homeOffset, session]);
-  const fetchGroupEvents = async () => {
-    // try {
-    //   setLoading((prev) => {
-    //     return { ...prev, events: true };
-    //   });
-    //   // setIsEventsLoading(true);
-    //   // if (!response.ok) {
-    //   //   console.log(response);
-    //   //   setError(response.statusText || "Errore nel caricamento degli eventi");
-    //   // }
-    //   const data = await ApiCalls.fetchGroupEvents(
-    //     currentGroup,
-    //     session.access_token
-    //   );
-    //   setGroupEventsData(data);
-    // } catch (err: any) {
-    //   console.error("Errore fetch eventi:", err);
-    //   setError(err.message || "Errore nel caricamento degli eventi");
-    // } finally {
-    //   setLoading((prev) => {
-    //     return { ...prev, events: false };
-    //   });
-    // }
-
+  }, [homeOffset, session, executeApiCall]);
+  const fetchGroupEvents = useCallback(async () => {
     const saveData = (data) => {
       setGroupEventsData(data);
     };
@@ -225,32 +157,8 @@ export const ChatProvider = ({ children }) => {
       },
       saveData
     );
-  };
-  const fetchGroups = async () => {
-    // if (loading.groups) return;
-    // try {
-    //   setError(null);
-    //   setLoading((prev) => {
-    //     return { ...prev, groups: true };
-    //   });
-    //   // if (!response.ok) {
-    //   //   console.log(response);
-    //   //   setError(
-    //   //     response.statusText || "Errore nel caricamento degli eventi"
-    //   //   );
-    //   // }
-    //   const data = await ApiCalls.fetchGroups(session.access_token);
-    // setGroupsData((prevData) => {
-    //   return data;
-    // });
-    // } catch (err: any) {
-    //   console.error("Errore fetch eventi:", err);
-    //   setError(err.message || "Errore nel caricamento degli eventi");
-    // } finally {
-    //   setLoading((prev) => {
-    //     return { ...prev, groups: false };
-    //   });
-    // }
+  }, [session, executeApiCall, currentGroup]);
+  const fetchGroups = useCallback(async () => {
     const saveData = (data) => {
       setGroupsData(data);
     };
@@ -261,110 +169,57 @@ export const ChatProvider = ({ children }) => {
       },
       saveData
     );
-  };
-  const fetchChat = async (groupId: UUID) => {
-    if (!groupId || !session) return;
+  }, [session, executeApiCall]);
+  const fetchChat = useCallback(
+    async (groupId: UUID) => {
+      if (!groupId || !session) return;
 
-    if (messagesMap[groupId]) {
-      setCurrentChatData(messagesMap[groupId]);
-    } else {
-      setLoading((prev) => {
-        return { ...prev, chat: true };
-      });
-      setLoading((prev) => {
-        return { ...prev, chat: true };
-      });
-    }
+      const saveData = (groupData) => {
+        const mappedMessages = groupData.messaggi.map((mess) => ({
+          ...mess,
+          isUser: mess.user_id === session.user.id,
+        }));
 
-    const saveData = (groupData) => {
-      console.log("eseguo on success fetchchat");
-      const mappedMessages = groupData.messaggi.map((mess) => ({
-        ...mess,
-        isUser: mess.user_id === session.user.id,
-      }));
-      console.log(mappedMessages);
+        setCurrentChatData({
+          ...groupData,
+          messaggi: mappedMessages,
+        });
+        setMessagesMap((prev) => ({
+          ...prev,
+          [groupId]: [...mappedMessages],
+        }));
 
-      setCurrentChatData({
-        ...groupData,
-        messaggi: mappedMessages,
-      });
-      setMessagesMap((prev) => ({
-        ...prev,
-        [groupId]: [...mappedMessages],
-      }));
+        setMobileView("chat");
+      };
 
-      setMobileView("chat");
-    };
-
-    executeApiCall(
-      "chat",
-      () => {
-        return ApiCalls.fetchChat(groupId, session.access_token);
-      },
-      saveData
-    );
-    // try {
-    //   setError(null);
-
-    //   // if (!response.ok) {
-    //   //   const errorData = await response.json().catch(() => ({}));
-    //   //   setError(
-    //   //     errorData.error?.message ||
-    //   //       response.statusText ||
-    //   //       "Errore nel caricamento della chat"
-    //   //   );
-    //   //   return;
-    //   // }
-
-    //   const result = await ApiCalls.fetchChat(groupId, session.access_token);
-    //   const groupData = result;
-    //   if (groupData) {
-    //     const mappedMessages = groupData.messaggi.map((mess) => ({
-    //       ...mess,
-    //       isUser: mess.user_id === session.user.id,
-    //     }));
-    //     console.log(mappedMessages);
-
-    //     setCurrentChatData({
-    //       ...groupData,
-    //       messaggi: mappedMessages,
-    //     });
-    //     setMessagesMap((prev) => ({
-    //       ...prev,
-    //       [groupId]: [...mappedMessages],
-    //     }));
-    //     setMobileView("chat");
-    //   } else {
-    //     setError("Dati del gruppo non trovati.");
-    //   }
-    // } catch (err: any) {
-    //   console.error("Errore fetch eventi:", err);
-    //   setError(err.message || "Errore nel caricamento degli eventi");
-    // } finally {
-    //   setLoading((prev) => {
-    //     return { ...prev, chat: false };
-    //   });
-    //   setMobileView("chat");
-    // }
-  };
+      executeApiCall(
+        "chat",
+        () => {
+          return ApiCalls.fetchChat(groupId, session.access_token);
+        },
+        saveData
+      );
+    },
+    [session, executeApiCall, setMobileView]
+  );
 
   useEffect(() => {
     if (session) {
       fetchGroups();
     }
-  }, [session]);
+  }, [session, fetchGroups]);
   useEffect(() => {
     if (session) {
       fetchEvents();
     }
-  }, [homeOffset, session]);
+  }, [homeOffset, session, fetchEvents]);
 
   useEffect(() => {
     if (currentGroup) {
       fetchGroupEvents();
       fetchChat(currentGroup);
     }
-  }, [currentGroup]);
+  }, [currentGroup, fetchChat, fetchGroupEvents]);
 
   useEffect(() => {
     const isLargeScreen = currentScreen && currentScreen !== "xs";
@@ -374,7 +229,6 @@ export const ChatProvider = ({ children }) => {
       groupsData &&
       groupsData?.length > 0
     ) {
-      console.log("Layout Desktop rilevato: auto-seleziono primo gruppo");
       setCurrentGroup(groupsData[0].group_id);
       setCurrentGroupData(groupsData[0]);
     }
