@@ -49,7 +49,7 @@ export const ChatProvider = ({ children }) => {
   const [currentGroupData, setCurrentGroupData] = useState<GroupData | null>(
     null
   );
-  const [messagesMap, setMessagesMap] = useState({});
+  const [messagesMap, setMessagesMap] = useState<Message[] | null>(null);
 
   const [groupsData, setGroupsData] = useState<GroupData[] | null>(null);
 
@@ -104,7 +104,14 @@ export const ChatProvider = ({ children }) => {
     } catch (err) {
       console.error("errore nel tipo: ", type, " :", err);
       setError((prev) => {
-        return { ...prev, [type]: { message: err.message } };
+        return {
+          ...prev,
+          [type]: {
+            message: err.message || "Errore di connessione",
+            status: err.status || 500, // Se il tuo handleResponse lo passa
+            at: Date.now(),
+          },
+        };
       });
     } finally {
       setLoading((prev) => {

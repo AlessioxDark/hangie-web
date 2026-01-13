@@ -148,7 +148,9 @@ const LayoutChatMedium = () => {
           <h3 className="text-2xl font-medium text-text-1 mb-2">
             Ops! Qualcosa è andato storto
           </h3>
-          {/* <p className="text-gray-500 mb-6 text-center text-lg">{error}</p> */}
+          <p className="text-gray-500 mb-6 text-center text-lg">
+            {error.groups.message}
+          </p>
 
           <button
             onClick={() => fetchChat()}

@@ -140,7 +140,9 @@ const Home = () => {
             <h3 className="text-lg font-medium text-text-1 mb-2">
               Ops! Qualcosa è andato storto
             </h3>
-            <p className="text-gray-500 mb-6 text-center">errore</p>
+            <p className="text-gray-500 mb-6 text-center">
+              {error.home.message}
+            </p>
             <button
               // onClick={() => fetchEvents()}
               className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
