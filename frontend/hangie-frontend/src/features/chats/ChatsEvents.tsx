@@ -1,5 +1,5 @@
 import { useChat } from "@/contexts/ChatContext";
-import RenderEmptyState from "@/components/renderEmptyState";
+import RenderEmptyState from "@/features/utils/RenderEmptyState";
 import SearchBar from "@/components/SearchBar";
 import GroupEventCard from "@/features/groups/GroupEventCard";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -148,7 +148,7 @@ const ChatsEvents = () => {
                 })}
               </div>
             ) : (
-              <RenderEmptyState />
+              <RenderEmptyState type="events" />
             )}
           </div>
         </div>

@@ -1,30 +1,36 @@
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useChat } from "@/contexts/ChatContext";
-import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { useNotification } from "@/contexts/NotificationContext";
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router";
-
+import type { GroupData, Message, Participant, UUID } from "@/types/chat";
+interface GroupCardInterface {
+  nome: string;
+  partecipanti_gruppo: Participant[];
+  group_id: UUID;
+  descrizione: string;
+  createdBy: UUID;
+  created_at: string;
+  group_cover_img: string | null;
+  event_id: UUID | null;
+  updated_at: string | null;
+  fullGroup: GroupData;
+  ultimoMessaggio: Message;
+}
 const GroupCard = ({
   nome,
   group_cover_img,
   ultimoMessaggio,
   group_id,
   created_at,
-  messaggi,
-  partecipanti_gruppo,
-  descrizione,
-  createdBy,
   updated_at,
   fullGroup,
-}) => {
-  const { setCurrentGroup, setCurrentGroupData } = useChat();
+}: GroupCardInterface) => {
+  const { setCurrentGroup, setCurrentGroupData, currentGroup } = useChat();
   const { currentNotifications } = useNotification();
   const displayImage = group_cover_img
     ? `${group_cover_img}?v=${updated_at || Date.now()}`
     : null;
 
-  const formatTime = (dateString: Date) => {
+  const formatTime = (dateString: Date | string) => {
     const date = new Date(dateString);
     if (date.toDateString() === new Date().toDateString()) {
       return date.toLocaleTimeString("it-IT", {
@@ -38,24 +44,26 @@ const GroupCard = ({
     });
   };
 
-  const unreadMsgNotifications = currentNotifications.unread.filter((n) => {
+  const unreadMsgNotifications = currentNotifications?.unread.filter((n) => {
     if (n.type == "new_message" && n.group_id == group_id) return n;
   }).length;
   return (
     <div
-      className="bg-bg-2 p-3 flex items-center w-full 
+      className={` p-3 flex items-center w-full 
     cursor-pointer 
-    hover:bg-gray-100/80 
+    
     transition-colors
-    border-b border-gray-200
-   "
+    border-b border-gray-200 ${
+      currentGroup == group_id
+        ? "bg-gray-100" // Grigio solido per la selezione
+        : "bg-white  hover:bg-gray-100/40 active:bg-gray-100/40"
+    }`}
       onClick={() => {
         setCurrentGroup(group_id);
-        console.log("part gruppo", partecipanti_gruppo);
         setCurrentGroupData(fullGroup);
       }}
     >
-      <div className="flex flex-row items-stretch w-full h-full gap-4">
+      <div className="flex flex-row items-stretch w-full h-full gap-4 ">
         {displayImage == null ? (
           <div className="rounded-full w-12 h-12 2xl:h-16 2xl:w-16 flex-shrink-0">
             <DefaultGroupIcon />

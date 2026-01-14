@@ -1,8 +1,11 @@
 import GroupCard from "@/features/groups/GroupCard.js";
 
-import { AlertCircle, Group, Loader2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
 import { useChat } from "@/contexts/ChatContext.js";
+import RenderLoadingState from "../utils/RenderLoadingState";
+import RenderErrorState from "../utils/RenderErrorState";
+import RenderEmptyState from "../utils/RenderEmptyState";
 const ChatsSidebar = () => {
   const { setMobileView } = useMobileLayoutChat();
   const { groupsData, error, fetchGroups, loading } = useChat();
@@ -10,51 +13,62 @@ const ChatsSidebar = () => {
   const renderContent = () => {
     if (loading.groups) {
       return (
-        <div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">
-          <div className=" rounded-full flex items-center justify-center mb-6">
-            <Loader2 className="w-16 h-16 text-primary animate-spin" />
-          </div>
-          <h3 className="text-xl font-medium text-gray-900 mb-2">
-            Caricamento dei gruppi in corso...
-          </h3>
-          <p className="text-gray-500 text-center  ">
-            Stiamo cercando i tuoi gruppi
-          </p>
-        </div>
+        // <div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">
+        //   <div className=" rounded-full flex items-center justify-center mb-6">
+        //     <Loader2 className="w-16 h-16 text-primary animate-spin" />
+        //   </div>
+        //   <h3 className="text-xl font-medium text-gray-900 mb-2">
+        //     Caricamento dei gruppi in corso...
+        //   </h3>
+        //   <p className="text-gray-500 text-center  ">
+        //     Stiamo cercando i tuoi gruppi
+        //   </p>
+        // </div>
+        // <RenderLo
+        <RenderLoadingState type="groups" />
       );
     }
     if (error && error.groups) {
+      // return (
+      //   <div className="flex flex-col items-center justify-center py-20">
+      //     <div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
+      //       <AlertCircle className="w-16 h-16 text-warning" />
+      //     </div>
+      //     <h3 className="text-lg font-medium text-text-1 mb-2">
+      //       Ops! Qualcosa è andato storto
+      //     </h3>
+      //     <p className="text-gray-500 mb-6 text-center">
+      //       {error.groups.message}
+      //     </p>
+      //     <button
+      //       onClick={() => fetchGroups()}
+      //       className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
+      //     >
+      //       Riprova
+      //     </button>
+      //   </div>
+      // );
+      // <Rendererr
       return (
-        <div className="flex flex-col items-center justify-center py-20">
-          <div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
-            <AlertCircle className="w-16 h-16 text-warning" />
-          </div>
-          <h3 className="text-lg font-medium text-text-1 mb-2">
-            Ops! Qualcosa è andato storto
-          </h3>
-          <p className="text-gray-500 mb-6 text-center">
-            {error.groups.message}
-          </p>
-          <button
-            onClick={() => fetchGroups()}
-            className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
-          >
-            Riprova
-          </button>
-        </div>
+        <RenderErrorState
+          errorMessage={error.groups.message}
+          reloadFunction={fetchGroups}
+        />
       );
     }
     if (groupsData?.length == 0) {
       return (
-        <div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-            <Group className="w-16 h-16 text-gray-400" />
-          </div>
+        // <div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
+        //   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+        //     <Group className="w-16 h-16 text-gray-400" />
+        //   </div>
 
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Nessun Gruppo per il momento
-          </h3>
-        </div>
+        //   <h3 className="text-lg font-medium text-gray-900 mb-2">
+        //     Nessun Gruppo per il momento
+        //   </h3>
+        // </div>
+
+        <RenderEmptyState type="groups" />
       );
     }
     if (groupsData) {

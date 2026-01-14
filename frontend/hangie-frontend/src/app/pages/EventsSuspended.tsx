@@ -1,5 +1,5 @@
 import ChevronLeft from "@/assets/icons/ChevronLeft";
-import RenderEmptyState from "@/components/renderEmptyState";
+import RenderEmptyState from "@/features/utils/RenderEmptyState";
 import EventCardSuspended from "@/features/events/EventCardSuspended";
 import { AlertCircle, Calendar, Loader2 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";

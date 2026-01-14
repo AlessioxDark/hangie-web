@@ -3,7 +3,7 @@ import ChevronRight from "@/assets/icons/ChevronRight.js";
 import EventCard from "@/features/events/EventCard.js";
 import EventCardSuspended from "@/features/events/EventCardSuspended.js";
 
-import RenderEmptyState from "@/components/renderEmptyState.js";
+import RenderEmptyState from "@/features/utils/RenderEmptyState.js";
 import EventDetailsModal from "@/features/modal/EventDetailsModal.js";
 import { AlertCircle, Calendar, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -188,7 +188,7 @@ const Home = () => {
                   ))}
               </div>
             ) : (
-              <RenderEmptyState />
+              <RenderEmptyState type="home" />
             )}
           </div>
         );
@@ -219,7 +219,7 @@ const Home = () => {
                 })}
               </div>
             ) : (
-              <RenderEmptyState />
+              <RenderEmptyState type="home" />
             )}
           </div>
         );
