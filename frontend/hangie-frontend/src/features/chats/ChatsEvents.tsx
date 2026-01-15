@@ -7,11 +7,13 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import ChevronLeft from "@/assets/icons/ChevronLeft";
+import RenderLoadingState from "../utils/RenderLoadingState";
+import RenderErrorState from "../utils/RenderErrorState";
 
 const FILTER_TYPES = ["accepted", "pending", "archive"];
 const ChatsEvents = () => {
   const [currentFilter, setCurrentFilter] = useState("");
-  const { loading, groupEventsData } = useChat();
+  const { loading, error, groupEventsData, fetchGroupEvents } = useChat();
   const [query, setQuery] = useState("");
   const { session } = useAuth();
   const { currentScreen } = useScreen();
@@ -79,6 +81,17 @@ const ChatsEvents = () => {
     return statusFilteredList;
   }, [groupEventsData, currentFilter, query, session?.user.id]);
 
+  if (loading.events) {
+    return <RenderLoadingState type="events" />;
+  }
+  if (error.events) {
+    return (
+      <RenderErrorState
+        errorMessage={error.events.message}
+        reloadFunction={fetchGroupEvents}
+      />
+    );
+  }
   return (
     <div className="2xl:min-w-1/5 2xl:max-w-1/5 h-full">
       <div className="p-3 2xl:p-6 flex flex-col gap-3 2xl:gap-8">
@@ -110,19 +123,7 @@ const ChatsEvents = () => {
                     currentFilter == filter
                       ? "bg-primary text-bg-1 shadow-lg shadow-primary/50"
                       : "bg-bg-2 text-text-2 border border-text-2 hover:bg-bg-3 hover:shadow-md"
-                  } font-body   text-base 2xl:text-xl cursor-pointer
-                
-                
-                
-             
-              font-semibold 
-              rounded-full 
-          
-              transition-all duration-200 
-              shadow-sm
-
-             
-              `}
+                  } font-body text-base 2xl:text-xl cursor-pointer font-semibold rounded-full transition-all duration-200 shadow-sm`}
                 >
                   {filter}
                 </div>

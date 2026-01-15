@@ -290,8 +290,6 @@ const GroupDetails = () => {
       );
 
       if (response.ok) {
-        // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
-
         setCurrentGroupData((prevData) => {
           return {
             ...prevData,
@@ -579,12 +577,9 @@ const GroupDetails = () => {
                       <h3
                         className="text-xs font-bold font-body text-primary uppercase tracking-wide mb-1"
                         onClick={() => {
-                          console.log("voglio modificare il titolo");
                           if (isEditingDescription == false) {
-                            console.log("era false lo metto true");
                             setIsEditingDescription(true);
                           } else {
-                            console.log("era true facci ocontrolli");
                             if (currentDescription.length < 10) {
                               setFormError({
                                 type: "title",
@@ -660,33 +655,9 @@ const GroupDetails = () => {
                         "border-b border-bg-3"
                       } `}
                     >
-                      {/* {isEditingParticipants &&
-                        isAdmin &&
-                        partecipante.user_id !== session.user.id && (
-                          <div
-                            className="absolute top-1.5 right-1.5 p-0.5 bg-primary rounded-full"
-                            onClick={() =>
-                              handleRemoveParticipants(partecipante)
-                            }
-                          >
-                            <X size={13} className="text-white" />
-                          </div>
-                        )}
-                      {isEditingParticipants &&
-                        partecipante.role != "admin" &&
-                        partecipante.user_id !== session.user.id && (
-                          <div
-                            className="absolute top-1.5 right-10 p-0.5 bg-primary rounded-full"
-                            onClick={() => handleMakeAdmin(partecipante)}
-                          >
-                            <Handshake size={13} className="text-white" />
-                          </div>
-                        )} */}
-
                       <div
                         className="w-13 h-13 shrink-0 "
                         onClick={() => {
-                          // apri profilo
                           console.log("apro profilo di", partecipante.nome);
                         }}
                       >
@@ -695,7 +666,6 @@ const GroupDetails = () => {
                       <div
                         className="flex flex-col min-w-0 flex-1"
                         onClick={() => {
-                          // apri modal con varie opzioni
                           if (partecipante.user_id !== session.user.id) {
                             console.log(
                               "apro action sheet di",
@@ -744,7 +714,6 @@ const GroupDetails = () => {
                       <div
                         className="w-5 h-5"
                         onClick={() => {
-                          // apri profilo
                           console.log("apro profilo di", partecipante.nome);
                         }}
                       >

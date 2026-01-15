@@ -6,36 +6,35 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import FormInput from "../CreateEventForm/FormInput";
 import FormTextarea from "../CreateEventForm/FormTextarea";
-import { Divide, Plus, Trash, X } from "lucide-react";
+import { Trash } from "lucide-react";
 import AddParticipantsGroup from "./AddParticipantsGroup";
-import FriendCard from "../friends/FriendCard";
 import ParticipantCard from "./ParticipantCard";
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "../../config/db.js";
 import { useSocket } from "@/contexts/SocketContext.js";
 const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
-
+const GroupSchema = z.object({
+  nome: z
+    .string()
+    .min(1, "il nome è obbligatorio")
+    .min(3, " il nome deve avere minimo 3 caratteri")
+    .max(20, "il nome è troppo lungo")
+    .regex(
+      /^[a-zA-Z0-9\s\u00C0-\u017F!?.()\-@#&]+$/u,
+      "Il nome contiene caratteri non validi"
+    ),
+  descrizione: z
+    .string()
+    .min(1, "la descrizione è obbligatoria")
+    .min(10, "la descrizione deve essere minimo 10 caratteri")
+    .max(350, "La descrizione può essere massimo 350 caratteri"),
+});
 const CreateGroupForm = () => {
   const { setMobileView } = useMobileLayoutChat();
-  const schema = z.object({
-    nome: z
-      .string()
-      .min(1, "il nome è obbligatorio")
-      .min(3, " il nome deve avere minimo 3 caratteri")
-      .max(20, "il nome è troppo lungo")
-      .regex(
-        /^[a-zA-Z0-9\s\u00C0-\u017F!?.()\-@#&]+$/u,
-        "Il nome contiene caratteri non validi"
-      ),
-    descrizione: z
-      .string()
-      .min(1, "la descrizione è obbligatoria")
-      .min(10, "la descrizione deve essere minimo 10 caratteri")
-      .max(350, "La descrizione può essere massimo 350 caratteri"),
-  });
+
   const methods = useForm({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(GroupSchema),
     mode: "onSubmit",
   });
   const [groupImage, setGroupImage] = useState(null);
@@ -77,10 +76,6 @@ const CreateGroupForm = () => {
     fileInputRef.current.click();
   }, []);
 
-  const handleParticipantsAdd = () => {
-    setIsParticipantsAdd(true);
-  };
-
   const {
     register,
     handleSubmit,
@@ -89,14 +84,12 @@ const CreateGroupForm = () => {
   } = methods;
 
   const onSubmit = async (data) => {
-    console.log("inviato", currentParticipants);
     if (currentParticipants.length < 2) {
-      setParticipantsError({ message: "inserisci almeno 2 partecipanti" });
+      setParticipantsError({ message: "Inserisci almeno due partecipanti" });
       return;
     } else {
       setParticipantsError(null);
     }
-
     try {
       const response = await fetch(
         "http://localhost:3000/api/groups/add/newGroup",
@@ -108,24 +101,17 @@ const CreateGroupForm = () => {
           },
           body: JSON.stringify({
             ...data,
-
             participants: currentParticipants,
           }),
         }
       );
       const result = await response.json();
       let finalImgUrl = null;
-      if (!response.ok) {
-        console.log("male");
+      if (!response.ok)
         throw new Error(result.error || "Errore creazione evento");
-      }
-      console.log(result);
-      console.log("ok");
-      console.log("gruppo creato");
+
       const groupId = result.group_id;
       if (groupImage) {
-        console.log(groupImage);
-        console.log(groupImage.file);
         const fileName = `${groupId}/cover.${groupImage.ext}`;
         const filePath = `${fileName}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -135,10 +121,7 @@ const CreateGroupForm = () => {
             contentType: groupImage.type,
             cacheControl: "3600",
           });
-        if (uploadError) {
-          setError("root", { message: uploadError });
-          return;
-        }
+        if (uploadError) throw new Error(uploadError);
         const { data: urlData } = supabase.storage
           .from("group_cover_pics")
           .getPublicUrl(uploadData.path);
@@ -147,9 +130,7 @@ const CreateGroupForm = () => {
           .from("gruppi")
           .update({ group_cover_img: urlData.publicUrl })
           .eq("group_id", groupId);
-        if (coverError) setError("root", { message: coverError });
-        console.log("Tutte le immagini caricate con successo!");
-
+        if (coverError) throw new Error(coverError);
         finalImgUrl = urlData.publicUrl;
       }
       currentSocket.emit(
@@ -160,19 +141,14 @@ const CreateGroupForm = () => {
         finalImgUrl,
         session.user.id
       );
-
-      console.log("invio socket new group");
-
       setMobileView("groups");
     } catch (error) {
-      console.error("Errore durante il processo:", error);
-      // Qui puoi gestire l'errore (es. mostrare un toast notification)
+      setError("root", { message: `errore: ${error}` });
     }
   };
-
   useEffect(() => {
-    if (currentParticipants) {
-      console.log(currentParticipants);
+    if (currentParticipants.length >= 2) {
+      setParticipantsError(null);
     }
   }, [currentParticipants]);
   return (
@@ -184,7 +160,6 @@ const CreateGroupForm = () => {
           currentParticipants={currentParticipants}
         />
       ) : (
-        // <p>true</p>
         <>
           <div className="w-full  p-2 border-b border-bg-3 items-center fixed top-0 bg-white">
             <div className="flex flex-row gap-1 items-center">
@@ -248,8 +223,6 @@ const CreateGroupForm = () => {
                           setGroupImage(null);
                         }}
                       >
-                        {/* <X size={14} /> */}
-
                         <Trash size={14} className="" />
                       </div>
                     </div>
@@ -291,7 +264,7 @@ const CreateGroupForm = () => {
                                     aspect-square minw-[80px] w-16 min-h-16 max-h-16 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
                                     hover:bg-bg-3 transition-all duration-200 shadow-inner`}
                       // onClick={handleButtonClick}
-                      onClick={handleParticipantsAdd}
+                      onClick={() => setIsParticipantsAdd(true)}
                       aria-label="Aggiungi Immagine"
                     >
                       <span
@@ -335,7 +308,6 @@ const CreateGroupForm = () => {
           </form>
         </>
       )}
-      {/* nome_gruppo, immagine_gruppo, descrizione_gruppo, partecipanti_guppo */}
     </div>
   );
 };

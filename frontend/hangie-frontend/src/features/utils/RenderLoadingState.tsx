@@ -1,11 +1,19 @@
 import { Loader2 } from "lucide-react";
 import React from "react";
 
-const renderLoadingState = ({ type }) => {
+const RenderLoadingState = ({ type }) => {
   const message = {
     groups: {
       main: "Caricamento dei gruppi in corso...",
       alt: "Stiamo cercando i tuoi gruppi",
+    },
+    events: {
+      main: "Caricamento degli eventi del gruppo in corso...",
+      alt: "Stiamo cercando i tuoi eventi",
+    },
+    participant: {
+      main: "Caricamento degli amii in corso...",
+      alt: "Stiamo cercando i tuoi amici",
     },
   };
   return (
@@ -21,4 +29,4 @@ const renderLoadingState = ({ type }) => {
   );
 };
 
-export default renderLoadingState;
+export default RenderLoadingState;

@@ -49,14 +49,14 @@ const GroupCard = ({
   }).length;
   return (
     <div
-      className={` p-3 flex items-center w-full 
+      className={`bg-bg-2 p-3 flex items-center w-full 
     cursor-pointer 
     
     transition-colors
-    border-b border-gray-200 ${
+    border-2 border-y border-neutral-200 ${
       currentGroup == group_id
-        ? "bg-gray-100" // Grigio solido per la selezione
-        : "bg-white  hover:bg-gray-100/40 active:bg-gray-100/40"
+        ? "bg-neutral-200/80" // Grigio solido per la selezione
+        : "bg-white  hover:bg-gray-100 active:bg-gray-100"
     }`}
       onClick={() => {
         setCurrentGroup(group_id);

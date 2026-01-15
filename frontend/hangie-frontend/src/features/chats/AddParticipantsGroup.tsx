@@ -1,10 +1,12 @@
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 import SearchBar from "@/components/SearchBar";
 import { useAuth } from "@/contexts/AuthContext";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import FriendCard from "../friends/FriendCard";
 import { useSocket } from "@/contexts/SocketContext";
 import { useChat } from "@/contexts/ChatContext";
+import RenderLoadingState from "../utils/RenderLoadingState";
+import RenderErrorState from "../utils/RenderErrorState";
 
 const AddParticipantsGroup = ({
   setIsParticipantsAdd,
@@ -19,38 +21,35 @@ const AddParticipantsGroup = ({
   const [isLoading, setIsLoading] = useState(false);
   const { currentSocket } = useSocket();
   const { currentGroup } = useChat();
-  const [fetchError, setFetchError] = useState(null);
   const { session } = useAuth();
-  const fetchFriends = useCallback(() => {
+  const [error, setError] = useState(null);
+  const fetchFriends = async () => {
     try {
       setIsLoading(true);
-      console.log(session.user.id);
-      fetch(`http://localhost:3000/api/friends/${session.user.id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          // const newData = data.map((friend) => {
-          //   return friend.user_1.isUser == false
-          //     ? friend.user_1
-          //     : friend.user_2;
-          // });
+      setError(null);
+      const response = await fetch(
+        `http://localhost:3000/api/friends/${session.user.id}`
+      );
 
-          setFriendsData(data);
-          setCurrentFriendsData(data);
-          // setFriendsData(newData);
-          // setCurrentFriendsData(newData);
-        });
+      if (!response.ok)
+        throw new Error(
+          response.message || "Errore nella ricerca dei partecipanti"
+        );
+
+      const result = await response.json();
+      setFriendsData(result);
+      setCurrentFriendsData(result);
     } catch (error) {
-      console.log(error);
+      setError({ message: error.message });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchFriends();
   }, []);
 
-  // useEffect(()=>)
   useEffect(() => {
     if (query) {
       setCurrentFriendsData(() => {
@@ -67,17 +66,6 @@ const AddParticipantsGroup = ({
     useState(currentParticipants);
   return (
     <div className="flex flex-col gap-3">
-      {/* <div className="flex flex-row gap-1">
-        <div
-          className="w-6 h-6"
-          onClick={() => {
-            setIsParticipantsAdd(false);
-          }}
-        >
-          <ChevronLeft color="#2463eb" />
-        </div>
-        <h3>Partecipanti</h3>
-      </div> */}
       <div className="w-full  p-2 border-b border-bg-3 items-center flex flex-row justify-between">
         <div className="flex flex-row gap-1 items-center">
           <div
@@ -121,7 +109,12 @@ const AddParticipantsGroup = ({
         <SearchBar query={query} setQuery={setQuery} />
         <div>
           {isLoading ? (
-            <p>loading</p>
+            <RenderLoadingState type={"participant"} />
+          ) : error ? (
+            <RenderErrorState
+              errorMessage={error.message}
+              reloadFunction={fetchFriends}
+            />
           ) : (
             <div className="flex flex-col gap-2">
               {currentFriendsData?.map((friend) => {

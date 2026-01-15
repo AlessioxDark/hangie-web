@@ -1,13 +1,11 @@
 import { useScreen } from "@/contexts/ScreenContext";
 import React from "react";
-const DESKTOPSIZE = "30px";
-const MOBILESIZE = "35px";
+
 // ==================== HOME ICON ====================
-const HomeIconOutline = ({ size }) => (
+const HomeIconOutline = ({ className }) => (
   <svg
     fill="none"
-    width={size}
-    height={size}
+    className={className}
     viewBox="-4.5 0 32 32"
     xmlns="http://www.w3.org/2000/svg"
     stroke="#64748b"
@@ -19,11 +17,10 @@ const HomeIconOutline = ({ size }) => (
   </svg>
 );
 
-const HomeIconSolid = ({ size }) => (
+const HomeIconSolid = ({ className }) => (
   <svg
     fill="#2463eb"
-    width={size}
-    height={size}
+    className={className}
     viewBox="-4.5 0 32 32"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
@@ -36,11 +33,10 @@ const HomeIconSolid = ({ size }) => (
 );
 
 // ==================== CHAT ICON ====================
-const ChatIconOutline = ({ size }) => (
+const ChatIconOutline = ({ className }) => (
   <svg
     fill="none"
-    width={size}
-    height={size}
+    className={className}
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
     stroke={"#64748b"}
@@ -55,11 +51,10 @@ const ChatIconOutline = ({ size }) => (
   </svg>
 );
 
-const ChatIconSolid = ({ size }) => (
+const ChatIconSolid = ({ className }) => (
   <svg
     fill="none"
-    width={size}
-    height={size}
+    className={className}
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -73,15 +68,14 @@ const ChatIconSolid = ({ size }) => (
 );
 
 // ==================== FRIENDS ICON ====================
-const FriendsIconOutline = ({ size }) => (
+const FriendsIconOutline = ({ className }) => (
   <svg
     fill="none"
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
+    className={className}
     stroke="#64748b"
     stroke-width={1.5}
-    width={size}
-    height={size}
   >
     <g id="SVGRepo_iconCarrier">
       <path
@@ -112,13 +106,12 @@ const FriendsIconOutline = ({ size }) => (
   </svg>
 );
 
-const FriendsIconSolid = ({ size }) => (
+const FriendsIconSolid = ({ className }) => (
   <svg
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    width={size}
-    height={size}
+    className={className}
   >
     <g id="SVGRepo_iconCarrier">
       <path
@@ -150,11 +143,10 @@ const FriendsIconSolid = ({ size }) => (
 );
 
 // ==================== PROFILE ICON ====================
-const ProfileIconOutline = ({ size }) => (
+const ProfileIconOutline = ({ className }) => (
   <svg
-    width={size}
-    height={size}
     viewBox="0 0 24 24"
+    className={className}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     stroke="#64748b"
@@ -179,11 +171,10 @@ const ProfileIconOutline = ({ size }) => (
   </svg>
 );
 
-const ProfileIconSolid = ({ size }) => (
+const ProfileIconSolid = ({ className }) => (
   <svg
-    width={size}
-    height={size}
     viewBox="0 0 24 24"
+    className={className}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -214,12 +205,12 @@ const ICON_MAP = {
   Profilo: { Outline: ProfileIconOutline, Solid: ProfileIconSolid },
 } as const;
 const ICON_SIZES = {
-  "2xl": "30",
-  xl: "35",
-  lg: "35",
-  md: "35",
-  sm: "35",
-  xs: "25",
+  "2xl": "w-7 h-7",
+  xl: "h-9 w-9",
+  lg: "h-9 w-9",
+  md: "h-9 w-9",
+  sm: "h-9 w-9",
+  xs: "h-7 w-7",
 };
 // ==================== COMPONENT ====================
 interface SidebarIconsProps {
@@ -228,11 +219,7 @@ interface SidebarIconsProps {
   className?: string;
 }
 
-const SidebarIcons: React.FC<SidebarIconsProps> = ({
-  title,
-  isActive,
-  size,
-}) => {
+const SidebarIcons: React.FC<SidebarIconsProps> = ({ title, isActive }) => {
   const iconSet = ICON_MAP[title];
   const { currentScreen } = useScreen();
 
@@ -244,11 +231,12 @@ const SidebarIcons: React.FC<SidebarIconsProps> = ({
   const IconComponent = isActive ? iconSet.Solid : iconSet.Outline;
 
   return (
-    <div className="w-full h-full flex justify-center items-center">
+    <div className="w-full h-full flex justify-center items-center ">
       <IconComponent
-        // className={` transition-colors duration-200 `}
         aria-hidden="true"
-        size={`${ICON_SIZES[currentScreen]}px`}
+        className={`
+          ${ICON_SIZES[currentScreen]} 
+          transition-all duration-300`}
       />
     </div>
   );

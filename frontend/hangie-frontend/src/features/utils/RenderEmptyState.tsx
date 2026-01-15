@@ -1,4 +1,4 @@
-import { Calendar, Group } from "lucide-react";
+import { Calendar, Group, MessageCircle } from "lucide-react";
 import React from "react";
 
 const RenderEmptyState = ({ type }) => {
@@ -14,6 +14,10 @@ const RenderEmptyState = ({ type }) => {
     events: {
       text: "Nessun evento trovato",
       icon: <Calendar className="w-8 h-8 text-gray-400" />,
+    },
+    chat: {
+      text: "Nessun gruppo trovato",
+      icon: <MessageCircle className="w-8 h-8 text-gray-400" />,
     },
   };
   return (
