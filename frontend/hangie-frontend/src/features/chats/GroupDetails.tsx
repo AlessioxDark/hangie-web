@@ -6,8 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { useScreen } from "@/contexts/ScreenContext";
-import { Edit, Edit2, Handshake, Plus, X } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import { Edit2, Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import AddParticipantsGroup from "./AddParticipantsGroup";
 import { supabase } from "../../config/db.js";
 import { useSocket } from "@/contexts/SocketContext.js";
@@ -24,7 +24,6 @@ const GroupDetails = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const [formError, setFormError] = useState(null);
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isAdmin, setIsAdmin] = useState(
     currentGroupData?.partecipanti_gruppo?.some(
       (p) =>
@@ -33,19 +32,16 @@ const GroupDetails = () => {
     ) || false
   );
 
-  // const isCreator = currentGroupData?.createdBy == session.user.id;
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const { currentSocket } = useSocket();
-  const [currentDescription, setCurrentDescription] = useState(
-    currentGroupData.descrizione
-  );
-  const { openModal } = useModal();
-  const [currentTitle, setCurrentTitle] = useState(currentGroupData.nome);
-  const [currentGroupImg, setCurrentGroupImg] = useState(
-    currentGroupData.group_cover_img
-  );
-  const fileInputRef = useRef(null);
 
+  const { openModal } = useModal();
+  const fileInputRef = useRef(null);
+  const [localGroupData, setLocalGroupData] = useState({
+    group_cover_img: currentGroupData.group_cover_img,
+    descrizione: currentGroupData.descrizione,
+    nome: currentGroupData.nome,
+  });
+  const [currentEditingField, setCurrentEditingField] = useState(null);
   const [currentParticipants, setCurrentParticipants] = useState(() => {
     return (
       currentGroupData?.partecipanti_gruppo?.map((partecipante) => {
@@ -59,13 +55,13 @@ const GroupDetails = () => {
       }) || []
     );
   });
-  const displayImage = currentGroupImg
-    ? `${currentGroupImg}?v=${currentGroupData.updated_at || Date.now()}`
+  const displayImage = localGroupData.group_cover_img
+    ? `${localGroupData.group_cover_img}?v=${
+        currentGroupData.updated_at || Date.now()
+      }`
     : null;
 
   const handleLeaveGroup = async () => {
-    console.log(currentGroupData);
-    console.log("invio l'abbandono");
     try {
       fetch(`http://localhost:3000/api/groups/leave/${currentGroup}/`, {
         method: "DELETE",
@@ -115,7 +111,7 @@ const GroupDetails = () => {
         });
       if (uploadError) {
         console.log(uploadError);
-        // setError("root", { message: uploadError });
+        setFormError("img", { message: uploadError.message });
         return;
       }
       const { data: urlData } = supabase.storage
@@ -125,10 +121,10 @@ const GroupDetails = () => {
         .from("gruppi")
         .update({ group_cover_img: urlData.publicUrl })
         .eq("group_id", currentGroup);
-      if (coverError) console.log(coverError);
-      // if (coverError) setError("root", { message: coverError });
-
-      setCurrentGroupImg(urlData.publicUrl);
+      if (coverError) setFormError("img", { message: coverError.message });
+      setLocalGroupData((prev) => {
+        return { ...prev, group_cover_img: urlData.publicUrl };
+      });
       setCurrentGroupData((prevData) => {
         return { ...prevData, group_cover_img: urlData.publicUrl };
       });
@@ -147,9 +143,8 @@ const GroupDetails = () => {
         urlData.publicUrl,
         currentParticipants
       );
-      console.log("Tutte le immagini caricate con successo!");
     } catch (error) {
-      console.log(error);
+      setFormError("img", { message: error.message });
     }
   };
   const handleParticipantsAdd = () => {
@@ -173,9 +168,6 @@ const GroupDetails = () => {
     const newParticipantsIds = newParticipants.map((p) => ({
       user_id: p.user_id,
     }));
-
-    console.log("Invio nuovi partecipanti:", newParticipantsIds);
-
     try {
       const response = await fetch(
         `http://localhost:3000/api/groups/add/participants/${currentGroup}`,
@@ -190,28 +182,12 @@ const GroupDetails = () => {
       );
 
       if (response.ok) {
-        // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
-        // setCurrentParticipants(updatedList);
-        // setIsParticipantsAdd(false);
-        // console.log("aggiorno stato globale con:", newParticipants);
-        // const newParticipantsForGlobalState = newParticipants.map((p) => ({
-        //   partecipante_id: p.user_id, // Assicurati che il nome della chiave sia corretto per il tuo DB
-        //   utenti: {
-        //     user_id: p.user_id,
-        //     nome: p.nome,
-        //     handle: p.handle,
-        //   },
-        // }));
-        // setCurrentGroupData((prevData) => {
-        //   return {
-        //     ...prevData,
-        //     partecipanti_gruppo: [
-        //       ...prevData.partecipanti_gruppo,
-        //       ...newParticipantsForGlobalState,
-        //     ],
-        //   };
-        // });
-        // Nota: qui potresti voler chiamare una funzione dal tuo Context per rinfrescare i dati globali
+        currentSocket.emit(
+          "add_participants",
+          currentGroup,
+          localParticipants,
+          currentParticipants
+        );
       }
     } catch (error) {
       console.error("Errore durante l'invio:", error);
@@ -237,29 +213,25 @@ const GroupDetails = () => {
       );
     }
   }, [currentGroupData.partecipanti_gruppo]);
-  useEffect(() => {
-    if (
-      !isEditingDescription &&
-      currentDescription !== currentGroupData.descrizione
-    ) {
-      editField("descrizione");
-    }
-  }, [isEditingDescription]);
-  useEffect(() => {
-    if (!isEditingTitle && currentTitle !== currentGroupData.nome) {
-      editField("nome");
-    }
-  }, [isEditingTitle]);
 
   useEffect(() => {
-    setCurrentDescription(currentGroupData.descrizione);
-  }, [currentGroupData.descrizione]);
-  useEffect(() => {
-    setCurrentGroupImg(currentGroupData.group_cover_img);
-  }, [currentGroupData.group_cover_img]);
-  useEffect(() => {
-    setCurrentTitle(currentGroupData.nome);
-  }, [currentGroupData.nome]);
+    if (currentGroupData) {
+      const { descrizione, nome, group_cover_img } = currentGroupData;
+      const usefulGroupData = { descrizione, nome, group_cover_img };
+      let hasChanged = false;
+      const updatedState = { ...localGroupData };
+      for (const key in usefulGroupData) {
+        if (usefulGroupData[key] !== localGroupData[key]) {
+          updatedState[key] = usefulGroupData[key];
+          hasChanged = true;
+        }
+      }
+      if (hasChanged) {
+        setLocalGroupData(updatedState);
+      }
+    }
+  }, [currentGroupData]);
+
   useEffect(() => {
     if (currentGroupData.partecipanti_gruppo && !isAdmin) {
       currentGroupData.partecipanti_gruppo.forEach((p) => {
@@ -268,19 +240,16 @@ const GroupDetails = () => {
         }
       });
     }
-    setCurrentTitle(currentGroupData.nome);
   }, [currentGroupData.partecipanti_gruppo]);
-  useEffect(() => {
-    setCurrentTitle(currentGroupData.nome);
-  }, [currentGroupData.nome]);
-  const editField = async (field) => {
+  const editField = async () => {
     try {
       const response = await fetch(
         `http://localhost:3000/api/groups/modify/${currentGroup}`,
         {
           method: "PATCH",
           body: JSON.stringify({
-            [field]: field == "descrizione" ? currentDescription : currentTitle,
+            field: currentEditingField,
+            fieldValue: localGroupData[currentEditingField],
           }),
           headers: {
             "Content-Type": "application/json",
@@ -293,7 +262,7 @@ const GroupDetails = () => {
         setCurrentGroupData((prevData) => {
           return {
             ...prevData,
-            [field]: field == "descrizione" ? currentDescription : currentTitle,
+            [currentEditingField]: localGroupData[currentEditingField],
           };
         });
 
@@ -302,8 +271,7 @@ const GroupDetails = () => {
             if (group.group_id == currentGroup) {
               return {
                 ...group,
-                [field]:
-                  field == "descrizione" ? currentDescription : currentTitle,
+                [currentEditingField]: localGroupData[currentEditingField],
               };
             }
             return group;
@@ -312,8 +280,8 @@ const GroupDetails = () => {
         currentSocket.emit(
           "edit_field",
           currentGroup,
-          field,
-          field == "descrizione" ? currentDescription : currentTitle,
+          currentEditingField,
+          localGroupData[currentEditingField],
           currentParticipants
         );
       }
@@ -321,7 +289,6 @@ const GroupDetails = () => {
       console.error("Errore durante l'invio:", error);
     }
   };
-  console.log(currentGroupData);
   const handleRemoveParticipants = async (partecipante) => {
     try {
       const response = await fetch(
@@ -385,6 +352,59 @@ const GroupDetails = () => {
       }
     } catch (error) {
       console.error("Errore durante l'invio:", error);
+    }
+  };
+
+  const handleFinishEdit = async () => {
+    if (
+      localGroupData[currentEditingField] !==
+      currentGroupData[currentEditingField]
+    ) {
+      if (validateField()) {
+        await editField(); // Esegui la fetch
+      }
+    }
+    setCurrentEditingField(null); // Chiudi l'edit solo dopo
+  };
+
+  const validateField = () => {
+    if (currentEditingField == "descrizione") {
+      if (localGroupData.descrizione.length < 10) {
+        setFormError({
+          type: "descrizione",
+          message: "la descrizione deve essere minimo 10 caratteri",
+        });
+        return false;
+      }
+      if (localGroupData.descrizione.length > 350) {
+        setFormError({
+          type: "descrizione",
+          message: "La descrizione può essere massimo 350 caratteri",
+        });
+        return false;
+      }
+      setFormError(null);
+
+      return true;
+    }
+    if (currentEditingField == "nome") {
+      if (localGroupData.nome.length < 3) {
+        setFormError({
+          type: "nome",
+          message: "il titolo deve avere almeno 3 caratteri",
+        });
+        return false;
+      }
+      if (localGroupData.nome.length > 20) {
+        setFormError({
+          type: "nome",
+          message: "il titolo può avere massimo 20 caratteri",
+        });
+        return false;
+      }
+      setFormError(null);
+
+      return true;
     }
   };
   const handleMakeAdmin = async (partecipante) => {
@@ -467,7 +487,7 @@ const GroupDetails = () => {
                         accept="image/*"
                       />
                       <div className="flex flex-col gap-2 w-full items-center">
-                        {currentGroupImg == null ? (
+                        {localGroupData.group_cover_img == null ? (
                           <div
                             className="rounded-full w-48 h-48 "
                             onClick={() => {
@@ -501,33 +521,15 @@ const GroupDetails = () => {
                             className="absolute rounded-full -top-2.5 -right-5 rotate-270 p-1.5 bg-primary"
                             onClick={() => {
                               console.log("voglio modificare il titolo");
-                              if (isEditingTitle == false) {
+                              if (currentEditingField != "nome") {
                                 console.log("era false lo metto true");
-                                setIsEditingTitle(true);
+                                setCurrentEditingField("nome");
                               } else {
-                                console.log("era true facci ocontrolli");
-                                if (currentTitle.length < 3) {
-                                  setFormError({
-                                    type: "title",
-                                    message:
-                                      "il titolo deve avere almeno 3 caratteri",
-                                  });
-                                  return;
-                                }
-                                if (currentTitle.length > 20) {
-                                  setFormError({
-                                    type: "title",
-                                    message:
-                                      "il titolo può avere massimo 20 caratteri",
-                                  });
-                                  return;
-                                }
-                                setFormError(null);
-                                setIsEditingTitle(false);
+                                handleFinishEdit();
                               }
                             }}
                           >
-                            {isEditingTitle ? (
+                            {currentEditingField == "nome" ? (
                               <X fill="#ffffff" stroke="#ffffff" size={12} />
                             ) : (
                               <Edit2
@@ -539,17 +541,19 @@ const GroupDetails = () => {
                           </div>
                         )}
 
-                        {isEditingTitle ? (
+                        {currentEditingField == "nome" ? (
                           <div className="flex flex-col gap-2 ">
                             <input
                               className="text-2xl font-bold text-text-1 leading-tight p-1 focus:outline-none text-center"
                               autoFocus
-                              value={currentTitle}
+                              value={localGroupData.nome}
                               onChange={(e) => {
-                                setCurrentTitle(e.target.value);
+                                setLocalGroupData((prevData) => {
+                                  return { ...prevData, nome: e.target.value };
+                                });
                               }}
                             />
-                            {formError && formError.type == "title" && (
+                            {formError && formError.type == "nome" && (
                               <span className="text-sm font-body  text-red-500 ">
                                 {formError.message}
                               </span>
@@ -557,7 +561,7 @@ const GroupDetails = () => {
                           </div>
                         ) : (
                           <h1 className="text-2xl font-bold text-text-1 leading-tight">
-                            {currentTitle}
+                            {localGroupData.nome}
                           </h1>
                         )}
                       </div>
@@ -577,44 +581,33 @@ const GroupDetails = () => {
                       <h3
                         className="text-xs font-bold font-body text-primary uppercase tracking-wide mb-1"
                         onClick={() => {
-                          if (isEditingDescription == false) {
-                            setIsEditingDescription(true);
+                          if (currentEditingField != "descrizione") {
+                            setCurrentEditingField("descrizione");
                           } else {
-                            if (currentDescription.length < 10) {
-                              setFormError({
-                                type: "title",
-                                message:
-                                  "la descrizione deve essere minimo 10 caratteri",
-                              });
-                              return;
-                            }
-                            if (currentTitle.length > 350) {
-                              setFormError({
-                                type: "title",
-                                message:
-                                  "La descrizione può essere massimo 350 caratteri",
-                              });
-                              return;
-                            }
-                            setFormError(null);
-                            setIsEditingDescription(false);
+                            handleFinishEdit();
                           }
                         }}
                       >
-                        {isEditingDescription ? "Fine" : "Modifica"}
+                        {currentEditingField == "descrizione"
+                          ? "Fine"
+                          : "Modifica"}
                       </h3>
                     )}
                   </div>
-                  {isEditingDescription ? (
+                  {currentEditingField == "descrizione" ? (
                     <div className="flex flex-col gap-2">
                       <textarea
-                        value={currentDescription}
+                        value={localGroupData.descrizione}
                         className="text-text-1 font-body text-sm leading-relaxed w-full p-1.5 border-2 border-primary rounded-lg focus:outline-none resize-none "
-                        onChange={(e) => setCurrentDescription(e.target.value)}
+                        onChange={(e) =>
+                          setLocalGroupData((prevData) => {
+                            return { ...prevData, descrizione: e.target.value };
+                          })
+                        }
                         rows={2}
                         autoFocus
                       ></textarea>
-                      {formError && formError.type == "description" && (
+                      {formError && formError.type == "descrizione" && (
                         <span className="text-sm font-body  text-red-500 ">
                           {formError.message}
                         </span>
@@ -623,9 +616,9 @@ const GroupDetails = () => {
                   ) : (
                     <span className="text-text-1 font-body text-sm leading-relaxed">
                       {isExpanded
-                        ? currentDescription
-                        : `${currentDescription.slice(0, 120)}`}
-                      {currentDescription.length > 120 && (
+                        ? localGroupData.descrizione
+                        : `${localGroupData.descrizione.slice(0, 120)}`}
+                      {localGroupData.descrizione.length > 120 && (
                         <span
                           className="text-primary font-semibold text-sm hover:underline"
                           onClick={() => {

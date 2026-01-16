@@ -277,11 +277,12 @@ const newGroup = async (req) => {
 const modify = async (req) => {
   const { group_id } = req.params;
   const body = req.body;
-
+  console.log("dal fronted mi arriva il body:", body);
   const { data, error } = await supabase
     .from("gruppi")
-    .update([{ ...body }])
+    .update([{ [body.field]: body.fieldValue }])
     .eq("group_id", group_id);
+  if (error) console.log("errore agg", error);
   return { data, error };
 };
 

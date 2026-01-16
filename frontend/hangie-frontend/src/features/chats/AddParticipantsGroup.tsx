@@ -91,13 +91,6 @@ const AddParticipantsGroup = ({
             });
             if (isGroup) {
               onConfirm(localParticipants);
-
-              currentSocket.emit(
-                "add_participants",
-                currentGroup,
-                localParticipants,
-                currentParticipants
-              );
             }
             setIsParticipantsAdd(false);
           }}

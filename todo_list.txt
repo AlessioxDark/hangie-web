@@ -3,4 +3,4 @@ fare refattorizzazzione socket
 fare refattorizzazione backend e gestire dati
 fare pagina eventi per mobile
 fare eliminazione e gestioen eventi
-aggiungere esonsive
+aggiungere resonsive
