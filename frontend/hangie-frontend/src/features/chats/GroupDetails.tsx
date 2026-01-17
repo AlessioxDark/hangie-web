@@ -24,7 +24,7 @@ const GroupDetails = () => {
     return currentGroupData?.partecipanti_gruppo?.some(
       (p) =>
         p.role === "admin" &&
-        (p.partecipante_id || p.user_id) === session.user.id
+        (p.partecipante_id || p.user_id) === session.user.id,
     );
   }, [currentGroupData, session.user.id]);
 
@@ -56,7 +56,7 @@ const GroupDetails = () => {
     // 1. Troviamo chi è veramente nuovo (quelli in updatedList che non sono in currentGroupData)
     const newParticipants = updatedList.filter((participant) => {
       return !currentGroupData.partecipanti_gruppo.some(
-        (original) => original.utenti.user_id === participant.user_id
+        (original) => original.utenti.user_id === participant.user_id,
       );
     });
 
@@ -80,15 +80,15 @@ const GroupDetails = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
         currentSocket.emit(
           "add_participants",
           currentGroup,
-          localParticipants,
-          currentParticipants
+          updatedList,
+          currentParticipants,
         );
       }
     } catch (error) {
@@ -100,7 +100,7 @@ const GroupDetails = () => {
     if (currentGroupData.partecipanti_gruppo) {
       console.log(
         "il nuovo partecipanti",
-        currentGroupData.partecipanti_gruppo
+        currentGroupData.partecipanti_gruppo,
       );
       setCurrentParticipants(
         currentGroupData?.partecipanti_gruppo?.map((partecipante) => {
@@ -111,7 +111,7 @@ const GroupDetails = () => {
             handle: utenti.handle,
             user_id: utenti.user_id,
           };
-        }) || []
+        }) || [],
       );
     }
   }, [currentGroupData.partecipanti_gruppo]);
@@ -148,7 +148,7 @@ const GroupDetails = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -175,7 +175,6 @@ const GroupDetails = () => {
           currentGroup,
           currentEditingField,
           localGroupData[currentEditingField],
-          currentParticipants
         );
       }
     } catch (error) {

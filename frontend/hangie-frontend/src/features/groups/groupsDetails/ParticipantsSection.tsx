@@ -28,7 +28,7 @@ const ParticipantsSection = ({
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -50,17 +50,12 @@ const ParticipantsSection = ({
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
         console.log("invio il socket a tutti tranne me");
-        currentSocket.emit(
-          "remove_participant",
-          currentGroup,
-          partecipante,
-          currentParticipants
-        );
+        currentSocket.emit("remove_participant", currentGroup, partecipante);
         // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
         // setCurrentParticipants((prev) =>
         //   prev.filter((p) => p.user_id !== partecipante.user_id)

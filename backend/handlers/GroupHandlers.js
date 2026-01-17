@@ -8,12 +8,12 @@ const groupHandlers = (io, socket) => {
   socket.on(
     "add_participants",
     async (groupId, newParticipants, allParticipants) => {
-      console.log("ricevuto add participants server.js");
-      // manca creatore gruppo in participants
-
+      const { data: allParticipants, error: participantsError } = await supabase
+        .from("partecipanti_gruppo")
+        .select("*,utenti(*),");
       const addedParticipants = newParticipants.filter((p) => {
         return !allParticipants.some(
-          (original) => original.user_id == p.user_id
+          (original) => original.user_id == p.user_id,
         );
       });
       const newAddedParticipants = addedParticipants.map((np) => {
@@ -35,19 +35,27 @@ const groupHandlers = (io, socket) => {
           addedParticipants: newAddedParticipants,
         });
       });
-    }
+    },
   );
-  socket.on("edit_field", async (groupId, field, fieldValue, participants) => {
+  socket.on("edit_field", async (groupId, field, fieldValue) => {
     console.log("ricevuto add participants server.js");
     // manca creatore gruppo in participants
+    try {
+      const { data: participants, error: participantsError } = await supabase
+        .from("partecipanti_gruppo")
+        .select("*,user_id:partecipante_id");
+      if (participantsError) throw participantsError;
 
-    participants.forEach((p) => {
-      io.to(p.partecipante_id).emit("edited_field", {
-        group_id: groupId,
-        field,
-        fieldValue,
+      participants.forEach((p) => {
+        io.to(p.partecipante_id).emit("edited_field", {
+          group_id: groupId,
+          field,
+          fieldValue,
+        });
       });
-    });
+    } catch (err) {
+      console.log("c'è un err", err);
+    }
   });
   socket.on("admin_participant", async (groupId, participant) => {
     try {
@@ -109,7 +117,7 @@ const groupHandlers = (io, socket) => {
           groupData,
           participantsWithRoles,
           imgUrl,
-          sender
+          sender,
         );
         io.to(p.user_id).emit("new_notification", {
           type: "new_group",
@@ -153,7 +161,7 @@ const groupHandlers = (io, socket) => {
           participant,
         });
       });
-    }
+    },
   );
 };
 module.exports = groupHandlers;
