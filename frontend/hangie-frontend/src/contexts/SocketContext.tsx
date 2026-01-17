@@ -1,40 +1,9 @@
-import React, {
-  Component,
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useChat } from "./ChatContext";
+import { type GroupData } from "@/types/chat";
 
-type UUID = string;
-interface User {
-  user_id: UUID;
-  nome: string;
-  handle: string;
-  profile_pic: string | null;
-}
-interface Participant {
-  correlation_id: UUID;
-  role: "admin" | "member";
-  joinedAt: string;
-  group_id: UUID;
-  user: User;
-}
-interface GroupData {
-  nome: string;
-  partecipanti_gruppo: Participant[];
-  group_id: UUID;
-  descrizione: string;
-  createdBy: UUID;
-  created_at: string;
-  group_cover_img: string | null;
-  event_id: UUID | null;
-  updated_at: string | null;
-}
 const SocketContext = createContext({
   currentSocket: null,
 });
@@ -49,10 +18,8 @@ export const useSocket = () => {
 
   return context;
 };
-interface SocketProps {
-  children: Component;
-}
-export const SocketProvider = ({ children }: SocketProps) => {
+
+export const SocketProvider = ({ children }) => {
   const [currentSocket, setCurrentSocket] = useState(null); // Usiamo lo stato invece di useRef per la disponibilità
   const {
     setCurrentChatData,
@@ -81,21 +48,18 @@ export const SocketProvider = ({ children }: SocketProps) => {
     socket.on("connect", () => {
       console.log("Socket.IO Connesso! ID:", socket.id);
       socket.emit("identify_user", session.user.id);
-      setCurrentSocket(socket); // Questo scatena il re-render dei figli
+      setCurrentSocket(socket);
     });
     socket.on("receive_message", (data) => {
-      console.log("Messaggio intercettato globalmente:", data);
-
-      console.log("sto per aggiornare");
       const isMe = data.sender_id === session?.user?.id;
-      const lastMessage = {
+      const newMessage = {
         message_id: data.message_id,
         content: data.message,
         group_id: data.group_id,
         user_id: data.sender_id,
         sent_at: Date.now(),
         isUser: isMe,
-        isSent: !isMe, // Più pulito: se non sono io, è arrivato. Se sono io, aspetto conferma.
+        isSent: !isMe,
         isRead: false,
         utenti: data.sender,
       };
@@ -104,7 +68,7 @@ export const SocketProvider = ({ children }: SocketProps) => {
           String(g.group_id) === data.group_id
             ? {
                 ...g,
-                ultimoMessaggio: lastMessage,
+                ultimoMessaggio: newMessage,
                 updated_at: new Date().toISOString(),
               }
             : g
@@ -112,20 +76,6 @@ export const SocketProvider = ({ children }: SocketProps) => {
       );
       setMessagesMap((messMap) => {
         const existingMessages = messMap[data.group_id] || [];
-        console.log("exmess", existingMessages);
-        // Protezione anti-duplicati anche qui
-
-        const newMessage = {
-          message_id: data.message_id,
-          content: data.message,
-          group_id: data.group_id,
-          user_id: data.sender_id,
-          sent_at: Date.now(),
-          isUser: isMe,
-          isSent: !isMe, // Più pulito: se non sono io, è arrivato. Se sono io, aspetto conferma.
-          isRead: false,
-          utenti: data.sender,
-        };
 
         return {
           ...messMap,
@@ -138,42 +88,22 @@ export const SocketProvider = ({ children }: SocketProps) => {
             console.log("Nessuna chat aperta (prevData è null)");
             return prevData;
           }
-          // Controllo fondamentale: la chat aperta è la stessa del messaggio in arrivo?
-          // Usiamo String() per evitare conflitti tra tipi Number e String
-          const currentId = String(prevData.group_id);
-          const incomingId = String(data.group_id);
+
           if (!prevData || String(prevData.group_id) !== String(data.group_id))
             return prevData;
 
           // BLOCCA DUPLICATI: Se il messaggio esiste già (perché lo hai inviato tu ottimisticamente), non aggiungerlo
           if (prevData.messaggi.some((m) => m.message_id === data.message_id))
             return prevData;
-          console.log(
-            `Confronto ID: Locale(${currentId}) vs In arrivo(${incomingId})`
-          );
+
           // Aggiungiamo il messaggio all'array
           return {
             ...prevData,
-            messaggi: [
-              ...prevData.messaggi,
-              {
-                message_id: data.message_id,
-                content: data.message,
-                group_id: data.group_id,
-                user_id: data.sender_id,
-                sent_at: Date.now(),
-                isUser: isMe,
-                isSent: !isMe,
-                isRead: false,
-                utenti: data.sender,
-              },
-            ],
+            messaggi: [...prevData.messaggi, newMessage],
           };
         });
       }
-      console.log("sono me?", isMe);
       if (!isMe) {
-        console.log("non sono me faccio sent");
         socket.emit(
           "message_sent",
           data.message_id,
@@ -185,8 +115,6 @@ export const SocketProvider = ({ children }: SocketProps) => {
 
     // 3. ASCOLTA QUANDO I TUOI MESSAGGI ARRIVANO AGLI ALTRI (Doppia spunta per te)
     socket.on("message_arrived", (data) => {
-      // notifica
-      console.log("messa rrivato a me");
       setMessagesMap((messMap) => {
         return {
           ...messMap,
@@ -211,18 +139,11 @@ export const SocketProvider = ({ children }: SocketProps) => {
     });
 
     socket.on("added_new_group", (groupId, data, participants, imgUrl) => {
-      console.log(data);
       const nuoviPartecipanti = participants.map((p) => {
         return {
           utenti: { nome: p.nome, handle: p.handle, user_id: p.user_id },
           ...p,
         };
-      });
-      console.log("aggiorno data perchè intercettato", {
-        group_id: groupId,
-        group_cover_img: imgUrl,
-        ...data.groupData,
-        partecipanti_gruppo: nuoviPartecipanti,
       });
 
       setGroupsData((prev) => {
@@ -240,14 +161,11 @@ export const SocketProvider = ({ children }: SocketProps) => {
 
     socket.on("left_group", (groupId, userId) => {
       // notifica
-      console.log("ricevuto left group");
       if (session.user.id == userId) {
-        console.log("sono quello uscito");
         setGroupsData((prev) => {
           return prev.filter((group) => group.group_id !== groupId);
         });
       } else {
-        console.log("sono quello non uscito");
         setGroupsData((prev) => {
           return prev.map((group) => {
             if (group.group_id == groupId) {
@@ -259,12 +177,7 @@ export const SocketProvider = ({ children }: SocketProps) => {
             return group;
           });
         });
-        console.log("mi trovo in", currentGroupData.group_id);
-        console.log("qualcuno è uscito in ", groupId);
         if (currentGroupData.group_id == groupId) {
-          console.log(
-            "non sono quello uscito e mi trovo nel gruppo che qualcuno ha abbandonato"
-          );
           setCurrentGroupData((prev) => {
             const newParticipants = prev.partecipanti_gruppo.filter(
               (p) => p.partecipante_id !== userId
@@ -275,10 +188,6 @@ export const SocketProvider = ({ children }: SocketProps) => {
       }
     });
     socket.on("removed_participant", (data) => {
-      console.log("arrivato removed_participant al frontend");
-      console.log("dati dal socket", data);
-      console.log("groupsData", groupsData);
-      console.log("currentGroupData", currentGroupData);
       setGroupsData((prev) => {
         // Usiamo MAP per creare un nuovo array, non forEach
         return prev.map((group) => {
@@ -302,10 +211,6 @@ export const SocketProvider = ({ children }: SocketProps) => {
       }
     });
     socket.on("added_participants", (data) => {
-      console.log("arrivato added_participatns al frontend");
-      console.log("dati dal socket", data);
-      console.log("groupsData", groupsData);
-      console.log("currentGroupData", currentGroupData);
       setGroupsData((prev) => {
         // Usiamo MAP per creare un nuovo array, non forEach
         return prev.map((group) => {
@@ -335,10 +240,6 @@ export const SocketProvider = ({ children }: SocketProps) => {
     });
 
     socket.on("edited_field", (data) => {
-      console.log("arrivato edited_field al frontend");
-      console.log("dati dal socket", data);
-      console.log("groupsData", groupsData);
-      console.log("currentGroupData", currentGroupData);
       setGroupsData((prev) => {
         // Usiamo MAP per creare un nuovo array, non forEach
         return prev.map((group) => {
@@ -351,18 +252,7 @@ export const SocketProvider = ({ children }: SocketProps) => {
           return group;
         });
       });
-      console.log(
-        "non mi trovo nel gruppo",
-        currentGroupData.group_id,
-        data.group_id
-      );
       if (currentGroupData.group_id == data.group_id) {
-        console.log(
-          "mi trovo nel gruppo",
-          currentGroupData.group_id,
-          data.group_id
-        );
-        console.log("aggiorno campo con valore", data.field, data.fieldValue);
         setCurrentGroupData((prev) => {
           return {
             ...prev,
@@ -431,15 +321,15 @@ export const SocketProvider = ({ children }: SocketProps) => {
         return [...prev, eventMessage];
       });
     });
-    socket.on("give_read", (data) => {
+    socket.on("give_read_bulk", (data) => {
       // notifica
-      console.log("DENTRO GIVING READ! ID messaggio:", data.message_id);
+      console.log("arrivato bulk frontend");
 
       setMessagesMap((messMap) => {
         return {
           ...messMap,
           [data.group_id]: messMap[data.group_id]?.map((mess) => {
-            return mess.message_id === data.message_id
+            return data.message_ids.includes(mess.message_id)
               ? { ...mess, isRead: true }
               : mess;
           }),
@@ -451,12 +341,15 @@ export const SocketProvider = ({ children }: SocketProps) => {
           return {
             ...prevData,
             messaggi: prevData.messaggi.map((m) =>
-              m.message_id === data.message_id ? { ...m, isRead: true } : m
+              data.message_ids.includes(m.message_id)
+                ? { ...m, isRead: true }
+                : m
             ),
           };
         });
       }
     });
+
     return () => {
       console.log("Pulizia socket e rimozione listener...");
       socket.off("receive_message");
@@ -467,7 +360,7 @@ export const SocketProvider = ({ children }: SocketProps) => {
       socket.off("added_participants");
       socket.off("removed_participant");
       socket.off("admined_participant");
-      socket.off("give_read");
+      socket.off("give_read_bulk");
       socket.off("sent_event");
       socket.disconnect();
     };

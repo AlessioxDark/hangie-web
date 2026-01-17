@@ -98,7 +98,6 @@ const CreateEventForm = () => {
       "send_event",
       event_id,
       currentGroup,
-      session.access_token,
       event_details,
       message_details
     );

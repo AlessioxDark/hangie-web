@@ -28,7 +28,7 @@ const Chats = () => {
       "send_message",
       trimmedInput, // 1. message
       currentGroupData.group_id,
-      currentGroupData?.partecipanti_gruppo,
+      // currentGroupData?.partecipanti_gruppo,
       session.access_token, // 4. token
       {
         group_cover_img: currentGroupData.group_cover_img,
@@ -41,19 +41,28 @@ const Chats = () => {
   };
   useEffect(() => {
     if (messaggi) {
-      const messaggiDaLeggere = messaggi.filter(
-        (m) => !m.isRead && m.user_id !== session?.user?.id
-      );
+      console.log("invio bulk ");
+
+      const messaggiDaLeggere = messaggi
+        .filter((m) => !m.isRead && m.user_id !== session?.user?.id)
+        .map((m) => m.message_id);
 
       if (currentSocket && messaggiDaLeggere?.length > 0) {
-        messaggiDaLeggere.forEach((mess) => {
-          currentSocket.emit(
-            "message_read",
-            mess.message_id,
-            session.user.id,
-            currentGroup
-          );
-        });
+        // messaggiDaLeggere.forEach((mess) => {
+        //   currentSocket.emit(
+        //     "message_read",
+        //     mess.message_id,
+        //     session.user.id,
+        //     currentGroup
+        //   );
+        // });
+
+        currentSocket.emit(
+          "message_read_bulk",
+          messaggiDaLeggere,
+          session.user.id,
+          currentGroup
+        );
       }
     }
   }, [messaggi.length, currentSocket, session.user.id, currentGroup, messaggi]);
