@@ -49,27 +49,40 @@ const groupHandlers = (io, socket) => {
       });
     });
   });
-  socket.on("admin_participant", async (groupId, participant, participants) => {
-    console.log("ricevuto admin participant server.js");
-    // manca creatore gruppo in participants
-    console.log(participant, participants);
-    participants.forEach((p) => {
-      io.to(p.user_id || p.partecipante_id).emit("admined_participant", {
-        group_id: groupId,
-        participant,
-        participants,
+  socket.on("admin_participant", async (groupId, participant) => {
+    try {
+      const { data: participants, error: participantsError } = await supabase
+        .from("partecipanti_gruppo")
+        .select("*,user_id:partecipante_id");
+      if (participantsError) throw participantsError;
+
+      participants.forEach((p) => {
+        io.to(p.user_id).emit("admined_participant", {
+          group_id: groupId,
+          participant,
+          participants,
+        });
       });
-    });
+    } catch (err) {
+      console.log("c'è un err", err);
+    }
   });
-  socket.on(
-    "add_new_group",
-    async (groupId, groupData, participants, imgUrl, creatorId) => {
-      console.log("ricevuto add new group server.js");
-      // manca creatore gruppo in participants
-      const { data: sender, error: userError } = await supabase
-        .from("utenti")
-        .select("*")
-        .eq("user_id", creatorId);
+  socket.on("add_new_group", async (groupId, groupData, imgUrl, creatorId) => {
+    try {
+      const [
+        { data: sender, error: userError },
+
+        { data: participants, error: participantsError },
+      ] = await Promise.all([
+        supabase.from("utenti").select("*").eq("user_id", creatorId).single(),
+
+        supabase
+          .from("partecipanti_gruppo")
+          .select("*,user_id:partecipante_id,utenti(*)")
+          .eq("group_id", groupId),
+      ]);
+      if (userError) throw userError;
+      if (participantsError) throw participantsError;
       const insertNotification = participants.map((p) => {
         return {
           type: "new_group",
@@ -79,57 +92,55 @@ const groupHandlers = (io, socket) => {
           user_id: p.user_id,
         };
       });
-      const { data: notificationData, error: notificationError } =
-        await supabase.from("notifiche").insert(insertNotification);
-      const newParticipants = [
-        ...participants,
-        {
-          user_id: creatorId,
-          handle: sender[0].handle,
-          nome: sender[0].nome,
-        },
-      ];
-      const participantsWithRoles = newParticipants.map((p) => {
+      const { error: notificationError } = await supabase
+        .from("notifiche")
+        .insert(insertNotification);
+      if (notificationError) throw notificationError;
+
+      const participantsWithRoles = participants.map((p) => {
         return p.user_id == creatorId
           ? { ...p, role: "admin" }
           : { ...p, role: "member" };
       });
-      newParticipants.forEach((p) => {
-        console.log("invio added new group a", p.user_id);
+      participants.forEach((p) => {
         io.to(p.user_id).emit(
           "added_new_group",
           groupId,
           groupData,
           participantsWithRoles,
           imgUrl,
-          sender[0]
+          sender
         );
-      });
-
-      participants.forEach((p) => {
         io.to(p.user_id).emit("new_notification", {
           type: "new_group",
-          sender: sender[0],
+          sender: sender,
           receiver: p,
           group_id: groupId,
-          // messaggio: { content: message },
           gruppo: groupData.groupData,
-          user_id: p.user_id, // Il client filtrerà se è per lui
+          user_id: p.user_id,
           created_at: new Date(),
           is_read: false,
         });
       });
+    } catch (err) {
+      console.log("c'è err", err);
     }
-  );
-  socket.on("leave_group", async (groupId, userId, participants) => {
+  });
+  socket.on("leave_group", async (groupId, userId) => {
     console.log("ricevuto leave group server.js");
     // manca creatore gruppo in participants
-
-    io.to(userId).emit("left_group", groupId, userId);
-    console.log("imviando left group a", participants);
-    participants.forEach((p) => {
-      io.to(p.user_id).emit("left_group", groupId, userId);
-    });
+    try {
+      const { data: participants, error: participantsError } = await supabase
+        .from("partecipanti_gruppo")
+        .select("*,user_id:partecipante_id");
+      if (participantsError) throw participantsError;
+      console.log("imviando left group a", participants);
+      participants.forEach((p) => {
+        io.to(p.user_id).emit("left_group", groupId, userId);
+      });
+    } catch (err) {
+      console.log("c'è un err", err);
+    }
   });
   socket.on(
     "remove_participant",

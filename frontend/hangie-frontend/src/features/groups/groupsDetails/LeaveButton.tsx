@@ -4,7 +4,7 @@ import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { useSocket } from "@/contexts/SocketContext";
 import React from "react";
 
-const LeaveButton = ({ currentParticipants }) => {
+const LeaveButton = () => {
   const { session } = useAuth();
   const { setMobileView } = useMobileLayoutChat();
   const { currentGroup } = useChat();
@@ -23,12 +23,7 @@ const LeaveButton = ({ currentParticipants }) => {
           setMobileView("groups");
           console.log("invio emit leave group");
 
-          currentSocket.emit(
-            "leave_group",
-            currentGroup,
-            session.user.id,
-            currentParticipants
-          );
+          currentSocket.emit("leave_group", currentGroup, session.user.id);
         });
     } catch (error) {
       console.log("error", error);

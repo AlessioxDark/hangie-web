@@ -139,13 +139,6 @@ export const SocketProvider = ({ children }) => {
     });
 
     socket.on("added_new_group", (groupId, data, participants, imgUrl) => {
-      const nuoviPartecipanti = participants.map((p) => {
-        return {
-          utenti: { nome: p.nome, handle: p.handle, user_id: p.user_id },
-          ...p,
-        };
-      });
-
       setGroupsData((prev) => {
         return [
           ...prev,
@@ -153,7 +146,7 @@ export const SocketProvider = ({ children }) => {
             group_id: groupId,
             group_cover_img: imgUrl,
             ...data.groupData,
-            partecipanti_gruppo: nuoviPartecipanti,
+            partecipanti_gruppo: participants,
           },
         ];
       });
@@ -170,7 +163,7 @@ export const SocketProvider = ({ children }) => {
           return prev.map((group) => {
             if (group.group_id == groupId) {
               const newParticipants = group.partecipanti_gruppo.filter(
-                (p) => p.partecipante_id !== userId
+                (p) => p.user_id !== userId
               );
               return { ...group, partecipanti_gruppo: newParticipants };
             }
@@ -180,7 +173,7 @@ export const SocketProvider = ({ children }) => {
         if (currentGroupData.group_id == groupId) {
           setCurrentGroupData((prev) => {
             const newParticipants = prev.partecipanti_gruppo.filter(
-              (p) => p.partecipante_id !== userId
+              (p) => p.user_id !== userId
             );
             return { ...prev, partecipanti_gruppo: newParticipants };
           });
@@ -262,12 +255,7 @@ export const SocketProvider = ({ children }) => {
       }
     });
     socket.on("admined_participant", (data) => {
-      console.log("arrivato admined_field al frontend");
-      console.log("dati dal socket", data);
-      console.log("groupsData", groupsData);
-      console.log("currentGroupData", currentGroupData);
       setGroupsData((prev) => {
-        // Usiamo MAP per creare un nuovo array, non forEach
         return prev.map((group) => {
           if (group.group_id === data.group_id) {
             const nuoviPartecipantiGruppo = group.partecipanti_gruppo.map(
@@ -285,17 +273,8 @@ export const SocketProvider = ({ children }) => {
           return group;
         });
       });
-      console.log(
-        "non mi trovo nel gruppo",
-        currentGroupData.group_id,
-        data.group_id
-      );
+
       if (currentGroupData.group_id == data.group_id) {
-        console.log(
-          "mi trovo nel gruppo",
-          currentGroupData.group_id,
-          data.group_id
-        );
         setCurrentGroupData((prev) => {
           const nuoviPartecipantiGruppo = prev.partecipanti_gruppo.map((p) => {
             return p.partecipante_id == data.participant.partecipante_id

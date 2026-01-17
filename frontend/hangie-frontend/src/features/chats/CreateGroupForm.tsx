@@ -137,7 +137,7 @@ const CreateGroupForm = () => {
         "add_new_group",
         groupId,
         result,
-        currentParticipants,
+
         finalImgUrl,
         session.user.id
       );

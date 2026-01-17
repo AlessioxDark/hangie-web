@@ -16,6 +16,7 @@ const ParticipantsSection = ({
   const { currentGroupData, currentGroup } = useChat();
   const { session } = useAuth();
   const { currentSocket } = useSocket();
+  console.log(currentParticipants);
   const handleMakeAdmin = async (partecipante) => {
     try {
       const response = await fetch(
@@ -32,21 +33,7 @@ const ParticipantsSection = ({
 
       if (response.ok) {
         console.log("invio il socket a tutti con me");
-        currentSocket.emit(
-          "admin_participant",
-          currentGroup,
-          partecipante,
-          currentParticipants
-        );
-        // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
-
-        // setCurrentGroupData((prevData) => {
-        //   return {
-        //     ...prevData,
-        //     partecipanti_gruppo: newParticipantsForGlobalState,
-        //   };
-        // });
-        // Nota: qui potresti voler chiamare una funzione dal tuo Context per rinfrescare i dati globali
+        currentSocket.emit("admin_participant", currentGroup, partecipante);
       }
     } catch (error) {
       console.error("Errore durante l'invio:", error);
@@ -111,7 +98,6 @@ const ParticipantsSection = ({
         //     }return group
         //   });
         // });
-        // Nota: qui potresti voler chiamare una funzione dal tuo Context per rinfrescare i dati globali
       }
     } catch (error) {
       console.error("Errore durante l'invio:", error);

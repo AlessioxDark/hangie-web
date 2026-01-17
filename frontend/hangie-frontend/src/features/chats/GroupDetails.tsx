@@ -298,7 +298,7 @@ const GroupDetails = () => {
                 handleParticipantsAdd={handleParticipantsAdd}
               />
             </div>
-            <LeaveButton currentParticipants={currentParticipants} />
+            <LeaveButton />
           </div>
         </div>
       )}
