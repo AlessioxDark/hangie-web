@@ -107,20 +107,19 @@ const modifyEvent = async (req, res) => {
   }
 };
 const addNewEvent = async (req, res) => {
-  console.log("adding new event");
   try {
     const { data, error } = await Event.newEvent(req); // Chiama il modello per ottenere gli eventi
 
     if (error) throw error;
     res.status(200).json({
       success: true,
-      message: "Operazione completata con successo", // Opzionale, utile per i toast
+      message: "Operazione completata con successo",
       data: data,
     });
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Non siamo riusciti a trovare i tuoi eventi in sospeso", // Messaggio generico per l'utente
+      message: "Non siamo riusciti a creare il tuo evento",
       details: err.message,
     });
   }

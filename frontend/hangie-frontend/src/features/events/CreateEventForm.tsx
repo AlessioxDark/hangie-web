@@ -4,7 +4,7 @@ import { useModal } from "@/contexts/ModalContext";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 
@@ -89,8 +89,10 @@ const CreateEventForm = () => {
     trigger,
     formState: { errors, isSubmitting },
     setError,
+    clearErrors,
   } = methods;
   const { currentGroup, currentGroupData } = useChat();
+  const { error: errorsApi } = useApi();
   const { currentScreen } = useScreen();
   const { executeApiCall } = useApi();
   const { setMobileView } = useMobileLayoutChat();
@@ -129,68 +131,12 @@ const CreateEventForm = () => {
 
     if (checkImagesError()) return;
 
-    // try {
-    //   const response = await fetch(
-    //     "http://localhost:3000/api/events/add/create-event",
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-type": "application/json",
-    //         Authorization: `Bearer ${session.access_token}`,
-    //       },
-    //       body: JSON.stringify({
-    //         data: { ...data, group_id: currentGroup }, // Niente images qui
-    //       }),
-    //     }
-    //   );
-    //   const result = await response.json();
-
-    //   if (!response.ok)
-    //     throw new Error(result.error || "Errore creazione evento");
-
-    //   const newEventId = result.event_id;
-
-    //   const uploadPromises = images.map(async (img) => {
-    //     const fileExt = img.file.name.split(".").pop();
-    //     const fileName = `${newEventId}/${img.name}.${fileExt}`;
-    //     const filePath = `${fileName}`;
-    //     const { data: uploadData, error: uploadError } = await supabase.storage
-    //       .from("eventi")
-    //       .upload(filePath, img.file, {
-    //         upsert: true,
-    //         contentType: img.type,
-    //         cacheControl: "3600",
-    //       });
-
-    //     if (uploadError) throw uploadError;
-    //     const { data: urlData } = supabase.storage
-    //       .from("eventi")
-    //       .getPublicUrl(uploadData.path);
-    //     return urlData.publicUrl;
-    //   });
-    //   const uploadedUrls = await Promise.all(uploadPromises);
-
-    //   const cover_url = uploadedUrls[0];
-    //   const { data: coverData, error: coverError } = await supabase
-    //     .from("eventi")
-    //     .update({ cover_img: cover_url })
-    //     .eq("event_id", newEventId);
-
-    //   if (coverError) throw coverError;
-
-    //   const newEventDetails = { ...result.event_details, cover_img: cover_url };
-    //   const messageDetails = result.messageDetails;
-    //   sendEvent(newEventId, newEventDetails, messageDetails);
-
-    //   setMobileView("chat");
-    // } catch (error) {
-    //   setImageError({ message: error.message || "Qualcosa è andato storto" });
-    // }
     console.log("onsubmit");
 
     const handleUploadAndSocket = async (dataArrived) => {
       console.log("aggiunto al database");
       try {
+        clearErrors("root");
         const newEventId = dataArrived.event_id;
 
         const uploadPromises = images.map(async (img) => {
@@ -213,7 +159,7 @@ const CreateEventForm = () => {
         const uploadedUrls = await Promise.all(uploadPromises);
 
         const cover_url = uploadedUrls[0];
-        const { data: coverData, error: coverError } = await supabase
+        const { error: coverError } = await supabase
           .from("eventi")
           .update({ cover_img: cover_url })
           .eq("event_id", newEventId);
@@ -226,8 +172,7 @@ const CreateEventForm = () => {
         };
         const messageDetails = dataArrived.messageDetails;
         sendEvent(newEventId, newEventDetails, messageDetails);
-        throw { message: "problemi" };
-        // setMobileView("chat");
+        setMobileView("chat");
       } catch (error) {
         console.log(error);
         setError("root", {
@@ -235,7 +180,6 @@ const CreateEventForm = () => {
         });
       }
     };
-    console.log("mando api call");
 
     executeApiCall(
       "add_event",
@@ -279,7 +223,7 @@ const CreateEventForm = () => {
       if (imageErr) return;
     }
     const result = await trigger(fieldsByStep[currentStep]);
-    if (result) {
+    if (result && currentStep < 3) {
       setCurrentStep((lastStep) => lastStep + 1);
     }
   };
@@ -290,7 +234,15 @@ const CreateEventForm = () => {
       setMobileView("chat");
     }
   };
-
+  useEffect(() => {
+    console.log("cambiato errr");
+    if (errorsApi?.add_event) {
+      setError("root", { message: errorsApi.add_event.message });
+    } else {
+      // Se non c'è più l'errore nell'API, pulisci il root nel form
+      clearErrors("root");
+    }
+  }, [errorsApi?.add_event]);
   return (
     <div
       className={`w-full max-w-4xl mx-auto rounded-2xl shadow-2xl overflow-hidden bg-bg-1 relative`}

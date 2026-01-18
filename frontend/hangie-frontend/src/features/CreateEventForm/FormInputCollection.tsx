@@ -116,7 +116,11 @@ const FormInputCollection = ({
                   error={errors.cap}
                 />
               </div>
-              {errors.root && <p>{errors.root.message}</p>}
+              {errors.root && (
+                <p className="text-sm font-body  text-red-500 ">
+                  {errors.root.message}
+                </p>
+              )}
             </div>
           );
       }

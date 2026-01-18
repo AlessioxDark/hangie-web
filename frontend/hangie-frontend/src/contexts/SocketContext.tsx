@@ -329,10 +329,16 @@ export const SocketProvider = ({ children }) => {
         type: "event",
         message_id: data.messageDetails.message_id,
         event_details: data.messageDetails.eventi,
-        isUser: session.user.id == data.messageData.user_id,
+        isUser: session.user.id == data.messageDetails.user_id,
       };
       setCurrentChatData((prev) => {
-        return [...prev, eventMessage];
+        return { ...prev, messaggi: [...prev.messaggi, eventMessage] };
+      });
+      setMessagesMap((messMap) => {
+        return {
+          ...messMap,
+          [data.group_id]: [...messMap[data.group_id], eventMessage],
+        };
       });
     });
     socket.on("give_read_bulk", (data) => {

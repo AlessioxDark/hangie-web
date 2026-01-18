@@ -150,7 +150,7 @@ const messageHandlers = (io, socket) => {
 
       if (notificationData && notificationData.length > 0) {
         console.log(
-          `Pulizia di ${notificationData.length} notifiche per l'utente`
+          `Pulizia di ${notificationData.length} notifiche per l'utente`,
         );
 
         io.to(user_id).emit("clear_notifications_count", {
@@ -191,9 +191,10 @@ const messageHandlers = (io, socket) => {
         io.to(p.partecipante_id).emit("sent_event", {
           event: { ...eventDetails, event_id: eventId },
           messageDetails,
+          group_id,
         });
       });
-    }
+    },
   );
 };
 module.exports = messageHandlers;

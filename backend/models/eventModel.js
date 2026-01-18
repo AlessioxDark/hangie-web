@@ -48,7 +48,9 @@ const getAll = async (req) => {
     const EVENTSINPAGE = 12;
 
     const { offset } = req.body;
-    const token = req.headers.authorization.split(" ")[1];
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw new Error({ message: "Token mancante" });
+    const token = authHeader.split(" ")[1];
     const {
       data: { user },
       error: tokenError,
@@ -60,7 +62,6 @@ const getAll = async (req) => {
         "event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,data_scadenza,cover_img,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))",
       )
       .range(offset, offset + EVENTSINPAGE - 1)
-
       .eq("user_id", user.id);
 
     if (error) throw error;
@@ -147,142 +148,93 @@ const modify = async (req) => {
     .eq("event_id", event_id);
   return { data, error };
 };
+const getOrCreateLuogo = async (realBody) => {
+  const { latitudine, longitudine, err } = await getCoords(realBody);
+  if (err) throw err;
 
+  const { data: luogo, error } = await supabase
+    .from("luoghi")
+    .select("luogo_id")
+    .match({ longitudine, latitudine })
+    .maybeSingle(); // Più pulito di .single() se può non esistere
+
+  if (luogo) return luogo.luogo_id;
+
+  const { data: nuovoLuogo, error: insertError } = await supabase
+    .from("luoghi")
+    .insert([
+      { ...realBody, nome: realBody.nome_luogo, latitudine, longitudine },
+    ])
+    .select("luogo_id")
+    .single();
+
+  if (insertError) throw insertError;
+  return nuovoLuogo.luogo_id;
+};
 const newEvent = async (req) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
-    const { images, ...realBody } = req.body.data;
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw { message: "manca header auth" };
+    const token = authHeader.split(" ")[1];
     const {
-      latitudine,
-      longitudine,
-      err: coordError,
-    } = await getCoords({
-      cap: realBody.cap,
-      indirizzo: realBody.indirizzo,
-      citta: realBody.citta,
-    });
-    console.log("dopo funzione");
-    if (coordError) {
-      throw coordError;
-    }
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+    if (authError) throw authError;
 
-    const { data: luogoEsistente, error: luogoEsistenteError } = await supabase
-      .from("luoghi")
-      .select("luogo_id")
-      .eq("longitudine", longitudine)
-      .eq("latitudine", latitudine)
+    const { images, ...realBody } = req.body.data;
+    const group_id = realBody.group_id;
+    const luogoId = await getOrCreateLuogo(realBody);
+    console.log("luogo id", luogoId);
+    const { cap, indirizzo, nome_luogo, citta, ...eventBody } = realBody;
+    const { data: eventData, error: eventError } = await supabase
+      .from("eventi")
+      .insert([{ ...eventBody, luogo_id: luogoId, created_by: user.id }])
+      .select("*")
       .single();
-    console.log("controllo luogo esistente");
-    if (luogoEsistenteError) throw luogoEsistenteError;
-    let luogoId = luogoEsistente?.luogo_id;
-
-    // 2. Se NON esiste, inseriscilo
-    if (!luogoId) {
-      const { data: luogoNuovo, error: insertError } = await supabase
-        .from("luoghi")
+    if (eventError) throw eventError;
+    console.log("arrivo ad event id");
+    const eventId = eventData.event_id;
+    const [
+      { data: messageData, error: errorMessage },
+      { error: eventGroupError },
+      { data: participantsData, error: participantsError },
+    ] = await Promise.all([
+      supabase
+        .from("messaggi")
         .insert([
           {
-            cap: realBody.cap,
-            indirizzo: realBody.indirizzo,
-            citta: realBody.citta,
-            nome: realBody.nome_luogo,
-            latitudine,
-            longitudine,
+            type: "event",
+            event_id: eventId,
+            user_id: user.id,
+            group_id,
           },
         ])
-        .select("luogo_id")
-        .single();
+        .select("*, eventi(*, luoghi(*), utenti(nome, user_id))")
+        .single(),
+      supabase.from("eventi_gruppo").insert([{ event_id: eventId, group_id }]),
+      supabase
+        .from("partecipanti_gruppo")
+        .select("partecipante_id")
+        .eq("group_id", group_id),
+    ]);
+    console.log("prima controllo promise");
 
-      if (insertError) throw insertError;
-
-      luogoId = luogoNuovo.luogo_id;
-    }
-
-    console.log("controllo user");
-
-    const { data: userData, error: userError } =
-      await supabase.auth.getUser(token);
-
-    if (userError) throw userError;
-
-    // L'ID utente (uid) si trova sotto session.user.id
-    const user_id = userData.user.id;
-    const { cap, indirizzo, nome_luogo, citta, ...eventBody } = realBody;
-    const { data: eventData, error } = await supabase
-      .from("eventi")
-      .insert([{ ...eventBody, luogo_id: luogoId, created_by: user_id }])
-      .select("*");
-    if (error) throw error;
-
-    const eventId = eventData?.[0].event_id;
-
-    const { data: messageData, error: errorMessage } = await supabase
-      .from("messaggi")
-      .insert([
-        {
-          type: "event",
-          event_id: eventId,
-          user_id,
-          group_id: realBody.group_id,
-        },
-      ])
-      .select(
-        "*,eventi(*, luoghi(nome, citta, indirizzo),utenti(creatore:nome, user_id),risposte_eventi(*, utenti(profile_pic, user_id, nome))) ",
-      );
     if (errorMessage) throw errorMessage;
-    const imagesPromises = (messageData || []).map(async (event) => {
-      const imagePublicUrls = [];
-      for (let i = 1; i <= 4; i++) {
-        const path = `${event.eventi.event_id}/${i}.jpg`;
-        // Non gestisco l'errore del getPublicUrl perché è implicito che alcune immagini potrebbero non esistere
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("eventi").getPublicUrl(path);
-        imagePublicUrls.push(publicUrl);
-      }
-      return {
-        event_id: event.eventi.event_id,
-        images: imagePublicUrls,
-      };
-    });
-
-    const imagesResults = await Promise.all(imagesPromises);
-    const imageMap = imagesResults.reduce((acc, result) => {
-      acc[result.event_id] = result.images;
-      return acc;
-    }, {});
-
-    const { data: eventGroupData, error: eventGroupError } = await supabase
-      .from("eventi_gruppo")
-      .insert([
-        {
-          event_id: eventId,
-          group_id: realBody.group_id,
-        },
-      ]);
     if (eventGroupError) throw eventGroupError;
-
-    const { data: participantsData, error: participantsError } = await supabase
-      .from("partecipanti_gruppo")
-      .select("partecipante_id")
-      .eq("group_id", realBody.group_id);
     if (participantsError) throw participantsError;
-    const participantsIds = participantsData.reduce((acc, participant) => {
-      acc[participant.partecipante_id] = participant;
-      return acc;
-    });
+    console.log("dopo controllo promise");
+
     const answersToInsert = participantsData.map((participant) => {
-      // Determina lo stato: 'accepted' per il creatore, 'pending' per gli altri
-      const status =
-        participant.partecipante_id === user_id ? "accepted" : "pending";
       return {
         event_id: eventId,
         user_id: participant.partecipante_id,
-        status: status,
-        is_creator: participant.user_id === user_id,
+        status:
+          participant.partecipante_id === user.id ? "accepted" : "pending",
+        is_creator: participant.user_id === user.id,
       };
     });
-    const { data: asnwerInsert, error: answerError } = await supabase
+    const { error: answerError } = await supabase
       .from("risposte_eventi")
       .insert(answersToInsert);
     if (answerError) throw answerError;
@@ -292,8 +244,7 @@ const newEvent = async (req) => {
         event_id: eventId,
         messageDetails: messageData[0],
         event_details: {
-          ...messageData[0].eventi,
-          event_imgs: imageMap[eventId],
+          ...messageData.eventi,
         },
       },
       error: null,
@@ -325,7 +276,9 @@ const modifyResponse = async (req) => {
 const getSuspended = async (req) => {
   try {
     const { offset } = req.body;
-    const token = req.headers.authorization.split(" ")[1];
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw { message: "manca header auth" };
+    const token = authHeader.split(" ")[1];
     const EVENTSINPAGE = 12;
 
     const {
@@ -338,11 +291,10 @@ const getSuspended = async (req) => {
       .select(
         "event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,cover_img,data_scadenza,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))",
       )
-
       .eq("user_id", user.id)
       .eq("status", "pending")
       .range(offset, offset + EVENTSINPAGE - 1);
-    // if (error) throw error;
+    if (error) throw error;
     return { data, error: null };
   } catch (err) {
     return { data: null, error: err };
