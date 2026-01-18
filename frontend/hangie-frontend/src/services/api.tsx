@@ -1,19 +1,19 @@
-import { useState } from "react";
-
 const BASE_URL = "http://localhost:3000/api";
 const handleResponse = async (res) => {
   console.log("arrivata res", res);
   if (!res.ok) {
     console.log("non è ok");
     const errorData = await res.json().catch(() => ({}));
-    console.log("errore durante api call di:", errorData.messsage, res.status);
-    throw new Error(errorData.message || `Errore: ${res.status}`);
+    console.log("errore durante api call di:", errorData.message, res.status);
+    throw { ...errorData, status: res.status };
   }
   console.log("è ok");
   const dataToSend = await res.json();
-  console.log("eccoli:", dataToSend);
-  return await dataToSend;
+  console.log("invio datatosend", dataToSend);
+
+  return dataToSend.data !== undefined ? dataToSend.data : dataToSend;
 };
+
 export const ApiCalls = {
   fetchGroups: async (token) => {
     const res = await fetch(`${BASE_URL}/groups?t=${Date.now()}`, {
@@ -25,6 +25,24 @@ export const ApiCalls = {
     });
     return await handleResponse(res);
   },
+  fetchSuspendedEvents: (token, offset) =>
+    fetch(`${BASE_URL}/events/suspendedevenets/all`, {
+      method: "POST",
+      body: JSON.stringify({ offset }),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }).then(handleResponse),
+  addNewEvent: (token, dataToSend) =>
+    fetch(`${BASE_URL}/events/add/create-event`, {
+      method: "POST",
+      body: JSON.stringify(dataToSend),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }).then(handleResponse),
   fetchChat: async (groupId, token) => {
     const res = await fetch(`${BASE_URL}/groups/${groupId}`, {
       method: "GET",

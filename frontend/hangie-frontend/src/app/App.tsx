@@ -18,56 +18,59 @@ import { MobileLayoutChatProvider } from "@/contexts/MobileLayoutChatContext";
 import { SocketProvider } from "@/contexts/SocketContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import Notification from "./pages/Notification";
+import { ApiContextProvider } from "@/contexts/ApiContext";
 function App() {
   return (
     <BrowserRouter>
       <AuthContextProvider>
         <MobileLayoutChatProvider>
           <ScreenProvider>
-            <ChatProvider>
-              <SocketProvider>
-                <NotificationProvider>
-                  <ModalProvider>
-                    <Routes>
-                      <Route path="/signup" element={<SignUp />}></Route>
-                      <Route path="/login" element={<Login />}></Route>
-                      <Route
-                        path="/notifications"
-                        element={
-                          <ResponsiveLayoutWrapper>
-                            <Notification />
-                          </ResponsiveLayoutWrapper>
-                        }
-                      ></Route>
-                      <Route
-                        path="/chats"
-                        element={
-                          <ResponsiveLayoutWrapper layoutType="chat"></ResponsiveLayoutWrapper>
-                        }
-                      ></Route>
+            <ApiContextProvider>
+              <ChatProvider>
+                <SocketProvider>
+                  <NotificationProvider>
+                    <ModalProvider>
+                      <Routes>
+                        <Route path="/signup" element={<SignUp />}></Route>
+                        <Route path="/login" element={<Login />}></Route>
+                        <Route
+                          path="/notifications"
+                          element={
+                            <ResponsiveLayoutWrapper>
+                              <Notification />
+                            </ResponsiveLayoutWrapper>
+                          }
+                        ></Route>
+                        <Route
+                          path="/chats"
+                          element={
+                            <ResponsiveLayoutWrapper layoutType="chat"></ResponsiveLayoutWrapper>
+                          }
+                        ></Route>
 
-                      <Route
-                        path="/"
-                        element={
-                          <ResponsiveLayoutWrapper>
-                            <Home />
-                          </ResponsiveLayoutWrapper>
-                        }
-                      />
-                      <Route
-                        path="/events/suspended/all"
-                        element={
-                          <ResponsiveLayoutWrapper>
-                            <EventsSuspended />
-                          </ResponsiveLayoutWrapper>
-                        }
-                      />
-                    </Routes>
-                    <ModalHandler />
-                  </ModalProvider>
-                </NotificationProvider>
-              </SocketProvider>
-            </ChatProvider>
+                        <Route
+                          path="/"
+                          element={
+                            <ResponsiveLayoutWrapper>
+                              <Home />
+                            </ResponsiveLayoutWrapper>
+                          }
+                        />
+                        <Route
+                          path="/events/suspended/all"
+                          element={
+                            <ResponsiveLayoutWrapper>
+                              <EventsSuspended />
+                            </ResponsiveLayoutWrapper>
+                          }
+                        />
+                      </Routes>
+                      <ModalHandler />
+                    </ModalProvider>
+                  </NotificationProvider>
+                </SocketProvider>
+              </ChatProvider>
+            </ApiContextProvider>
           </ScreenProvider>
         </MobileLayoutChatProvider>
       </AuthContextProvider>

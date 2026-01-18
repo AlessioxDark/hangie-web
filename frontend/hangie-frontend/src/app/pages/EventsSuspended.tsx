@@ -6,71 +6,50 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { supabase } from "../../config/db";
 import { useScreen } from "@/contexts/ScreenContext";
+import RenderErrorState from "@/features/utils/RenderErrorState";
+import RenderLoadingState from "@/features/utils/RenderLoadingState";
+import { useApi } from "@/contexts/ApiContext";
+import { ApiCalls } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 const EVENTSINPAGE = 12;
 
 const EventsSuspended = () => {
   const [eventsData, setEventsData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [dataError, setDataError] = useState(false);
   const sliderRef = useRef(null);
   const [offset, setOffset] = useState<number>(0);
   const { currentScreen } = useScreen();
-  const fetchEvents = useCallback(async (): Promise<void> => {
-    if (isLoading) return;
+  const { executeApiCall, loading, error } = useApi();
+  const { session } = useAuth();
 
-    try {
-      setDataError(null);
-      setIsLoading(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-      if (session) {
-        const response = await fetch(
-          "http://localhost:3000/api/events/suspendedevenets/all",
-          {
-            method: "POST",
-            body: JSON.stringify({ offset: offset }),
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
+  const saveData = (data) => {
+    if (data.length > 0) {
+      setEventsData((prevData) => {
+        const mergeData = [...prevData, ...data.data];
+
+        const dedupData = Array.from(
+          new Map(mergeData.map((item) => [item.event_id, item])).values(),
         );
-        if (!response.ok) {
-          console.log(response);
-          setDataError(
-            response.statusText || "Errore nel caricamento degli eventi"
-          );
-        }
 
-        const data = await response.json();
-        console.log(data);
-
-        setEventsData((prevData) => {
-          const mergeData = [...prevData, ...data.data];
-
-          const dedupData = Array.from(
-            new Map(mergeData.map((item) => [item.event_id, item])).values()
-          );
-
-          return dedupData;
-        });
-      }
-    } catch (err: any) {
-      console.error("Errore fetch eventi:", err);
-      setDataError(err.message || "Errore nel caricamento degli eventi");
-    } finally {
-      setIsLoading(false);
+        return dedupData;
+      });
     }
-  }, [offset, isLoading]);
+  };
 
+  useEffect(() => {
+    if (session) {
+      executeApiCall(
+        "home_events",
+        () => ApiCalls.fetchSuspendedEvents(session.access_token, offset),
+        saveData,
+      );
+    }
+  }, [offset, executeApiCall, session?.access_token]);
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider) return;
 
     const onScroll = () => {
-      if (isLoading) return; // <--- QUESTA RIGA QUI
+      if (loading.home_events) return;
       const { scrollHeight, scrollTop, clientHeight } = slider;
       const distanzaDalBasso = scrollHeight - scrollTop - clientHeight;
 
@@ -80,45 +59,19 @@ const EventsSuspended = () => {
     };
     slider.addEventListener("scroll", onScroll);
     return () => slider.removeEventListener("scroll", onScroll);
-  }, [isLoading]);
-  useEffect(() => {
-    fetchEvents();
-  }, [offset]);
+  }, [loading.home_events]);
 
+  {
+    /* <div className="flex flex-col items-center justify-center py-20"></div> */
+  }
   const renderContent = useCallback(() => {
-    if (dataError) {
+    if (error.home_events) {
       return (
-        <div className="flex flex-col items-center justify-center py-20">
-          <div className="w-16 h-16 bg-bg-2 rounded-full flex items-center justify-center mb-6">
-            <AlertCircle className="w-8 h-8 text-warning" />
-          </div>
-          <h3 className="text-lg font-medium text-text-1 mb-2">
-            Ops! Qualcosa è andato storto
-          </h3>
-          <p className="text-gray-500 mb-6 text-center">{dataError}</p>
-          <button
-            onClick={() => fetchEvents()}
-            className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
-          >
-            Riprova
-          </button>
-        </div>
+        <RenderErrorState type={"home_events"} reloadFunction={() => {}} />
       );
     }
-    if (isLoading) {
-      return (
-        <div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
-          <div className=" rounded-full flex items-center justify-center mb-6">
-            <Loader2 className="w-16 h-16 text-primary animate-spin" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Caricamento degli eventi...
-          </h3>
-          <p className="text-gray-500 text-center max-w-sm">
-            Stiamo scoprendo le prossime esperienze per te.
-          </p>
-        </div>
-      );
+    if (loading.home_events) {
+      return <RenderLoadingState type={"home"} />;
     }
 
     return (
@@ -146,11 +99,11 @@ const EventsSuspended = () => {
             })}
           </div>
         ) : (
-          <RenderEmptyState />
+          <RenderEmptyState type={"home"} />
         )}
       </>
     );
-  }, [fetchEvents, eventsData, dataError, isLoading]);
+  }, [eventsData, error.home_events, loading.home_events]);
   return (
     <div ref={sliderRef} className="">
       <div className="flex flex-row 2xl:flex-col ">
@@ -171,7 +124,7 @@ const EventsSuspended = () => {
           </Link>
         </div>
 
-        <h1 className="font-body text-text-1 text-xl 2xl:text-4xl font-bold my-2.5 2xl:my-6">
+        <h1 className="font-body text-text-1 text-xl 2xl:text-4xl font-bold 2xl:my-6">
           Eventi in sospeso
         </h1>
       </div>

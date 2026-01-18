@@ -116,6 +116,7 @@ const FormInputCollection = ({
                   error={errors.cap}
                 />
               </div>
+              {errors.root && <p>{errors.root.message}</p>}
             </div>
           );
       }

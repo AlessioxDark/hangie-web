@@ -5,9 +5,8 @@ const supabase = require("../config/db");
 const getAllGroups = async (req, res) => {
   try {
     const { data, error } = await Group.getAll(req); // Chiama il modello per ottenere gli eventi
-    if (error) {
-      throw new Error(error);
-    }
+    if (error) throw new Error(error);
+
     const formattedData = data.map((row) => {
       let ultimoMessaggio = null;
       row.gruppi.messaggi.forEach((messaggio) => {

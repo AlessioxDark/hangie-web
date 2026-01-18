@@ -10,6 +10,7 @@ import { useMobileLayoutChat } from "./MobileLayoutChatContext.js";
 import { useScreen } from "./ScreenContext.js";
 import { type Message, type UUID, type GroupData } from "../types/chat.tsx";
 import { ApiCalls } from "@/services/api.tsx";
+import { useApi } from "./ApiContext.tsx";
 
 export const ChatContext = createContext({
   currentChatData: null,
@@ -44,28 +45,28 @@ export const useChat = () => {
 
 export const ChatProvider = ({ children }) => {
   const [currentChatData, setCurrentChatData] = useState<Message[] | null>(
-    null
+    null,
   );
   const [currentGroup, setCurrentGroup] = useState<UUID | null>(null);
   const [currentGroupData, setCurrentGroupData] = useState<GroupData | null>(
-    null
+    null,
   );
   const [messagesMap, setMessagesMap] = useState<Message[] | object>({});
 
-  const [groupsData, setGroupsData] = useState<GroupData[] | null>(null);
-
-  const [loading, setLoading] = useState({
-    chat: false,
-    home: false,
-    groups: false,
-    events: false,
-  });
-  const [error, setError] = useState({
-    chat: null,
-    home: null,
-    groups: null,
-    events: null,
-  });
+  const [groupsData, setGroupsData] = useState<GroupData[] | null>([]);
+  const { executeApiCall } = useApi();
+  // const [loading, setLoading] = useState({
+  //   chat: false,
+  //   home: false,
+  //   groups: false,
+  //   events: false,
+  // });
+  // const [error, setError] = useState({
+  //   chat: null,
+  //   home: null,
+  //   groups: null,
+  //   events: null,
+  // });
 
   const [homeOffset, setHomeOffset] = useState(0);
   const [homeEventsData, setHomeEventsData] = useState<{
@@ -83,54 +84,55 @@ export const ChatProvider = ({ children }) => {
   const { currentScreen } = useScreen();
   const { session } = useAuth();
 
-  const executeApiCall = useCallback(
-    async (
-      type: "chat" | "groups" | "events" | "home",
-      fetchCall,
-      onSuccess
-    ) => {
-      // if (loading[type]) return;
+  // const executeApiCall = useCallback(
+  //   async (
+  //     type: "chat" | "groups" | "events" | "home",
+  //     fetchCall,
+  //     onSuccess,
+  //   ) => {
+  //     // if (loading[type]) return;
 
-      try {
-        setError((prev) => ({ ...prev, [type]: null }));
-        setLoading((prev) => {
-          return { ...prev, [type]: true };
-        });
-        const data = await fetchCall();
-        onSuccess(data);
-      } catch (err: any) {
-        setError((prev) => {
-          return {
-            ...prev,
-            [type]: {
-              message: err.message || "Errore di connessione",
-              status: err.status || 500,
-              at: Date.now(),
-            },
-          };
-        });
-      } finally {
-        setLoading((prev) => {
-          return { ...prev, [type]: false };
-        });
-      }
-    },
-    []
-  );
+  //     try {
+  //       setError((prev) => ({ ...prev, [type]: null }));
+  //       setLoading((prev) => {
+  //         return { ...prev, [type]: true };
+  //       });
+  //       const data = await fetchCall();
+  //       onSuccess(data);
+  //     } catch (err: any) {
+  //       setError((prev) => {
+  //         return {
+  //           ...prev,
+  //           [type]: {
+  //             message: err.message || "Errore di connessione",
+  //             status: err.status || 500,
+  //             at: Date.now(),
+  //             details: err.details,
+  //           },
+  //         };
+  //       });
+  //     } finally {
+  //       setLoading((prev) => {
+  //         return { ...prev, [type]: false };
+  //       });
+  //     }
+  //   },
+  //   [],
+  // );
   const fetchEvents = useCallback(async (): Promise<void> => {
     const saveData = (data) => {
       setHomeEventsData((prevData) => {
         const mergeAccepted = [...prevData.accepted, ...data.accepted];
         const dedupAccepted = Array.from(
-          new Map(mergeAccepted.map((item) => [item.event_id, item])).values()
+          new Map(mergeAccepted.map((item) => [item.event_id, item])).values(),
         );
         const mergePending = [...prevData.pending, ...data.pending];
         const dedupPending = Array.from(
-          new Map(mergePending.map((item) => [item.event_id, item])).values()
+          new Map(mergePending.map((item) => [item.event_id, item])).values(),
         );
         const mergeRefused = [...prevData.refused, ...data.refused];
         const dedupRefused = Array.from(
-          new Map(mergeRefused.map((item) => [item.event_id, item])).values()
+          new Map(mergeRefused.map((item) => [item.event_id, item])).values(),
         );
         return {
           pending: dedupPending,
@@ -144,7 +146,7 @@ export const ChatProvider = ({ children }) => {
       () => {
         return ApiCalls.fetchHomeEvents(homeOffset, session.access_token);
       },
-      saveData
+      saveData,
     );
   }, [homeOffset, session, executeApiCall]);
   const fetchGroupEvents = useCallback(async () => {
@@ -156,7 +158,7 @@ export const ChatProvider = ({ children }) => {
       () => {
         return ApiCalls.fetchGroupEvents(currentGroup, session.access_token);
       },
-      saveData
+      saveData,
     );
   }, [session, executeApiCall, currentGroup]);
   const fetchGroups = useCallback(async () => {
@@ -168,7 +170,7 @@ export const ChatProvider = ({ children }) => {
       () => {
         return ApiCalls.fetchGroups(session.access_token);
       },
-      saveData
+      saveData,
     );
   }, [session, executeApiCall]);
   const fetchChat = useCallback(
@@ -198,10 +200,10 @@ export const ChatProvider = ({ children }) => {
         () => {
           return ApiCalls.fetchChat(groupId, session.access_token);
         },
-        saveData
+        saveData,
       );
     },
-    [session, executeApiCall, setMobileView]
+    [session, executeApiCall, setMobileView],
   );
 
   useEffect(() => {
@@ -244,7 +246,7 @@ export const ChatProvider = ({ children }) => {
         currentGroupData,
         setCurrentGroupData,
         groupsData,
-        error,
+
         groupEventsData,
         setGroupsData,
         fetchGroups,
@@ -252,7 +254,7 @@ export const ChatProvider = ({ children }) => {
         setMessagesMap,
         homeEventsData,
         setHomeOffset,
-        loading,
+
         fetchGroupEvents,
       }}
     >

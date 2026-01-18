@@ -10,6 +10,7 @@ import {
   ChatProvider,
   useChat,
 } from "../../../contexts/ChatContext.js";
+import { useApi } from "@/contexts/ApiContext.js";
 const LayoutChatDesktop = ({}) => {
   const {
     currentGroup,
@@ -18,9 +19,8 @@ const LayoutChatDesktop = ({}) => {
     setCurrentGroupData,
     currentChatData,
     setCurrentChatData,
-    error,
-    loading,
   } = useChat();
+  const { error, loading } = useApi();
 
   const renderContent = useCallback(() => {
     if (loading.chat) {

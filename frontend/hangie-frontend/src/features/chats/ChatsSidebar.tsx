@@ -6,9 +6,11 @@ import { useChat } from "@/contexts/ChatContext.js";
 import RenderLoadingState from "../utils/RenderLoadingState";
 import RenderErrorState from "../utils/RenderErrorState";
 import RenderEmptyState from "../utils/RenderEmptyState";
+import { useApi } from "@/contexts/ApiContext";
 const ChatsSidebar = () => {
   const { setMobileView } = useMobileLayoutChat();
-  const { groupsData, error, fetchGroups, loading } = useChat();
+  const { groupsData, fetchGroups } = useChat();
+  const { error, loading } = useApi();
 
   const renderContent = () => {
     if (loading.groups) {

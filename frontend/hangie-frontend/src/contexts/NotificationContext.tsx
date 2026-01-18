@@ -23,7 +23,7 @@ export const useNotification = () => {
   // Si può aggiungere un check per assicurarsi che l'hook venga usato all'interno del Provider
   if (context === undefined) {
     throw new Error(
-      "useNotification deve essere usato all'interno di un ChatProvider"
+      "useNotification deve essere usato all'interno di un ChatProvider",
     );
   }
 
@@ -68,7 +68,7 @@ export const NotificationProvider = ({ children }) => {
     content
     ),
     created_at,
-    is_read`
+    is_read`,
       )
       .eq("user_id", session.user.id)
       .order("created_at", { ascending: false });
@@ -87,34 +87,21 @@ export const NotificationProvider = ({ children }) => {
   }, [session?.user?.id]);
   useEffect(() => {
     if (currentSocket) {
-      // ASCOLTATORE GLOBALE
-
       currentSocket.on("new_notification", (data) => {
-        console.log("Nuova notifica ricevuta via socket:", data);
-
-        // Se la notifica è per me, la aggiungo in cima allo stato
-        // Filtriamo lato client per sicurezza
-
-        console.log("data user_id", data.user_id);
-        console.log("sessuin user id", session.user.id);
-        console.log(data.user_id == session.user.id);
         if (data.user_id === session.user.id) {
-          console.log("è mia");
           setCurrentNotifications((prev) => {
             return { read: prev.read, unread: [data, ...prev.unread] };
           });
         }
       });
       currentSocket.on("clear_notifications_count", (data) => {
-        console.log("Rimozione notifiche:", data);
-
         if (data.user_id === session.user.id) {
           setCurrentNotifications((prev) => {
             const newlyRead = prev.unread.filter(
-              (n) => n.group_id === data.group_id
+              (n) => n.group_id === data.group_id,
             );
             const remainingUnread = prev.unread.filter(
-              (n) => n.group_id !== data.group_id
+              (n) => n.group_id !== data.group_id,
             );
             return {
               read: [
@@ -144,9 +131,6 @@ export const NotificationProvider = ({ children }) => {
     setGroupsData,
     groupsData,
   ]);
-  useEffect(() => {
-    console.log("cambio notifiche", currentNotifications);
-  }, [currentNotifications]);
 
   const markAllAsRead = async () => {
     if (!session?.user?.id) return;

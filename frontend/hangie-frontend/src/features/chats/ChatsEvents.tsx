@@ -9,15 +9,17 @@ import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 import RenderLoadingState from "../utils/RenderLoadingState";
 import RenderErrorState from "../utils/RenderErrorState";
+import { useApi } from "@/contexts/ApiContext";
 
 const FILTER_TYPES = ["accepted", "pending", "archive"];
 const ChatsEvents = () => {
   const [currentFilter, setCurrentFilter] = useState("");
-  const { loading, error, groupEventsData, fetchGroupEvents } = useChat();
+  const { groupEventsData, fetchGroupEvents } = useChat();
   const [query, setQuery] = useState("");
   const { session } = useAuth();
   const { currentScreen } = useScreen();
   const { setMobileView } = useMobileLayoutChat();
+  const { error, loading } = useApi();
 
   const getEventStatus = (event) => {
     console.log("eventStatus");
@@ -28,7 +30,7 @@ const ChatsEvents = () => {
     console.log(session.user.id);
     console.log(event.risposte_eventi);
     const userResponse = event.risposte_eventi.find(
-      (risposta) => risposta.user_id === session.user.id
+      (risposta) => risposta.user_id === session.user.id,
     );
 
     if (userResponse) {
@@ -45,7 +47,7 @@ const ChatsEvents = () => {
       }
 
       const userResponse = (event.risposte_eventi || []).find(
-        (risposta) => risposta.user_id === session.user.id
+        (risposta) => risposta.user_id === session.user.id,
       );
 
       if (userResponse) {
@@ -74,7 +76,7 @@ const ChatsEvents = () => {
     if (query.trim() !== "") {
       const regex = new RegExp(query, "i");
       return statusFilteredList.filter(
-        (evento) => evento.titolo && evento.titolo.match(regex)
+        (evento) => evento.titolo && evento.titolo.match(regex),
       );
     }
 

@@ -8,8 +8,10 @@ import BottomNav from "@/app/pages/mobile/BottomNav.js";
 import CreateEventForm from "@/features/events/CreateEventForm.js";
 import CreateGroupForm from "@/features/chats/CreateGroupForm.js";
 import GroupDetails from "@/features/chats/GroupDetails.js";
+import { useApi } from "@/contexts/ApiContext";
 const LayoutChatMobile = () => {
-  const { error, fetchGroups, loading } = useChat();
+  const { fetchGroups } = useChat();
+  const { error, loading } = useApi();
 
   const { mobileView } = useMobileLayoutChat();
 

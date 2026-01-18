@@ -71,6 +71,7 @@ const GroupDetails = () => {
       user_id: p.user_id,
     }));
     try {
+      console.log("sto per inviare richiesta http");
       const response = await fetch(
         `http://localhost:3000/api/groups/add/participants/${currentGroup}`,
         {
@@ -84,11 +85,12 @@ const GroupDetails = () => {
       );
 
       if (response.ok) {
+        console.log("la risposta è ok invio il socket");
+
         currentSocket.emit(
           "add_participants",
           currentGroup,
-          updatedList,
-          currentParticipants,
+          session.access_token,
         );
       }
     } catch (error) {

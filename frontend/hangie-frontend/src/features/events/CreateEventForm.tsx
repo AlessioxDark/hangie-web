@@ -11,11 +11,13 @@ import z from "zod";
 // Componente Textarea
 import { supabase } from "../../config/db.js";
 import FormInputCollection from "../CreateEventForm/FormInputCollection.js";
-import ChevronLeft from "@/assets/icons/ChevronLeft.js";
-import ChevronRight from "@/assets/icons/ChevronRight.js";
-import { useScreen } from "@/contexts/ScreenContext.js";
+import ChevronLeft from "@/assets/icons/ChevronLeft.tsx";
+import ChevronRight from "@/assets/icons/ChevronRight.tsx";
+import { useScreen } from "@/contexts/ScreenContext.tsx";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
-import { useSocket } from "@/contexts/SocketContext.js";
+import { useSocket } from "@/contexts/SocketContext.tsx";
+import { useApi } from "@/contexts/ApiContext.tsx";
+import { ApiCalls } from "@/services/api.tsx";
 
 const EventSchema = z
   .object({
@@ -90,6 +92,7 @@ const CreateEventForm = () => {
   } = methods;
   const { currentGroup, currentGroupData } = useChat();
   const { currentScreen } = useScreen();
+  const { executeApiCall } = useApi();
   const { setMobileView } = useMobileLayoutChat();
   const [currentStep, setCurrentStep] = useState(1);
   const [imageError, setImageError] = useState(false); // Stato per l'errore
@@ -99,7 +102,7 @@ const CreateEventForm = () => {
       event_id,
       currentGroup,
       event_details,
-      message_details
+      message_details,
     );
 
     setCurrentChatData((prevData) => {
@@ -120,65 +123,132 @@ const CreateEventForm = () => {
       };
     });
   };
+
   const onSubmit = async (data) => {
+    console.log("onsubmit pt-1");
+
     if (checkImagesError()) return;
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/events/add/create-event",
-        {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
+
+    // try {
+    //   const response = await fetch(
+    //     "http://localhost:3000/api/events/add/create-event",
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-type": "application/json",
+    //         Authorization: `Bearer ${session.access_token}`,
+    //       },
+    //       body: JSON.stringify({
+    //         data: { ...data, group_id: currentGroup }, // Niente images qui
+    //       }),
+    //     }
+    //   );
+    //   const result = await response.json();
+
+    //   if (!response.ok)
+    //     throw new Error(result.error || "Errore creazione evento");
+
+    //   const newEventId = result.event_id;
+
+    //   const uploadPromises = images.map(async (img) => {
+    //     const fileExt = img.file.name.split(".").pop();
+    //     const fileName = `${newEventId}/${img.name}.${fileExt}`;
+    //     const filePath = `${fileName}`;
+    //     const { data: uploadData, error: uploadError } = await supabase.storage
+    //       .from("eventi")
+    //       .upload(filePath, img.file, {
+    //         upsert: true,
+    //         contentType: img.type,
+    //         cacheControl: "3600",
+    //       });
+
+    //     if (uploadError) throw uploadError;
+    //     const { data: urlData } = supabase.storage
+    //       .from("eventi")
+    //       .getPublicUrl(uploadData.path);
+    //     return urlData.publicUrl;
+    //   });
+    //   const uploadedUrls = await Promise.all(uploadPromises);
+
+    //   const cover_url = uploadedUrls[0];
+    //   const { data: coverData, error: coverError } = await supabase
+    //     .from("eventi")
+    //     .update({ cover_img: cover_url })
+    //     .eq("event_id", newEventId);
+
+    //   if (coverError) throw coverError;
+
+    //   const newEventDetails = { ...result.event_details, cover_img: cover_url };
+    //   const messageDetails = result.messageDetails;
+    //   sendEvent(newEventId, newEventDetails, messageDetails);
+
+    //   setMobileView("chat");
+    // } catch (error) {
+    //   setImageError({ message: error.message || "Qualcosa è andato storto" });
+    // }
+    console.log("onsubmit");
+
+    const handleUploadAndSocket = async (dataArrived) => {
+      console.log("aggiunto al database");
+      try {
+        const newEventId = dataArrived.event_id;
+
+        const uploadPromises = images.map(async (img) => {
+          const fileExt = img.file.name.split(".").pop();
+          const fileName = `${newEventId}/${img.name}.${fileExt}`;
+          const filePath = `${fileName}`;
+          const { data: uploadData, error: uploadError } =
+            await supabase.storage.from("eventi").upload(filePath, img.file, {
+              upsert: true,
+              contentType: img.type,
+              cacheControl: "3600",
+            });
+
+          if (uploadError) throw uploadError;
+          const { data: urlData } = supabase.storage
+            .from("eventi")
+            .getPublicUrl(uploadData.path);
+          return urlData.publicUrl;
+        });
+        const uploadedUrls = await Promise.all(uploadPromises);
+
+        const cover_url = uploadedUrls[0];
+        const { data: coverData, error: coverError } = await supabase
+          .from("eventi")
+          .update({ cover_img: cover_url })
+          .eq("event_id", newEventId);
+
+        if (coverError) throw coverError;
+
+        const newEventDetails = {
+          ...dataArrived.event_details,
+          cover_img: cover_url,
+        };
+        const messageDetails = dataArrived.messageDetails;
+        sendEvent(newEventId, newEventDetails, messageDetails);
+        throw { message: "problemi" };
+        // setMobileView("chat");
+      } catch (error) {
+        console.log(error);
+        setError("root", {
+          message: error.message || "Qualcosa è andato storto",
+        });
+      }
+    };
+    console.log("mando api call");
+
+    executeApiCall(
+      "add_event",
+      () => {
+        return ApiCalls.addNewEvent(session.access_token, {
+          data: {
+            ...data,
+            group_id: currentGroup,
           },
-          body: JSON.stringify({
-            data: { ...data, group_id: currentGroup }, // Niente images qui
-          }),
-        }
-      );
-      const result = await response.json();
-
-      if (!response.ok)
-        throw new Error(result.error || "Errore creazione evento");
-
-      const newEventId = result.event_id;
-
-      const uploadPromises = images.map(async (img) => {
-        const fileExt = img.file.name.split(".").pop();
-        const fileName = `${newEventId}/${img.name}.${fileExt}`;
-        const filePath = `${fileName}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("eventi")
-          .upload(filePath, img.file, {
-            upsert: true,
-            contentType: img.type,
-            cacheControl: "3600",
-          });
-
-        if (uploadError) throw uploadError;
-        const { data: urlData } = supabase.storage
-          .from("eventi")
-          .getPublicUrl(uploadData.path);
-        return urlData.publicUrl;
-      });
-      const uploadedUrls = await Promise.all(uploadPromises);
-
-      const cover_url = uploadedUrls[0];
-      const { data: coverData, error: coverError } = await supabase
-        .from("eventi")
-        .update({ cover_img: cover_url })
-        .eq("event_id", newEventId);
-
-      if (coverError) throw coverError;
-
-      const newEventDetails = { ...result.event_details, cover_img: cover_url };
-      const messageDetails = result.messageDetails;
-      sendEvent(newEventId, newEventDetails, messageDetails);
-
-      setMobileView("chat");
-    } catch (error) {
-      setImageError({ message: error.message || "Qualcosa è andato storto" });
-    }
+        });
+      },
+      handleUploadAndSocket,
+    );
   };
 
   const checkImagesError = () => {

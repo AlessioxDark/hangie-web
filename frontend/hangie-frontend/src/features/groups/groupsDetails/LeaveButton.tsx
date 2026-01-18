@@ -7,7 +7,7 @@ import React from "react";
 const LeaveButton = () => {
   const { session } = useAuth();
   const { setMobileView } = useMobileLayoutChat();
-  const { currentGroup } = useChat();
+  const { currentGroup, setCurrentGroup } = useChat();
   const { currentSocket } = useSocket();
   const handleLeaveGroup = async () => {
     try {
@@ -21,8 +21,7 @@ const LeaveButton = () => {
         .then((res) => res.json())
         .then((data) => {
           setMobileView("groups");
-          console.log("invio emit leave group");
-
+          setCurrentGroup(null);
           currentSocket.emit("leave_group", currentGroup, session.user.id);
         });
     } catch (error) {

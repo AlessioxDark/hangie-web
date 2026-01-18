@@ -2,6 +2,7 @@ import ChevronRight from "@/assets/icons/ChevronRight";
 import ProfileIcon from "@/components/ProfileIcon";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
+import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
 import { useSocket } from "@/contexts/SocketContext";
 import { Plus } from "lucide-react";
@@ -16,7 +17,6 @@ const ParticipantsSection = ({
   const { currentGroupData, currentGroup } = useChat();
   const { session } = useAuth();
   const { currentSocket } = useSocket();
-  console.log(currentParticipants);
   const handleMakeAdmin = async (partecipante) => {
     try {
       const response = await fetch(
@@ -54,45 +54,7 @@ const ParticipantsSection = ({
       );
 
       if (response.ok) {
-        console.log("invio il socket a tutti tranne me");
         currentSocket.emit("remove_participant", currentGroup, partecipante);
-        // 4. Aggiorniamo lo stato locale e chiudiamo la schermata
-        // setCurrentParticipants((prev) =>
-        //   prev.filter((p) => p.user_id !== partecipante.user_id)
-        // );
-
-        // const participantsForGlobalState = currentParticipants.filter(
-        //   (p) => p.user_id !== partecipante.user_id
-        // );
-        // const newParticipantsForGlobalState = participantsForGlobalState.map(
-        //   (p) => {
-        //     // return {...partici}
-        //     return {
-        //       partecipante_id: p.user_id, // Assicurati che il nome della chiave sia corretto per il tuo DB
-        //       utenti: {
-        //         user_id: p.user_id,
-        //         nome: p.nome,
-        //         handle: p.handle,
-        //       },
-        //     };
-        //   }
-        // );
-        // setCurrentGroupData((prevData) => {
-        //   return {
-        //     ...prevData,
-        //     partecipanti_gruppo: newParticipantsForGlobalState,
-        //   };
-        // });
-        // setGroupsData((prevData) => {
-        //   return prevData.map((group) => {
-        //     if (group.group_id == currentGroup) {
-        //       return {
-        //         ...prevData,
-        //         partecipanti_gruppo: newParticipantsForGlobalState,
-        //       };
-        //     }return group
-        //   });
-        // });
       }
     } catch (error) {
       console.error("Errore durante l'invio:", error);

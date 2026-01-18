@@ -3,6 +3,7 @@ import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useChat } from "./ChatContext";
 import { type GroupData } from "@/types/chat";
+import { useMobileLayoutChat } from "./MobileLayoutChatContext";
 
 const SocketContext = createContext({
   currentSocket: null,
@@ -12,7 +13,7 @@ export const useSocket = () => {
   const context = useContext(SocketContext);
   if (context === undefined) {
     throw new Error(
-      "useSocket deve essere usato all'interno di un ChatProvider"
+      "useSocket deve essere usato all'interno di un ChatProvider",
     );
   }
 
@@ -26,12 +27,13 @@ export const SocketProvider = ({ children }) => {
     currentGroup,
     currentGroupData,
     setGroupsData,
-    groupsData,
+
+    setCurrentGroup,
     setCurrentGroupData,
     setMessagesMap,
   } = useChat();
   const { session } = useAuth();
-
+  const { setMobileView } = useMobileLayoutChat();
   const currentGroupDataRef = useRef<null | GroupData>(null);
 
   useEffect(() => {
@@ -71,8 +73,8 @@ export const SocketProvider = ({ children }) => {
                 ultimoMessaggio: newMessage,
                 updated_at: new Date().toISOString(),
               }
-            : g
-        )
+            : g,
+        ),
       );
       setMessagesMap((messMap) => {
         const existingMessages = messMap[data.group_id] || [];
@@ -108,7 +110,7 @@ export const SocketProvider = ({ children }) => {
           "message_sent",
           data.message_id,
           session?.user?.id,
-          data.group_id
+          data.group_id,
         );
       }
     });
@@ -131,7 +133,7 @@ export const SocketProvider = ({ children }) => {
           return {
             ...prevData,
             messaggi: prevData.messaggi.map((m) =>
-              m.message_id === data.message_id ? { ...m, isSent: true } : m
+              m.message_id === data.message_id ? { ...m, isSent: true } : m,
             ),
           };
         });
@@ -155,6 +157,7 @@ export const SocketProvider = ({ children }) => {
     socket.on("left_group", (groupId, userId) => {
       // notifica
       if (session.user.id == userId) {
+        console.log("sono l'utente uscito");
         setGroupsData((prev) => {
           return prev.filter((group) => group.group_id !== groupId);
         });
@@ -163,7 +166,7 @@ export const SocketProvider = ({ children }) => {
           return prev.map((group) => {
             if (group.group_id == groupId) {
               const newParticipants = group.partecipanti_gruppo.filter(
-                (p) => p.user_id !== userId
+                (p) => p.user_id !== userId,
               );
               return { ...group, partecipanti_gruppo: newParticipants };
             }
@@ -173,7 +176,7 @@ export const SocketProvider = ({ children }) => {
         if (currentGroupData.group_id == groupId) {
           setCurrentGroupData((prev) => {
             const newParticipants = prev.partecipanti_gruppo.filter(
-              (p) => p.user_id !== userId
+              (p) => p.user_id !== userId,
             );
             return { ...prev, partecipanti_gruppo: newParticipants };
           });
@@ -181,23 +184,56 @@ export const SocketProvider = ({ children }) => {
       }
     });
     socket.on("removed_participant", (data) => {
+      const isMe = session.user.id == data.participant.user_id;
       setGroupsData((prev) => {
         // Usiamo MAP per creare un nuovo array, non forEach
-        return prev.map((group) => {
-          if (group.group_id === data.group_id) {
-            const newParticipants = group.partecipanti_gruppo.filter(
-              (p) =>
-                (p.partecipante_id || p.user_id) !== data.participant.user_id // Verifica se la chiave è user_id o partecipante_id
-            );
-            return { ...group, partecipanti_gruppo: newParticipants };
-          }
-          return group;
-        });
+        console.log("sono io ?", isMe);
+        if (!isMe) {
+          return prev.map((group) => {
+            if (group.group_id === data.group_id) {
+              const newParticipants = group.partecipanti_gruppo.filter(
+                (p) =>
+                  (p.partecipante_id || p.user_id) !== data.participant.user_id,
+              );
+              return { ...group, partecipanti_gruppo: newParticipants };
+            }
+            return group;
+          });
+        } else {
+          console.log("non sono io controllo tra i gruppi");
+          return prev.filter((g) => {
+            console.log(g.group_id, data.group_id);
+
+            return g.group_id !== data.group_id;
+          });
+        }
+
+        // return prev.map((group) => {
+        //   if (!isMe) {
+        //     if (group.group_id === data.group_id) {
+        //       const newParticipants = group.partecipanti_gruppo.filter(
+        //         (p) =>
+        //           (p.partecipante_id || p.user_id) !== data.participant.user_id,
+        //       );
+        //       return { ...group, partecipanti_gruppo: newParticipants };
+        //     } else {
+        //       return group;
+        //     }
+        //   } else {
+        //     return prev.filter((g) => g.group_id !== data.group_id);
+        //   }
+        // });
       });
       if (currentGroupData.group_id == data.group_id) {
+        if (isMe) {
+          setMobileView("groups");
+          setCurrentGroup(null);
+          return;
+        }
         setCurrentGroupData((prev) => {
           const newParticipants = prev.partecipanti_gruppo.filter(
-            (p) => (p.partecipante_id || p.user_id) !== data.participant.user_id // Verifica se la chiave è user_id o partecipante_id
+            (p) =>
+              (p.partecipante_id || p.user_id) !== data.participant.user_id, // Verifica se la chiave è user_id o partecipante_id
           );
           return { ...prev, partecipanti_gruppo: newParticipants };
         });
@@ -205,28 +241,27 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("added_participants", (data) => {
       setGroupsData((prev) => {
+        const groupExists = prev.find((g) => g.group_id === data.group_id);
         // Usiamo MAP per creare un nuovo array, non forEach
-        return prev.map((group) => {
-          if (group.group_id === data.group_id) {
-            return {
-              ...group,
-              partecipanti_gruppo: [
-                ...group.partecipanti_gruppo,
-                ...data.addedParticipants,
-              ],
-            };
-          }
-          return group;
-        });
+        if (groupExists) {
+          return prev.map((group) => {
+            if (group.group_id === data.group_id) {
+              return {
+                ...group,
+                partecipanti_gruppo: data.newParticipants,
+              };
+            }
+            return group;
+          });
+        } else {
+          return [data.groupInfo, ...prev];
+        }
       });
-      if (currentGroupData.group_id == data.group_id) {
+      if (currentGroup && currentGroupData.group_id == data.group_id) {
         setCurrentGroupData((prev) => {
           return {
             ...prev,
-            partecipanti_gruppo: [
-              ...prev.partecipanti_gruppo,
-              ...data.addedParticipants,
-            ],
+            partecipanti_gruppo: data.newParticipants,
           };
         });
       }
@@ -263,7 +298,7 @@ export const SocketProvider = ({ children }) => {
                 return p.partecipante_id == data.participant.partecipante_id
                   ? { ...p, role: "admin" }
                   : p;
-              }
+              },
             );
             return {
               ...group,
@@ -322,7 +357,7 @@ export const SocketProvider = ({ children }) => {
             messaggi: prevData.messaggi.map((m) =>
               data.message_ids.includes(m.message_id)
                 ? { ...m, isRead: true }
-                : m
+                : m,
             ),
           };
         });

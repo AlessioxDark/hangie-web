@@ -28,12 +28,12 @@ const AddParticipantsGroup = ({
       setIsLoading(true);
       setError(null);
       const response = await fetch(
-        `http://localhost:3000/api/friends/${session.user.id}`
+        `http://localhost:3000/api/friends/${session.user.id}`,
       );
 
       if (!response.ok)
         throw new Error(
-          response.message || "Errore nella ricerca dei partecipanti"
+          response.message || "Errore nella ricerca dei partecipanti",
         );
 
       const result = await response.json();
