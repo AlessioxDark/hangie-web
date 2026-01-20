@@ -11,11 +11,11 @@ router.patch("/modify/:group_id", groupController.modifyGroup);
 router.patch("/add/participants/:group_id", groupController.addParticipants);
 router.patch(
   "/remove/participants/:group_id",
-  groupController.removeParticipant
+  groupController.removeParticipant,
 );
 router.patch(
   "/modify/participants/:group_id",
-  groupController.modifyParticipant
+  groupController.modifyParticipant,
 );
 router.delete("/leave/:group_id", groupController.leaveGroup);
 

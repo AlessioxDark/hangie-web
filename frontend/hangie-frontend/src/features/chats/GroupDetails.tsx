@@ -10,6 +10,8 @@ import ParticipantsSection from "../groups/groupsDetails/ParticipantsSection.js"
 import EditableDescription from "../groups/groupsDetails/EditableDescription.js";
 import EditableImg from "../groups/groupsDetails/EditableImg.tsx";
 import LeaveButton from "../groups/groupsDetails/LeaveButton.tsx";
+import { useApi } from "@/contexts/ApiContext.tsx";
+import { ApiCalls } from "@/services/api.tsx";
 
 const GroupDetails = () => {
   const { currentScreen } = useScreen();
@@ -19,6 +21,7 @@ const GroupDetails = () => {
     useChat();
   const { setMobileView } = useMobileLayoutChat();
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
+  const { executeApiCall } = useApi();
   const [formError, setFormError] = useState(null);
   const isAdmin = useMemo(() => {
     return currentGroupData?.partecipanti_gruppo?.some(
@@ -70,32 +73,25 @@ const GroupDetails = () => {
     const newParticipantsIds = newParticipants.map((p) => ({
       user_id: p.user_id,
     }));
-    try {
-      console.log("sto per inviare richiesta http");
-      const response = await fetch(
-        `http://localhost:3000/api/groups/add/participants/${currentGroup}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify(newParticipantsIds),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        },
+
+    const saveData = (data) => {
+      currentSocket.emit(
+        "add_participants",
+        currentGroup,
+        session.access_token,
       );
-
-      if (response.ok) {
-        console.log("la risposta è ok invio il socket");
-
-        currentSocket.emit(
-          "add_participants",
-          currentGroup,
+    };
+    executeApiCall(
+      "add_participants",
+      () => {
+        return ApiCalls.addNewEvent(
           session.access_token,
+          currentGroup,
+          newParticipantsIds,
         );
-      }
-    } catch (error) {
-      console.error("Errore durante l'invio:", error);
-    }
+      },
+      saveData,
+    );
   };
 
   useEffect(() => {
@@ -137,51 +133,45 @@ const GroupDetails = () => {
   }, [currentGroupData]);
 
   const editField = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/groups/modify/${currentGroup}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({
+    const saveData = (data) => {
+      setCurrentGroupData((prevData) => {
+        return {
+          ...prevData,
+          [currentEditingField]: localGroupData[currentEditingField],
+        };
+      });
+
+      setGroupsData((prevData) => {
+        return prevData.map((group) => {
+          if (group.group_id == currentGroup) {
+            return {
+              ...group,
+              [currentEditingField]: localGroupData[currentEditingField],
+            };
+          }
+          return group;
+        });
+      });
+      currentSocket.emit(
+        "edit_field",
+        currentGroup,
+        currentEditingField,
+        localGroupData[currentEditingField],
+      );
+    };
+    executeApiCall(
+      "edit_field",
+      () => {
+        return () => {
+          ApiCalls.editGroupField(session.access_token, currentGroup, {
             field: currentEditingField,
             fieldValue: localGroupData[currentEditingField],
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        },
-      );
-
-      if (response.ok) {
-        setCurrentGroupData((prevData) => {
-          return {
-            ...prevData,
-            [currentEditingField]: localGroupData[currentEditingField],
-          };
-        });
-
-        setGroupsData((prevData) => {
-          return prevData.map((group) => {
-            if (group.group_id == currentGroup) {
-              return {
-                ...group,
-                [currentEditingField]: localGroupData[currentEditingField],
-              };
-            }
-            return group;
+            isAdmin,
           });
-        });
-        currentSocket.emit(
-          "edit_field",
-          currentGroup,
-          currentEditingField,
-          localGroupData[currentEditingField],
-        );
-      }
-    } catch (error) {
-      console.error("Errore durante l'invio:", error);
-    }
+        };
+      },
+      saveData,
+    );
   };
 
   const handleFinishEdit = async () => {

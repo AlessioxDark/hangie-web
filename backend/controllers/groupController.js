@@ -5,7 +5,7 @@ const supabase = require("../config/db");
 const getAllGroups = async (req, res) => {
   try {
     const { data, error } = await Group.getAll(req); // Chiama il modello per ottenere gli eventi
-    if (error) throw new Error(error);
+    if (error) throw error;
 
     const formattedData = data.map((row) => {
       let ultimoMessaggio = null;
@@ -23,31 +23,42 @@ const getAllGroups = async (req, res) => {
         ultimoMessaggio: ultimoMessaggio,
       };
     });
-    console.log(formattedData);
-    res.json(formattedData); // Restituisce i dati come risposta
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: formattedData,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.log("ecco err", err.message);
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a trovare i tuoi gruppi",
+      details: err.message,
+    });
   }
 };
 const getSpecificGroup = async (req, res) => {
-  console.log("qui si");
   try {
     const { data, error } = await Group.getGroup(req);
-    if (error) {
-      console.log(error);
-    }
+    if (error) throw error;
 
-    res.json(data);
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a trovare il tuo gruppo",
+      details: err.message,
+    });
   }
 };
 const getGroupEvents = async (req, res) => {
   try {
     const { data, error } = await Group.getEvents(req);
-    if (error) {
-      console.log(error);
-    }
+    if (error) throw error;
     const cleanData = data.map((response) => {
       // Estrae l'oggetto evento dal campo 'eventi' e aggiunge lo 'status'
       return {
@@ -70,33 +81,41 @@ const getGroupEvents = async (req, res) => {
       };
     });
 
-    console.log("i dati eventi eventsdata", data);
-    console.log("i dati eventi eventsdata clean", cleanData);
-
-    res.json(cleanData);
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: cleanData,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a trovare i tuoi eventi del gruppo",
+      details: err.message,
+    });
   }
 };
 const getSpecificGroupEvent = async (req, res) => {
   try {
     const { data, error } = await Group.getEvent(req);
-    if (error) {
-      console.log(error);
-    }
+    if (error) throw error;
 
-    res.json(data);
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a trovare l'evento",
+      details: err.message,
+    });
   }
 };
 const addNewGroup = async (req, res) => {
   try {
     const { data, error } = await Group.newGroup(req);
-    if (error) {
-      console.log(error);
-    }
-    // fkfkfk
+    if (error) throw error;
     const { groupData, participants, creator } = data;
     const notificationInsert = participants
       .filter((p) => p.partecipante_id !== creator.id)
@@ -110,86 +129,107 @@ const addNewGroup = async (req, res) => {
           user_id: p.partecipante_id,
         };
       });
-    const { data: notificationData, error: notificanError } = supabase
+    const { error: notificanError } = supabase
       .from("notifiche")
       .insert(notificationInsert);
-
-    const io = req.io;
-
-    //     participants.forEach((p) => {
-    //     // 1. Evento specifico per la logica delle Chat
-
-    // });
-    //     participants
-    //       .filter((p) => p.partecipante_id !== creator.id)
-    //       .forEach((p) => {
-    //           io.to(p.partecipante_id).emit("added_to_group", groupData);
-
-    //     // 2. Evento generico per le Notifiche (il campanellino)
-    //     io.to(p.partecipante_id).emit("new_notification", {
-    //         type: "group_invite",
-    //         sender: creator,
-    //         text: `Ti ha aggiunto al gruppo ${groupData.nome}`
-    //     });
-    //         io.to(p.partecipante_id).emit("new_notification", {
-    //           type: "new_group",
-    //           sender: creator,
-    //           group_id: groupData.group_id,
-    //           gruppo: { nome: groupData.nome },
-    //           user_id: p.partecipante_id,
-    //           created_at: new Date().toISOString(),
-    //           is_read: false,
-    //         });
-    //       });
-
-    res.json(data);
+    if (notificanError) throw notificanError;
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a creare il gruppo",
+      details: err.message,
+    });
   }
 };
 const modifyGroup = async (req, res) => {
   try {
     const { data, error } = await Group.modify(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
-    res.json(data);
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a fornire il gruppo",
+      details: err.message,
+    });
   }
 };
 const leaveGroup = async (req, res) => {
   try {
     const { data, error } = await Group.leave(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
-    res.json(data);
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti ad abbandorare il gruppo",
+      details: err.message,
+    });
   }
 };
 const addParticipants = async (req, res) => {
   try {
     const { data, error } = await Group.addParticipants(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
-    res.json(data);
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti ad aggiungere il partecipante",
+      details: err.message,
+    });
   }
 };
 const removeParticipant = async (req, res) => {
+  console.log("remove participant al backend");
   try {
     const { data, error } = await Group.removeParticipant(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
-    res.json(data);
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a rimuovere il partecipante",
+      details: err.message,
+    });
   }
 };
 const modifyParticipant = async (req, res) => {
   try {
     const { data, error } = await Group.modifyParticipant(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
-    res.json(data);
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a mettere admin partecipante",
+      details: err.message,
+    });
   }
 };
 module.exports = {

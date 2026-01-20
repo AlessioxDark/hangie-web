@@ -43,6 +43,50 @@ export const ApiCalls = {
         "Content-Type": "application/json",
       },
     }).then(handleResponse),
+  AddParticipants: (token, groupId, dataToSend) =>
+    fetch(`${BASE_URL}add/participants/${groupId}`, {
+      method: "PATCH",
+      body: JSON.stringify(dataToSend),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }).then(handleResponse),
+  editGroupField: (token, groupId, dataToSend) =>
+    fetch(`${BASE_URL}groups/modify/${groupId}`, {
+      method: "PATCH",
+      body: JSON.stringify(dataToSend),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }).then(handleResponse),
+  MakeParticipantAdmin: (token, groupId, dataToSend) =>
+    fetch(`${BASE_URL}groups/modify/participants/${groupId}`, {
+      method: "PATCH",
+      body: JSON.stringify(dataToSend),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }).then(handleResponse),
+  handleRemoveParticipant: (token, groupId, dataToSend) =>
+    fetch(`${BASE_URL}groups/remove/participants/${groupId}`, {
+      method: "PATCH",
+      body: JSON.stringify(dataToSend),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }).then(handleResponse),
+  handleLeaveGroup: (token, groupId) =>
+    fetch(`${BASE_URL}groups/leave/participants/${groupId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }).then(handleResponse),
   fetchChat: async (groupId, token) => {
     const res = await fetch(`${BASE_URL}/groups/${groupId}`, {
       method: "GET",

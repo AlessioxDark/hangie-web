@@ -7,6 +7,7 @@ import { useSocket } from "@/contexts/SocketContext";
 import { useChat } from "@/contexts/ChatContext";
 import RenderLoadingState from "../utils/RenderLoadingState";
 import RenderErrorState from "../utils/RenderErrorState";
+import { useApi } from "@/contexts/ApiContext";
 
 const AddParticipantsGroup = ({
   setIsParticipantsAdd,
@@ -19,9 +20,9 @@ const AddParticipantsGroup = ({
   const [friendsData, setFriendsData] = useState([]);
   const [currentFriendsData, setCurrentFriendsData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { currentSocket } = useSocket();
-  const { currentGroup } = useChat();
+
   const { session } = useAuth();
+  const { error: errorApi } = useApi();
   const [error, setError] = useState(null);
   const fetchFriends = async () => {
     try {
@@ -49,7 +50,11 @@ const AddParticipantsGroup = ({
   useEffect(() => {
     fetchFriends();
   }, []);
-
+  useEffect(() => {
+    if (errorsApi?.add_participants) {
+      setError({ message: errorApi.add_participants.message });
+    }
+  }, [errorApi?.new_participants]);
   useEffect(() => {
     if (query) {
       setCurrentFriendsData(() => {

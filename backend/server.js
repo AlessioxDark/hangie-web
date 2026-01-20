@@ -5,7 +5,6 @@ const http = require("http"); // Importiamo il modulo HTTP di Node
 
 const { Server } = require("socket.io");
 const cors = require("cors");
-const supabase = require("./config/db");
 const eventRoutes = require("./routes/eventRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -34,7 +33,7 @@ app.use(
     origin: "*", // Permette richieste da qualsiasi origine (per lo sviluppo).
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"], // Permette tutti i metodi che usi. 'OPTIONS' è fondamentale.
     allowedHeaders: ["Content-Type", "Authorization", "body"], // Specifica gli header che sono permessi.
-  })
+  }),
 );
 app.use(express.json());
 app.use("/api/events", eventRoutes);

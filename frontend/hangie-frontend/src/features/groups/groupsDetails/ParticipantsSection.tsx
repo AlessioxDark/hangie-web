@@ -1,10 +1,12 @@
 import ChevronRight from "@/assets/icons/ChevronRight";
 import ProfileIcon from "@/components/ProfileIcon";
+import { useApi } from "@/contexts/ApiContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
 import { useSocket } from "@/contexts/SocketContext";
+import { ApiCalls } from "@/services/api";
 import { Plus } from "lucide-react";
 import React from "react";
 
@@ -17,48 +19,39 @@ const ParticipantsSection = ({
   const { currentGroupData, currentGroup } = useChat();
   const { session } = useAuth();
   const { currentSocket } = useSocket();
+  const { executeApiCall } = useApi();
   const handleMakeAdmin = async (partecipante) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/groups/modify/participants/${currentGroup}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({ user_id: partecipante.user_id }),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        },
-      );
-
-      if (response.ok) {
-        console.log("invio il socket a tutti con me");
-        currentSocket.emit("admin_participant", currentGroup, partecipante);
-      }
-    } catch (error) {
-      console.error("Errore durante l'invio:", error);
-    }
+    const saveData = (data) => {
+      currentSocket.emit("admin_participant", currentGroup, partecipante);
+    };
+    executeApiCall(
+      "make_admin",
+      () => {
+        return () => {
+          ApiCalls.editGroupField(session.access_token, currentGroup, {
+            user_id: partecipante.user_id,
+          });
+        };
+      },
+      saveData,
+    );
   };
   const handleRemoveParticipants = async (partecipante) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/groups/remove/participants/${currentGroup}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({ user_id: partecipante.user_id }),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        },
-      );
+    const saveData = (data) => {
+      currentSocket.emit("remove_participant", currentGroup, partecipante);
+    };
 
-      if (response.ok) {
-        currentSocket.emit("remove_participant", currentGroup, partecipante);
-      }
-    } catch (error) {
-      console.error("Errore durante l'invio:", error);
-    }
+    executeApiCall(
+      "remove_participant",
+      () => {
+        return () => {
+          ApiCalls.editGroupField(session.access_token, currentGroup, {
+            user_id: partecipante.user_id,
+          });
+        };
+      },
+      saveData,
+    );
   };
   return (
     <section className="flex flex-col gap-2.5">

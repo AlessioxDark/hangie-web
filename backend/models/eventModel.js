@@ -12,7 +12,7 @@ const getCoords = async ({ indirizzo, citta, cap }) => {
       console.error(
         `Errore nella richiesta API: Stato ${response.status} - ${response.statusText}`,
       );
-      return null;
+      throw { data: null, error: "Impossibile effettuare chiamata api" };
     }
 
     // 5. Parsa il corpo della risposta come JSON
@@ -36,10 +36,15 @@ const getCoords = async ({ indirizzo, citta, cap }) => {
       console.log(` - Latitudine (lat): ${latitudine}`);
       console.log(` - Longitudine (lon): ${longitudine}`);
 
-      return { latitudine, longitudine };
+      return { latitudine, longitudine, error: null };
+    } else {
+      throw {
+        message: "Non esiste nessun luogo con quell'indirizzo",
+        details: "l'array è vuoto",
+      };
     }
   } catch (err) {
-    return err;
+    return { data: null, error: err };
   }
 };
 
@@ -59,7 +64,7 @@ const getAll = async (req) => {
     const { data, error } = await supabase
       .from("risposte_eventi")
       .select(
-        "event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,data_scadenza,cover_img,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))",
+        "event_id,status,eventi(event_id,costo,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(nome,group_cover_img,partecipanti_gruppo(partecipante_id)))",
       )
       .range(offset, offset + EVENTSINPAGE - 1)
       .eq("user_id", user.id);
@@ -118,19 +123,7 @@ const getEvent = async (req) => {
 
     images.push(publicUrl);
   }
-  // risolvere problemi della query per fare prima refact ffronted e poi backend
-  // ,
-  // 	      utenti(creatore:nome,user_id ),
-  // 	      luoghi(nome, citta,indirizzo),
-  // 	      partecipanti:risposte_eventi!inner(user_id, status,utenti(profile_pic))(
-  // 	          user_id,
-  // 	          status,
-  // 	          utenti(profile_pic)
-  // 	      ),
-  // 	      rifiutatori:risposte_eventi!inner(user_id, status)(
-  // 	          user_id,
-  // 	          status
-  // 	      ),
+
   const finalData = {
     ...data,
     event_imgs: images,
@@ -149,15 +142,19 @@ const modify = async (req) => {
   return { data, error };
 };
 const getOrCreateLuogo = async (realBody) => {
-  const { latitudine, longitudine, err } = await getCoords(realBody);
-  if (err) throw err;
+  const {
+    latitudine,
+    longitudine,
+    error: errorCoords,
+  } = await getCoords(realBody);
+  if (errorCoords) throw errorCoords;
 
   const { data: luogo, error } = await supabase
     .from("luoghi")
     .select("luogo_id")
     .match({ longitudine, latitudine })
     .maybeSingle(); // Più pulito di .single() se può non esistere
-
+  if (error) throw error;
   if (luogo) return luogo.luogo_id;
 
   const { data: nuovoLuogo, error: insertError } = await supabase
@@ -185,7 +182,6 @@ const newEvent = async (req) => {
     const { images, ...realBody } = req.body.data;
     const group_id = realBody.group_id;
     const luogoId = await getOrCreateLuogo(realBody);
-    console.log("luogo id", luogoId);
     const { cap, indirizzo, nome_luogo, citta, ...eventBody } = realBody;
     const { data: eventData, error: eventError } = await supabase
       .from("eventi")
@@ -193,7 +189,6 @@ const newEvent = async (req) => {
       .select("*")
       .single();
     if (eventError) throw eventError;
-    console.log("arrivo ad event id");
     const eventId = eventData.event_id;
     const [
       { data: messageData, error: errorMessage },
@@ -215,16 +210,13 @@ const newEvent = async (req) => {
       supabase.from("eventi_gruppo").insert([{ event_id: eventId, group_id }]),
       supabase
         .from("partecipanti_gruppo")
-        .select("partecipante_id")
+        .select("user_id:partecipante_id")
         .eq("group_id", group_id),
     ]);
-    console.log("prima controllo promise");
 
     if (errorMessage) throw errorMessage;
     if (eventGroupError) throw eventGroupError;
     if (participantsError) throw participantsError;
-    console.log("dopo controllo promise");
-
     const answersToInsert = participantsData.map((participant) => {
       return {
         event_id: eventId,
@@ -238,20 +230,18 @@ const newEvent = async (req) => {
       .from("risposte_eventi")
       .insert(answersToInsert);
     if (answerError) throw answerError;
-    console.log("ho creato l'evento e invio la cosa giusta");
     return {
       data: {
         event_id: eventId,
-        messageDetails: messageData[0],
+        messageDetails: messageData,
         event_details: {
+          event_imgs: [],
           ...messageData.eventi,
         },
       },
       error: null,
     };
   } catch (err) {
-    console.log("sto inviando errore");
-
     return { data: null, error: err };
   }
 };

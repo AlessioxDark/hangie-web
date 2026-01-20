@@ -207,22 +207,6 @@ export const SocketProvider = ({ children }) => {
             return g.group_id !== data.group_id;
           });
         }
-
-        // return prev.map((group) => {
-        //   if (!isMe) {
-        //     if (group.group_id === data.group_id) {
-        //       const newParticipants = group.partecipanti_gruppo.filter(
-        //         (p) =>
-        //           (p.partecipante_id || p.user_id) !== data.participant.user_id,
-        //       );
-        //       return { ...group, partecipanti_gruppo: newParticipants };
-        //     } else {
-        //       return group;
-        //     }
-        //   } else {
-        //     return prev.filter((g) => g.group_id !== data.group_id);
-        //   }
-        // });
       });
       if (currentGroupData.group_id == data.group_id) {
         if (isMe) {

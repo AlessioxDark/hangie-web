@@ -1,5 +1,4 @@
 import { Loader2 } from "lucide-react";
-import React from "react";
 
 const RenderLoadingState = ({ type }) => {
   const message = {
@@ -18,6 +17,10 @@ const RenderLoadingState = ({ type }) => {
     home: {
       main: "Caricamento degli eventi in corso...",
       alt: "Stiamo cercando i tuoi eventi",
+    },
+    add_event: {
+      main: "Creazione evento in corso in corso...",
+      alt: "Stiamo creando il tuo evento",
     },
   };
   return (

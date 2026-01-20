@@ -18,6 +18,7 @@ import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
 import { useSocket } from "@/contexts/SocketContext.tsx";
 import { useApi } from "@/contexts/ApiContext.tsx";
 import { ApiCalls } from "@/services/api.tsx";
+import RenderLoadingState from "../utils/RenderLoadingState.js";
 
 const EventSchema = z
   .object({
@@ -94,7 +95,7 @@ const CreateEventForm = () => {
   const { currentGroup, currentGroupData } = useChat();
   const { error: errorsApi } = useApi();
   const { currentScreen } = useScreen();
-  const { executeApiCall } = useApi();
+  const { executeApiCall, loading } = useApi();
   const { setMobileView } = useMobileLayoutChat();
   const [currentStep, setCurrentStep] = useState(1);
   const [imageError, setImageError] = useState(false); // Stato per l'errore
@@ -154,10 +155,11 @@ const CreateEventForm = () => {
           const { data: urlData } = supabase.storage
             .from("eventi")
             .getPublicUrl(uploadData.path);
+
           return urlData.publicUrl;
         });
         const uploadedUrls = await Promise.all(uploadPromises);
-
+        console.log("url caricati", uploadPromises);
         const cover_url = uploadedUrls[0];
         const { error: coverError } = await supabase
           .from("eventi")
@@ -165,6 +167,17 @@ const CreateEventForm = () => {
           .eq("event_id", newEventId);
 
         if (coverError) throw coverError;
+        const otherImages = uploadedUrls
+          .filter((url) => url !== cover_url)
+          .map((url) => ({ img_url: url, event_id: newEventId }));
+        console.log("altre immagini no cover", otherImages);
+        if (otherImages.length > 0) {
+          const { error: imgError } = await supabase
+            .from("event_imgs")
+            .insert(otherImages);
+          if (imgError) throw imgError;
+          console.log("inseriti other img");
+        }
 
         const newEventDetails = {
           ...dataArrived.event_details,
@@ -188,6 +201,7 @@ const CreateEventForm = () => {
           data: {
             ...data,
             group_id: currentGroup,
+            images: images,
           },
         });
       },
@@ -237,12 +251,19 @@ const CreateEventForm = () => {
   useEffect(() => {
     console.log("cambiato errr");
     if (errorsApi?.add_event) {
-      setError("root", { message: errorsApi.add_event.message });
+      setError("root", {
+        message: errorsApi.add_event.message,
+        details: errorsApi.add_event.details,
+      });
     } else {
       // Se non c'è più l'errore nell'API, pulisci il root nel form
       clearErrors("root");
     }
   }, [errorsApi?.add_event]);
+
+  if (loading.add_event) {
+    return <RenderLoadingState type={"add_event"} />;
+  }
   return (
     <div
       className={`w-full max-w-4xl mx-auto rounded-2xl shadow-2xl overflow-hidden bg-bg-1 relative`}

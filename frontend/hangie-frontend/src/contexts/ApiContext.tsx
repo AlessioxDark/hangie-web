@@ -23,6 +23,11 @@ export const ApiContextProvider = ({ children }) => {
     events: false,
     home_events: false,
     add_event: false,
+    add_participants: false,
+    edit_field: false,
+    make_admin: false,
+    leave_group: false,
+    remove_participant: false,
   });
   const [error, setError] = useState({
     chat: null,
@@ -31,6 +36,11 @@ export const ApiContextProvider = ({ children }) => {
     events: null,
     home_events: null,
     add_event: null,
+    add_participants: null,
+    edit_field: null,
+    make_admin: null,
+    leave_group: null,
+    remove_participant: null,
   });
 
   const executeApiCall = useCallback(
@@ -40,7 +50,7 @@ export const ApiContextProvider = ({ children }) => {
       onSuccess,
     ) => {
       // if (loading[type]) return;
-
+      console.log("eseguo type", type);
       try {
         setError((prev) => ({ ...prev, [type]: null }));
         setLoading((prev) => {
@@ -49,6 +59,8 @@ export const ApiContextProvider = ({ children }) => {
         const data = await fetchCall();
         onSuccess(data);
       } catch (err: any) {
+        console.log("metto error", err);
+
         setError((prev) => {
           return {
             ...prev,

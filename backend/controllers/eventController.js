@@ -108,9 +108,9 @@ const modifyEvent = async (req, res) => {
 };
 const addNewEvent = async (req, res) => {
   try {
-    const { data, error } = await Event.newEvent(req); // Chiama il modello per ottenere gli eventi
-
+    const { data, error } = await Event.newEvent(req);
     if (error) throw error;
+
     res.status(200).json({
       success: true,
       message: "Operazione completata con successo",
