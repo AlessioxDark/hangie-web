@@ -1,5 +1,6 @@
 import MapIcon from "@/assets/icons/MapIcon";
 import ParticipantsIcon from "@/assets/icons/ParticipantsIcon";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
 import { useScreen } from "@/contexts/ScreenContext";
 
@@ -69,7 +70,7 @@ const GroupEventCard = ({
 
   const { openModal } = useModal();
   const { currentScreen } = useScreen();
-
+  const { setMobileView } = useMobileLayout();
   const numPartecipanti = gruppo.partecipanti_gruppo.length;
   const isInactive = type === "archive" || type === "rejected";
   return (

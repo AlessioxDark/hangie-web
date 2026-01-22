@@ -1,7 +1,7 @@
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
-import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import { useEffect, useMemo, useState } from "react";
 import AddParticipantsGroup from "./AddParticipantsGroup";
@@ -19,7 +19,7 @@ const GroupDetails = () => {
 
   const { currentGroupData, currentGroup, setCurrentGroupData, setGroupsData } =
     useChat();
-  const { setMobileView } = useMobileLayoutChat();
+  const { setMobileView } = useMobileLayout();
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const { executeApiCall } = useApi();
   const [formError, setFormError] = useState(null);

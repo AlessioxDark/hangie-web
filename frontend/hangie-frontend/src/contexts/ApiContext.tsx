@@ -28,6 +28,7 @@ export const ApiContextProvider = ({ children }) => {
     make_admin: false,
     leave_group: false,
     remove_participant: false,
+    event: false,
   });
   const [error, setError] = useState({
     chat: null,
@@ -41,6 +42,7 @@ export const ApiContextProvider = ({ children }) => {
     make_admin: null,
     leave_group: null,
     remove_participant: null,
+    event: null,
   });
 
   const executeApiCall = useCallback(

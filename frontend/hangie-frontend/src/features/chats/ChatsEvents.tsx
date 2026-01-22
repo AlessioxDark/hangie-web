@@ -5,7 +5,7 @@ import GroupEventCard from "@/features/groups/GroupEventCard";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useScreen } from "@/contexts/ScreenContext";
-import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 import RenderLoadingState from "../utils/RenderLoadingState";
 import RenderErrorState from "../utils/RenderErrorState";
@@ -18,7 +18,7 @@ const ChatsEvents = () => {
   const [query, setQuery] = useState("");
   const { session } = useAuth();
   const { currentScreen } = useScreen();
-  const { setMobileView } = useMobileLayoutChat();
+  const { setMobileView } = useMobileLayout();
   const { error, loading } = useApi();
 
   const getEventStatus = (event) => {

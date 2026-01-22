@@ -1,5 +1,5 @@
 import ChevronLeft from "@/assets/icons/ChevronLeft";
-import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -22,7 +22,7 @@ const GroupSchema = z.object({
     .max(20, "il nome è troppo lungo")
     .regex(
       /^[a-zA-Z0-9\s\u00C0-\u017F!?.()\-@#&]+$/u,
-      "Il nome contiene caratteri non validi"
+      "Il nome contiene caratteri non validi",
     ),
   descrizione: z
     .string()
@@ -31,7 +31,7 @@ const GroupSchema = z.object({
     .max(350, "La descrizione può essere massimo 350 caratteri"),
 });
 const CreateGroupForm = () => {
-  const { setMobileView } = useMobileLayoutChat();
+  const { setMobileView } = useMobileLayout();
 
   const methods = useForm({
     resolver: zodResolver(GroupSchema),
@@ -103,7 +103,7 @@ const CreateGroupForm = () => {
             ...data,
             participants: currentParticipants,
           }),
-        }
+        },
       );
       const result = await response.json();
       let finalImgUrl = null;
@@ -139,7 +139,7 @@ const CreateGroupForm = () => {
         result,
 
         finalImgUrl,
-        session.user.id
+        session.user.id,
       );
       setMobileView("groups");
     } catch (error) {

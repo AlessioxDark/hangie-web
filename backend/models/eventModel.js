@@ -61,17 +61,40 @@ const getAll = async (req) => {
       error: tokenError,
     } = await supabase.auth.getUser(token);
     if (tokenError) throw tokenError;
-    const { data, error } = await supabase
+    const { data: eventsList, error } = await supabase
       .from("risposte_eventi")
       .select(
-        "event_id,status,eventi(event_id,costo,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(nome,group_cover_img,partecipanti_gruppo(partecipante_id)))",
+        "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(group_id,nome,group_cover_img,partecipanti_gruppo(partecipante_id)))",
       )
       .range(offset, offset + EVENTSINPAGE - 1)
       .eq("user_id", user.id);
 
+    const eventIds = eventsList.map((e) => e.event_id);
+    const groupIds = eventsList.map((e) => e.eventi.gruppi.group_id);
     if (error) throw error;
-
-    return { data: data, error: null };
+    const { data: risposte, error: risposteError } = await supabase
+      .from("risposte_eventi")
+      .select("user_id,status,eventi(*,gruppi(*))")
+      .eq("status", "accepted")
+      .in("eventi.event_id", eventIds)
+      .in("eventi.gruppi.group_id", groupIds);
+    if (risposteError) throw risposteError;
+    const risposteMap = risposte.reduce((acc, curr) => {
+      if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
+      acc[curr.eventi.event_id].push({
+        user_id: curr.user_id,
+        status: curr.status,
+      });
+      return acc;
+    }, {});
+    const finalData = eventsList.map((e) => {
+      return {
+        ...e,
+        partecipanti_confermati: risposteMap[e.event_id] || [],
+      };
+    });
+    console.log("dati fina", finalData[0].partecipanti_confermati);
+    return { data: finalData, error: null };
   } catch (err) {
     return { data: null, error: err };
   }
@@ -89,47 +112,53 @@ const getEvents = async () => {
   // return { data, error };
 };
 const getEvent = async (req) => {
-  const { event_id } = req.params;
-
-  const { data, error } = await supabase
-    .from("eventi")
-    .select(
-      `
-	     *,
-	      utenti(creatore:nome,user_id ),
-	 	    luoghi(nome, citta,indirizzo),
-	 	     risposte_eventi(*,utenti(profile_pic,user_id,nome))
-      
-	  `,
-    )
-    .eq("event_id", event_id)
-    .single();
-
-  let images = [];
-  for (let i = 1; i <= 4; i++) {
-    const path = `${event_id}/${i}.jpg`;
+  try {
+    const { event_id } = req.params;
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw new Error({ message: "Token mancante" });
+    const token = authHeader.split(" ")[1];
     const {
-      data: { publicUrl },
-      error: publicUrlError,
-    } = supabase.storage
-      .from("eventi") // Updated bucket name here
-      .getPublicUrl(path);
-    if (publicUrlError) {
-      console.error(
-        `Errore nel recuperare l'immagine ${i}.jpg:`,
-        publicUrlError,
-      );
-    }
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token);
+    if (userError) throw userError;
+    const { data: eventData, error: eventError } = await supabase
+      .from("risposte_eventi")
+      .select(
+        `event_id,
+        status,eventi(event_id,
+                      costo,
+                      created_at,
+                      created_by,
+                      data,
+                      titolo,
+                      descrizione,
+                      data_scadenza,
+                      cover_img,
+                      utenti(user_id,nome),
+                      luoghi(*),
+                      gruppi(nome,group_cover_img,partecipanti_gruppo(partecipante_id)))`,
+      )
+      .eq("event_id", event_id)
+      .eq("user_id", user.id)
+      .single();
+    if (eventError) throw eventError;
 
-    images.push(publicUrl);
+    console.log("datipls", eventData);
+    const { data: eventParticipants, error: eventParticipantsError } =
+      await supabase
+        .from("risposte_eventi")
+        .select("status,utente:utenti(*)")
+        .not("user_id", "eq", user.id);
+    if (eventParticipantsError) throw eventParticipantsError;
+
+    return {
+      data: { ...eventData, partecipanti: eventParticipants },
+      error: null,
+    };
+  } catch (err) {
+    return { data: null, error: err };
   }
-
-  const finalData = {
-    ...data,
-    event_imgs: images,
-  };
-
-  return { finalData, error };
 };
 
 const modify = async (req) => {
@@ -213,19 +242,19 @@ const newEvent = async (req) => {
         .select("user_id:partecipante_id")
         .eq("group_id", group_id),
     ]);
-
+    console.log("questi sono i dati dei partecipanti", participantsData);
     if (errorMessage) throw errorMessage;
     if (eventGroupError) throw eventGroupError;
     if (participantsError) throw participantsError;
     const answersToInsert = participantsData.map((participant) => {
       return {
         event_id: eventId,
-        user_id: participant.partecipante_id,
-        status:
-          participant.partecipante_id === user.id ? "accepted" : "pending",
+        user_id: participant.user_id,
+        status: participant.user_id === user.id ? "accepted" : "pending",
         is_creator: participant.user_id === user.id,
       };
     });
+    console.log("aggiungo queste alle risposte degli eventi", answersToInsert);
     const { error: answerError } = await supabase
       .from("risposte_eventi")
       .insert(answersToInsert);

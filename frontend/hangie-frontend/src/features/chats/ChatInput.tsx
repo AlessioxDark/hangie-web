@@ -1,6 +1,6 @@
 import ClipIcon from "@/assets/icons/ClipIcon";
 import SendIcon from "@/assets/icons/SendIcon";
-import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import { Calendar, Plus } from "lucide-react";
@@ -17,7 +17,7 @@ const ChatInput = ({
   const debounceTimerRef = useRef(null);
   const { openModal } = useModal();
   const { currentScreen } = useScreen();
-  const { setMobileView } = useMobileLayoutChat();
+  const { setMobileView } = useMobileLayout();
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
   };
@@ -52,7 +52,7 @@ const ChatInput = ({
         setInputValue(currentContent);
       }, 100);
     },
-    [setInputValue]
+    [setInputValue],
   );
   const isSendActive =
     inputValue && inputValue.trim().length > 0 && !isDropdownOpen;

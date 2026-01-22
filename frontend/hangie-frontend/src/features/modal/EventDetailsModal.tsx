@@ -5,22 +5,23 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import EventDetails from "../events/EventDetails";
 import EventDetailsParticipants from "../events/EventDetailsParticipants";
+import { useParams } from "react-router";
 const MountElement = document.getElementById("overlays");
 
 const EventDetailsModal = () => {
-  const { isModalOpen, modalData, closeModal } = useModal();
   const { session } = useAuth();
-
+  const { eventId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [eventData, setEventData] = useState([]);
   const [currentPage, setCurrentPage] = useState("");
+  console.log("aprire event modal desktop");
   const fetchEvent = async () => {
     if (isLoading) return;
     try {
       setIsLoading(true);
       const response = await fetch(
-        `http://localhost:3000/api/events/${modalData?.event_id}`,
+        `http://localhost:3000/api/events/${eventId}`,
         {
           method: "GET",
           // body: JSON.stringify({ offset: offset }),
@@ -28,9 +29,8 @@ const EventDetailsModal = () => {
             "Content-Type": "application/json",
             // Authorization: `Bearer ${session.access_token}`,
           },
-        }
+        },
       );
-      // console.log(response);
       if (!response.ok) {
         console.log(response);
         setError(response.statusText || "Errore nel caricamento degli eventi");
@@ -45,18 +45,19 @@ const EventDetailsModal = () => {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
-    if (modalData?.event_id) {
+    if (eventId) {
       fetchEvent();
     }
-  }, [modalData?.event_id]);
+  }, [eventId]);
 
   const getEventStatus = () => {
     if (eventData?.created_by === session.user.id) {
       return "creator"; // L'utente è il creatore, vede i pulsanti di modifica
     }
     const userResponse = eventData?.risposte_eventi?.find(
-      (risposta) => risposta.utenti.user_id === session.user.id
+      (risposta) => risposta.utenti.user_id === session.user.id,
     );
 
     if (userResponse) {
@@ -68,7 +69,7 @@ const EventDetailsModal = () => {
       return (
         <>
           <div className="p-3 w-full flex justify-end">
-            <div className="  text-text-1 cursor-pointer" onClick={closeModal}>
+            <div className="  text-text-1 cursor-pointer">
               <X width={40} height={40} />
             </div>
           </div>
@@ -124,27 +125,24 @@ const EventDetailsModal = () => {
     }
   };
 
-  useEffect(() => {}, [currentPage]);
   return createPortal(
     <>
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 
              bg-black/40
              transition-opacity duration-300"
-          // Chiude il modal cliccando sull'overlay
-          aria-modal="true"
-          role="dialog"
-          aria-labelledby="modal-title"
-        >
-          <div className=" bg-bg-1  rounded-2xl p-8 w-70/100  overflow-y-auto">
-            {renderContent()}
-          </div>
-          {/* <EventDetails {...eventData} /> */}
+        // Chiude il modal cliccando sull'overlay
+        aria-modal="true"
+        role="dialog"
+        aria-labelledby="modal-title"
+      >
+        <div className=" bg-bg-1  rounded-2xl p-8 w-70/100  overflow-y-auto">
+          {renderContent()}
         </div>
-      )}
+        {/* <EventDetails {...eventData} /> */}
+      </div>
     </>,
-    MountElement
+    MountElement,
   );
 };
 

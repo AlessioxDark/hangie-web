@@ -18,9 +18,27 @@ const getAllEvents = async (req, res) => {
         utente: response.eventi.utenti,
         gruppo: response.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
         scadenza: response.eventi.data_scadenza,
+        partecipanti_confermati: response.partecipanti_confermati,
         // Non includere ...dato (spread) qui se vuoi un oggetto pulito
       };
     });
+    // data.map((event) => {
+    //   event.partecipanti.forEach((risposta) => {
+    //     const userModel = {
+    //       ...risposta.utente,
+    //       status: risposta.status,
+    //     };
+    //     if (risposta.status == "accepted") {
+    //       newData.risposte_eventi.accepted.push(userModel);
+    //     }
+    //     if (risposta.status == "rejected") {
+    //       newData.risposte_eventi.refused.push(userModel);
+    //     }
+    //     if (risposta.status == "pending") {
+    //       newData.risposte_eventi.pending.push(userModel);
+    //     }
+    //   });
+    // });
     const newCleanData = {
       pending: cleanData.filter((response) => {
         return response.status == "pending";
@@ -70,31 +88,56 @@ const getMyEvents = async (req, res) => {
 };
 const getSpecificEvent = async (req, res) => {
   try {
-    const { finalData, error } = await Event.getEvent(req); // Chiama il modello per ottenere gli eventi
+    const { data, error } = await Event.getEvent(req);
+    console.log(data);
+    if (error) throw error;
     let newData = {
-      ...finalData,
-      risposte: {
-        partecipanti: [],
-        rifiutatori: [],
+      event_id: data.event_id,
+      status: data.status, // Stato (pending, accepted, refused)
+      costo: data.eventi.costo,
+      data: data.eventi.data,
+      titolo: data.eventi.titolo,
+      descrizione: data.eventi.descrizione,
+      cover_img: data.eventi.cover_img,
+      event_imgs: data.eventi.event_imgs,
+      luogo: data.eventi.luoghi, // Attenzione, qui è 'luoghi' non 'luogo'
+      utente: data.eventi.utenti,
+      gruppo: data.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
+      scadenza: data.eventi.data_scadenza,
+      risposte_eventi: {
+        refused: [],
+        accepted: [],
         pending: [],
       },
     };
-    const newParticipants = finalData.risposte_eventi.forEach((risposta) => {
+
+    data.partecipanti.forEach((risposta) => {
+      const userModel = {
+        ...risposta.utente,
+        status: risposta.status,
+      };
       if (risposta.status == "accepted") {
-        newData.risposte.partecipanti.push(risposta);
+        newData.risposte_eventi.accepted.push(userModel);
       }
       if (risposta.status == "rejected") {
-        newData.risposte.rifiutatori.push(risposta);
+        newData.risposte_eventi.refused.push(userModel);
       }
       if (risposta.status == "pending") {
-        newData.risposte.pending.push(risposta);
+        newData.risposte_eventi.pending.push(userModel);
       }
     });
-    if (error) throw error;
 
-    res.json(newData);
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo", // Opzionale, utile per i toast
+      data: newData, // <--- I dati reali che hai appena creato o modificato
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a trovare il tuo evento", // Messaggio generico per l'utente
+      details: err.message,
+    });
   }
 };
 const modifyEvent = async (req, res) => {

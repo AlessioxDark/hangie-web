@@ -1,7 +1,7 @@
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
 import ChatsSidebar from "@/features/chats/ChatsSidebar";
-import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext.js";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext.js";
 import ChatsEvents from "@/features/chats/ChatsEvents.js";
 import Chats from "@/app/pages/Chats.js";
 import BottomNav from "@/app/pages/mobile/BottomNav.js";
@@ -9,11 +9,12 @@ import CreateEventForm from "@/features/events/CreateEventForm.js";
 import CreateGroupForm from "@/features/chats/CreateGroupForm.js";
 import GroupDetails from "@/features/chats/GroupDetails.js";
 import { useApi } from "@/contexts/ApiContext";
+import EventDetailsMobile from "@/features/events/EventDetailsMobile";
 const LayoutChatMobile = () => {
   const { fetchGroups } = useChat();
   const { error, loading } = useApi();
 
-  const { mobileView } = useMobileLayoutChat();
+  const { mobileView } = useMobileLayout();
 
   const renderContent = () => {
     if (loading.chat) {
@@ -80,6 +81,7 @@ const LayoutChatMobile = () => {
     if (mobileView == "GROUP_DETAILS") {
       return <GroupDetails />;
     }
+
     return (
       <p className="p-4 text-center text-gray-500">
         Vista non valida. {`${mobileView}`}

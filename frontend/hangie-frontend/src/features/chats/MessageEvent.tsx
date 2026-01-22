@@ -14,12 +14,16 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
+import { Link, useLocation } from "react-router";
+import { useScreen } from "@/contexts/ScreenContext";
 const MessageEvent = ({ event_details }) => {
-  console.log(event_details);
-  // const [buttonContent, setButtonContent] = useState(null);
   const { openModal } = useModal();
+  const { setMobileView } = useMobileLayout();
   const { session } = useAuth();
+  const location = useLocation();
+  const { currentScreen } = useScreen();
   const formatDate = (dateString) => {
     if (!dateString) return "Data non definita";
     try {
@@ -123,7 +127,10 @@ const MessageEvent = ({ event_details }) => {
   };
 
   return (
-    <>
+    <Link
+      to={`/events/${event_details.event_id}`}
+      state={currentScreen != "xs" && { backgroundLocation: location }}
+    >
       <div
         className="flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden
       shadow-xl transition-all duration-300   hover:shadow-2xl max-w-[80%]
@@ -250,7 +257,7 @@ const MessageEvent = ({ event_details }) => {
           <div className="flex gap-2   ">{getButtonContent()}</div>
         </div>
       </div>
-    </>
+    </Link>
   );
 };
 

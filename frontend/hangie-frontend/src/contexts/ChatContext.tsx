@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { useAuth } from "./AuthContext";
-import { useMobileLayoutChat } from "./MobileLayoutChatContext.js";
+import { useMobileLayout } from "./MobileLayoutChatContext.js";
 import { useScreen } from "./ScreenContext.js";
 import { type Message, type UUID, type GroupData } from "../types/chat.tsx";
 import { ApiCalls } from "@/services/api.tsx";
@@ -29,6 +29,8 @@ export const ChatContext = createContext({
   setMessagesMap: (arg) => arg,
   homeEventsData: [],
   homeOffset: 0,
+  currentEvent: {},
+  setCurrentEvent: (arg) => arg,
   loading: { chat: false, home: false, groups: false, events: false },
 });
 
@@ -80,47 +82,14 @@ export const ChatProvider = ({ children }) => {
   });
 
   const [groupEventsData, setGroupEventsData] = useState(null);
-  const { setMobileView } = useMobileLayoutChat();
+  const [currentEventData, setCurrentEventData] = useState({});
+  const { setMobileView } = useMobileLayout();
   const { currentScreen } = useScreen();
   const { session } = useAuth();
 
-  // const executeApiCall = useCallback(
-  //   async (
-  //     type: "chat" | "groups" | "events" | "home",
-  //     fetchCall,
-  //     onSuccess,
-  //   ) => {
-  //     // if (loading[type]) return;
-
-  //     try {
-  //       setError((prev) => ({ ...prev, [type]: null }));
-  //       setLoading((prev) => {
-  //         return { ...prev, [type]: true };
-  //       });
-  //       const data = await fetchCall();
-  //       onSuccess(data);
-  //     } catch (err: any) {
-  //       setError((prev) => {
-  //         return {
-  //           ...prev,
-  //           [type]: {
-  //             message: err.message || "Errore di connessione",
-  //             status: err.status || 500,
-  //             at: Date.now(),
-  //             details: err.details,
-  //           },
-  //         };
-  //       });
-  //     } finally {
-  //       setLoading((prev) => {
-  //         return { ...prev, [type]: false };
-  //       });
-  //     }
-  //   },
-  //   [],
-  // );
   const fetchEvents = useCallback(async (): Promise<void> => {
     const saveData = (data) => {
+      console.log("event dalla home", data);
       setHomeEventsData((prevData) => {
         const mergeAccepted = [...prevData.accepted, ...data.accepted];
         const dedupAccepted = Array.from(
@@ -141,7 +110,7 @@ export const ChatProvider = ({ children }) => {
         };
       });
     };
-    await executeApiCall(
+    executeApiCall(
       "home",
       () => {
         return ApiCalls.fetchHomeEvents(homeOffset, session.access_token);
@@ -256,6 +225,8 @@ export const ChatProvider = ({ children }) => {
         setHomeOffset,
 
         fetchGroupEvents,
+        setCurrentEventData,
+        currentEventData,
       }}
     >
       {children}

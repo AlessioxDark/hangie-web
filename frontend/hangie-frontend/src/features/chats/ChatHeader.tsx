@@ -2,13 +2,13 @@ import CalendarIcon from "@/assets/icons/CalendarIcon";
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useChat } from "@/contexts/ChatContext";
-import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import React from "react";
 
 const ChatHeader = () => {
   const { currentScreen } = useScreen();
-  const { setMobileView } = useMobileLayoutChat();
+  const { setMobileView } = useMobileLayout();
   const { currentGroupData, setCurrentGroup } = useChat();
   const displayImage = currentGroupData.group_cover_img
     ? `${currentGroupData.group_cover_img}?v=${

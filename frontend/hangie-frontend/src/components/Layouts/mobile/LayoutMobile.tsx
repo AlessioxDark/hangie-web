@@ -1,10 +1,13 @@
 import BottomNav from "@/app/pages/mobile/BottomNav";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useNotification } from "@/contexts/NotificationContext";
+import EventDetailsMobile from "@/features/events/EventDetailsMobile";
 import { Bell } from "lucide-react";
 import React from "react";
 import { Link } from "react-router";
 const LayoutMobile = ({ children }) => {
   const { currentNotifications } = useNotification();
+
   return (
     <div className="h-screen w-full flex flex-col justify-between ">
       <div className="">

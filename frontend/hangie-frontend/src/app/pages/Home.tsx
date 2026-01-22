@@ -66,22 +66,9 @@ const Home = () => {
         return <RenderErrorState reloadFunction={() => {}} type="home" />;
       }
       if (loading.home) {
-        // return (
-        //   <div className="flex flex-col items-center justify-center py-20 px-4 w-full ">
-        //     <div className=" rounded-full flex items-center justify-center mb-6">
-        //       <Loader2 className="w-16 h-16 text-primary animate-spin" />
-        //     </div>
-        //     <h3 className="text-lg font-medium text-gray-900 mb-2">
-        //       Caricamento degli eventi...
-        //     </h3>
-        //     <p className="text-gray-500 text-center max-w-sm">
-        //       Stiamo scoprendo le prossime esperienze per te.
-        //     </p>
-        //   </div>
-        // );
-
         return <RenderLoadingState type={"home"} />;
       }
+
       if (type == "pending") {
         return (
           <div>
@@ -128,7 +115,7 @@ const Home = () => {
                   // const evento = event.evento
                   return (
                     <div key={event.event_id}>
-                      <EventCard {...event} />
+                      <EventCard event={event} />
                     </div>
                   );
                 })}
@@ -139,14 +126,10 @@ const Home = () => {
           </div>
         );
       }
+
       return null;
     },
-    [
-      // fetchEvents,
-      homeEventsData,
-      error.home,
-      loading.home,
-    ],
+    [homeEventsData, error.home, loading.home],
   );
 
   return (

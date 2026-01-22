@@ -1,5 +1,6 @@
 import ParticipantsIcon from "@/assets/icons/ParticipantsIcon";
 import ProfileIcon from "@/components/ProfileIcon";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
 import { Clock1 } from "lucide-react"; // Aggiungi questa icona
 import React from "react";
@@ -113,6 +114,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
     return `Scade tra ${parti.slice(0, 2).join(" e ")}`; // Mostra solo le due unità più grandi
   };
   const { openModal } = useModal();
+  const { setMobileView } = useMobileLayout();
   return (
     <article
       className={`

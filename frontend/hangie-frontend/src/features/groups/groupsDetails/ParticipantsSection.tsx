@@ -3,7 +3,6 @@ import ProfileIcon from "@/components/ProfileIcon";
 import { useApi } from "@/contexts/ApiContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
-import { useMobileLayoutChat } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
 import { useSocket } from "@/contexts/SocketContext";
 import { ApiCalls } from "@/services/api";

@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useChat } from "./ChatContext";
 import { type GroupData } from "@/types/chat";
-import { useMobileLayoutChat } from "./MobileLayoutChatContext";
+import { useMobileLayout } from "./MobileLayoutChatContext";
 
 const SocketContext = createContext({
   currentSocket: null,
@@ -33,7 +33,7 @@ export const SocketProvider = ({ children }) => {
     setMessagesMap,
   } = useChat();
   const { session } = useAuth();
-  const { setMobileView } = useMobileLayoutChat();
+  const { setMobileView } = useMobileLayout();
   const currentGroupDataRef = useRef<null | GroupData>(null);
 
   useEffect(() => {

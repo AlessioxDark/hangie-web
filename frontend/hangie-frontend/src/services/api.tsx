@@ -97,6 +97,16 @@ export const ApiCalls = {
     });
     return await handleResponse(res);
   },
+  fetchEvent: async (eventId, token) => {
+    const res = await fetch(`${BASE_URL}/events/${eventId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await handleResponse(res);
+  },
 
   fetchGroupEvents: (groupId, token) =>
     fetch(`${BASE_URL}/groups/${groupId}/group-events`, {

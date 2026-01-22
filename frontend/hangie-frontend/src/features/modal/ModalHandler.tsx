@@ -8,12 +8,9 @@ import ParticipantActionsModal from "./ParticipantActionsModal";
 const ModalHandler = () => {
   console.log("ok");
   const { modalType } = useModal();
-  useEffect(() => {
-    console.log(modalType);
-  }, []);
+
   if (modalType == null) return <></>;
   if (modalType == "PARTICIPANT_ACTIONS") return <ParticipantActionsModal />;
-  if (modalType == "EVENT_MODAL") return <EventDetailsModal />;
   if (modalType == "CREATE_EVENT_MODAL") return <CreateEventModal />;
 };
 
