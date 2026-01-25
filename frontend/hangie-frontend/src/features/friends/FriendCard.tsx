@@ -14,7 +14,7 @@ const FriendCard = ({
   console.log("friend", friend);
   const isSelected = useMemo(
     () => localParticipants.some((p) => p.user_id === friend.user_id),
-    [localParticipants, friend.user_id]
+    [localParticipants, friend.user_id],
   );
   return (
     <div
@@ -22,7 +22,7 @@ const FriendCard = ({
        border-[#E2E8F0] rounded-xl cursor-pointer group
 		     hover:-translate-y-2 relative
 		  shadow-sm hover:shadow-2xl
-		     transition-all duration-200 border-2
+		     transition-all duration-200 border-2 
          ${
            isSelected
              ? "border-primary bg-primary/5 shadow-md"
@@ -35,7 +35,7 @@ const FriendCard = ({
         if (isSelected) {
           setLocalParticipants((prevParticipants) => {
             return prevParticipants.filter(
-              (participant) => participant.user_id !== friend.user_id
+              (participant) => participant.user_id !== friend.user_id,
             );
           });
         } else {

@@ -51,7 +51,7 @@ const AddParticipantsGroup = ({
     fetchFriends();
   }, []);
   useEffect(() => {
-    if (errorsApi?.add_participants) {
+    if (errorApi?.add_participants) {
       setError({ message: errorApi.add_participants.message });
     }
   }, [errorApi?.new_participants]);

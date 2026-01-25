@@ -218,13 +218,13 @@ const EventDetailsMobile = () => {
           </div>
         </div>
 
-        <div className={`px-4 ${status !== "pending" && "pb-4"}`}>
+        <div className={`px-4 ${status !== "pending" && "pb-4"} space-y-2.5`}>
           <div>
             <div className="flex items-center justify-between text-sm my-3">
               {/* GRUPPO: Cliccabile, sobrio, stile Apple/Google */}
               <div
                 onClick={() => navigate(`/group/${gruppo.group_id}`)} // implementare sistema eventi anche con gruppo
-                className="flex items-center gap-2 group active:opacity-60 transition-opacity cursor-pointer"
+                className="flex items-center gap-2.5 group active:opacity-60 transition-opacity cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-full ">
                   {/*w-6 h-6*/}
@@ -242,9 +242,6 @@ const EventDetailsMobile = () => {
                 </div>
                 <span className="font-semibold text-primary flex items-center gap-0.5">
                   {gruppo.nome}
-                  <div className="w-6 h-6">
-                    <ChevronRight className="mt-0.5" />
-                  </div>
                 </span>
               </div>
 
@@ -263,7 +260,7 @@ const EventDetailsMobile = () => {
             <h1 className="font-bold text-2xl font-body ">{titolo}</h1>
           </div>
           <div className="">
-            <div className="flex flex-col gap-3 border-b pb-6">
+            <div className="flex flex-col gap-3 border-b pb-6 border-gray-200">
               {/* Ogni riga ha lo stesso stile: sfondo neutro, bordo leggero */}
               {[
                 {
@@ -305,7 +302,7 @@ const EventDetailsMobile = () => {
                 </div>
               ))}
             </div>
-            <div className="mt-6 flex flex-col gap-4">
+            <div className="mt-4 flex flex-col gap-4">
               <div>
                 <h2 className="font-body font-bold text-text-1 text-lg">
                   Descrizione
@@ -348,19 +345,6 @@ const EventDetailsMobile = () => {
                 </div>
               </button>
 
-              {/* <div className="flex items-center gap-2 p-2.5 bg-gray-50 rounded-2xl ring ring-gray-300">
-                <div className="w-12 h-12">
-                  <ProfileIcon user_id={utente?.user_id} />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-text-2 uppercase tracking-wide">
-                    Organizzatore
-                  </p>
-                  <p className="text-base font-semibold text-text-1">
-                    {utente?.nome}
-                  </p>
-                </div>
-              </div> */}
               <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-2xl">
                 <div className="w-10 h-10">
                   <ProfileIcon user_id={utente.user_id} />
