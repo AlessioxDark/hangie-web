@@ -1,61 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Mona+Sans:ital,wght@0,200..900;1,200..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Mona+Sans:ital,wght@0,200..900;1,200..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @theme {
-	--color-primary: #2463eb;
-	--color-bg-1: #ffffff;
-	--color-bg-2: #f8fafc;
-	--color-bg-3: #e2e8f0;
-	--color-text-1: #0f172a;
-	--color-text-2: #64748b;
-	--color-text-3: #94a3b8;
-	/* --color-complementary: #f97316;
+  --color-primary: #2463eb;
+  --color-bg-1: #ffffff;
+  --color-bg-2: #f8fafc;
+  --color-bg-3: #e2e8f0;
+  --color-text-1: #0f172a;
+  --color-text-2: #64748b;
+  --color-text-3: #94a3b8;
+  /* --color-complementary: #f97316;
 	--color-accent: #10b981;
 	--color-neutral-white: #ffffff;
 	--color-neutral-white-2: #fbfbfe;
 	--color-neutral-black: #090909; */
 
-	/* support colors */
-	--color-success: #10b981;
-	--color-danger: hsl(40, 60%, 47%);
-	--color-warning: hsl(0, 60%, 47%);
-	--color-error: #ef4444;
-	--color-info: hsl(240, 60%, 47%);
+  /* support colors */
+  --color-success: #10b981;
+  --color-danger: hsl(40, 60%, 47%);
+  --color-warning: hsl(0, 60%, 47%);
+  --color-error: #ef4444;
+  --color-info: hsl(240, 60%, 47%);
 
-	--font-title: 'Montserrat';
-	--font-body: 'Open Sans', 'serif';
-	--font-test: 'Mona Sans', 'serif';
+  --font-title: "Montserrat";
+  --font-body: "Open Sans", "serif";
+  --font-test: "Mona Sans", "serif";
 
-	--breakpoint-xs: 600px;
+  --breakpoint-xs: 600px;
 
-	@keyframes {
-	}
+  @keyframes {
+  }
 }
 
 [contenteditable][data-placeholder] {
-	position: relative;
+  position: relative;
 }
 
 [contenteditable][data-placeholder]:empty::before {
-	content: attr(data-placeholder); /* Legge da data-placeholder */
+  content: attr(data-placeholder); /* Legge da data-placeholder */
 
-	/* Posizionamento e comportamento */
-	position: absolute;
-	top: 50%;
-	transform: translateY(-50%);
-	left: 8px; /* p-2 tailwind (8px) */
-	right: 8px;
-	pointer-events: none;
-	user-select: none;
-	display: block;
+  /* Posizionamento e comportamento */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 8px; /* p-2 tailwind (8px) */
+  right: 8px;
+  pointer-events: none;
+  user-select: none;
+  display: block;
 
-	/* Stili Tailwind-like integrati */
-	z-index: 9;
-	opacity: 0.8;
-	/* Per il colore e line-height useremo le classi direttamente nel JSX */
+  /* Stili Tailwind-like integrati */
+  z-index: 9;
+  opacity: 0.8;
+  /* Per il colore e line-height useremo le classi direttamente nel JSX */
 }
 
 [contenteditable][data-placeholder]:empty:focus::before {
-	content: '';
+  content: "";
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Nasconde la scrollbar per IE, Edge e Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

@@ -1,132 +1,101 @@
-import ChevronLeft from '@/assets/icons/ChevronLeft';
-import { useModal } from '@/contexts/ModalContext';
-import { X } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import PartecipanteCard from './PartecipanteCard';
+import ChevronLeft from "@/assets/icons/ChevronLeft";
+import { useModal } from "@/contexts/ModalContext";
+import { X } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import PartecipanteCard from "./PartecipanteCard";
+import { useNavigate } from "react-router";
+import { useChat } from "@/contexts/ChatContext";
+import { useScreen } from "@/contexts/ScreenContext";
+import SearchBar from "@/components/SearchBar";
 
-const FILTER_TYPES = ['Confermati', 'In attesa', 'Rifiutati'];
-const EventDetailsParticipants = ({
-	risposte_eventi,
-	titolo,
-	setCurrentPage,
-}) => {
-	const { closeModal } = useModal();
-	const [query, setQuery] = useState('');
-	const [currentFilter, setCurrentFilter] = useState('');
-	const [currentRisposte, setCurrentRisposte] = useState([]);
+const FILTER_TYPES = ["Confermati", "In attesa", "Rifiutati"];
+const EventDetailsParticipants = () => {
+  const [query, setQuery] = useState("");
+  const [currentFilter, setCurrentFilter] = useState("");
+  const [currentRisposte, setCurrentRisposte] = useState([]);
+  const { currentEventData } = useChat();
+  const navigate = useNavigate();
+  const { currentScreen } = useScreen();
+  const renderFilteredAnswers = useCallback(() => {
+    if (currentFilter == "") {
+      {
+        setCurrentRisposte([
+          ...currentEventData.risposte_evento?.accepted,
+          ...currentEventData.risposte_evento?.refused,
+          ...currentEventData.risposte_evento?.pending,
+        ]);
+      }
+    }
+    if (query !== "") {
+      const queryRegex = new RegExp(query, "i");
+      const allRisposte = [
+        ...currentEventData.risposte_evento?.accepted,
+        ...currentEventData.risposte_evento?.refused,
+        ...currentEventData.risposte_evento?.pending,
+      ];
+      const nuoveRisposte = allRisposte.filter((risposta) => {
+        return risposta.utenti.nome.match(queryRegex);
+      });
 
-	const renderFilteredAnswers = useCallback(() => {
-		if (currentFilter == '') {
-			{
-				setCurrentRisposte(risposte_eventi);
-			}
-		}
-		if (query !== '') {
-			const queryRegex = new RegExp(query, 'i');
-			const nuoveRisposte = risposte_eventi.filter((risposta) => {
-				return risposta.utenti.nome.match(queryRegex);
-			});
+      setCurrentRisposte(nuoveRisposte);
+    }
+    if (currentFilter == "Confermati") {
+      setCurrentRisposte(currentEventData.risposte_evento?.accepted);
+    }
+    if (currentFilter == "In attesa") {
+      setCurrentRisposte(currentEventData.risposte_evento?.pending);
+    }
+    if (currentFilter == "Rifiutati") {
+      setCurrentRisposte(currentEventData.risposte_evento?.refused);
+    }
+  }, [currentFilter, query]);
+  useEffect(() => {
+    renderFilteredAnswers();
+  }, [currentFilter, query]);
 
-			setCurrentRisposte(nuoveRisposte);
-		}
-		if (currentFilter == 'Confermati') {
-			const nuoveRisposte = risposte_eventi.filter((risposta) => {
-				return risposta.status == 'accepted';
-			});
-			setCurrentRisposte(nuoveRisposte);
-		}
-		if (currentFilter == 'In attesa') {
-			const nuoveRisposte = risposte_eventi.filter((risposta) => {
-				return risposta.status == 'pending';
-			});
-			setCurrentRisposte(nuoveRisposte);
-		}
-		if (currentFilter == 'Rifiutati') {
-			const nuoveRisposte = risposte_eventi.filter((risposta) => {
-				return risposta.status == 'rejected';
-			});
-
-			setCurrentRisposte(nuoveRisposte);
-		}
-	}, [currentFilter, query, risposte_eventi]);
-	useEffect(() => {
-		renderFilteredAnswers();
-	}, [currentFilter, query]);
-	return (
-		<div className="flex flex-col gap-12">
-			<div className="flex flex-col gap-4">
-				<div className="w-full flex justify-between">
-					<h1 className="text-text-1 font-body font-bold text-4xl">{titolo}</h1>
-					<div className="  text-text-1 cursor-pointer" onClick={closeModal}>
-						<X width={40} height={40} />
-					</div>
-				</div>
-				<div>
-					<button
-						className="flex flex-row gap-1 items-center rounded-2xl cursor-pointer  justify-center"
-						onClick={() => {
-							setCurrentPage('');
-						}}
-					>
-						<ChevronLeft />
-						<span className="text-primary font-semibold font-body text-xl">
-							Torna Indietro
-						</span>
-					</button>
-					<div className="flex flex-col mt-6 gap-4">
-						<h1 className="text-text-1 font-body font-semibold text-3xl ">
-							Partecipanti
-						</h1>
-						<div className="flex flex-row w-full  gap-4 items-center">
-							<div
-								className="
-          bg-gray-100 flex-1 
-                            rounded-4xl 
-                            focus-within:ring-2 
-                            focus-within:ring-blue-500
-                            p-2 shadow-inner transition-shadow
-                            flex items-start
-                            
-          "
-							>
-								<input
-									className={`
-                min-h-10 max-h-32
-                whitespace-pre-wrap
-                w-full p-2  outline-none font-body text-lg text-text-1 items-start overflow-y-auto
-             
-                `}
-									placeholder="Inserisci un Utente"
-									onInput={(e) => {
-										setQuery(e.target.value);
-									}}
-									data-placeholder="Scrivi un messaggio..."
-								/>
-							</div>
-						</div>
-						<div className="flex flex-row gap-4 items-center">
-							<span className="font-bold font-body text-text-2 text-xl">
-								Filtra:{' '}
-							</span>
-							<div className="flex w-full flex-row gap-4 items-center">
-								{FILTER_TYPES.map((filter) => {
-									return (
-										<div
-											onClick={() => {
-												if (currentFilter === filter) {
-													setCurrentFilter('');
-												} else {
-													setCurrentFilter(filter);
-												}
-											}}
-											className={`px-5 py-2 ${
-												currentFilter == filter
-													? 'bg-primary text-bg-1 shadow-lg shadow-primary/50'
-													: 'bg-bg-2 text-text-2 border border-text-2 hover:bg-bg-3 hover:shadow-md'
-											} font-body   text-xl cursor-pointer
+  return (
+    <div className="flex flex-col gap-6 2xl:gap-12">
+      <div className="flex flex-col gap-4">
+        <div>
+          <div className="px-2 py-3 w-full flex flex-row items-center gap-4 border-b border-gray-200">
+            <div className="w-8 h-8" onClick={() => navigate(-1)}>
+              <ChevronLeft color={"#2463eb"} />
+            </div>
+            <h1 className="font-body text-text-1 text-lg font-bold">
+              Dettagli Partecipanti
+            </h1>
+          </div>
+          <div className="flex flex-col 2xl:mt-6 mt-2 gap-3 2xl:gap-4 px-4">
+            <h1 className="text-text-1 font-body font-semibold 2xl:text-3xl ">
+              Partecipanti
+            </h1>
+            <div className="flex flex-row w-full  gap-4 items-center">
+              <div className="w-full h-10">
+                <SearchBar query={query} setQuery={setQuery} />
+              </div>
+            </div>
+            <div className="flex flex-row gap-4 items-center">
+              <span className="font-bold font-body text-text-2 text-sm 2xl:text-xl">
+                Filtra:{" "}
+              </span>
+              <div className="flex w-full flex-row gap-2 2xl:gap-4 items-center">
+                {FILTER_TYPES.map((filter) => {
+                  return (
+                    <div
+                      onClick={() => {
+                        if (currentFilter === filter) {
+                          setCurrentFilter("");
+                        } else {
+                          setCurrentFilter(filter);
+                        }
+                      }}
+                      className={`px-3 2xl:px-5 py-2 ${
+                        currentFilter == filter
+                          ? "bg-primary text-bg-1 shadow-lg shadow-primary/50"
+                          : "bg-bg-2 text-text-2 border border-text-2 hover:bg-bg-3 hover:shadow-md"
+                      } font-body   text-xs 2xl:text-xl cursor-pointer
                 
                 
-                px-4 py-2 
              
               font-semibold 
               rounded-full 
@@ -136,25 +105,24 @@ const EventDetailsParticipants = ({
 
              
               `}
-										>
-											{filter}
-										</div>
-									);
-								})}
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+                    >
+                      {filter}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-			<div className="flex flex-col gap-4 overflow-y-auto px-1">
-				{currentRisposte.map((risposta) => {
-					console.log(risposta);
-					return <PartecipanteCard {...risposta} />;
-				})}
-			</div>
-		</div>
-	);
+      <div className="flex flex-col gap-4 overflow-y-auto px-1">
+        {currentRisposte?.map((risposta) => {
+          return <PartecipanteCard {...risposta} />;
+        })}
+      </div>
+    </div>
+  );
 };
 
 export default EventDetailsParticipants;

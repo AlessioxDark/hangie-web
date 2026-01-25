@@ -7,7 +7,7 @@ const SearchBar = ({ query, setQuery }) => {
   };
   return (
     <div
-      className="border border-bg-3 p-1.5 px-3  2xl:p-3 h-1 rounded-4xl flex flex-row justify-between items-center  bg-bg-2 w-full mx-auto focus-within:ring-2 focus-within:ring-primary
+      className="border border-bg-3 p-1.5 px-3  2xl:p-3 h-1 rounded-4xl flex flex-row justify-between items-center  bg-bg-2 w-full h-full mx-auto focus-within:ring-2 focus-within:ring-primary
       flex-1 shadow-inner transition-shadow
     
     "

@@ -236,7 +236,7 @@ const EventDetails = ({
               </p>
               <div>
                 <p className="font-body font-bold text-xl text-text-1">
-                  La casa di Marco
+                  {luoghi?.nome}
                 </p>
                 <p className="font-body  text-text-2">
                   {luoghi?.indirizzo}, {luoghi?.citta}

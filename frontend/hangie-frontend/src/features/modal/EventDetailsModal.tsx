@@ -27,7 +27,7 @@ const EventDetailsModal = () => {
           // body: JSON.stringify({ offset: offset }),
           headers: {
             "Content-Type": "application/json",
-            // Authorization: `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
         },
       );

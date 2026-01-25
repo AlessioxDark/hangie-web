@@ -29,8 +29,8 @@ export const ChatContext = createContext({
   setMessagesMap: (arg) => arg,
   homeEventsData: [],
   homeOffset: 0,
-  currentEvent: {},
-  setCurrentEvent: (arg) => arg,
+  currentEventData: {},
+  setCurrentEventData: (arg) => arg,
   loading: { chat: false, home: false, groups: false, events: false },
 });
 

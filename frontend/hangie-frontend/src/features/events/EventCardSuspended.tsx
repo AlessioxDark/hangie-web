@@ -4,6 +4,7 @@ import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
 import { Clock1 } from "lucide-react"; // Aggiungi questa icona
 import React from "react";
+import { Link, useNavigate } from "react-router";
 
 interface Gruppo {
   nome: string;
@@ -46,6 +47,7 @@ interface EventCardSuspendedProps {
 const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
   titolo,
   data,
+  event_id,
   utente,
   gruppo,
   scadenza,
@@ -115,9 +117,11 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
   };
   const { openModal } = useModal();
   const { setMobileView } = useMobileLayout();
+  const navigate = useNavigate();
   return (
-    <article
-      className={`
+    <Link to={`/events/${event_id}`}>
+      <article
+        className={`
         group
         flex flex-col
         bg-bg-1
@@ -134,41 +138,38 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
      
        
       `}
-      onClick={() => {
-        openModal({ data: { event_id: event_id }, type: "EVENT_MODAL" });
-      }}
-    >
-      {/* ═══════════════════════════════════════════════════
+      >
+        {/* ═══════════════════════════════════════════════════
           HEADER - Gruppo + Scadenza
       ════════════════════════════════════════════════════ */}
-      <div
-        className="
+        <div
+          className="
         flex items-center justify-between gap-4
         2xl:px-6 p-4 pb-0
         from-blue-50 to-purple-50
       
       "
-      >
-        {/* ✅ BADGE GRUPPO - Sinistra */}
-        {gruppo && (
-          <div className=" max-w-[90%]">
-            <div className="px-3 py-1.5 2xl:py-2 bg-black/60 backdrop-blur-md rounded-xl shadow-lg">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6">
-                  <img src={gruppo.group_cover_img} alt="" />
-                </div>
+        >
+          {/* ✅ BADGE GRUPPO - Sinistra */}
+          {gruppo && (
+            <div className=" max-w-[90%]">
+              <div className="px-3 py-1.5 2xl:py-2 bg-black/60 backdrop-blur-md rounded-xl shadow-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6">
+                    <img src={gruppo.group_cover_img} alt="" />
+                  </div>
 
-                <span className="text-xs 2xl:text-sm font-bold text-bg-1 truncate">
-                  {gruppo.nome}
-                </span>
+                  <span className="text-xs 2xl:text-sm font-bold text-bg-1 truncate">
+                    {gruppo.nome}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ✅ BADGE SCADENZA - Destra */}
-        <div
-          className={`
+          {/* ✅ BADGE SCADENZA - Destra */}
+          <div
+            className={`
           flex items-center gap-2
           px-3 py-2
           bg-primary
@@ -176,106 +177,106 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
           flex-shrink-0
           
         `}
-        >
-          <svg
-            className="w-4 h-4 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="text-xs 2xl:text-sm  font-body font-bold text-white whitespace-nowrap ">
-            {getUrgencyText()}
-          </span>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════
-          CONTENT - Info Evento
-      ════════════════════════════════════════════════════ */}
-      <div className="2xl:p-6 p-4 pt-2.5 flex flex-col justify-between h-full ">
-        {/* Data + Titolo */}
-        <div className="flex flex-col gap-2 2xl:gap-4">
-          <div className="flex flex-col ">
-            <time className="text-xs 2xl:text-base block text-primary font-semibold uppercase tracking-wider">
-              {formattedTime}
-            </time>
-            <h3
-              className={`text-base 2xl:text-2xl font-bold text-text-1 leading-tight ${line_clamp}`}
+            <svg
+              className="w-4 h-4 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              {titolo}
-            </h3>
-          </div>
-
-          {/* Partecipanti */}
-          <div className="ml-1 2xl:ml-2">
-            <div className="flex items-center gap-2 2xl:gap-4 ">
-              <div className=" 2xl:w-7 2xl:h-7 w-5 h-5 flex-shrink-0 text-gray-400">
-                <ParticipantsIcon color={"#64748b"} />
-              </div>
-
-              {partecipantiArray.length > 0 ? (
-                <div className="flex items-center 2xl:gap-2.5 gap-1.5 flex-1 min-w-0">
-                  <div className="flex -space-x-2 flex-shrink-0">
-                    {avatarsToDisplay.map((partecipante, index) => (
-                      <div
-                        className="2xl:w-7 2xl:h-7 w-5 h-5"
-                        key={partecipante.user_id}
-                      >
-                        <ProfileIcon user_id={partecipante.partecipante_id} />
-                      </div>
-                    ))}
-
-                    {remainingCount > 0 && (
-                      <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center">
-                        <span className="text-xs font-semibold text-gray-700">
-                          +{remainingCount}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <span className="text-sm 2xl:text-base text-text-2 font-medium truncate">
-                    {partecipantiArray.length} partecipant
-                    {partecipantiArray.length !== 1 ? "i" : "e"}
-                  </span>
-                </div>
-              ) : (
-                <span className="text-base text-gray-500">
-                  Nessun partecipante ancora
-                </span>
-              )}
-            </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span className="text-xs 2xl:text-sm  font-body font-bold text-white whitespace-nowrap ">
+              {getUrgencyText()}
+            </span>
           </div>
         </div>
 
         {/* ═══════════════════════════════════════════════════
-            ORGANIZZATORE
-        ════════════════════════════════════════════════════ */}
-        <div>
-          <div className="pb-1 pt-3 2xl:pb-2 2xl:pt-4  ">
-            <div className="flex items-center gap-3">
-              <div className="2xl:w-12 2xl:h-12 w-8 h-8 flex-shrink-0">
-                <ProfileIcon user_id={utente.user_id} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm 2xl:text-base font-semibold text-text-2 truncate">
-                  {utente.nome}
-                </p>
+          CONTENT - Info Evento
+      ════════════════════════════════════════════════════ */}
+        <div className="2xl:p-6 p-4 pt-2.5 flex flex-col justify-between h-full ">
+          {/* Data + Titolo */}
+          <div className="flex flex-col gap-2 2xl:gap-4">
+            <div className="flex flex-col ">
+              <time className="text-xs 2xl:text-base block text-primary font-semibold uppercase tracking-wider">
+                {formattedTime}
+              </time>
+              <h3
+                className={`text-base 2xl:text-2xl font-bold text-text-1 leading-tight ${line_clamp}`}
+              >
+                {titolo}
+              </h3>
+            </div>
+
+            {/* Partecipanti */}
+            <div className="ml-1 2xl:ml-2">
+              <div className="flex items-center gap-2 2xl:gap-4 ">
+                <div className=" 2xl:w-7 2xl:h-7 w-5 h-5 flex-shrink-0 text-gray-400">
+                  <ParticipantsIcon color={"#64748b"} />
+                </div>
+
+                {partecipantiArray.length > 0 ? (
+                  <div className="flex items-center 2xl:gap-2.5 gap-1.5 flex-1 min-w-0">
+                    <div className="flex -space-x-2 flex-shrink-0">
+                      {avatarsToDisplay.map((partecipante, index) => (
+                        <div
+                          className="2xl:w-7 2xl:h-7 w-5 h-5"
+                          key={partecipante.user_id}
+                        >
+                          <ProfileIcon user_id={partecipante.partecipante_id} />
+                        </div>
+                      ))}
+
+                      {remainingCount > 0 && (
+                        <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center">
+                          <span className="text-xs font-semibold text-gray-700">
+                            +{remainingCount}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <span className="text-sm 2xl:text-base text-text-2 font-medium truncate">
+                      {partecipantiArray.length} partecipant
+                      {partecipantiArray.length !== 1 ? "i" : "e"}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-base text-gray-500">
+                    Nessun partecipante ancora
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="pt-2.5 2xl:pt-5  border-t border-gray-100 ">
-            <div className="flex gap-3">
-              <button
-                className="
+          {/* ═══════════════════════════════════════════════════
+            ORGANIZZATORE
+        ════════════════════════════════════════════════════ */}
+          <div>
+            <div className="pb-1 pt-3 2xl:pb-2 2xl:pt-4  ">
+              <div className="flex items-center gap-3">
+                <div className="2xl:w-12 2xl:h-12 w-8 h-8 flex-shrink-0">
+                  <ProfileIcon user_id={utente.user_id} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm 2xl:text-base font-semibold text-text-2 truncate">
+                    {utente.nome}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2.5 2xl:pt-5  border-t border-gray-100 ">
+              <div className="flex gap-3">
+                <button
+                  className="
                 flex-1
                 2xl:px-6 2xl:py-3
                 px-3 py-2.5
@@ -290,11 +291,11 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                  text-sm  
                  cursor-pointer 
               "
-              >
-                Accetta Invito
-              </button>
-              <button
-                className="
+                >
+                  Accetta Invito
+                </button>
+                <button
+                  className="
                 flex-1
                2xl:px-6 2xl:py-3
                 px-3 py-2.5
@@ -310,18 +311,19 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                 2xl:text-lg  
                 cursor-pointer       
               "
-              >
-                Rifiuta
-              </button>
+                >
+                  Rifiuta
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* ═══════════════════════════════════════════════════
+          {/* ═══════════════════════════════════════════════════
             AZIONI - Accetta/Rifiuta
         ════════════════════════════════════════════════════ */}
-      </div>
-    </article>
+        </div>
+      </article>
+    </Link>
   );
 };
 

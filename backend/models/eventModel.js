@@ -87,13 +87,31 @@ const getAll = async (req) => {
       });
       return acc;
     }, {});
+
+    const { data: eventParticipants, error: eventParticipantsError } =
+      await supabase
+        .from("risposte_eventi")
+        .select("status,utente:utenti(*),eventi(*),created_at,is_creator")
+        .in("eventi.event_id", eventIds);
+
+    const eventParticipantsMap = eventParticipants.reduce((acc, curr) => {
+      if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
+      acc[curr.eventi.event_id].push({
+        utenti: curr.utente,
+        status: curr.status,
+        is_creator: curr.is_creator,
+        created_at: curr.created_at,
+      });
+      return acc;
+    }, {});
+    if (eventParticipantsError) throw eventParticipantsError;
+
     const finalData = eventsList.map((e) => {
       return {
         ...e,
-        partecipanti_confermati: risposteMap[e.event_id] || [],
+        partecipanti: eventParticipantsMap[e.event_id],
       };
     });
-    console.log("dati fina", finalData[0].partecipanti_confermati);
     return { data: finalData, error: null };
   } catch (err) {
     return { data: null, error: err };
@@ -115,7 +133,7 @@ const getEvent = async (req) => {
   try {
     const { event_id } = req.params;
     const authHeader = req.headers.authorization;
-    if (!authHeader) throw new Error({ message: "Token mancante" });
+    if (!authHeader) throw { message: "Token mancante" };
     const token = authHeader.split(" ")[1];
     const {
       data: { user },
@@ -135,6 +153,7 @@ const getEvent = async (req) => {
                       descrizione,
                       data_scadenza,
                       cover_img,
+                      event_imgs(*),
                       utenti(user_id,nome),
                       luoghi(*),
                       gruppi(nome,group_cover_img,partecipanti_gruppo(partecipante_id)))`,
@@ -148,12 +167,26 @@ const getEvent = async (req) => {
     const { data: eventParticipants, error: eventParticipantsError } =
       await supabase
         .from("risposte_eventi")
-        .select("status,utente:utenti(*)")
-        .not("user_id", "eq", user.id);
+        .select("status,utente:utenti(*),eventi(*),created_at,is_creator")
+        .eq("eventi.event_id", event_id);
     if (eventParticipantsError) throw eventParticipantsError;
 
+    const newRisposte = eventParticipants.map((risposta) => {
+      return {
+        utenti: risposta.utente,
+        status: risposta.status,
+        created_at: risposta.created_at,
+        is_creator: risposta.is_creator,
+      };
+    });
+
+    const finalData = {
+      ...eventData,
+      partecipanti: newRisposte,
+    };
+
     return {
-      data: { ...eventData, partecipanti: eventParticipants },
+      data: finalData,
       error: null,
     };
   } catch (err) {

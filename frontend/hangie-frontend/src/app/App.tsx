@@ -24,9 +24,10 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import Notification from "./pages/Notification";
 import { ApiContextProvider } from "@/contexts/ApiContext";
 import EventDetailsMobile from "@/features/events/EventDetailsMobile";
+import AppRouter from "./AppRouter";
 function App() {
-  const location = useLocation();
-  const background = location.state && location.state.backgroundLocation;
+  // const location = useLocation();
+  // const background = location.state && location.state.backgroundLocation;
 
   return (
     <AuthContextProvider>
@@ -37,56 +38,9 @@ function App() {
               <SocketProvider>
                 <NotificationProvider>
                   <ModalProvider>
-                    <Routes location={background || location}>
-                      <Route path="/signup" element={<SignUp />}></Route>
-                      <Route path="/login" element={<Login />}></Route>
-                      {!background && (
-                        <Route
-                          path="/events/:eventId"
-                          element={<EventDetailsMobile />}
-                        ></Route>
-                      )}
-                      <Route
-                        path="/notifications"
-                        element={
-                          <ResponsiveLayoutWrapper>
-                            <Notification />
-                          </ResponsiveLayoutWrapper>
-                        }
-                      ></Route>
-                      <Route
-                        path="/chats"
-                        element={
-                          <ResponsiveLayoutWrapper layoutType="chat"></ResponsiveLayoutWrapper>
-                        }
-                      ></Route>
-
-                      <Route
-                        path="/"
-                        element={
-                          <ResponsiveLayoutWrapper>
-                            <Home />
-                          </ResponsiveLayoutWrapper>
-                        }
-                      />
-                      <Route
-                        path="/events/suspended/all"
-                        element={
-                          <ResponsiveLayoutWrapper>
-                            <EventsSuspended />
-                          </ResponsiveLayoutWrapper>
-                        }
-                      />
-                    </Routes>
-                    {background && (
-                      <Routes>
-                        <Route
-                          path="/events/:eventId"
-                          element={<EventDetailsModal />}
-                        />
-                      </Routes>
-                    )}
-                    <ModalHandler />
+                    <BrowserRouter>
+                      <AppRouter />
+                    </BrowserRouter>
                   </ModalProvider>
                 </NotificationProvider>
               </SocketProvider>

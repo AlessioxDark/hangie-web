@@ -25,10 +25,11 @@ const EventCard = ({ event }) => {
     event_imgs,
     status: eventStatus,
     descrizione,
-    partecipanti_confermati,
+    risposte_evento,
     cover_img,
     gruppo,
   } = event;
+
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
         day: "numeric",
@@ -122,33 +123,35 @@ const EventCard = ({ event }) => {
                 </div>
 
                 <div className="flex items-center gap-1 2xl:gap-2">
-                  {partecipanti_confermati.length > 0 ? (
+                  {risposte_evento.accepted.length > 0 ? (
                     <>
                       <div className="flex -space-x-1">
-                        {partecipanti_confermati.map((partecipante, index) => {
+                        {risposte_evento.accepted.map((partecipante, index) => {
                           return (
                             <div
                               className="2xl:w-7 2xl:h-7 w-6 h-6"
                               key={partecipante.user_id}
                             >
-                              <ProfileIcon user_id={partecipante.user_id} />
+                              <ProfileIcon
+                                user_id={partecipante.utenti.user_id}
+                              />
                             </div>
                           );
                         })}
 
                         {/* Counter per rimanenti */}
-                        {partecipanti_confermati.length > 3 && (
+                        {risposte_evento.accepted.length > 3 && (
                           <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center">
                             <span className="text-xs font-bold text-text-2">
-                              +{partecipanti_confermati.length - 3}
+                              +{risposte_evento.accepted.length - 3}
                             </span>
                           </div>
                         )}
                       </div>
 
                       <span className="text-text-2 font-body font-medium text-sm 2xl:text-base truncate">
-                        {partecipanti_confermati.length} partecipant
-                        {partecipanti_confermati.length !== 1 ? "i" : "e"}
+                        {risposte_evento.accepted.length} partecipant
+                        {risposte_evento.accepted.length !== 1 ? "i" : "e"}
                       </span>
                     </>
                   ) : (
