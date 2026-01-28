@@ -39,21 +39,20 @@ const MessageEvent = ({ event_details }) => {
       return dateString;
     }
   };
-
+  console.log("dettagli evento del socket", event_details);
   // Determina se la data di scadenza è passata
 
   const isDeadlinePassed = useMemo(() => {
     return (
-      event_details.data_scadenza &&
-      new Date(event_details.data_scadenza) < new Date()
+      event_details.scadenza && new Date(event_details.scadenza) < new Date()
     );
-  }, [event_details?.data_scadenza || null]);
+  }, [event_details?.scadenza || null]);
 
   // --- Icona Placeholder per Profilo (sostituisce ProfileIcon) ---
 
   // --- Logica Contenuto Bottone ---
   const getButtonContent = () => {
-    if (session.user.id === event_details.utenti.user_id) {
+    if (session.user.id === event_details.utente.user_id) {
       return null;
     }
     if (isDeadlinePassed) {
@@ -133,7 +132,7 @@ const MessageEvent = ({ event_details }) => {
     >
       <div
         className="flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden
-      shadow-xl transition-all duration-300   hover:shadow-2xl max-w-[80%]
+      shadow-xl transition-all duration-300   hover:shadow-2xl max-w-full mr-4
        2xl:min-w-sm  my-2 cursor-pointer "
         onClick={() => {
           openModal({
@@ -150,7 +149,7 @@ const MessageEvent = ({ event_details }) => {
             src={event_details.cover_img}
             alt={event_details.titolo || "Event Cover"}
           />
-          {event_details.data_scadenza && (
+          {event_details.scadenza && (
             <div
               className={`absolute top-0 right-0 m-3 px-3 py-1 rounded-full text-xs font-semibold text-white shadow-lg font-body ${
                 isDeadlinePassed ? "bg-red-600" : "bg-primary"
@@ -158,7 +157,7 @@ const MessageEvent = ({ event_details }) => {
             >
               {isDeadlinePassed
                 ? "CHIUSO"
-                : `Scade: ${formatDate(event_details.data_scadenza)}`}
+                : `Scade: ${formatDate(event_details.scadenza)}`}
             </div>
           )}
         </div>
@@ -192,7 +191,7 @@ const MessageEvent = ({ event_details }) => {
                 <span
                   className={`font-body truncate text-xs 2xl:text-base text-text-2`}
                 >
-                  {event_details.luoghi.nome}
+                  {event_details.luogo.nome}
                 </span>
               </div>
 
@@ -237,12 +236,12 @@ const MessageEvent = ({ event_details }) => {
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 2xl:w-12 2xl:h-12 flex-shrink-0">
                     {/* Usa la Sostituzione ProfileIcon */}
-                    <ProfileIcon user_id={event_details.utenti?.user_id} />
+                    <ProfileIcon user_id={event_details.utente?.user_id} />
                   </div>
                   <span className="font-medium text-xs 2xl:text-sm text-text-2 font-body truncate">
                     Creato da:
                     <span className="font-semibold block text-sm 2xl:text-base text-text-1 leading-none">
-                      {event_details.utenti?.creatore}
+                      {event_details.utente?.creatore}
                     </span>
                   </span>
                 </div>

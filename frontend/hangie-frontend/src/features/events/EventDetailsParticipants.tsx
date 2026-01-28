@@ -95,7 +95,7 @@ const EventDetailsParticipants = () => {
                         currentFilter == filter
                           ? "bg-primary text-bg-1 shadow-md "
                           : "bg-bg-2 text-text-2 border border-gray-200  hover:bg-bg-3 hover:shadow-md"
-                      } font-body   text-xs 2xl:text-xl cursor-pointer
+                      } font-body  text-xs 2xl:text-xl cursor-pointer
                 
                 
              

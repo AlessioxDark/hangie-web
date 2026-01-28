@@ -59,6 +59,7 @@ const getGroupEvents = async (req, res) => {
   try {
     const { data, error } = await Group.getEvents(req);
     if (error) throw error;
+    console.log("da group events ecco data", data);
     const cleanData = data.map((response) => {
       // Estrae l'oggetto evento dal campo 'eventi' e aggiunge lo 'status'
       return {
@@ -76,6 +77,11 @@ const getGroupEvents = async (req, res) => {
         gruppo: response.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
         scadenza: response.eventi.data_scadenza,
         group_id: response.group_id,
+        risposte_evento: {
+          refused: response.partecipanti.filter((p) => p.status == "refused"),
+          accepted: response.partecipanti.filter((p) => p.status == "accepted"),
+          pending: response.partecipanti.filter((p) => p.status == "pending"),
+        },
 
         // Non includere ...dato (spread) qui se vuoi un oggetto pulito
       };

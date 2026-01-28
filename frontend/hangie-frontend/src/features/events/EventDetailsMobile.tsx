@@ -15,12 +15,16 @@ import { useNavigate, useParams } from "react-router";
 import RenderEmptyState from "../utils/RenderEmptyState";
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { Clock } from "lucide-react";
+import RenderLoadingState from "../utils/RenderLoadingState";
+import RenderErrorState from "../utils/RenderErrorState";
+import { useSocket } from "@/contexts/SocketContext";
 
 const EventDetailsMobile = () => {
   const navigate = useNavigate();
   const { eventId } = useParams();
-  const { executeApiCall, error } = useApi();
+  const { executeApiCall, error, loading } = useApi();
   const { setCurrentEventData, currentEventData } = useChat();
+  const { currentSocket } = useSocket();
   const { session } = useAuth();
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
   const carouselRef = useRef(null);
@@ -69,10 +73,12 @@ const EventDetailsMobile = () => {
   useEffect(() => {
     fetchEvent();
   }, []);
-  console.log(currentEventData);
 
-  if (Object.keys(currentEventData).length == 0) {
-    return <RenderEmptyState type="events" />;
+  if (error?.event !== null) {
+    return <RenderErrorState reloadFunction={() => {}} type="event" />;
+  }
+  if (loading.event) {
+    return <RenderLoadingState type={"event"} />;
   }
   const {
     titolo,
@@ -163,6 +169,22 @@ const EventDetailsMobile = () => {
       behavior: "smooth",
     });
   };
+
+  const handleDeleteEvent = () => {
+    const saveData = (data) => {
+      console.log("eliminato");
+      navigate(-1);
+      currentSocket.emit("delete_event", eventId, gruppo.group_id);
+    };
+    executeApiCall(
+      "delete_event",
+      () => {
+        return ApiCalls.deleteEvent(eventId, session.access_token);
+      },
+      saveData,
+    );
+  };
+
   return (
     <div className="">
       <div className="px-2 py-3 bg-white z-[100] w-full flex flex-row items-center gap-4 border-b border-gray-200 sticky top-0">
@@ -359,6 +381,15 @@ const EventDetailsMobile = () => {
                   </p>
                 </div>
               </div>
+
+              <button
+                className="w-full py-4 text-white  bg-red-500 font-semibold rounded-2xl active:bg-red-400 transition-all shadow-sm"
+                onClick={() => {
+                  handleDeleteEvent();
+                }}
+              >
+                Elimina Evento
+              </button>
             </div>
           </div>
         </div>

@@ -31,6 +31,8 @@ export const SocketProvider = ({ children }) => {
     setCurrentGroup,
     setCurrentGroupData,
     setMessagesMap,
+    setGroupEventsData,
+    setHomeEventsData,
   } = useChat();
   const { session } = useAuth();
   const { setMobileView } = useMobileLayout();
@@ -324,6 +326,25 @@ export const SocketProvider = ({ children }) => {
           [data.group_id]: [...messMap[data.group_id], eventMessage],
         };
       });
+      console.log("controllo se è user", eventMessage.isUser);
+      if (eventMessage.isUser) {
+        console.log("si, aggiungo evento", data.messageDetails.eventi);
+        setHomeEventsData((prevEvents) => {
+          const category = eventMessage.isUser ? "accepted" : "pending";
+          return {
+            ...prevEvents,
+            [category]: [data.messageDetails.eventi, ...prevEvents[category]],
+          };
+        });
+      } else {
+        console.log("no, aggiungo evento", data.messsageDetails.eventi);
+        setHomeEventsData((prevEvents) => {
+          return {
+            ...prevEvents,
+            pending: [data.messageDetails.eventi, ...prevEvents.pending],
+          };
+        });
+      }
     });
     socket.on("give_read_bulk", (data) => {
       // notifica
@@ -352,6 +373,38 @@ export const SocketProvider = ({ children }) => {
           };
         });
       }
+    });
+    socket.on("deleted_event", (data) => {
+      // notifica
+      console.log("arrivato deleted_event");
+      const { event_id, group_id } = data;
+      setMessagesMap((messMap) => {
+        const { [group_id]: removed, ...newMessMap } = messMap;
+        return newMessMap;
+      });
+      if (currentGroup == group_id) {
+        setCurrentChatData((prevData) => {
+          if (!prevData) return prevData;
+          return {
+            ...prevData,
+            messaggi: prevData.messaggi.filter((m) => {
+              if (m?.event_id == null) return true;
+              return m.event_id !== event_id;
+            }),
+          };
+        });
+        setGroupEventsData((prevEvents) => {
+          return prevEvents.filter((e) => e.event_id !== event_id);
+        });
+      }
+
+      setHomeEventsData((prevEvents) => {
+        return {
+          ...prevEvents,
+          pending: prevEvents.pending.filter((e) => e.event_id !== event_id),
+          accepted: prevEvents.accepted.filter((e) => e.event_id !== event_id),
+        };
+      });
     });
 
     return () => {

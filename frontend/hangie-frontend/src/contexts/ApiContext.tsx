@@ -29,6 +29,7 @@ export const ApiContextProvider = ({ children }) => {
     leave_group: false,
     remove_participant: false,
     event: false,
+    delete_event: null,
   });
   const [error, setError] = useState({
     chat: null,
@@ -43,11 +44,20 @@ export const ApiContextProvider = ({ children }) => {
     leave_group: null,
     remove_participant: null,
     event: null,
+    delete_event: null,
   });
 
   const executeApiCall = useCallback(
     async (
-      type: "chat" | "groups" | "events" | "home" | "home_events" | "add_event",
+      type:
+        | "chat"
+        | "groups"
+        | "events"
+        | "home"
+        | "home_events"
+        | "add_event"
+        | "event"
+        | "delete_event",
       fetchCall,
       onSuccess,
     ) => {

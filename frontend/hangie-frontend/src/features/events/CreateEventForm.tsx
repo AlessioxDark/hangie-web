@@ -180,7 +180,7 @@ const CreateEventForm = () => {
         }
 
         const newEventDetails = {
-          ...dataArrived.event_details,
+          ...dataArrived.messageDetails.eventi,
           cover_img: cover_url,
         };
         const messageDetails = dataArrived.messageDetails;

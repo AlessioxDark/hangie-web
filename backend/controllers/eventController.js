@@ -161,6 +161,25 @@ const modifyResponseEvent = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const deleteSpecificEvent = async (req, res) => {
+  try {
+    const { data, error } = await Event.deleteEvent(req); // Chiama il modello per ottenere gli eventi
+    console.log("error", error);
+    if (error) throw error;
+    console.log("è andata bene");
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo", // Opzionale, utile per i toast
+      data, // <--- I dati reali che hai appena creato o modificato
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a trovare il tuo evento", // Messaggio generico per l'utente
+      details: err.message,
+    });
+  }
+};
 const getSuspendedEvents = async (req, res) => {
   try {
     const { data, error } = await Event.getSuspended(req); // Chiama il modello per ottenere gli eventi
@@ -202,4 +221,5 @@ module.exports = {
   addNewEvent,
   modifyResponseEvent,
   getSuspendedEvents,
+  deleteSpecificEvent,
 };

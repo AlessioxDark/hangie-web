@@ -22,6 +22,10 @@ const RenderLoadingState = ({ type }) => {
       main: "Creazione evento in corso in corso...",
       alt: "Stiamo creando il tuo evento",
     },
+    event: {
+      main: "Caricamento evento in corso in corso...",
+      alt: "Stiamo cercando il tuo evento",
+    },
   };
   return (
     <div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">

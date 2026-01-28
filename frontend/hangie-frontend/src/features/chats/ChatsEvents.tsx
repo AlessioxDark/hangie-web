@@ -86,20 +86,17 @@ const ChatsEvents = () => {
   if (loading.events) {
     return <RenderLoadingState type="events" />;
   }
-  if (error.events) {
+  if (error && error?.events) {
     return (
-      <RenderErrorState
-        errorMessage={error.events.message}
-        reloadFunction={fetchGroupEvents}
-      />
+      <RenderErrorState type={"events"} reloadFunction={fetchGroupEvents} />
     );
   }
   return (
     <div className="2xl:min-w-1/5 2xl:max-w-1/5 h-full">
-      <div className="p-3 2xl:p-6 flex flex-col gap-3 2xl:gap-8">
-        <div className="flex flex-row gap-1 items-center w-full">
+      <div className=" 2xl:p-6 flex flex-col gap-3 2xl:gap-8 ">
+        <div className="px-2 py-3 bg-white z-[100] w-full flex flex-row items-center gap-2 border-b border-gray-200 sticky top-0">
           {currentScreen == "xs" && (
-            <div className="w-6 h-6" onClick={() => setMobileView("chat")}>
+            <div className="w-8 h-8" onClick={() => setMobileView("chat")}>
               <ChevronLeft color="#2463eb" />
             </div>
           )}
@@ -107,52 +104,68 @@ const ChatsEvents = () => {
             Eventi Gruppo
           </h1>
         </div>
-        <div className="w-full flex flex-col gap-3 2xl:gap-4">
-          <SearchBar query={query} setQuery={setQuery} />
+        <div className="px-4 space-y-4.5 pt-4 pb-10">
+          <div className="w-full flex flex-col gap-3 2xl:gap-4">
+            <div className="w-full h-11">
+              <SearchBar query={query} setQuery={setQuery} />
+            </div>
 
-          <div className="flex w-full flex-row gap-2 2xl:gap-3 items-center">
-            {FILTER_TYPES.map((filter) => {
-              return (
-                <div
-                  onClick={() => {
-                    if (currentFilter === filter) {
-                      setCurrentFilter("");
-                    } else {
-                      setCurrentFilter(filter);
-                    }
-                  }}
-                  className={`px-3 py-1 2xl:px-4 2xl:py-2 ${
-                    currentFilter == filter
-                      ? "bg-primary text-bg-1 shadow-lg shadow-primary/50"
-                      : "bg-bg-2 text-text-2 border border-text-2 hover:bg-bg-3 hover:shadow-md"
-                  } font-body text-base 2xl:text-xl cursor-pointer font-semibold rounded-full transition-all duration-200 shadow-sm`}
-                >
-                  {filter}
-                </div>
-              );
-            })}
+            <div className="flex w-full flex-row gap-2 2xl:gap-3 items-center">
+              {FILTER_TYPES.map((filter) => {
+                return (
+                  <div
+                    onClick={() => {
+                      if (currentFilter === filter) {
+                        setCurrentFilter("");
+                      } else {
+                        setCurrentFilter(filter);
+                      }
+                    }}
+                    className={` 2xl:py-2 px-3 2xl:px-5 py-2 ${
+                      currentFilter == filter
+                        ? "bg-primary text-bg-1 shadow-md "
+                        : "bg-bg-2 text-text-2 border border-gray-200  hover:bg-bg-3 hover:shadow-md"
+                    } font-body   text-xs 2xl:text-xl cursor-pointer   font-semibold 
+              rounded-full 
+          
+              transition-all duration-200 
+              shadow-sm`}
+                  >
+                    {filter}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col gap-8">
-          <div>
-            {filteredEvents?.length > 0 ? (
-              <div
-                className="
+          <div className="flex flex-col gap-8">
+            <div>
+              {filteredEvents?.length > 0 ? (
+                <div
+                  className="
                 flex flex-col gap-4
               "
-              >
-                {filteredEvents?.map((event) => {
-                  const status = getEventStatus(event);
-                  return (
-                    <div key={event.event_id}>
-                      <GroupEventCard type={status} {...event} />
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <RenderEmptyState type="events" />
-            )}
+                >
+                  {filteredEvents?.map((event) => {
+                    const status = getEventStatus(event);
+                    return (
+                      <div key={event.event_id}>
+                        <GroupEventCard type={status} {...event} />
+                      </div>
+                    );
+                  })}
+                  {filteredEvents?.map((event) => {
+                    const status = getEventStatus(event);
+                    return (
+                      <div key={event.event_id}>
+                        <GroupEventCard type={status} {...event} />
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <RenderEmptyState type="events" />
+              )}
+            </div>
           </div>
         </div>
       </div>

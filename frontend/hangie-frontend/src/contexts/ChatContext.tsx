@@ -32,6 +32,7 @@ export const ChatContext = createContext({
   currentEventData: {},
   setCurrentEventData: (arg) => arg,
   loading: { chat: false, home: false, groups: false, events: false },
+  setHomeEventsData: (arg) => arg,
 });
 
 export const useChat = () => {
@@ -223,10 +224,10 @@ export const ChatProvider = ({ children }) => {
         setMessagesMap,
         homeEventsData,
         setHomeOffset,
-
         fetchGroupEvents,
         setCurrentEventData,
         currentEventData,
+        setHomeEventsData,
       }}
     >
       {children}

@@ -74,7 +74,7 @@ const getAll = async (req) => {
     if (error) throw error;
     const { data: risposte, error: risposteError } = await supabase
       .from("risposte_eventi")
-      .select("user_id,status,eventi(*,gruppi(*))")
+      .select("user_id,is_creator,status,eventi(*,gruppi(*))")
       .eq("status", "accepted")
       .in("eventi.event_id", eventIds)
       .in("eventi.gruppi.group_id", groupIds);
@@ -84,6 +84,7 @@ const getAll = async (req) => {
       acc[curr.eventi.event_id].push({
         user_id: curr.user_id,
         status: curr.status,
+        is_creator: curr.is_creator,
       });
       return acc;
     }, {});
@@ -129,6 +130,71 @@ const getEvents = async () => {
   // 	.eq('status', 'accepted');
   // return { data, error };
 };
+const deleteEvent = async (req) => {
+  try {
+    console.log("provando ad eliminare");
+    const { event_id } = req.params;
+    console.log("id evento", event_id);
+    const { error: messageError } = await supabase
+      .from("messaggi")
+      .delete()
+      .eq("event_id", event_id);
+    if (messageError) throw messageError;
+
+    const { error: eventGroupError } = await supabase
+      .from("eventi_gruppo")
+      .delete()
+      .eq("event_id", event_id);
+    if (eventGroupError) throw eventGroupError;
+
+    const { error: imgsError } = await supabase
+      .from("event_imgs")
+      .delete()
+      .eq("event_id", event_id);
+    if (imgsError) throw imgsError;
+
+    const { err: eventError } = await supabase
+      .from("eventi")
+      .delete()
+      .eq("event_id", event_id);
+    if (eventError) throw eventError;
+
+    // rimuovi immgaini
+    const { data: files, error: listError } = await supabase.storage
+      .from("eventi")
+      .list(`/${event_id}`);
+
+    if (listError) throw listError;
+    if (!files || files.length === 0) {
+      console.log(
+        "La cartella è già vuota, procedo con l'eliminazione del record.",
+      );
+      return { data: { message: "ok" }, error: null };
+    }
+    // 2. Crea i percorsi completi (folder/file.jpg)
+    const filesToRemove = files.map((x) => `${event_id}/${x.name}`);
+
+    // 3. Elimina i file in blocco
+    const { error: deleteError } = await supabase.storage
+      .from("eventi")
+      .remove(filesToRemove);
+
+    if (deleteError) throw deleteError;
+
+    return { data: { message: "ok" }, error: null };
+  } catch (err) {
+    return { error: err, data: null };
+  }
+  // const { user_id } = req.params;
+  // const { data, error } = await supabase
+  // 	.from('risposte_eventi')
+  // 	.select(
+  // 		'eventi(event_id,luogo,costo,data,titolo,created_by,event_cover_img)'
+  // 	)
+  // 	// .eq('risposte_eventi.user_id', user_id)
+  // 	.eq('status', 'accepted');
+  // return { data, error };
+};
 const getEvent = async (req) => {
   try {
     const { event_id } = req.params;
@@ -156,7 +222,7 @@ const getEvent = async (req) => {
                       event_imgs(*),
                       utenti(user_id,nome),
                       luoghi(*),
-                      gruppi(nome,group_cover_img,partecipanti_gruppo(partecipante_id)))`,
+                      gruppi(group_id,nome,group_cover_img,partecipanti_gruppo(partecipante_id)))`,
       )
       .eq("event_id", event_id)
       .eq("user_id", user.id)
@@ -267,7 +333,9 @@ const newEvent = async (req) => {
             group_id,
           },
         ])
-        .select("*, eventi(*, luoghi(*), utenti(nome, user_id))")
+        .select(
+          "*, eventi(*,scadenza:data_scadenza, luogo:luoghi(*), utente:utenti(nome, user_id),gruppo:gruppi(*))",
+        )
         .single(),
       supabase.from("eventi_gruppo").insert([{ event_id: eventId, group_id }]),
       supabase
@@ -292,13 +360,65 @@ const newEvent = async (req) => {
       .from("risposte_eventi")
       .insert(answersToInsert);
     if (answerError) throw answerError;
+
+    const { data: eventParticipants, error: eventParticipantsError } =
+      await supabase
+        .from("risposte_eventi")
+        .select("status,utente:utenti(*),eventi(*),created_at,is_creator")
+        .eq("eventi.event_id", eventId);
+    if (eventParticipantsError) throw eventParticipantsError;
+
+    const newRisposte = eventParticipants.map((risposta) => {
+      return {
+        utenti: risposta.utente,
+        status: risposta.status,
+        created_at: risposta.created_at,
+        is_creator: risposta.is_creator,
+      };
+    });
+
+    console.log("aggiunto nuovo evento", {
+      event_imgs: [],
+      ...messageData.eventi,
+      risposte_evento: {
+        refused: newRisposte.filter((r) => r.status == "refused"),
+        accepted: newRisposte.filter((r) => r.status == "accepted"),
+        pending: newRisposte.filter((r) => r.status == "pending"),
+      },
+    });
+    // return {
+    //   data: {
+    //     event_id: eventId,
+    //     messageDetails: messageData,
+    //     event_details: {
+    //       ...messageData.eventi,
+    //       event_imgs: [],
+    //       risposte_evento: {
+    //         refused: newRisposte.filter((r) => r.status == "refused"),
+    //         accepted: newRisposte.filter((r) => r.status == "accepted"),
+    //         pending: newRisposte.filter((r) => r.status == "pending")
+    //       },
+    //       },
+    //     },
+    //     error: null,
+    //   },
+
     return {
       data: {
         event_id: eventId,
-        messageDetails: messageData,
-        event_details: {
-          event_imgs: [],
-          ...messageData.eventi,
+        group_id: messageData.group_id, // Fondamentale per la tua setMessagesMap
+        messageDetails: {
+          ...messageData,
+          // Iniettiamo i dettagli calcolati direttamente nell'oggetto eventi
+          eventi: {
+            ...messageData.eventi,
+            event_imgs: [],
+            risposte_evento: {
+              refused: newRisposte.filter((r) => r.status === "refused"),
+              accepted: newRisposte.filter((r) => r.status === "accepted"),
+              pending: newRisposte.filter((r) => r.status === "pending"),
+            },
+          },
         },
       },
       error: null,
@@ -357,4 +477,5 @@ module.exports = {
   getSuspended,
   getEvent,
   newEvent,
+  deleteEvent,
 };

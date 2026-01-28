@@ -135,16 +135,39 @@ const getEvents = async (req) => {
   try {
     const { group_id } = req.params;
 
-    const { data, error } = await supabase
+    const { data: eventsData, error: eventsError } = await supabase
       .from("eventi_gruppo")
 
       .select(
         "*, eventi(event_id,costo,data,titolo,utenti (user_id, nome, profile_pic),luoghi(*),risposte_eventi(*),descrizione, data_scadenza,cover_img,event_imgs(*),gruppi(*, partecipanti_gruppo(*)))",
       )
       .eq("group_id", group_id);
-    if (error) throw error;
+    if (eventsError) throw eventsError;
     console.log("trovando eventi_gruppo");
-    return { data, error: null };
+    const eventIds = eventsData.map((e) => e.event_id);
+
+    const { data: risposte, error: risposteError } = await supabase
+      .from("risposte_eventi")
+      .select("user_id,is_creator,status,eventi(*,gruppi(*))")
+      .eq("status", "accepted")
+      .in("eventi.event_id", eventIds)
+      .eq("eventi.gruppi.group_id", group_id);
+    if (risposteError) throw risposteError;
+    const newRisposte = risposte.reduce((acc, event) => {
+      if (!acc[event.eventi.event_id]) acc[event.eventi.event_id] = [];
+      acc[event.eventi.event_id].push({
+        is_creator: event.is_creator,
+        user_id: event.user_id,
+        status: event.status,
+      });
+      return acc;
+    }, {});
+    // const {data:participantsData,error:partecipanti_error} = await supabase.from("risposte_eventoùi").select("user_id,status").eq("event_id")
+    const newData = eventsData.map((e) => {
+      return { ...e, partecipanti: newRisposte[e.event_id] };
+    });
+    // ottenere partecipanti confermati per tutti, seguire esempio event
+    return { data: newData, error: null };
   } catch (err) {
     return { error: err, data: null };
   }

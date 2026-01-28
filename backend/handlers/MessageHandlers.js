@@ -189,12 +189,25 @@ const messageHandlers = (io, socket) => {
         .eq("group_id", group_id);
       participants.forEach((p) => {
         io.to(p.partecipante_id).emit("sent_event", {
-          event: { ...eventDetails, event_id: eventId },
+          eventi: { ...eventDetails, event_id: eventId },
           messageDetails,
           group_id,
         });
       });
     },
   );
+  socket.on("delete_event", async (eventId, groupId) => {
+    const { data: participants, error: participantsError } = await supabase
+      .from("partecipanti_gruppo")
+      .select("*")
+      .eq("group_id", groupId);
+    console.log("ecco i partecipanti", participants, participantsError);
+    participants.forEach((p) => {
+      io.to(p.partecipante_id).emit("deleted_event", {
+        event_id: eventId,
+        group_id: groupId,
+      });
+    });
+  });
 };
 module.exports = messageHandlers;
