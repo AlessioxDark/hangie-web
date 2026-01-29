@@ -187,6 +187,7 @@ const messageHandlers = (io, socket) => {
         .from("partecipanti_gruppo")
         .select("*")
         .eq("group_id", group_id);
+      console.log("ecco gli event details", eventDetails);
       participants.forEach((p) => {
         io.to(p.partecipante_id).emit("sent_event", {
           eventi: { ...eventDetails, event_id: eventId },

@@ -18,12 +18,14 @@ import { Clock } from "lucide-react";
 import RenderLoadingState from "../utils/RenderLoadingState";
 import RenderErrorState from "../utils/RenderErrorState";
 import { useSocket } from "@/contexts/SocketContext";
+import { object } from "zod";
 
 const EventDetailsMobile = () => {
   const navigate = useNavigate();
   const { eventId } = useParams();
   const { executeApiCall, error, loading } = useApi();
-  const { setCurrentEventData, currentEventData } = useChat();
+  const { setCurrentEventData, currentEventData, handleDeleteEvent } =
+    useChat();
   const { currentSocket } = useSocket();
   const { session } = useAuth();
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
@@ -32,6 +34,8 @@ const EventDetailsMobile = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const fetchEvent = () => {
+    console.log("qui arrivo 2");
+
     executeApiCall(
       "event",
       () => {
@@ -71,13 +75,18 @@ const EventDetailsMobile = () => {
   };
 
   useEffect(() => {
+    console.log("qui arrivo");
     fetchEvent();
   }, []);
+  // if (error && error?.event !== null) {
+  //   return <RenderErrorState reloadFunction={() => {}} type="event" />;
+  // }
+  // if (loading.event) {
+  //   return <RenderLoadingState type={"event"} />;
+  // }
+  console.log(currentEventData);
 
-  if (error?.event !== null) {
-    return <RenderErrorState reloadFunction={() => {}} type="event" />;
-  }
-  if (loading.event) {
+  if (Object.keys(currentEventData).length == 0) {
     return <RenderLoadingState type={"event"} />;
   }
   const {
@@ -93,7 +102,7 @@ const EventDetailsMobile = () => {
     scadenza,
     risposte_evento,
     utente,
-  } = currentEventData || [];
+  } = currentEventData || {};
   const allImgs = [cover_img, ...event_imgs?.map((e) => e.img_url)];
   console.log(allImgs);
 
@@ -170,21 +179,24 @@ const EventDetailsMobile = () => {
     });
   };
 
-  const handleDeleteEvent = () => {
-    const saveData = (data) => {
-      console.log("eliminato");
-      navigate(-1);
-      currentSocket.emit("delete_event", eventId, gruppo.group_id);
-    };
-    executeApiCall(
-      "delete_event",
-      () => {
-        return ApiCalls.deleteEvent(eventId, session.access_token);
-      },
-      saveData,
-    );
+  // const handleDeleteEvent = () => {
+  //   const saveData = (data) => {
+  //     console.log("eliminato");
+  //     navigate(-1);
+  //     currentSocket.emit("delete_event", eventId, gruppo.group_id);
+  //   };
+  //   executeApiCall(
+  //     "delete_event",
+  //     () => {
+  //       return ApiCalls.deleteEvent(eventId, session.access_token);
+  //     },
+  //     saveData,
+  //   );
+  // };
+  const sendSocket = () => {
+    navigate(-1);
+    currentSocket.emit("delete_event", eventId, gruppo.group_id);
   };
-
   return (
     <div className="">
       <div className="px-2 py-3 bg-white z-[100] w-full flex flex-row items-center gap-4 border-b border-gray-200 sticky top-0">
@@ -385,7 +397,7 @@ const EventDetailsMobile = () => {
               <button
                 className="w-full py-4 text-white  bg-red-500 font-semibold rounded-2xl active:bg-red-400 transition-all shadow-sm"
                 onClick={() => {
-                  handleDeleteEvent();
+                  handleDeleteEvent(eventId, sendSocket);
                 }}
               >
                 Elimina Evento

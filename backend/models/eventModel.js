@@ -334,7 +334,7 @@ const newEvent = async (req) => {
           },
         ])
         .select(
-          "*, eventi(*,scadenza:data_scadenza, luogo:luoghi(*), utente:utenti(nome, user_id),gruppo:gruppi(*))",
+          "*, eventi(*,scadenza:data_scadenza, luogo:luoghi(*), utente:utenti(nome, user_id),gruppo:gruppi(*),cover_img)",
         )
         .single(),
       supabase.from("eventi_gruppo").insert([{ event_id: eventId, group_id }]),
@@ -376,7 +376,7 @@ const newEvent = async (req) => {
         is_creator: risposta.is_creator,
       };
     });
-
+    console.log("questo è message data per gli eventi", messageData.eventi);
     console.log("aggiunto nuovo evento", {
       event_imgs: [],
       ...messageData.eventi,

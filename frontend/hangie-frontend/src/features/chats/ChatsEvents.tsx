@@ -14,7 +14,7 @@ import { useApi } from "@/contexts/ApiContext";
 const FILTER_TYPES = ["accepted", "pending", "archive"];
 const ChatsEvents = () => {
   const [currentFilter, setCurrentFilter] = useState("");
-  const { groupEventsData, fetchGroupEvents } = useChat();
+  const { groupEventsData, fetchGroupEvents, setGroupEventsData } = useChat();
   const [query, setQuery] = useState("");
   const { session } = useAuth();
   const { currentScreen } = useScreen();
@@ -40,7 +40,7 @@ const ChatsEvents = () => {
 
   const filteredEvents = useMemo(() => {
     const allEvents = groupEventsData || [];
-
+    console.log("qui arrivo", allEvents);
     const getUserEventStatus = (event) => {
       if (event.created_by === session.user.id) {
         return "creator";
@@ -59,7 +59,9 @@ const ChatsEvents = () => {
 
     let statusFilteredList = [];
 
+    console.log("qui arrivo");
     if (currentFilter === "") {
+      console.log("qui arrivo");
       statusFilteredList = allEvents;
     } else {
       statusFilteredList = allEvents.filter((event) => {
@@ -79,9 +81,15 @@ const ChatsEvents = () => {
         (evento) => evento.titolo && evento.titolo.match(regex),
       );
     }
-
+    console.log("pure qui", statusFilteredList);
     return statusFilteredList;
-  }, [groupEventsData, currentFilter, query, session?.user.id]);
+  }, [
+    groupEventsData,
+    currentFilter,
+    query,
+    session?.user.id,
+    setGroupEventsData,
+  ]);
 
   if (loading.events) {
     return <RenderLoadingState type="events" />;
@@ -145,14 +153,6 @@ const ChatsEvents = () => {
                 flex flex-col gap-4
               "
                 >
-                  {filteredEvents?.map((event) => {
-                    const status = getEventStatus(event);
-                    return (
-                      <div key={event.event_id}>
-                        <GroupEventCard type={status} {...event} />
-                      </div>
-                    );
-                  })}
                   {filteredEvents?.map((event) => {
                     const status = getEventStatus(event);
                     return (

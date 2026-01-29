@@ -83,8 +83,8 @@ const getGroup = async (req) => {
       .from("eventi")
       .select(
         `*,
-            utenti(creatore:nome, user_id),
-            luoghi(nome, citta, indirizzo),
+            utente:utenti(creatore:nome, user_id),
+            luogo:luoghi(nome, citta, indirizzo),
             risposte_eventi(*, utenti(profile_pic, user_id, nome))
             `,
       )
@@ -164,8 +164,11 @@ const getEvents = async (req) => {
     }, {});
     // const {data:participantsData,error:partecipanti_error} = await supabase.from("risposte_eventoùi").select("user_id,status").eq("event_id")
     const newData = eventsData.map((e) => {
+      console.log("questo è e", e);
       return { ...e, partecipanti: newRisposte[e.event_id] };
     });
+    console.log("ecco il newData", newData);
+    console.log("ecco il newRispsote", newRisposte);
     // ottenere partecipanti confermati per tutti, seguire esempio event
     return { data: newData, error: null };
   } catch (err) {

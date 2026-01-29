@@ -314,7 +314,7 @@ export const SocketProvider = ({ children }) => {
       const eventMessage = {
         type: "event",
         message_id: data.messageDetails.message_id,
-        event_details: data.messageDetails.eventi,
+        event_details: data.eventi,
         isUser: session.user.id == data.messageDetails.user_id,
       };
       setCurrentChatData((prev) => {
@@ -326,6 +326,11 @@ export const SocketProvider = ({ children }) => {
           [data.group_id]: [...messMap[data.group_id], eventMessage],
         };
       });
+
+      setGroupEventsData((prevGroups) => [
+        ...prevGroups,
+        eventMessage.event_details,
+      ]);
       console.log("controllo se è user", eventMessage.isUser);
       if (eventMessage.isUser) {
         console.log("si, aggiungo evento", data.messageDetails.eventi);
@@ -333,7 +338,7 @@ export const SocketProvider = ({ children }) => {
           const category = eventMessage.isUser ? "accepted" : "pending";
           return {
             ...prevEvents,
-            [category]: [data.messageDetails.eventi, ...prevEvents[category]],
+            [category]: [data.eventi, ...prevEvents[category]],
           };
         });
       } else {
@@ -341,7 +346,7 @@ export const SocketProvider = ({ children }) => {
         setHomeEventsData((prevEvents) => {
           return {
             ...prevEvents,
-            pending: [data.messageDetails.eventi, ...prevEvents.pending],
+            pending: [data.eventi, ...prevEvents.pending],
           };
         });
       }
@@ -382,7 +387,16 @@ export const SocketProvider = ({ children }) => {
         const { [group_id]: removed, ...newMessMap } = messMap;
         return newMessMap;
       });
+
+      setHomeEventsData((prevEvents) => {
+        return {
+          ...prevEvents,
+          pending: prevEvents.pending.filter((e) => e.event_id !== event_id),
+          accepted: prevEvents.accepted.filter((e) => e.event_id !== event_id),
+        };
+      });
       if (currentGroup == group_id) {
+        console.log("qui lo toglo");
         setCurrentChatData((prevData) => {
           if (!prevData) return prevData;
           return {
@@ -397,14 +411,6 @@ export const SocketProvider = ({ children }) => {
           return prevEvents.filter((e) => e.event_id !== event_id);
         });
       }
-
-      setHomeEventsData((prevEvents) => {
-        return {
-          ...prevEvents,
-          pending: prevEvents.pending.filter((e) => e.event_id !== event_id),
-          accepted: prevEvents.accepted.filter((e) => e.event_id !== event_id),
-        };
-      });
     });
 
     return () => {

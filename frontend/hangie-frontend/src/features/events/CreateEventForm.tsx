@@ -69,7 +69,7 @@ const EventSchema = z
   .refine((data) => data.data > data.data_scadenza, {
     message:
       "La data dell'evento deve essere successiva alla scadenza iscrizione.",
-    path: ["data"],
+    path: ["root"],
   });
 const CreateEventForm = () => {
   const IMAGE_LIMIT = 4;
@@ -159,7 +159,7 @@ const CreateEventForm = () => {
           return urlData.publicUrl;
         });
         const uploadedUrls = await Promise.all(uploadPromises);
-        console.log("url caricati", uploadPromises);
+        console.log("url caricati", uploadedUrls);
         const cover_url = uploadedUrls[0];
         const { error: coverError } = await supabase
           .from("eventi")
@@ -178,7 +178,7 @@ const CreateEventForm = () => {
           if (imgError) throw imgError;
           console.log("inseriti other img");
         }
-
+        console.log("ecco cover", cover_url);
         const newEventDetails = {
           ...dataArrived.messageDetails.eventi,
           cover_img: cover_url,

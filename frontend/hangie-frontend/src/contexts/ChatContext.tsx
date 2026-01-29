@@ -11,6 +11,8 @@ import { useScreen } from "./ScreenContext.js";
 import { type Message, type UUID, type GroupData } from "../types/chat.tsx";
 import { ApiCalls } from "@/services/api.tsx";
 import { useApi } from "./ApiContext.tsx";
+import { useNavigate } from "react-router";
+import { useSocket } from "./SocketContext.tsx";
 
 export const ChatContext = createContext({
   currentChatData: null,
@@ -58,18 +60,6 @@ export const ChatProvider = ({ children }) => {
 
   const [groupsData, setGroupsData] = useState<GroupData[] | null>([]);
   const { executeApiCall } = useApi();
-  // const [loading, setLoading] = useState({
-  //   chat: false,
-  //   home: false,
-  //   groups: false,
-  //   events: false,
-  // });
-  // const [error, setError] = useState({
-  //   chat: null,
-  //   home: null,
-  //   groups: null,
-  //   events: null,
-  // });
 
   const [homeOffset, setHomeOffset] = useState(0);
   const [homeEventsData, setHomeEventsData] = useState<{
@@ -81,7 +71,7 @@ export const ChatProvider = ({ children }) => {
     accepted: [],
     refused: [],
   });
-
+  const { currentSocket } = useSocket();
   const [groupEventsData, setGroupEventsData] = useState(null);
   const [currentEventData, setCurrentEventData] = useState({});
   const { setMobileView } = useMobileLayout();
@@ -121,6 +111,7 @@ export const ChatProvider = ({ children }) => {
   }, [homeOffset, session, executeApiCall]);
   const fetchGroupEvents = useCallback(async () => {
     const saveData = (data) => {
+      console.log("ecco i gruppi", data);
       setGroupEventsData(data);
     };
     await executeApiCall(
@@ -175,7 +166,15 @@ export const ChatProvider = ({ children }) => {
     },
     [session, executeApiCall, setMobileView],
   );
-
+  const handleDeleteEvent = (eventId, saveData) => {
+    executeApiCall(
+      "delete_event",
+      () => {
+        return ApiCalls.deleteEvent(eventId, session.access_token);
+      },
+      saveData,
+    );
+  };
   useEffect(() => {
     if (session) {
       fetchGroups();
@@ -217,7 +216,6 @@ export const ChatProvider = ({ children }) => {
         setCurrentGroupData,
         groupsData,
 
-        groupEventsData,
         setGroupsData,
         fetchGroups,
         messagesMap,
@@ -228,6 +226,9 @@ export const ChatProvider = ({ children }) => {
         setCurrentEventData,
         currentEventData,
         setHomeEventsData,
+        groupEventsData,
+        setGroupEventsData,
+        handleDeleteEvent,
       }}
     >
       {children}

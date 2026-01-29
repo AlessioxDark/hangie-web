@@ -1,9 +1,14 @@
 import DollarIcon from "@/assets/icons/DollarIcon";
+import KebabMenuIcon from "@/assets/icons/KebabMenuIcon";
 import MapIcon from "@/assets/icons/MapIcon";
 import ParticipantsIcon from "@/assets/icons/ParticipantsIcon";
+import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
 import { useScreen } from "@/contexts/ScreenContext";
+import { useSocket } from "@/contexts/SocketContext";
+import { Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 const GroupEventCard = ({
@@ -27,7 +32,12 @@ const GroupEventCard = ({
         minute: "2-digit",
       })
     : "";
-  const navigate = useNavigate();
+  const { handleDeleteEvent } = useChat();
+  const { currentSocket } = useSocket();
+
+  const sendSocket = () => {
+    currentSocket.emit("delete_event", event_id, gruppo.group_id);
+  };
   const getUrgencyText = () => {
     const scadenza_timestamp = new Date(scadenza).getTime();
     const distanza_ms = scadenza_timestamp - Date.now();
@@ -76,8 +86,28 @@ const GroupEventCard = ({
   const { currentScreen } = useScreen();
   const { setMobileView } = useMobileLayout();
   const numPartecipanti = risposte_evento.accepted.length;
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  console.log(risposte_evento);
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    // Aggiunge l'event listener al documento
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Pulizia: rimuove l'event listener quando il componente viene smontato
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const isInactive = type === "archive" || type === "rejected";
   return (
     <div
@@ -91,9 +121,9 @@ const GroupEventCard = ({
   
           
 		 `}
-      onClick={() => {
-        navigate(`/events/${event_id}`);
-      }}
+      // onClick={() => {
+      //   navigate(`/events/${event_id}`);
+      // }}
     >
       <div className="flex flex-row gap-4 2xl:gap-6  py-3 h-full">
         <div className="relative w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-100">
@@ -109,9 +139,11 @@ const GroupEventCard = ({
               <time className="text-[10px] font-bold uppercase tracking-widest text-primary">
                 {formattedTime}
               </time>
-              {type == "pending" && (
-                <div
-                  className={`
+
+              <div className="flex flex-row gap-2 relative" ref={dropdownRef}>
+                {type == "pending" && (
+                  <div
+                    className={`
                       
 		      flex items-center gap-2
 		      
@@ -119,32 +151,51 @@ const GroupEventCard = ({
 		      flex-shrink-0
 px-2 py-1 bg-amber-50 text-amber-600  border border-amber-100
 		    `}
-                >
-                  {currentScreen != "xs" && (
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  )}
+                  >
+                    {currentScreen != "xs" && (
+                      <svg
+                        className="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    )}
 
-                  <span className="text-[10px]  rounded-full  font-bold">
-                    {getUrgencyText()}
-                  </span>
+                    <span className="text-[10px]  rounded-full  font-bold">
+                      {getUrgencyText()}
+                    </span>
+                  </div>
+                )}
+                <div className="w-4 h-4 " onClick={toggleDropdown}>
+                  <KebabMenuIcon />
                 </div>
-              )}
+                {isDropdownOpen && currentScreen == "xs" && (
+                  <div className="absolute -right-6 top-4 w-30 bg-white shadow-xl rounded-xl border border-slate-100 flex flex-col z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
+                    <button
+                      className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 transition-colors flex items-center gap-2"
+                      onClick={() => {
+                        console.log("click");
+                        handleDeleteEvent(event_id, sendSocket);
+                      }}
+                    >
+                      <span className="font-medium text-xs">
+                        Elimina Evento
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <h3 className="text-base 2xl:text-lg font-bold font-body text-text-1 line-clamp-2 leading-tight ">
-              {titolo}xxxxxxxxxxx
+              {titolo}
             </h3>
           </div>
 
