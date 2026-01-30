@@ -124,8 +124,9 @@ const addNewGroup = async (req, res) => {
     console.log("c'è data o errore", { data, error });
     if (error) throw error;
     const { groupData, participants, creator } = data;
+    console.log({ groupData, participants, creator });
     const notificationInsert = participants
-      .filter((p) => p.partecipante_id !== creator.id)
+      .filter((p) => p.user_id !== creator.id)
       .map((p) => {
         return {
           type: "new_group",
@@ -133,20 +134,20 @@ const addNewGroup = async (req, res) => {
           group_id: groupData.group_id,
           created_at: new Date().toISOString(),
           sender_id: creator.id,
-          user_id: p.partecipante_id,
+          user_id: p.user_id,
         };
       });
-    const { error: notificanError } = supabase
+    const { error: notificanError } = await supabase
       .from("notifiche")
       .insert(notificationInsert);
     if (notificanError) throw notificanError;
+
     res.status(200).json({
       success: true,
       message: "Operazione completata con successo",
       data: data,
     });
   } catch (err) {
-    console.log("c'è err", err);
     res.status(500).json({
       success: false,
       message: "Non siamo riusciti a creare il gruppo",

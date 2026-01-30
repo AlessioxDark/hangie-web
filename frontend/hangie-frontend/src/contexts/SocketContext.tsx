@@ -143,13 +143,14 @@ export const SocketProvider = ({ children }) => {
     });
 
     socket.on("added_new_group", (groupId, data, participants, imgUrl) => {
+      console.log("qui arrivo", { groupId, data, participants, imgUrl });
       setGroupsData((prev) => {
         return [
           ...prev,
           {
             group_id: groupId,
             group_cover_img: imgUrl,
-            ...data.groupData,
+            ...data,
             partecipanti_gruppo: participants,
           },
         ];

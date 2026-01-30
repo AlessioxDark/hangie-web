@@ -102,6 +102,7 @@ const groupHandlers = (io, socket) => {
   });
   socket.on("add_new_group", async (groupId, groupData, imgUrl, creatorId) => {
     try {
+      console.log("io sto qua", { groupId, groupData, imgUrl, creatorId });
       const [
         { data: sender, error: userError },
         { data: participants, error: participantsError },
@@ -124,6 +125,8 @@ const groupHandlers = (io, socket) => {
           user_id: p.user_id,
         };
       });
+      console.log("aggiungo notifiche", insertNotification);
+
       const { error: notificationError } = await supabase
         .from("notifiche")
         .insert(insertNotification);

@@ -109,8 +109,8 @@ const CreateGroupForm = () => {
       let finalImgUrl = null;
       if (!response.ok)
         throw new Error(result.error || "Errore creazione evento");
-
-      const groupId = result.group_id;
+      console.log("Wquesto è il result", result);
+      const groupId = result.data.group_id;
       if (groupImage) {
         const fileName = `${groupId}/cover.${groupImage.ext}`;
         const filePath = `${fileName}`;
@@ -136,7 +136,7 @@ const CreateGroupForm = () => {
       currentSocket.emit(
         "add_new_group",
         groupId,
-        result,
+        result.data.groupData,
 
         finalImgUrl,
         session.user.id,
