@@ -29,7 +29,8 @@ export const ApiContextProvider = ({ children }) => {
     leave_group: false,
     remove_participant: false,
     event: false,
-    delete_event: null,
+    delete_event: false,
+    vote_event: false,
   });
   const [error, setError] = useState({
     chat: null,
@@ -45,6 +46,7 @@ export const ApiContextProvider = ({ children }) => {
     remove_participant: null,
     event: null,
     delete_event: null,
+    vote_event: null,
   });
 
   const executeApiCall = useCallback(
@@ -57,7 +59,8 @@ export const ApiContextProvider = ({ children }) => {
         | "home_events"
         | "add_event"
         | "event"
-        | "delete_event",
+        | "delete_event"
+        | "vote_event",
       fetchCall,
       onSuccess,
     ) => {

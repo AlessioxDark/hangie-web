@@ -8,8 +8,8 @@ router.get("/myevents", eventController.getMyEvents);
 router.post("/suspendedevenets/all", eventController.getSuspendedEvents);
 router.patch("/modify/:event_id", eventController.modifyEvent);
 router.post("/add/create-event", eventController.addNewEvent);
-router.post(
-  "/request/:event_id",
+router.patch(
+  "/answer/:event_id",
   authMiddleware.authMiddleware,
   eventController.modifyResponseEvent,
 );

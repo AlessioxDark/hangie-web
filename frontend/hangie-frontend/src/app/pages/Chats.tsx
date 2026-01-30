@@ -33,7 +33,7 @@ const Chats = () => {
       {
         group_cover_img: currentGroupData.group_cover_img,
         nome: currentGroupData.nome,
-      }
+      },
     );
 
     setChatInput("");
@@ -61,7 +61,7 @@ const Chats = () => {
           "message_read_bulk",
           messaggiDaLeggere,
           session.user.id,
-          currentGroup
+          currentGroup,
         );
       }
     }
@@ -82,19 +82,6 @@ const Chats = () => {
         inputValue={chatInput}
         setInputValue={setChatInput}
       />
-
-      {/* {showEvents && (
-        <>
-          <div
-            className="absolute inset-0 bg-black/40 z-[100] backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
-            onClick={() => setShowEvents(false)} // Chiude cliccando fuori
-          />
-
-          <div className="absolute right-0 top-0 h-full w-[85%] md:w-[400px] bg-white z-[101] shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 ease-out">
-            <ChatsEvents />
-          </div>
-        </>
-      )} */}
     </div>
   );
 };

@@ -190,7 +190,7 @@ const messageHandlers = (io, socket) => {
       console.log("ecco gli event details", eventDetails);
       participants.forEach((p) => {
         io.to(p.partecipante_id).emit("sent_event", {
-          eventi: { ...eventDetails, event_id: eventId },
+          eventi: { ...eventDetails, event_id: eventId, status: p.part },
           messageDetails,
           group_id,
         });
@@ -207,6 +207,22 @@ const messageHandlers = (io, socket) => {
       io.to(p.partecipante_id).emit("deleted_event", {
         event_id: eventId,
         group_id: groupId,
+      });
+    });
+  });
+
+  socket.on("vote_event", async (eventId, groupId, status, userId) => {
+    const { data: participants, error: participantsError } = await supabase
+      .from("partecipanti_gruppo")
+      .select("*")
+      .eq("group_id", groupId);
+    console.log("ecco i partecipanti", participants, participantsError);
+    participants.forEach((p) => {
+      io.to(p.partecipante_id).emit("voted_event", {
+        event_id: eventId,
+        group_id: groupId,
+        status,
+        sender_id: userId,
       });
     });
   });

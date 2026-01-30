@@ -121,6 +121,7 @@ const getSpecificGroupEvent = async (req, res) => {
 const addNewGroup = async (req, res) => {
   try {
     const { data, error } = await Group.newGroup(req);
+    console.log("c'è data o errore", { data, error });
     if (error) throw error;
     const { groupData, participants, creator } = data;
     const notificationInsert = participants
@@ -145,6 +146,7 @@ const addNewGroup = async (req, res) => {
       data: data,
     });
   } catch (err) {
+    console.log("c'è err", err);
     res.status(500).json({
       success: false,
       message: "Non siamo riusciti a creare il gruppo",
@@ -171,6 +173,7 @@ const modifyGroup = async (req, res) => {
 };
 const leaveGroup = async (req, res) => {
   try {
+    console.log("arrivati a leave");
     const { data, error } = await Group.leave(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
     res.status(200).json({

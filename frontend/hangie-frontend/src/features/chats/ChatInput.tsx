@@ -66,7 +66,7 @@ const ChatInput = ({
             bg-white border-t border-gray-200
                     flex items-center justify-center 
                     p-2 2xl:p-4 shadow-2xl 
-					w-full
+					w-full sticky bottom-0
         "
       style={{ borderWidth: "0.1px", borderLeft: "0px" }}
     >

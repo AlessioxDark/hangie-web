@@ -311,10 +311,12 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("sent_event", (data) => {
       console.log("dati dall'invio eventi al socket", data);
+      const myStatus =
+        data.eventi.createdBy == session.user.id ? "accepted" : "pending";
       const eventMessage = {
         type: "event",
         message_id: data.messageDetails.message_id,
-        event_details: data.eventi,
+        event_details: { ...data.eventi, status: myStatus },
         isUser: session.user.id == data.messageDetails.user_id,
       };
       setCurrentChatData((prev) => {
@@ -412,6 +414,89 @@ export const SocketProvider = ({ children }) => {
         });
       }
     });
+    socket.on("voted_event", (data) => {
+      // notifica
+      console.log("arrivato deleted_event");
+      const { event_id, group_id, status, sender_id } = data;
+      // setMessagesMap((messMap) => {
+      //   const { [group_id]: removed, ...newMessMap } = messMap;
+      //   return newMessMap;
+      // });
+      if (sender_id == session.user.id) {
+        setHomeEventsData((prevEvents) => {
+          const eventToMove = prevEvents.pending.find(
+            (e) => e.event_id == event_id,
+          );
+
+          return {
+            ...prevEvents,
+            [status]: [eventToMove, ...prevEvents[status]],
+            pending: prevEvents.pending.filter((e) => e.event_id !== event_id),
+          };
+        });
+        if (currentGroup == group_id) {
+          console.log("qui lo toglo");
+          setCurrentChatData((prevData) => {
+            if (!prevData) return prevData;
+            return {
+              ...prevData,
+              messaggi: prevData.messaggi.map((m) => {
+                if (m.type == "event" && m.event_id == event_id) {
+                  return { ...m, status };
+                }
+                return m;
+              }),
+            };
+          });
+          setGroupEventsData((prevEvents) => {
+            return prevEvents.map((e) => {
+              if (e.event_id == event_id) {
+                const eventToMove = e.risposte_eventi.find(
+                  (e) => e.event_id == event_id,
+                );
+                const newRisposte = [
+                  ...e.risposte_eventi.filter(
+                    (event) => event.event_id !== event_id,
+                  ),
+                  { ...eventToMove, status },
+                ];
+                return { ...e, risposte_eventi: newRisposte };
+              }
+              return e;
+            });
+          });
+        }
+      } else {
+        setHomeEventsData((prevEvents) => {
+          const allEvents = [
+            ...prevEvents.accepted,
+            ...prevEvents.refused,
+            ...prevEvents.pending,
+          ];
+          const eventResponse = allEvents.find((e) => e.event_id == event_id);
+          const category = eventResponse.status;
+          const categoryEvents = prevEvents[category].map((event) => {
+            if (event.event_id == event_id) {
+              const newRisposte = (event.risposte_evento = {
+                ...event.risposte_evento,
+                pending: event.risposte_evento.pending
+                  .filter((e) => e.event_id !== event_id)
+                  .map((e) => {
+                    return { ...e, utenti: { user_id: e.user_id } };
+                  }),
+                [status]: [
+                  { status: status, utenti: { user_id: sender_id } },
+                  ...event.risposte_evento[status],
+                ],
+              });
+              return { ...event, risposte_evento: newRisposte };
+            }
+            return event;
+          });
+          return { ...prevEvents, [category]: categoryEvents };
+        });
+      }
+    });
 
     return () => {
       console.log("Pulizia socket e rimozione listener...");
@@ -425,6 +510,8 @@ export const SocketProvider = ({ children }) => {
       socket.off("admined_participant");
       socket.off("give_read_bulk");
       socket.off("sent_event");
+      socket.off("deleted_event");
+      socket.off("voted_event");
       socket.disconnect();
     };
   }, [session?.user?.id, setCurrentChatData, currentGroupData, currentGroup]);

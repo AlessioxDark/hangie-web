@@ -24,8 +24,12 @@ const EventDetailsMobile = () => {
   const navigate = useNavigate();
   const { eventId } = useParams();
   const { executeApiCall, error, loading } = useApi();
-  const { setCurrentEventData, currentEventData, handleDeleteEvent } =
-    useChat();
+  const {
+    setCurrentEventData,
+    currentEventData,
+    handleDeleteEvent,
+    handleEventDecision,
+  } = useChat();
   const { currentSocket } = useSocket();
   const { session } = useAuth();
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
@@ -102,10 +106,11 @@ const EventDetailsMobile = () => {
     scadenza,
     risposte_evento,
     utente,
+    created_by,
   } = currentEventData || {};
   const allImgs = [cover_img, ...event_imgs?.map((e) => e.img_url)];
   console.log(allImgs);
-
+  console.log(currentEventData);
   const handleScroll = (e) => {
     const container = e.currentTarget;
     const scrollPosition = container.scrollLeft;
@@ -193,9 +198,16 @@ const EventDetailsMobile = () => {
   //     saveData,
   //   );
   // };
-  const sendSocket = () => {
+
+  const sendSocketDeleteEvent = () => {
     navigate(-1);
     currentSocket.emit("delete_event", eventId, gruppo.group_id);
+  };
+  const sendSocketVoteEvent = (status) => {
+    setCurrentEventData((prev) => {
+      return { ...prev, status };
+    });
+    currentSocket.emit("vote_event", eventId, gruppo.group_id, status);
   };
   return (
     <div className="">
@@ -393,27 +405,54 @@ const EventDetailsMobile = () => {
                   </p>
                 </div>
               </div>
-
-              <button
-                className="w-full py-4 text-white  bg-red-500 font-semibold rounded-2xl active:bg-red-400 transition-all shadow-sm"
-                onClick={() => {
-                  handleDeleteEvent(eventId, sendSocket);
-                }}
-              >
-                Elimina Evento
-              </button>
+              {created_by == session.user.id && (
+                <button
+                  className="w-full py-4 text-white  bg-red-500 font-semibold rounded-2xl active:bg-red-400 transition-all shadow-sm"
+                  onClick={() => {
+                    handleDeleteEvent(eventId, sendSocketDeleteEvent);
+                  }}
+                >
+                  Elimina Evento
+                </button>
+              )}
             </div>
           </div>
         </div>
         {status == "pending" && (
           <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-6 z-[110] shadow-[0_-10px_20px_-5px_rgba(0,0,0,0,0.05)]">
             <div className="w-full flex justify-between flex-row gap-6">
-              <button className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer">
+              <button
+                className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
+                onClick={() => {
+                  handleEventDecision(
+                    eventId,
+                    {
+                      status: "accepted",
+                    },
+                    () => {
+                      sendSocketVoteEvent("accepted");
+                    },
+                  );
+                }}
+              >
                 Accetta
               </button>
 
               {/* BOTTONE RIFIUTA: Più sobrio, per non distrarre */}
-              <button className="flex-1 bg-gray-50 text-gray-400 font-bold py-4 rounded-2xl border border-gray-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer">
+              <button
+                className="flex-1 bg-gray-50 text-gray-400 font-bold py-4 rounded-2xl border border-gray-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
+                onClick={() => {
+                  handleEventDecision(
+                    eventId,
+                    {
+                      status: "rejected",
+                    },
+                    () => {
+                      sendSocketVoteEvent("rejected");
+                    },
+                  );
+                }}
+              >
                 Rifiuta
               </button>
             </div>

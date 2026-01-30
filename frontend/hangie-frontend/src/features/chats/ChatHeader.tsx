@@ -16,7 +16,7 @@ const ChatHeader = () => {
       }`
     : null;
   return (
-    <div className="bg-bg-1 p-2 items-center 2xl:p-4  border-b border-neutral-300 flex flex-row  justify-between">
+    <div className="bg-bg-1 p-2 items-center 2xl:p-4  border-b border-neutral-300 flex flex-row  justify-between sticky top-0">
       <div className="flex flex-row gap-1 items-center flex-1">
         {currentScreen == "xs" && (
           <div

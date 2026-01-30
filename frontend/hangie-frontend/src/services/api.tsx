@@ -44,7 +44,7 @@ export const ApiCalls = {
       },
     }).then(handleResponse),
   AddParticipants: (token, groupId, dataToSend) =>
-    fetch(`${BASE_URL}add/participants/${groupId}`, {
+    fetch(`${BASE_URL}/add/participants/${groupId}`, {
       method: "PATCH",
       body: JSON.stringify(dataToSend),
       headers: {
@@ -53,7 +53,7 @@ export const ApiCalls = {
       },
     }).then(handleResponse),
   editGroupField: (token, groupId, dataToSend) =>
-    fetch(`${BASE_URL}groups/modify/${groupId}`, {
+    fetch(`${BASE_URL}/groups/modify/${groupId}`, {
       method: "PATCH",
       body: JSON.stringify(dataToSend),
       headers: {
@@ -62,7 +62,7 @@ export const ApiCalls = {
       },
     }).then(handleResponse),
   MakeParticipantAdmin: (token, groupId, dataToSend) =>
-    fetch(`${BASE_URL}groups/modify/participants/${groupId}`, {
+    fetch(`${BASE_URL}/groups/modify/participants/${groupId}`, {
       method: "PATCH",
       body: JSON.stringify(dataToSend),
       headers: {
@@ -71,7 +71,7 @@ export const ApiCalls = {
       },
     }).then(handleResponse),
   handleRemoveParticipant: (token, groupId, dataToSend) =>
-    fetch(`${BASE_URL}groups/remove/participants/${groupId}`, {
+    fetch(`${BASE_URL}/groups/remove/participants/${groupId}`, {
       method: "PATCH",
       body: JSON.stringify(dataToSend),
       headers: {
@@ -80,7 +80,7 @@ export const ApiCalls = {
       },
     }).then(handleResponse),
   handleLeaveGroup: (token, groupId) =>
-    fetch(`${BASE_URL}groups/leave/participants/${groupId}`, {
+    fetch(`${BASE_URL}/groups/leave/${groupId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -110,6 +110,18 @@ export const ApiCalls = {
   deleteEvent: async (eventId, token) => {
     const res = await fetch(`${BASE_URL}/events/${eventId}`, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await handleResponse(res);
+  },
+  voteEvent: async (eventId, token, body) => {
+    console.log({ eventId, token, body });
+    const res = await fetch(`${BASE_URL}/events/answer/${eventId}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

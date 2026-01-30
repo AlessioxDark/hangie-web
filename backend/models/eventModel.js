@@ -428,7 +428,27 @@ const newEvent = async (req) => {
   }
 };
 const modifyResponse = async (req) => {
-  const { status, event_id } = req.body;
+  try {
+    const { event_id } = req.params;
+    const { status } = req.body;
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw { message: "manca header auth" };
+    const token = authHeader.split(" ")[1];
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token);
+    if (userError) throw userError;
+    const { data: answerData, error: answerError } = await supabase
+      .from("risposte_eventi")
+      .update({ status })
+      .eq("event_id", event_id)
+      .eq("user_id", user.id);
+    if (answerError) throw answerError;
+    return { data: answerData, error: null };
+  } catch (err) {
+    return { data: null, err: err };
+  }
   const token = req.headers.authorization.split(" ")[1];
   let user_id;
   const { user, error: userError } = await supabase.auth.getUser(token);
@@ -478,4 +498,5 @@ module.exports = {
   getEvent,
   newEvent,
   deleteEvent,
+  modifyResponse,
 };

@@ -89,10 +89,15 @@ const getGroup = async (req) => {
             `,
       )
       .in("event_id", eventIds);
-
+    const newEventsDetails = eventsDetails.map((e) => {
+      const risposta = e.risposte_eventi.find(
+        (r) => r.user_id == e.utente.user_id,
+      );
+      return { ...e, status: risposta.status };
+    });
     if (eventsError) throw eventsError;
 
-    const eventDetail = eventsDetails.reduce((acc, event) => {
+    const eventDetail = newEventsDetails.reduce((acc, event) => {
       acc[event.event_id] = event;
       return acc;
     }, {});
@@ -203,7 +208,9 @@ const newGroup = async (req) => {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser(token);
+
     if (userError) throw userError;
+    console.log("ci siamo?");
     const { data: groupData, error: groupError } = await supabase
       .from("gruppi")
       .insert([{ ...newBody, createdBy: user.id }])
@@ -234,7 +241,7 @@ const newGroup = async (req) => {
     return {
       data: {
         group_id: groupId,
-        groupData: groupData[0],
+        groupData: groupData,
         participants,
         creator: user,
       },

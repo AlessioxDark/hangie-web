@@ -175,6 +175,16 @@ export const ChatProvider = ({ children }) => {
       saveData,
     );
   };
+  const handleEventDecision = (eventId, body, saveData) => {
+    executeApiCall(
+      "vote_event",
+      () => {
+        return ApiCalls.voteEvent(eventId, session.access_token, body);
+      },
+      saveData,
+    );
+  };
+
   useEffect(() => {
     if (session) {
       fetchGroups();
@@ -229,6 +239,7 @@ export const ChatProvider = ({ children }) => {
         groupEventsData,
         setGroupEventsData,
         handleDeleteEvent,
+        handleEventDecision,
       }}
     >
       {children}

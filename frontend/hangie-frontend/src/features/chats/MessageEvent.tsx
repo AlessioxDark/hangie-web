@@ -51,7 +51,7 @@ const MessageEvent = ({ event_details }) => {
   // --- Icona Placeholder per Profilo (sostituisce ProfileIcon) ---
 
   // --- Logica Contenuto Bottone ---
-  const getButtonContent = () => {
+  const getButtonContent = (status) => {
     if (session.user.id === event_details.utente.user_id) {
       return null;
     }
@@ -65,24 +65,25 @@ const MessageEvent = ({ event_details }) => {
           Evento Concluso / Scaduto
         </button>
       );
-    } else if (" d" === "partecipo") {
-      return (
-        <div className="w-full flex flex-col gap-2">
-          <div className="flex items-center justify-center w-full px-6 py-3 bg-green-500 text-white font-bold rounded-xl shadow-lg">
-            <Check className="w-5 h-5 mr-2" />
-            Hai Conferato la tua partecipazione
-          </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="w-full text-sm py-2 text-gray-600 hover:text-red-500 transition-colors duration-200"
-          >
-            Annulla la partecipazione
-          </button>
-        </div>
-      );
-    } else if (" d" === "non_partecipo") {
+    } else if (status === "accepted") {
+      return null;
+      // return (
+      //   <div className="w-full flex flex-col gap-2">
+      //     <div className="flex items-center justify-center w-full px-6 py-3 bg-green-500 text-white font-bold rounded-xl shadow-lg">
+      //       <Check className="w-5 h-5 mr-2" />
+      //       Hai Conferato la tua partecipazione
+      //     </div>
+      //     <button
+      //       onClick={(e) => {
+      //         e.stopPropagation();
+      //       }}
+      //       className="w-full text-sm py-2 text-gray-600 hover:text-red-500 transition-colors duration-200"
+      //     >
+      //       Annulla la partecipazione
+      //     </button>
+      //   </div>
+      // );
+    } else if (status === "rejected") {
       return (
         <div className="w-full flex flex-col gap-2">
           <div className="flex items-center justify-center w-full px-6 py-3 bg-red-100 text-red-600 border border-red-300 font-bold rounded-xl shadow-lg">
@@ -100,6 +101,7 @@ const MessageEvent = ({ event_details }) => {
         </div>
       );
     } else {
+      console.log("lo status è", status);
       return (
         <div className="w-full flex flex-row gap-4">
           <button
@@ -124,7 +126,7 @@ const MessageEvent = ({ event_details }) => {
       );
     }
   };
-
+  console.log("message", event_details);
   return (
     <Link
       to={`/events/${event_details.event_id}`}
@@ -241,7 +243,7 @@ const MessageEvent = ({ event_details }) => {
                   <span className="font-medium text-xs 2xl:text-sm text-text-2 font-body truncate">
                     Creato da:
                     <span className="font-semibold block text-sm 2xl:text-base text-text-1 leading-none">
-                      {event_details.utente?.creatore}
+                      {event_details.utente?.nome}
                     </span>
                   </span>
                 </div>
@@ -253,7 +255,9 @@ const MessageEvent = ({ event_details }) => {
           </div>
 
           {/* Bottoni di Risposta (Sezione 4) */}
-          <div className="flex gap-2   ">{getButtonContent()}</div>
+          <div className="flex gap-2   ">
+            {getButtonContent(event_details.status)}
+          </div>
         </div>
       </div>
     </Link>

@@ -93,6 +93,7 @@ const getSpecificEvent = async (req, res) => {
       utente: data.eventi.utenti,
       gruppo: data.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
       scadenza: data.eventi.data_scadenza,
+      created_by: data.eventi.created_by,
       risposte_evento: {
         refused: [],
         accepted: [],
@@ -156,9 +157,17 @@ const modifyResponseEvent = async (req, res) => {
   try {
     const { data, error } = await Event.modifyResponse(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
-    res.json({ success: true, data });
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a votare il tuo evento",
+      details: err.message,
+    });
   }
 };
 const deleteSpecificEvent = async (req, res) => {
