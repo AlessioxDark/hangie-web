@@ -21,7 +21,7 @@ const EventDetailsParticipants = () => {
       {
         setCurrentRisposte([
           ...currentEventData.risposte_evento?.accepted,
-          ...currentEventData.risposte_evento?.refused,
+          ...currentEventData.risposte_evento?.rejected,
           ...currentEventData.risposte_evento?.pending,
         ]);
       }
@@ -30,7 +30,7 @@ const EventDetailsParticipants = () => {
       const queryRegex = new RegExp(query, "i");
       const allRisposte = [
         ...currentEventData.risposte_evento?.accepted,
-        ...currentEventData.risposte_evento?.refused,
+        ...currentEventData.risposte_evento?.rejected,
         ...currentEventData.risposte_evento?.pending,
       ];
       const nuoveRisposte = allRisposte.filter((risposta) => {
@@ -46,7 +46,7 @@ const EventDetailsParticipants = () => {
       setCurrentRisposte(currentEventData.risposte_evento?.pending);
     }
     if (currentFilter == "Rifiutati") {
-      setCurrentRisposte(currentEventData.risposte_evento?.refused);
+      setCurrentRisposte(currentEventData.risposte_evento?.rejected);
     }
   }, [currentFilter, query]);
   useEffect(() => {

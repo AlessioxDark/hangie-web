@@ -25,7 +25,7 @@ type EventDataTypes = {
   scadenza: Date;
   descrizione: string;
   costo: number;
-  status: "accepted" | "pending" | "refused";
+  status: "accepted" | "pending" | "rejected";
   cover_img: string;
   event_imgs: string[];
   gruppo: any[];
@@ -36,7 +36,7 @@ type EventDataTypes = {
 type EventDataTypesArray = {
   pending: EventDataTypes[];
   accepted: EventDataTypes[];
-  refused: EventDataTypes[];
+  rejected: EventDataTypes[];
 };
 const EVENTSINPAGE = 12;
 const Home = () => {

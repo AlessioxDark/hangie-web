@@ -202,11 +202,17 @@ const EventDetailsMobile = () => {
   const sendSocketDeleteEvent = () => {
     +currentSocket.emit("delete_event", eventId, gruppo.group_id);
   };
-  const sendSocketVoteEvent = (status) => {
+  const sendSocketVoteEvent = (status, prevStatus) => {
     setCurrentEventData((prev) => {
       return { ...prev, status };
     });
-    currentSocket.emit("vote_event", eventId, gruppo.group_id, status);
+    currentSocket.emit(
+      "vote_event",
+      eventId,
+      gruppo.group_id,
+      status,
+      prevStatus,
+    );
   };
   return (
     <div className="">
@@ -428,6 +434,8 @@ const EventDetailsMobile = () => {
                 onClick={() => {
                   const newStatus =
                     status == "accepted" ? "pending" : "accepted";
+                  const prevStatus =
+                    newStatus == "accepted" ? "pending" : "accepted";
 
                   handleEventDecision(
                     eventId,
@@ -435,14 +443,14 @@ const EventDetailsMobile = () => {
                       status: newStatus,
                     },
                     () => {
-                      sendSocketVoteEvent(newStatus);
+                      sendSocketVoteEvent(newStatus, prevStatus);
                     },
                   );
                 }}
               >
                 Accetta
+                {/* { ATTENZIONE RISOLVERE PENDING POSSIBILE E SWTICH} */}
               </button>
-
               {/* BOTTONE RIFIUTA: Più sobrio, per non distrarre */}
               <button
                 // className="flex-1 bg-gray-50 text-gray-400 font-bold py-4 rounded-2xl border border-gray-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
@@ -450,13 +458,15 @@ const EventDetailsMobile = () => {
                 onClick={() => {
                   const newStatus =
                     status == "rejected" ? "pending" : "rejected";
+                  const prevStatus =
+                    newStatus == "rejected" ? "pending" : "rejected";
                   handleEventDecision(
                     eventId,
                     {
                       status: newStatus,
                     },
                     () => {
-                      sendSocketVoteEvent(newStatus);
+                      sendSocketVoteEvent(newStatus, prevStatus);
                     },
                   );
                 }}

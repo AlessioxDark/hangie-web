@@ -8,7 +8,7 @@ const getAllEvents = async (req, res) => {
       const new_risposte = {
         accepted: response.partecipanti.filter((r) => r.status == "accepted"),
         pending: response.partecipanti.filter((r) => r.status == "pending"),
-        refused: response.partecipanti.filter((r) => r.status == "refused"),
+        rejected: response.partecipanti.filter((r) => r.status == "rejected"),
       };
       return {
         event_id: response.event_id,
@@ -35,9 +35,9 @@ const getAllEvents = async (req, res) => {
       accepted: cleanData.filter((response) => {
         return response.status == "accepted";
       }),
-      refused: cleanData.filter((response) => {
+      rejected: cleanData.filter((response) => {
         // ⬅️ Aggiungi 'refused' (o 'rejected' se usi quel termine)
-        return response.status == "refused";
+        return response.status == "rejected";
       }),
     };
 
@@ -95,7 +95,7 @@ const getSpecificEvent = async (req, res) => {
       scadenza: data.eventi.data_scadenza,
       created_by: data.eventi.created_by,
       risposte_evento: {
-        refused: [],
+        rejected: [],
         accepted: [],
         pending: [],
       },
@@ -106,7 +106,7 @@ const getSpecificEvent = async (req, res) => {
         newData.risposte_evento.accepted.push(risposta);
       }
       if (risposta.status == "rejected") {
-        newData.risposte_evento.refused.push(risposta);
+        newData.risposte_evento.rejected.push(risposta);
       }
       if (risposta.status == "pending") {
         newData.risposte_evento.pending.push(risposta);

@@ -211,20 +211,32 @@ const messageHandlers = (io, socket) => {
     });
   });
 
-  socket.on("vote_event", async (eventId, groupId, status, userId) => {
-    const { data: participants, error: participantsError } = await supabase
-      .from("partecipanti_gruppo")
-      .select("*")
-      .eq("group_id", groupId);
-    console.log("ecco i partecipanti", participants, participantsError);
-    participants.forEach((p) => {
-      io.to(p.partecipante_id).emit("voted_event", {
-        event_id: eventId,
-        group_id: groupId,
+  socket.on(
+    "vote_event",
+    async (eventId, groupId, status, userId, prevStatus) => {
+      console.log("eccoli i socketini", {
+        eventId,
+        groupId,
         status,
-        sender_id: userId,
+        userId,
+        prevStatus,
       });
-    });
-  });
+
+      const { data: participants, error: participantsError } = await supabase
+        .from("partecipanti_gruppo")
+        .select("*")
+        .eq("group_id", groupId);
+      console.log("ecco i partecipanti", participants, participantsError);
+      participants.forEach((p) => {
+        io.to(p.partecipante_id).emit("voted_event", {
+          event_id: eventId,
+          group_id: groupId,
+          status,
+          sender_id: userId,
+          prevStatus,
+        });
+      });
+    },
+  );
 };
 module.exports = messageHandlers;

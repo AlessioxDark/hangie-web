@@ -65,11 +65,11 @@ export const ChatProvider = ({ children }) => {
   const [homeEventsData, setHomeEventsData] = useState<{
     pending: any[];
     accepted: any[];
-    refused: any[];
+    rejected: any[];
   }>({
     pending: [],
     accepted: [],
-    refused: [],
+    rejected: [],
   });
   const { currentSocket } = useSocket();
   const [groupEventsData, setGroupEventsData] = useState(null);
@@ -90,14 +90,15 @@ export const ChatProvider = ({ children }) => {
         const dedupPending = Array.from(
           new Map(mergePending.map((item) => [item.event_id, item])).values(),
         );
-        const mergeRefused = [...prevData.refused, ...data.refused];
-        const dedupRefused = Array.from(
-          new Map(mergeRefused.map((item) => [item.event_id, item])).values(),
+        console.log("il prev", prevData);
+        const mergeRejected = [...prevData.rejected, ...data.rejected];
+        const dedupRejected = Array.from(
+          new Map(mergeRejected.map((item) => [item.event_id, item])).values(),
         );
         return {
           pending: dedupPending,
           accepted: dedupAccepted,
-          refused: dedupRefused, // fai uguale se ti serve
+          rejected: dedupRejected, // fai uguale se ti serve
         };
       });
     };

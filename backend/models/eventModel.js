@@ -381,7 +381,7 @@ const newEvent = async (req) => {
       event_imgs: [],
       ...messageData.eventi,
       risposte_evento: {
-        refused: newRisposte.filter((r) => r.status == "refused"),
+        rejected: newRisposte.filter((r) => r.status == "rejected"),
         accepted: newRisposte.filter((r) => r.status == "accepted"),
         pending: newRisposte.filter((r) => r.status == "pending"),
       },
@@ -414,7 +414,7 @@ const newEvent = async (req) => {
             ...messageData.eventi,
             event_imgs: [],
             risposte_evento: {
-              refused: newRisposte.filter((r) => r.status === "refused"),
+              rejected: newRisposte.filter((r) => r.status === "rejected"),
               accepted: newRisposte.filter((r) => r.status === "accepted"),
               pending: newRisposte.filter((r) => r.status === "pending"),
             },
@@ -430,7 +430,7 @@ const newEvent = async (req) => {
 const modifyResponse = async (req) => {
   try {
     const { event_id } = req.params;
-    const { status } = req.body;
+    const { status, prevStatus } = req.body;
     const authHeader = req.headers.authorization;
     if (!authHeader) throw { message: "manca header auth" };
     const token = authHeader.split(" ")[1];
@@ -445,7 +445,7 @@ const modifyResponse = async (req) => {
       .eq("event_id", event_id)
       .eq("user_id", user.id);
     if (answerError) throw answerError;
-    return { data: answerData, error: null };
+    return { data: { ...answerData, prevStatus }, error: null };
   } catch (err) {
     return { data: null, err: err };
   }

@@ -434,7 +434,7 @@ export const SocketProvider = ({ children }) => {
     socket.on("voted_event", (data) => {
       // notifica
       console.log("arrivato voted_event");
-      const { event_id, group_id, status, sender_id } = data;
+      const { event_id, group_id, status, sender_id, prevStatus } = data;
       // setMessagesMap((messMap) => {
       //   const { [group_id]: removed, ...newMessMap } = messMap;
       //   return newMessMap;
@@ -443,7 +443,7 @@ export const SocketProvider = ({ children }) => {
         // bug con i partecipanti dell'evento al cambio per il sender
         console.log("modifichiamo per sender");
         setHomeEventsData((prevEvents) => {
-          const eventToMove = prevEvents.pending.find(
+          const eventToMove = prevEvents[prevStatus].find(
             (e) => e.event_id == event_id,
           );
           console.log("prevEvents", prevEvents);
@@ -451,13 +451,17 @@ export const SocketProvider = ({ children }) => {
           console.log("risultato", {
             ...prevEvents,
             [status]: [eventToMove, ...prevEvents[status]],
-            pending: prevEvents.pending.filter((e) => e.event_id !== event_id),
+            [prevStatus]: prevEvents[prevStatus].filter(
+              (e) => e.event_id !== event_id,
+            ),
           });
 
           return {
             ...prevEvents,
             [status]: [eventToMove, ...prevEvents[status]],
-            pending: prevEvents.pending.filter((e) => e.event_id !== event_id),
+            [prevStatus]: prevEvents[prevStatus].filter(
+              (e) => e.event_id !== event_id,
+            ),
           };
         });
         if (currentGroup == group_id) {
@@ -496,10 +500,13 @@ export const SocketProvider = ({ children }) => {
           setCurrentEventData((prev) => {
             const newRisposte = {
               ...prev.risposte_evento,
-              accpeted: [
-                ...prev.risposte_evento.accpeted,
+              [status]: [
+                ...prev.risposte_evento[status],
                 { status, utenti: { user_id: sender_id } },
               ],
+              [prevStatus]: prev.risposte_evento[prevStatus].filter(
+                (p) => p.utenti.user_id !== sender_id,
+              ),
             };
             return { ...prev, risposte_evento: newRisposte };
           });
@@ -513,13 +520,13 @@ export const SocketProvider = ({ children }) => {
           if (event.event_id == event_id) {
             const newRisposte = {
               ...event.risposte_evento,
-              pending: event.risposte_evento.pending
+              [prevStatus]: event.risposte_evento[prevStatus]
                 .filter((e) => e.utenti.user_id !== sender_id)
                 .map((e) => {
                   return { ...e, utenti: { user_id: e.user_id } };
                 }),
               [status]: [
-                { status: status, utenti: { user_id: sender_id }, ok: "nuovo" },
+                { status: status, utenti: { user_id: sender_id } },
                 ...event.risposte_evento[status],
               ],
             };
