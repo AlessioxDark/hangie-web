@@ -4,6 +4,7 @@ import { useAuth } from "./AuthContext";
 import { useChat } from "./ChatContext";
 import { type GroupData } from "@/types/chat";
 import { useMobileLayout } from "./MobileLayoutChatContext";
+import { useNavigate } from "react-router";
 
 const SocketContext = createContext({
   currentSocket: null,
@@ -33,11 +34,15 @@ export const SocketProvider = ({ children }) => {
     setMessagesMap,
     setGroupEventsData,
     setHomeEventsData,
+    currentEventData,
+    messagesMap,
+    groupEventsData,
+    setCurrentEventData,
   } = useChat();
   const { session } = useAuth();
   const { setMobileView } = useMobileLayout();
   const currentGroupDataRef = useRef<null | GroupData>(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     currentGroupDataRef.current = currentGroupData;
   }, [currentGroupData]);
@@ -313,30 +318,34 @@ export const SocketProvider = ({ children }) => {
     socket.on("sent_event", (data) => {
       console.log("dati dall'invio eventi al socket", data);
       const myStatus =
-        data.eventi.createdBy == session.user.id ? "accepted" : "pending";
+        data.eventi.created_by == session.user.id ? "accepted" : "pending";
       const eventMessage = {
         type: "event",
         message_id: data.messageDetails.message_id,
         event_details: { ...data.eventi, status: myStatus },
         isUser: session.user.id == data.messageDetails.user_id,
       };
-      setCurrentChatData((prev) => {
-        return { ...prev, messaggi: [...prev.messaggi, eventMessage] };
-      });
-      setMessagesMap((messMap) => {
-        return {
-          ...messMap,
-          [data.group_id]: [...messMap[data.group_id], eventMessage],
-        };
-      });
+      if (currentGroup == data.group_id) {
+        setCurrentChatData((prev) => {
+          return { ...prev, messaggi: [...prev.messaggi, eventMessage] };
+        });
+        setGroupEventsData((prevGroups) => [
+          ...prevGroups,
+          eventMessage.event_details,
+        ]);
+      }
+      if (messagesMap[data.group_id]) {
+        setMessagesMap((messMap) => {
+          return {
+            ...messMap,
+            [data.group_id]: [...messMap[data.group_id], eventMessage],
+          };
+        });
+      }
 
-      setGroupEventsData((prevGroups) => [
-        ...prevGroups,
-        eventMessage.event_details,
-      ]);
       console.log("controllo se è user", eventMessage.isUser);
       if (eventMessage.isUser) {
-        console.log("si, aggiungo evento", data.messageDetails.eventi);
+        console.log("si, aggiungo evento", data.eventi);
         setHomeEventsData((prevEvents) => {
           const category = eventMessage.isUser ? "accepted" : "pending";
           return {
@@ -345,7 +354,7 @@ export const SocketProvider = ({ children }) => {
           };
         });
       } else {
-        console.log("no, aggiungo evento", data.messsageDetails.eventi);
+        console.log("no, aggiungo evento", data.eventi);
         setHomeEventsData((prevEvents) => {
           return {
             ...prevEvents,
@@ -384,8 +393,14 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("deleted_event", (data) => {
       // notifica
+
       console.log("arrivato deleted_event");
       const { event_id, group_id } = data;
+      console.log({ current: currentEventData, event_id });
+      if (currentEventData.event_id == event_id) {
+        console.log("stesso event_id");
+        navigate(-1);
+      }
       setMessagesMap((messMap) => {
         const { [group_id]: removed, ...newMessMap } = messMap;
         return newMessMap;
@@ -410,6 +425,7 @@ export const SocketProvider = ({ children }) => {
             }),
           };
         });
+        console.log(groupEventsData);
         setGroupEventsData((prevEvents) => {
           return prevEvents.filter((e) => e.event_id !== event_id);
         });
@@ -417,17 +433,26 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("voted_event", (data) => {
       // notifica
-      console.log("arrivato deleted_event");
+      console.log("arrivato voted_event");
       const { event_id, group_id, status, sender_id } = data;
       // setMessagesMap((messMap) => {
       //   const { [group_id]: removed, ...newMessMap } = messMap;
       //   return newMessMap;
       // });
       if (sender_id == session.user.id) {
+        // bug con i partecipanti dell'evento al cambio per il sender
+        console.log("modifichiamo per sender");
         setHomeEventsData((prevEvents) => {
           const eventToMove = prevEvents.pending.find(
             (e) => e.event_id == event_id,
           );
+          console.log("prevEvents", prevEvents);
+          console.log("evento da spostare", eventToMove);
+          console.log("risultato", {
+            ...prevEvents,
+            [status]: [eventToMove, ...prevEvents[status]],
+            pending: prevEvents.pending.filter((e) => e.event_id !== event_id),
+          });
 
           return {
             ...prevEvents,
@@ -467,36 +492,44 @@ export const SocketProvider = ({ children }) => {
             });
           });
         }
-      } else {
-        setHomeEventsData((prevEvents) => {
-          const allEvents = [
-            ...prevEvents.accepted,
-            ...prevEvents.refused,
-            ...prevEvents.pending,
-          ];
-          const eventResponse = allEvents.find((e) => e.event_id == event_id);
-          const category = eventResponse.status;
-          const categoryEvents = prevEvents[category].map((event) => {
-            if (event.event_id == event_id) {
-              const newRisposte = (event.risposte_evento = {
-                ...event.risposte_evento,
-                pending: event.risposte_evento.pending
-                  .filter((e) => e.event_id !== event_id)
-                  .map((e) => {
-                    return { ...e, utenti: { user_id: e.user_id } };
-                  }),
-                [status]: [
-                  { status: status, utenti: { user_id: sender_id } },
-                  ...event.risposte_evento[status],
-                ],
-              });
-              return { ...event, risposte_evento: newRisposte };
-            }
-            return event;
+        if (currentEventData && currentEventData.event_id == event_id) {
+          setCurrentEventData((prev) => {
+            const newRisposte = {
+              ...prev.risposte_evento,
+              accpeted: [
+                ...prev.risposte_evento.accpeted,
+                { status, utenti: { user_id: sender_id } },
+              ],
+            };
+            return { ...prev, risposte_evento: newRisposte };
           });
-          return { ...prevEvents, [category]: categoryEvents };
-        });
+        }
       }
+      console.log("non lo ho inviato io");
+      setHomeEventsData((prevEvents) => {
+        const category = status;
+        console.log("la category è", category);
+        const categoryEvents = prevEvents[category].map((event) => {
+          if (event.event_id == event_id) {
+            const newRisposte = {
+              ...event.risposte_evento,
+              pending: event.risposte_evento.pending
+                .filter((e) => e.utenti.user_id !== sender_id)
+                .map((e) => {
+                  return { ...e, utenti: { user_id: e.user_id } };
+                }),
+              [status]: [
+                { status: status, utenti: { user_id: sender_id }, ok: "nuovo" },
+                ...event.risposte_evento[status],
+              ],
+            };
+            return { ...event, risposte_evento: newRisposte };
+          } else {
+            return event;
+          }
+        });
+        return { ...prevEvents, [category]: categoryEvents };
+      });
     });
 
     return () => {

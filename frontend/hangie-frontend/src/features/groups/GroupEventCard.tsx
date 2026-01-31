@@ -34,7 +34,7 @@ const GroupEventCard = ({
     : "";
   const { handleDeleteEvent } = useChat();
   const { currentSocket } = useSocket();
-
+  const { currentScreen } = useScreen();
   const sendSocket = () => {
     currentSocket.emit("delete_event", event_id, gruppo.group_id);
   };
@@ -79,11 +79,10 @@ const GroupEventCard = ({
       if (parti.length === 2) break;
     }
 
-    return `Scade tra ${parti.join(" e ")}`;
+    return `${currentScreen == "xs" ? "" : "Scade tra"} ${parti.join(" e ")}`;
   };
 
   const { openModal } = useModal();
-  const { currentScreen } = useScreen();
   const { setMobileView } = useMobileLayout();
   const numPartecipanti = risposte_evento.accepted.length;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

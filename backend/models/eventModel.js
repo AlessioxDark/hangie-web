@@ -334,7 +334,7 @@ const newEvent = async (req) => {
           },
         ])
         .select(
-          "*, eventi(*,scadenza:data_scadenza, luogo:luoghi(*), utente:utenti(nome, user_id),gruppo:gruppi(*),cover_img)",
+          "*, eventi(*,scadenza:data_scadenza, luogo:luoghi(*), utente:utenti(nome, user_id),gruppo:gruppi(*),cover_img,created_by)",
         )
         .single(),
       supabase.from("eventi_gruppo").insert([{ event_id: eventId, group_id }]),

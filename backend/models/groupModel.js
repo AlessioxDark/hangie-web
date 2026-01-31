@@ -83,7 +83,7 @@ const getGroup = async (req) => {
       .from("eventi")
       .select(
         `*,
-            utente:utenti(creatore:nome, user_id),
+            utente:utenti(nome, user_id),
             luogo:luoghi(nome, citta, indirizzo),
             risposte_eventi(*, utenti(profile_pic, user_id, nome))
             `,

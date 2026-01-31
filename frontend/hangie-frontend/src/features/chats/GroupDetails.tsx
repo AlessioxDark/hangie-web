@@ -81,10 +81,12 @@ const GroupDetails = () => {
         session.access_token,
       );
     };
+
+    console.log("invio richiesta api");
     executeApiCall(
       "add_participants",
       () => {
-        return ApiCalls.addNewEvent(
+        return ApiCalls.AddParticipants(
           session.access_token,
           currentGroup,
           newParticipantsIds,

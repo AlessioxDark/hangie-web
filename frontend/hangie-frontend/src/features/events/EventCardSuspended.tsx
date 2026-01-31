@@ -1,5 +1,6 @@
 import ParticipantsIcon from "@/assets/icons/ParticipantsIcon";
 import ProfileIcon from "@/components/ProfileIcon";
+import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
@@ -121,13 +122,20 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
   const navigate = useNavigate();
   const { handleEventDecision } = useChat();
   const { currentSocket } = useSocket();
+  const { session } = useAuth();
 
   const sendSocketVoteEvent = (status) => {
     // setCurrentEventData((prev) => {
 
     //   return { ...prev, status };
     // });
-    currentSocket.emit("vote_event", event_id, gruppo.group_id, status);
+    currentSocket.emit(
+      "vote_event",
+      event_id,
+      gruppo.group_id,
+      status,
+      session.user.id,
+    );
   };
 
   return (
@@ -296,7 +304,8 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                  text-sm  
                  cursor-pointer 
               "
-                onClick={() =>
+                onClick={(e) => {
+                  e.stopPropagation();
                   handleEventDecision(
                     event_id,
                     {
@@ -305,8 +314,8 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                     () => {
                       sendSocketVoteEvent("accepted");
                     },
-                  )
-                }
+                  );
+                }}
               >
                 Accetta Invito
               </button>

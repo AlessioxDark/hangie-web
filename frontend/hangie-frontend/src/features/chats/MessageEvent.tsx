@@ -127,6 +127,9 @@ const MessageEvent = ({ event_details }) => {
     }
   };
   console.log("message", event_details);
+  const acceptedParticipants = event_details.risposte_eventi.filter(
+    (r) => r.status == "accepted",
+  ).length;
   return (
     <Link
       to={`/events/${event_details.event_id}`}
@@ -225,11 +228,9 @@ const MessageEvent = ({ event_details }) => {
                 </div>
                 <span className="text-xs 2xl:text-base font-body text-text-2">
                   <span className="font-bold text-text-2 ">
-                    {event_details.partecipanti_count} 3
+                    {acceptedParticipants}
                   </span>{" "}
-                  {event_details.partecipanti_count === 1
-                    ? "persona ha"
-                    : "persone hanno"}{" "}
+                  {acceptedParticipants === 1 ? "persona ha" : "persone hanno"}{" "}
                   confermato
                 </span>
               </div>

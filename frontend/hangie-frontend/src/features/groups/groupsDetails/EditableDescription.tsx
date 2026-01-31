@@ -1,3 +1,4 @@
+import { useChat } from "@/contexts/ChatContext";
 import React, { useState } from "react";
 
 const EditableDescription = ({
@@ -10,7 +11,7 @@ const EditableDescription = ({
   formError,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-
+  const { currentGroupData } = useChat();
   return (
     <div className="px-4">
       <div className="w-full flex flex-row justify-between">
@@ -24,7 +25,13 @@ const EditableDescription = ({
               if (currentEditingField != "descrizione") {
                 setCurrentEditingField("descrizione");
               } else {
-                handleFinishEdit();
+                if (
+                  localGroupData.descrizione !== currentGroupData.descrizione
+                ) {
+                  handleFinishEdit();
+                } else {
+                  setCurrentEditingField("");
+                }
               }
             }}
           >

@@ -81,7 +81,7 @@ const EditableImg = ({
         currentGroup,
         "group_cover_img",
         urlData.publicUrl,
-        currentParticipants
+        currentParticipants,
       );
     } catch (error) {
       setFormError("img", { message: error.message });
@@ -137,7 +137,11 @@ const EditableImg = ({
                     console.log("era false lo metto true");
                     setCurrentEditingField("nome");
                   } else {
-                    handleFinishEdit();
+                    if (localGroupData.nome !== currentGroupData.nome) {
+                      handleFinishEdit();
+                    } else {
+                      setCurrentEditingField("");
+                    }
                   }
                 }}
               >

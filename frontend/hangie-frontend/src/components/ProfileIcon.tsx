@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
-import defaultpfp from "../assets/defaultpfp.jpg";
-import { supabase } from "../config/db.js";
+
+import { useAuth } from "@/contexts/AuthContext.js";
 const defaultPfp = () => {
   return (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,20 +24,10 @@ const defaultPfp = () => {
 };
 const ProfileIcon = ({ user_id }) => {
   const [userPfp, setUserPfp] = useState("");
-  const [isLoggedIn, setisLoggedIn] = useState(false);
-  const navigate = useNavigate();
+  const { session } = useAuth();
   const findProfilePic = async () => {
     try {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error("Errore getSession:", error);
-        return;
-      }
-      if (session && user_id != undefined) {
+      if (user_id != undefined) {
         const response = await fetch(
           `http://localhost:3000/api/profile/getpfp/${user_id}`,
           {
@@ -46,7 +35,7 @@ const ProfileIcon = ({ user_id }) => {
             headers: {
               Authorization: `Bearer ${session.access_token}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -64,10 +53,9 @@ const ProfileIcon = ({ user_id }) => {
               src={data.data[0].profile_pic}
               className="w-full h-full rounded-full"
               alt="profile pic"
-            />
+            />,
           );
         }
-        setisLoggedIn(true);
       } else {
         // navigate('/login');
       }

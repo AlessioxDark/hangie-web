@@ -192,6 +192,7 @@ const leaveGroup = async (req, res) => {
 };
 const addParticipants = async (req, res) => {
   try {
+    console.log("ci siamo?");
     const { data, error } = await Group.addParticipants(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
     res.status(200).json({

@@ -25,6 +25,32 @@ export const ApiCalls = {
     });
     return await handleResponse(res);
   },
+  AddParticipants: async (token, groupId, dataToSend) => {
+    console.log("data da inviare", { token, groupId, dataToSend });
+    const res = await fetch(`${BASE_URL}/groups/add/participants/${groupId}`, {
+      method: "PATCH",
+      body: JSON.stringify(dataToSend),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return await handleResponse(res);
+  },
+  handleRemoveParticipant: async (token, groupId, dataToSend) => {
+    const res = await fetch(
+      `${BASE_URL}/groups/remove/participants/${groupId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(dataToSend),
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    return await handleResponse(res);
+  },
   fetchSuspendedEvents: (token, offset) =>
     fetch(`${BASE_URL}/events/suspendedevenets/all`, {
       method: "POST",
@@ -43,15 +69,7 @@ export const ApiCalls = {
         "Content-Type": "application/json",
       },
     }).then(handleResponse),
-  AddParticipants: (token, groupId, dataToSend) =>
-    fetch(`${BASE_URL}/add/participants/${groupId}`, {
-      method: "PATCH",
-      body: JSON.stringify(dataToSend),
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }).then(handleResponse),
+
   editGroupField: (token, groupId, dataToSend) =>
     fetch(`${BASE_URL}/groups/modify/${groupId}`, {
       method: "PATCH",
@@ -70,15 +88,7 @@ export const ApiCalls = {
         "Content-Type": "application/json",
       },
     }).then(handleResponse),
-  handleRemoveParticipant: (token, groupId, dataToSend) =>
-    fetch(`${BASE_URL}/groups/remove/participants/${groupId}`, {
-      method: "PATCH",
-      body: JSON.stringify(dataToSend),
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }).then(handleResponse),
+
   handleLeaveGroup: (token, groupId) =>
     fetch(`${BASE_URL}/groups/leave/${groupId}`, {
       method: "DELETE",

@@ -34,17 +34,17 @@ function App() {
       <MobileLayoutChatProvider>
         <ScreenProvider>
           <ApiContextProvider>
-            <ChatProvider>
-              <SocketProvider>
-                <NotificationProvider>
-                  <ModalProvider>
-                    <BrowserRouter>
+            <BrowserRouter>
+              <ChatProvider>
+                <SocketProvider>
+                  <NotificationProvider>
+                    <ModalProvider>
                       <AppRouter />
-                    </BrowserRouter>
-                  </ModalProvider>
-                </NotificationProvider>
-              </SocketProvider>
-            </ChatProvider>
+                    </ModalProvider>
+                  </NotificationProvider>
+                </SocketProvider>
+              </ChatProvider>
+            </BrowserRouter>
           </ApiContextProvider>
         </ScreenProvider>
       </MobileLayoutChatProvider>

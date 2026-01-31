@@ -200,8 +200,7 @@ const EventDetailsMobile = () => {
   // };
 
   const sendSocketDeleteEvent = () => {
-    navigate(-1);
-    currentSocket.emit("delete_event", eventId, gruppo.group_id);
+    +currentSocket.emit("delete_event", eventId, gruppo.group_id);
   };
   const sendSocketVoteEvent = (status) => {
     setCurrentEventData((prev) => {
@@ -303,7 +302,9 @@ const EventDetailsMobile = () => {
                 </div>
               )}
             </div>
-            <h1 className="font-bold text-2xl font-body ">{titolo}</h1>
+            <h1 className="font-bold text-2xl font-body break-words">
+              {titolo}
+            </h1>
           </div>
           <div className="">
             <div className="flex flex-col gap-3 border-b pb-6 border-gray-200">
@@ -418,19 +419,23 @@ const EventDetailsMobile = () => {
             </div>
           </div>
         </div>
-        {status == "pending" && (
+        {created_by !== session.user.id && (
           <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-6 z-[110] shadow-[0_-10px_20px_-5px_rgba(0,0,0,0,0.05)]">
             <div className="w-full flex justify-between flex-row gap-6">
               <button
-                className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
+                className={`flex-1 ${status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-4 rounded-2xl  active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer`}
+                // className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
                 onClick={() => {
+                  const newStatus =
+                    status == "accepted" ? "pending" : "accepted";
+
                   handleEventDecision(
                     eventId,
                     {
-                      status: "accepted",
+                      status: newStatus,
                     },
                     () => {
-                      sendSocketVoteEvent("accepted");
+                      sendSocketVoteEvent(newStatus);
                     },
                   );
                 }}
@@ -440,15 +445,18 @@ const EventDetailsMobile = () => {
 
               {/* BOTTONE RIFIUTA: Più sobrio, per non distrarre */}
               <button
-                className="flex-1 bg-gray-50 text-gray-400 font-bold py-4 rounded-2xl border border-gray-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
+                // className="flex-1 bg-gray-50 text-gray-400 font-bold py-4 rounded-2xl border border-gray-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
+                className={`flex-1 ${status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-4 rounded-2xl  active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer`}
                 onClick={() => {
+                  const newStatus =
+                    status == "rejected" ? "pending" : "rejected";
                   handleEventDecision(
                     eventId,
                     {
-                      status: "rejected",
+                      status: newStatus,
                     },
                     () => {
-                      sendSocketVoteEvent("rejected");
+                      sendSocketVoteEvent(newStatus);
                     },
                   );
                 }}
