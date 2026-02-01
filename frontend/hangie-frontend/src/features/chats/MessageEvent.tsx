@@ -139,7 +139,7 @@ const MessageEvent = ({ event_details, group_id }) => {
   //   }
   // }, [event_details]);
   console.log("message", event_details);
-  const acceptedParticipants = event_details.risposte_eventi.filter(
+  const acceptedParticipants = event_details.risposte_evento.filter(
     (r) => r.status == "accepted",
   ).length;
   return (

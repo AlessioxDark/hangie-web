@@ -59,6 +59,9 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
   status,
   line_clamp = "line-clamp-1",
 }) => {
+  const risposteAccepted = risposte_evento.filter(
+    (r) => r.status == "accepted",
+  );
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
         day: "numeric",
@@ -243,23 +246,23 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                 <ParticipantsIcon color={"#64748b"} />
               </div>
 
-              {risposte_evento.accepted.length > 0 ? (
+              {risposteAccepted.length > 0 ? (
                 <div className="flex items-center 2xl:gap-2.5 gap-1.5 flex-1 min-w-0">
-                  {risposte_evento.accepted.slice(0, 3).map((partecipante) => {
+                  {risposteAccepted.slice(0, 3).map((partecipante) => {
                     return (
                       <div className="flex -space-x-2 flex-shrink-0">
                         <div
                           className="2xl:w-7 2xl:h-7 w-5 h-5"
-                          key={partecipante.utenti.user_id}
+                          key={partecipante.user_id}
                         >
-                          <ProfileIcon user_id={partecipante.utenti.user_id} />
+                          <ProfileIcon user_id={partecipante.user_id} />
                         </div>
                       </div>
                     );
                   })}
                   <span className="text-sm 2xl:text-base text-text-2 font-medium truncate">
-                    {risposte_evento.accepted.length} partecipant
-                    {risposte_evento.accepted.length !== 1 ? "i" : "e"}
+                    {risposteAccepted.length} partecipant
+                    {risposteAccepted.length !== 1 ? "i" : "e"}
                   </span>
                 </div>
               ) : (

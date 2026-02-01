@@ -64,7 +64,6 @@ const getGroupEvents = async (req, res) => {
       // Estrae l'oggetto evento dal campo 'eventi' e aggiunge lo 'status'
       return {
         event_id: response.event_id,
-        risposte_eventi: response.eventi.risposte_eventi, // Stato (pending, accepted, refused)
 
         costo: response.eventi.costo,
         data: response.eventi.data,
@@ -78,11 +77,7 @@ const getGroupEvents = async (req, res) => {
         scadenza: response.eventi.data_scadenza,
         group_id: response.group_id,
         status: response.status,
-        risposte_evento: {
-          rejected: response.partecipanti.filter((p) => p.status == "rejected"),
-          accepted: response.partecipanti.filter((p) => p.status == "accepted"),
-          pending: response.partecipanti.filter((p) => p.status == "pending"),
-        },
+        risposte_evento: response.partecipanti,
 
         // Non includere ...dato (spread) qui se vuoi un oggetto pulito
       };

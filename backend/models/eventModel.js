@@ -371,6 +371,7 @@ const newEvent = async (req) => {
     const newRisposte = eventParticipants.map((risposta) => {
       return {
         utenti: risposta.utente,
+        user_id: risposta.utente.user_id,
         status: risposta.status,
         created_at: risposta.created_at,
         is_creator: risposta.is_creator,
@@ -413,11 +414,12 @@ const newEvent = async (req) => {
           eventi: {
             ...messageData.eventi,
             event_imgs: [],
-            risposte_evento: {
-              rejected: newRisposte.filter((r) => r.status === "rejected"),
-              accepted: newRisposte.filter((r) => r.status === "accepted"),
-              pending: newRisposte.filter((r) => r.status === "pending"),
-            },
+            risposte_evento: [
+              ...newRisposte,
+              // rejected: newRisposte.filter((r) => r.status === "rejected"),
+              // accepted: newRisposte.filter((r) => r.status === "accepted"),
+              // pending: newRisposte.filter((r) => r.status === "pending"),
+            ],
           },
         },
       },

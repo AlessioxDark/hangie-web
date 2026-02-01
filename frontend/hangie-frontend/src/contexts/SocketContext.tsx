@@ -4,7 +4,7 @@ import { useAuth } from "./AuthContext";
 import { useChat } from "./ChatContext";
 import { type GroupData } from "@/types/chat";
 import { useMobileLayout } from "./MobileLayoutChatContext";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 const SocketContext = createContext({
   currentSocket: null,
@@ -43,6 +43,9 @@ export const SocketProvider = ({ children }) => {
   const { setMobileView } = useMobileLayout();
   const currentGroupDataRef = useRef<null | GroupData>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath =
+    location.state?.backgroundLocation?.pathname || location.pathname;
   useEffect(() => {
     currentGroupDataRef.current = currentGroupData;
   }, [currentGroupData]);
@@ -396,8 +399,8 @@ export const SocketProvider = ({ children }) => {
 
       console.log("arrivato deleted_event");
       const { event_id, group_id } = data;
-      console.log({ current: currentEventData, event_id });
-      if (currentEventData.event_id == event_id) {
+
+      if (currentPath == `/events/${event_id}`) {
         console.log("stesso event_id");
         navigate(-1);
       }
@@ -417,11 +420,18 @@ export const SocketProvider = ({ children }) => {
         console.log("qui lo toglo");
         setCurrentChatData((prevData) => {
           if (!prevData) return prevData;
+          console.log("prima", prevData.messaggi);
+          console.log("restituisco", {
+            messaggi: prevData.messaggi.filter((m) => {
+              if (m?.event_id == null) return true;
+              return m.event_details.event_id !== event_id;
+            }),
+          });
           return {
             ...prevData,
             messaggi: prevData.messaggi.filter((m) => {
               if (m?.event_id == null) return true;
-              return m.event_id !== event_id;
+              return m.event_details.event_id !== event_id;
             }),
           };
         });
@@ -594,7 +604,13 @@ export const SocketProvider = ({ children }) => {
       socket.off("voted_event");
       socket.disconnect();
     };
-  }, [session?.user?.id, setCurrentChatData, currentGroupData, currentGroup]);
+  }, [
+    session?.user?.id,
+    setCurrentChatData,
+    currentGroupData,
+    currentGroup,
+    location.pathname,
+  ]);
 
   useEffect(() => {});
   return (

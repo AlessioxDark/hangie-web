@@ -26,7 +26,8 @@ const GroupEventCard = ({
   status,
   created_by,
 }) => {
-  console.log("status", status);
+  console.log("ris", risposte_evento);
+
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
         day: "numeric",
@@ -89,7 +90,9 @@ const GroupEventCard = ({
 
   const { openModal } = useModal();
   const { setMobileView } = useMobileLayout();
-  const numPartecipanti = risposte_evento.accepted.length;
+  const numPartecipanti = risposte_evento.filter(
+    (r) => r.status == "accepted",
+  ).length;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [prevStatus, setPrevStatus] = useState(status);
   const dropdownRef = useRef(null);

@@ -28,8 +28,9 @@ const ChatsEvents = () => {
       return "creator"; // L'utente è il creatore, vede i pulsanti di modifica
     }
     console.log(session.user.id);
-    console.log(event.risposte_eventi);
-    const userResponse = event.risposte_eventi.find(
+    console.log(event);
+
+    const userResponse = event.risposte_evento.find(
       (risposta) => risposta.user_id === session.user.id,
     );
 
@@ -46,7 +47,7 @@ const ChatsEvents = () => {
         return "creator";
       }
 
-      const userResponse = (event.risposte_eventi || []).find(
+      const userResponse = (event.risposte_evento || []).find(
         (risposta) => risposta.user_id === session.user.id,
       );
 

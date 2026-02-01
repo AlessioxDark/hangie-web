@@ -5,11 +5,6 @@ const getAllEvents = async (req, res) => {
     const { data, error } = await Event.getAll(req);
     if (error) throw error;
     const cleanData = data.map((response) => {
-      const new_risposte = {
-        accepted: response.partecipanti.filter((r) => r.status == "accepted"),
-        pending: response.partecipanti.filter((r) => r.status == "pending"),
-        rejected: response.partecipanti.filter((r) => r.status == "rejected"),
-      };
       return {
         event_id: response.event_id,
         status: response.status, // Stato (pending, accepted, refused)
@@ -23,7 +18,7 @@ const getAllEvents = async (req, res) => {
         utente: response.eventi.utenti,
         gruppo: response.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
         scadenza: response.eventi.data_scadenza,
-        risposte_evento: new_risposte,
+        risposte_evento: response.partecipanti,
         // Non includere ...dato (spread) qui se vuoi un oggetto pulito
       };
     });
@@ -94,24 +89,9 @@ const getSpecificEvent = async (req, res) => {
       gruppo: data.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
       scadenza: data.eventi.data_scadenza,
       created_by: data.eventi.created_by,
-      risposte_evento: {
-        rejected: [],
-        accepted: [],
-        pending: [],
-      },
+      risposte_evento: data.partecipanti,
     };
     console.log("data che invio", newData);
-    data.partecipanti.forEach((risposta) => {
-      if (risposta.status == "accepted") {
-        newData.risposte_evento.accepted.push(risposta);
-      }
-      if (risposta.status == "rejected") {
-        newData.risposte_evento.rejected.push(risposta);
-      }
-      if (risposta.status == "pending") {
-        newData.risposte_evento.pending.push(risposta);
-      }
-    });
 
     res.status(200).json({
       success: true,

@@ -30,11 +30,11 @@ function App() {
   // const background = location.state && location.state.backgroundLocation;
 
   return (
-    <AuthContextProvider>
-      <MobileLayoutChatProvider>
-        <ScreenProvider>
-          <ApiContextProvider>
-            <BrowserRouter>
+    <BrowserRouter>
+      <AuthContextProvider>
+        <MobileLayoutChatProvider>
+          <ScreenProvider>
+            <ApiContextProvider>
               <ChatProvider>
                 <SocketProvider>
                   <NotificationProvider>
@@ -44,11 +44,11 @@ function App() {
                   </NotificationProvider>
                 </SocketProvider>
               </ChatProvider>
-            </BrowserRouter>
-          </ApiContextProvider>
-        </ScreenProvider>
-      </MobileLayoutChatProvider>
-    </AuthContextProvider>
+            </ApiContextProvider>
+          </ScreenProvider>
+        </MobileLayoutChatProvider>
+      </AuthContextProvider>
+    </BrowserRouter>
   );
 }
 

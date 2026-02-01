@@ -85,13 +85,13 @@ const getGroup = async (req) => {
         `*,
             utente:utenti(nome, user_id),
             luogo:luoghi(nome, citta, indirizzo),
-            risposte_eventi(*, utenti(profile_pic, user_id, nome))
+            risposte_evento:risposte_eventi(*, utenti(profile_pic, user_id, nome))
             `,
       )
       .in("event_id", eventIds);
     console.log("gli eventsDetails", eventsDetails);
     const newEventsDetails = eventsDetails.map((e) => {
-      const risposta = e.risposte_eventi.find((r) => r.user_id == user.id);
+      const risposta = e.risposte_evento.find((r) => r.user_id == user.id);
       return { ...e, status: risposta.status };
     });
     console.log("i nuovi eventsDetails", newEventsDetails);
@@ -132,6 +132,7 @@ const getGroup = async (req) => {
       error: null,
     };
   } catch (err) {
+    console.log("ecco", err);
     return { data: null, error: err };
   }
 };

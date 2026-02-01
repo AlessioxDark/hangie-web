@@ -29,7 +29,9 @@ const EventCard = ({ event }) => {
     cover_img,
     gruppo,
   } = event;
-
+  const risposteAccepted = risposte_evento.filter(
+    (r) => r.status == "accepted",
+  );
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
         day: "numeric",
@@ -123,10 +125,10 @@ const EventCard = ({ event }) => {
                 </div>
 
                 <div className="flex items-center gap-1 2xl:gap-2">
-                  {risposte_evento.accepted.length > 0 ? (
+                  {risposteAccepted.length > 0 ? (
                     <>
                       <div className="flex -space-x-1">
-                        {risposte_evento.accepted.map((partecipante, index) => {
+                        {risposteAccepted.map((partecipante, index) => {
                           return (
                             <div
                               className="2xl:w-7 2xl:h-7 w-6 h-6"
@@ -140,18 +142,18 @@ const EventCard = ({ event }) => {
                         })}
 
                         {/* Counter per rimanenti */}
-                        {risposte_evento.accepted.length > 3 && (
+                        {risposteAccepted.length > 3 && (
                           <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center">
                             <span className="text-xs font-bold text-text-2">
-                              +{risposte_evento.accepted.length - 3}
+                              {risposteAccepted.length - 3}
                             </span>
                           </div>
                         )}
                       </div>
 
                       <span className="text-text-2 font-body font-medium text-sm 2xl:text-base truncate">
-                        {risposte_evento.accepted.length} partecipant
-                        {risposte_evento.accepted.length !== 1 ? "i" : "e"}
+                        {risposteAccepted.length} partecipant
+                        {risposteAccepted.length !== 1 ? "i" : "e"}
                       </span>
                     </>
                   ) : (

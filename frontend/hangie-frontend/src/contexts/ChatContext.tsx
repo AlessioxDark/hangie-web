@@ -216,6 +216,12 @@ export const ChatProvider = ({ children }) => {
       setCurrentGroupData(groupsData[0]);
     }
   }, [groupsData, currentGroup, currentScreen]);
+
+  useEffect(() => {
+    if (currentChatData) {
+      console.log("currentChatData è cambiato", currentChatData?.messaggi);
+    }
+  }, [currentChatData]);
   return (
     <ChatContext.Provider
       value={{
