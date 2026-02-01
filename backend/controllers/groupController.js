@@ -77,6 +77,7 @@ const getGroupEvents = async (req, res) => {
         gruppo: response.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
         scadenza: response.eventi.data_scadenza,
         group_id: response.group_id,
+        status: response.status,
         risposte_evento: {
           rejected: response.partecipanti.filter((p) => p.status == "rejected"),
           accepted: response.partecipanti.filter((p) => p.status == "accepted"),

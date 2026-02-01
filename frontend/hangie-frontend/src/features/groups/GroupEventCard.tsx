@@ -2,6 +2,7 @@ import DollarIcon from "@/assets/icons/DollarIcon";
 import KebabMenuIcon from "@/assets/icons/KebabMenuIcon";
 import MapIcon from "@/assets/icons/MapIcon";
 import ParticipantsIcon from "@/assets/icons/ParticipantsIcon";
+import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useModal } from "@/contexts/ModalContext";
@@ -20,10 +21,12 @@ const GroupEventCard = ({
   costo,
   cover_img,
   gruppo,
-  type,
   scadenza,
   risposte_evento,
+  status,
+  created_by,
 }) => {
+  console.log("status", status);
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
         day: "numeric",
@@ -32,8 +35,10 @@ const GroupEventCard = ({
         minute: "2-digit",
       })
     : "";
-  const { handleDeleteEvent } = useChat();
+  const { handleDeleteEvent, setCurrentEventData, handleEventDecision } =
+    useChat();
   const { currentSocket } = useSocket();
+  const { session } = useAuth();
   const { currentScreen } = useScreen();
   const sendSocket = () => {
     currentSocket.emit("delete_event", event_id, gruppo.group_id);
@@ -86,6 +91,7 @@ const GroupEventCard = ({
   const { setMobileView } = useMobileLayout();
   const numPartecipanti = risposte_evento.accepted.length;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [prevStatus, setPrevStatus] = useState(status);
   const dropdownRef = useRef(null);
 
   const toggleDropdown = () => {
@@ -107,7 +113,21 @@ const GroupEventCard = ({
     };
   }, []);
 
-  const isInactive = type === "archive" || type === "rejected";
+  const isInactive = status === "archive" || status === "rejected";
+
+  const sendSocketVoteEvent = (status, prevStatus) => {
+    setCurrentEventData((prev) => {
+      return { ...prev, status };
+    });
+    currentSocket.emit(
+      "vote_event",
+      event_id,
+      gruppo.group_id,
+      status,
+      session.user.id,
+      prevStatus,
+    );
+  };
   return (
     <div
       className={` cursor-pointer 
@@ -140,7 +160,7 @@ const GroupEventCard = ({
               </time>
 
               <div className="flex flex-row gap-2 relative" ref={dropdownRef}>
-                {type == "pending" && (
+                {status == "pending" && (
                   <div
                     className={`
                       
@@ -218,14 +238,56 @@ px-2 py-1 bg-amber-50 text-amber-600  border border-amber-100
         </div>
       </div>
 
-      {type === "pending" && (
+      {created_by !== session.user.id && (
         <div className="flex gap-3 pt-4 border-t border-slate-200">
-          <button className="flex-1 px-4 py-3 bg-primary text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 hover:brightness-110 transition-all">
+          <button
+            className={`flex-1 ${status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-4 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer text-xs font-bold
+                     hover:bg-primary/80`}
+            onClick={(e) => {
+              e.stopPropagation();
+              const newStatus = status == "accepted" ? "pending" : "accepted";
+
+              handleEventDecision(
+                event_id,
+                {
+                  status: newStatus,
+                },
+                () => {
+                  sendSocketVoteEvent(newStatus, prevStatus);
+                  setPrevStatus(newStatus);
+                },
+              );
+            }}
+          >
+            Accetta
+          </button>
+          <button
+            className={`flex-1 ${status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-4 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer text-xs font-bold
+                     hover:bg-primary/80`}
+            onClick={(e) => {
+              e.stopPropagation();
+              const newStatus = status == "rejected" ? "pending" : "rejected";
+
+              handleEventDecision(
+                event_id,
+                {
+                  status: newStatus,
+                },
+                () => {
+                  sendSocketVoteEvent(newStatus, prevStatus);
+                  setPrevStatus(newStatus);
+                },
+              );
+            }}
+          >
+            Rifiuta
+          </button>
+          {/* <button className="flex-1 px-4 py-3 bg-primary text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 hover:brightness-110 transition-all">
             Accetta
           </button>
           <button className="flex-1 bg-gray-50 text-gray-400 font-bold px-4 py-3 text-xs hover:text-slate-600 transition-colors rounded-xl border border-gray-200">
             Ignora
-          </button>
+          </button> */}
         </div>
       )}
     </div>

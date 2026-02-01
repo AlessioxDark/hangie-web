@@ -36,6 +36,7 @@ const EventDetailsMobile = () => {
   const carouselRef = useRef(null);
   const imageRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [prevStatus, setPrevStatus] = useState(currentEventData?.status);
 
   const fetchEvent = () => {
     console.log("qui arrivo 2");
@@ -108,9 +109,11 @@ const EventDetailsMobile = () => {
     utente,
     created_by,
   } = currentEventData || {};
+
   const allImgs = [cover_img, ...event_imgs?.map((e) => e.img_url)];
   console.log(allImgs);
   console.log(currentEventData);
+
   const handleScroll = (e) => {
     const container = e.currentTarget;
     const scrollPosition = container.scrollLeft;
@@ -211,6 +214,7 @@ const EventDetailsMobile = () => {
       eventId,
       gruppo.group_id,
       status,
+      session.user.id,
       prevStatus,
     );
   };
@@ -434,8 +438,6 @@ const EventDetailsMobile = () => {
                 onClick={() => {
                   const newStatus =
                     status == "accepted" ? "pending" : "accepted";
-                  const prevStatus =
-                    newStatus == "accepted" ? "pending" : "accepted";
 
                   handleEventDecision(
                     eventId,
@@ -444,6 +446,7 @@ const EventDetailsMobile = () => {
                     },
                     () => {
                       sendSocketVoteEvent(newStatus, prevStatus);
+                      setPrevStatus(newStatus);
                     },
                   );
                 }}
@@ -458,8 +461,7 @@ const EventDetailsMobile = () => {
                 onClick={() => {
                   const newStatus =
                     status == "rejected" ? "pending" : "rejected";
-                  const prevStatus =
-                    newStatus == "rejected" ? "pending" : "rejected";
+
                   handleEventDecision(
                     eventId,
                     {
@@ -467,6 +469,7 @@ const EventDetailsMobile = () => {
                     },
                     () => {
                       sendSocketVoteEvent(newStatus, prevStatus);
+                      setPrevStatus(newStatus);
                     },
                   );
                 }}

@@ -439,6 +439,7 @@ export const SocketProvider = ({ children }) => {
       //   const { [group_id]: removed, ...newMessMap } = messMap;
       //   return newMessMap;
       // });
+      console.log({ event_id, group_id, status, sender_id, prevStatus });
       if (sender_id == session.user.id) {
         // bug con i partecipanti dell'evento al cambio per il sender
         console.log("modifichiamo per sender");
@@ -464,38 +465,7 @@ export const SocketProvider = ({ children }) => {
             ),
           };
         });
-        if (currentGroup == group_id) {
-          console.log("qui lo toglo");
-          setCurrentChatData((prevData) => {
-            if (!prevData) return prevData;
-            return {
-              ...prevData,
-              messaggi: prevData.messaggi.map((m) => {
-                if (m.type == "event" && m.event_id == event_id) {
-                  return { ...m, status };
-                }
-                return m;
-              }),
-            };
-          });
-          setGroupEventsData((prevEvents) => {
-            return prevEvents.map((e) => {
-              if (e.event_id == event_id) {
-                const eventToMove = e.risposte_eventi.find(
-                  (e) => e.event_id == event_id,
-                );
-                const newRisposte = [
-                  ...e.risposte_eventi.filter(
-                    (event) => event.event_id !== event_id,
-                  ),
-                  { ...eventToMove, status },
-                ];
-                return { ...e, risposte_eventi: newRisposte };
-              }
-              return e;
-            });
-          });
-        }
+
         if (currentEventData && currentEventData.event_id == event_id) {
           setCurrentEventData((prev) => {
             const newRisposte = {
@@ -511,6 +481,75 @@ export const SocketProvider = ({ children }) => {
             return { ...prev, risposte_evento: newRisposte };
           });
         }
+      }
+      if (currentGroup == group_id) {
+        console.log("qui lo toglo");
+        setCurrentChatData((prevData) => {
+          if (!prevData) return prevData;
+          return {
+            ...prevData,
+            messaggi: prevData.messaggi.map((m) => {
+              if (m.type == "event" && m.event_id == event_id) {
+                console.log(
+                  "prima di modifica",
+                  m.event_details.risposte_eventi,
+                );
+                const altreRisposte = m.event_details.risposte_eventi.filter(
+                  (r) => r.utenti?.user_id !== sender_id,
+                );
+
+                const newRisposte =
+                  status !== "pending"
+                    ? [
+                        ...altreRisposte,
+                        { status, utenti: { user_id: sender_id } },
+                      ]
+                    : altreRisposte;
+                console.log("questi sono i nuovi risposte", newRisposte);
+                return {
+                  ...m,
+                  event_details: {
+                    ...m.event_details,
+                    status,
+                    risposte_eventi: newRisposte,
+                  },
+                };
+              }
+              return m;
+            }),
+          };
+        });
+        setGroupEventsData((prevEvents) => {
+          return prevEvents.map((e) => {
+            if (e.event_id == event_id) {
+              // const newRisposte = {
+              //   [prevStatus]:     ...e.risposte_eventi[prevStatus].filter(
+              //     (event) => event.event_id !== event_id,
+              //   ),
+              //   { ...eventToMove, status },
+              // }
+              const altreRisposte = e.risposte_evento[prevStatus].filter(
+                (r) => r.user_id !== sender_id,
+              );
+
+              const newRisposte = [
+                ...altreRisposte,
+                { status, user_id: sender_id },
+              ];
+
+              return {
+                ...e,
+                risposte_evento: {
+                  ...e.risposte_evento,
+                  [prevStatus]: altreRisposte,
+                  [status]: newRisposte,
+                },
+                status,
+              };
+            }
+            return e;
+          });
+        });
       }
       console.log("non lo ho inviato io");
       setHomeEventsData((prevEvents) => {

@@ -7,7 +7,7 @@ import { useModal } from "@/contexts/ModalContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import { useSocket } from "@/contexts/SocketContext";
 import { Clock1 } from "lucide-react"; // Aggiungi questa icona
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 interface Gruppo {
@@ -124,7 +124,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
   const { handleEventDecision } = useChat();
   const { currentSocket } = useSocket();
   const { session } = useAuth();
-
+  const [prevStatus, setPrevStatus] = useState("pending");
   const sendSocketVoteEvent = (status, prevStatus) => {
     // setCurrentEventData((prev) => {
 
@@ -306,13 +306,12 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                 //    text-sm
                 //    cursor-pointer
                 // "
-                className={`flex-1 ${status == "rejected" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-2.5 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer text-sm`}
+                className={`flex-1 ${status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-2.5 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer text-sm`}
                 onClick={(e) => {
                   e.stopPropagation();
                   const newStatus =
                     status == "accepted" ? "pending" : "accepted";
-                  const prevStatus =
-                    newStatus == "accepted" ? "pending" : "accepted";
+
                   handleEventDecision(
                     event_id,
                     {
@@ -320,6 +319,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                     },
                     () => {
                       sendSocketVoteEvent(newStatus, prevStatus);
+                      setPrevStatus(newStatus);
                     },
                   );
                 }}
@@ -348,8 +348,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                   e.stopPropagation();
                   const newStatus =
                     status == "rejected" ? "pending" : "rejected";
-                  const prevStatus =
-                    newStatus == "rejected" ? "pending" : "rejected";
 
                   handleEventDecision(
                     event_id,
@@ -358,6 +356,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                     },
                     () => {
                       sendSocketVoteEvent(newStatus, prevStatus);
+                      setPrevStatus(newStatus);
                     },
                   );
                 }}

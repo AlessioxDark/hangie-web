@@ -14,16 +14,21 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { Link, useLocation } from "react-router";
 import { useScreen } from "@/contexts/ScreenContext";
-const MessageEvent = ({ event_details }) => {
+import { useSocket } from "@/contexts/SocketContext";
+const MessageEvent = ({ event_details, group_id }) => {
   const { openModal } = useModal();
   const { setMobileView } = useMobileLayout();
   const { session } = useAuth();
   const location = useLocation();
   const { currentScreen } = useScreen();
+  const [prevStatus, setPrevStatus] = useState(event_details.status);
+  const { handleEventDecision, setCurrentEventData } = useChat();
+  const { currentSocket } = useSocket();
+
   const formatDate = (dateString) => {
     if (!dateString) return "Data non definita";
     try {
@@ -50,82 +55,89 @@ const MessageEvent = ({ event_details }) => {
 
   // --- Icona Placeholder per Profilo (sostituisce ProfileIcon) ---
 
-  // --- Logica Contenuto Bottone ---
-  const getButtonContent = (status) => {
-    if (session.user.id === event_details.utente.user_id) {
-      return null;
-    }
-    if (isDeadlinePassed) {
-      return (
-        <button
-          disabled
-          className="w-full px-6 py-3 bg-gray-100 text-gray-700 border border-gray-300 font-bold rounded-xl
-                  transition-colors duration-300 text-lg shadow-inner cursor-not-allowed opacity-80"
-        >
-          Evento Concluso / Scaduto
-        </button>
-      );
-    } else if (status === "accepted") {
-      return null;
-      // return (
-      //   <div className="w-full flex flex-col gap-2">
-      //     <div className="flex items-center justify-center w-full px-6 py-3 bg-green-500 text-white font-bold rounded-xl shadow-lg">
-      //       <Check className="w-5 h-5 mr-2" />
-      //       Hai Conferato la tua partecipazione
-      //     </div>
-      //     <button
-      //       onClick={(e) => {
-      //         e.stopPropagation();
-      //       }}
-      //       className="w-full text-sm py-2 text-gray-600 hover:text-red-500 transition-colors duration-200"
-      //     >
-      //       Annulla la partecipazione
-      //     </button>
-      //   </div>
-      // );
-    } else if (status === "rejected") {
-      return (
-        <div className="w-full flex flex-col gap-2">
-          <div className="flex items-center justify-center w-full px-6 py-3 bg-red-100 text-red-600 border border-red-300 font-bold rounded-xl shadow-lg">
-            <XCircle className="w-5 h-5 mr-2" />
-            Hai Rifiutato l'Invito
-          </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="w-full text-sm py-2 text-gray-600 hover:text-green-600 transition-colors duration-200"
-          >
-            Cambia idea e partecipa
-          </button>
-        </div>
-      );
-    } else {
-      console.log("lo status è", status);
-      return (
-        <div className="w-full flex flex-row gap-4">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-bold
-                     hover:bg-primary/80 transition-colors duration-300 shadow-md"
-          >
-            Accetta Invito
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="flex-1 px-6 py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-xl font-bold
-                     hover:bg-gray-100 hover:border-gray-500 transition-colors duration-300 shadow-sm"
-          >
-            Rifiuta
-          </button>
-        </div>
-      );
-    }
+  const sendSocketVoteEvent = (status, prevStatus) => {
+    setCurrentEventData((prev) => {
+      return { ...prev, status };
+    });
+    currentSocket.emit(
+      "vote_event",
+      event_details.event_id,
+      group_id,
+      status,
+      session.user.id,
+      prevStatus,
+    );
   };
+  // --- Logica Contenuto Bottone ---
+  // const getButtonContent = useCallback(() => {
+  //   if (session.user.id === event_details.utente.user_id) {
+  //     return null;
+  //   }
+  //   if (isDeadlinePassed) {
+  //     return (
+  //       <button
+  //         disabled
+  //         className="w-full px-6 py-3 bg-gray-100 text-gray-700 border border-gray-300 font-bold rounded-xl
+  //                 transition-colors duration-300 text-lg shadow-inner cursor-not-allowed opacity-80"
+  //       >
+  //         Evento Concluso / Scaduto
+  //       </button>
+  //     );
+  //   } else {
+  //     console.log("lo status è", event_details.status);
+  //     return (
+  // <div className="w-full flex flex-row gap-4">
+  //   <button
+  //     className={`flex-1 ${event_details.status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-6 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer font-bold
+  //              hover:bg-primary/80`}
+  //     onClick={(e) => {
+  //       e.stopPropagation();
+  //       e.preventDefault();
+  //       const newStatus =
+  //         event_details.status == "accepted" ? "pending" : "accepted";
+
+  //       handleEventDecision(
+  //         event_details.event_id,
+  //         {
+  //           status: newStatus,
+  //         },
+  //         () => {
+  //           sendSocketVoteEvent(newStatus, prevStatus);
+  //           setPrevStatus(newStatus);
+  //         },
+  //       );
+  //     }}
+  //   >
+  //     Accetta
+  //   </button>
+
+  //   <button
+  //     className={`flex-1 ${event_details.status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-6 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer font-bold
+  //              hover:bg-primary/80`}
+  //     onClick={(e) => {
+  //       e.stopPropagation();
+  //       e.preventDefault();
+  //       const newStatus =
+  //         event_details.status == "rejected" ? "pending" : "rejected";
+
+  //       handleEventDecision(
+  //         event_details.event_id,
+  //         {
+  //           status: newStatus,
+  //         },
+  //         () => {
+  //           sendSocketVoteEvent(newStatus, prevStatus);
+  //           setPrevStatus(newStatus);
+  //         },
+  //       );
+  //     }}
+  //   >
+  //     Rifiuta
+  //   </button>
+  // </div>
+  //     );
+  //   }
+  // }, [event_details]);
   console.log("message", event_details);
   const acceptedParticipants = event_details.risposte_eventi.filter(
     (r) => r.status == "accepted",
@@ -257,7 +269,62 @@ const MessageEvent = ({ event_details }) => {
 
           {/* Bottoni di Risposta (Sezione 4) */}
           <div className="flex gap-2   ">
-            {getButtonContent(event_details.status)}
+            {event_details.created_by !== session.user.id ? (
+              <div className="w-full flex flex-row gap-4">
+                <button
+                  className={`flex-1 ${event_details.status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-6 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer font-bold
+                     hover:bg-primary/80`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const newStatus =
+                      event_details.status == "accepted"
+                        ? "pending"
+                        : "accepted";
+
+                    handleEventDecision(
+                      event_details.event_id,
+                      {
+                        status: newStatus,
+                      },
+                      () => {
+                        sendSocketVoteEvent(newStatus, prevStatus);
+                        setPrevStatus(newStatus);
+                      },
+                    );
+                  }}
+                >
+                  Accetta
+                </button>
+
+                <button
+                  className={`flex-1 ${event_details.status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-6 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer font-bold
+                     hover:bg-primary/80`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const newStatus =
+                      event_details.status == "rejected"
+                        ? "pending"
+                        : "rejected";
+
+                    handleEventDecision(
+                      event_details.event_id,
+                      {
+                        status: newStatus,
+                      },
+                      () => {
+                        sendSocketVoteEvent(newStatus, prevStatus);
+                        setPrevStatus(newStatus);
+                      },
+                    );
+                  }}
+                >
+                  Rifiuta
+                </button>
+              </div>
+            ) : null}
+            {/* {getButtonContent(event_details.status)} */}
           </div>
         </div>
       </div>

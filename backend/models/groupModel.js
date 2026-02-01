@@ -89,12 +89,12 @@ const getGroup = async (req) => {
             `,
       )
       .in("event_id", eventIds);
+    console.log("gli eventsDetails", eventsDetails);
     const newEventsDetails = eventsDetails.map((e) => {
-      const risposta = e.risposte_eventi.find(
-        (r) => r.user_id == e.utente.user_id,
-      );
+      const risposta = e.risposte_eventi.find((r) => r.user_id == user.id);
       return { ...e, status: risposta.status };
     });
+    console.log("i nuovi eventsDetails", newEventsDetails);
     if (eventsError) throw eventsError;
 
     const eventDetail = newEventsDetails.reduce((acc, event) => {
@@ -113,7 +113,6 @@ const getGroup = async (req) => {
       const isSent =
         statuses.length > 0 &&
         statuses.every((s) => s.status === "delivered" || s.status === "read");
-
       return {
         ...m,
         isUser,
@@ -154,7 +153,6 @@ const getEvents = async (req) => {
     const { data: risposte, error: risposteError } = await supabase
       .from("risposte_eventi")
       .select("user_id,is_creator,status,eventi(*,gruppi(*))")
-      .eq("status", "accepted")
       .in("eventi.event_id", eventIds)
       .eq("eventi.gruppi.group_id", group_id);
     if (risposteError) throw risposteError;
@@ -167,10 +165,25 @@ const getEvents = async (req) => {
       });
       return acc;
     }, {});
-    // const {data:participantsData,error:partecipanti_error} = await supabase.from("risposte_eventoùi").select("user_id,status").eq("event_id")
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw { message: "Manca Header Auth" };
+    const token = req.headers.authorization.split(" ")[1];
+    const {
+      data: { user },
+      error: tokenError,
+    } = await supabase.auth.getUser(token);
+    if (tokenError) throw tokenError;
     const newData = eventsData.map((e) => {
+      console.log("risp", newRisposte, e.event_id);
+      const eventStatus = newRisposte[e.event_id].find(
+        (r) => r.user_id == user.id,
+      );
       console.log("questo è e", e);
-      return { ...e, partecipanti: newRisposte[e.event_id] };
+      return {
+        ...e,
+        partecipanti: newRisposte[e.event_id],
+        status: eventStatus.status,
+      };
     });
     console.log("ecco il newData", newData);
     console.log("ecco il newRispsote", newRisposte);
