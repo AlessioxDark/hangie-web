@@ -387,22 +387,6 @@ const newEvent = async (req) => {
         pending: newRisposte.filter((r) => r.status == "pending"),
       },
     });
-    // return {
-    //   data: {
-    //     event_id: eventId,
-    //     messageDetails: messageData,
-    //     event_details: {
-    //       ...messageData.eventi,
-    //       event_imgs: [],
-    //       risposte_evento: {
-    //         refused: newRisposte.filter((r) => r.status == "refused"),
-    //         accepted: newRisposte.filter((r) => r.status == "accepted"),
-    //         pending: newRisposte.filter((r) => r.status == "pending")
-    //       },
-    //       },
-    //     },
-    //     error: null,
-    //   },
 
     return {
       data: {

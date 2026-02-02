@@ -327,6 +327,7 @@ export const SocketProvider = ({ children }) => {
         message_id: data.messageDetails.message_id,
         event_details: { ...data.eventi, status: myStatus },
         isUser: session.user.id == data.messageDetails.user_id,
+        group_id: data.group_id,
       };
       if (currentGroup == data.group_id) {
         setCurrentChatData((prev) => {
@@ -478,16 +479,16 @@ export const SocketProvider = ({ children }) => {
 
         if (currentEventData && currentEventData.event_id == event_id) {
           setCurrentEventData((prev) => {
-            const newRisposte = {
+            const newResponses = prev.risposte_evento.filter(
+              (r) => r.utenti.user_id !== sender_id,
+            );
+
+            const newRisposte = [
               ...prev.risposte_evento,
-              [status]: [
-                ...prev.risposte_evento[status],
-                { status, utenti: { user_id: sender_id } },
-              ],
-              [prevStatus]: prev.risposte_evento[prevStatus].filter(
-                (p) => p.utenti.user_id !== sender_id,
-              ),
-            };
+              ...newResponses,
+
+              { status, utenti: { user_id: sender_id } },
+            ];
             return { ...prev, risposte_evento: newRisposte };
           });
         }
@@ -502,9 +503,9 @@ export const SocketProvider = ({ children }) => {
               if (m.type == "event" && m.event_id == event_id) {
                 console.log(
                   "prima di modifica",
-                  m.event_details.risposte_eventi,
+                  m.event_details.risposte_evento,
                 );
-                const altreRisposte = m.event_details.risposte_eventi.filter(
+                const altreRisposte = m.event_details.risposte_evento.filter(
                   (r) => r.utenti?.user_id !== sender_id,
                 );
 
@@ -515,13 +516,12 @@ export const SocketProvider = ({ children }) => {
                         { status, utenti: { user_id: sender_id } },
                       ]
                     : altreRisposte;
-                console.log("questi sono i nuovi risposte", newRisposte);
                 return {
                   ...m,
                   event_details: {
                     ...m.event_details,
                     status,
-                    risposte_eventi: newRisposte,
+                    risposte_evento: newRisposte,
                   },
                 };
               }
@@ -538,7 +538,8 @@ export const SocketProvider = ({ children }) => {
               //   ),
               //   { ...eventToMove, status },
               // }
-              const altreRisposte = e.risposte_evento[prevStatus].filter(
+              console.log("le risposte evento", e.risposte_evento, e);
+              const altreRisposte = e.risposte_evento.filter(
                 (r) => r.user_id !== sender_id,
               );
 
@@ -549,11 +550,11 @@ export const SocketProvider = ({ children }) => {
 
               return {
                 ...e,
-                risposte_evento: {
+                risposte_evento: [
                   ...e.risposte_evento,
-                  [prevStatus]: altreRisposte,
-                  [status]: newRisposte,
-                },
+                  ...altreRisposte,
+                  ...newRisposte,
+                ],
                 status,
               };
             }
@@ -567,18 +568,17 @@ export const SocketProvider = ({ children }) => {
         console.log("la category è", category);
         const categoryEvents = prevEvents[category].map((event) => {
           if (event.event_id == event_id) {
-            const newRisposte = {
-              ...event.risposte_evento,
-              [prevStatus]: event.risposte_evento[prevStatus]
-                .filter((e) => e.utenti.user_id !== sender_id)
+            const newRisposte = [
+              ...event.risposte_evento
+                .filter(
+                  (e) =>
+                    e.utenti.user_id !== sender_id && e.status == prevStatus,
+                )
                 .map((e) => {
                   return { ...e, utenti: { user_id: e.user_id } };
                 }),
-              [status]: [
-                { status: status, utenti: { user_id: sender_id } },
-                ...event.risposte_evento[status],
-              ],
-            };
+              { status: status, utenti: { user_id: sender_id } },
+            ];
             return { ...event, risposte_evento: newRisposte };
           } else {
             return event;
