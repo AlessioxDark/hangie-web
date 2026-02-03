@@ -5,6 +5,7 @@ import { useChat } from "@/contexts/ChatContext";
 import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import React from "react";
+import { useNavigate } from "react-router";
 
 const ChatHeader = () => {
   const { currentScreen } = useScreen();
@@ -15,6 +16,8 @@ const ChatHeader = () => {
         currentGroupData.updated_at || Date.now()
       }`
     : null;
+
+  const navigate = useNavigate();
   return (
     <div className="bg-bg-1 p-2 items-center 2xl:p-4  border-b border-neutral-300 flex flex-row  justify-between sticky top-0">
       <div className="flex flex-row gap-1 items-center flex-1">
@@ -22,7 +25,8 @@ const ChatHeader = () => {
           <div
             className="w-7 h-7"
             onClick={() => {
-              setMobileView("groups");
+              // setMobileView("groups");
+              navigate(-1);
               setCurrentGroup(null);
             }}
           >
@@ -31,7 +35,10 @@ const ChatHeader = () => {
         )}
         <div
           className="flex flex-row items-center gap-3 2xl:gap-6  flex-grow"
-          onClick={() => setMobileView("GROUP_DETAILS")}
+          onClick={() => {
+            navigate(`/chats/${currentGroupData.group_id}/details`);
+            // setMobileView("GROUP_DETAILS")
+          }}
         >
           {displayImage ? (
             <img
@@ -61,7 +68,8 @@ const ChatHeader = () => {
       <div className="flex items-center gap-1">
         <button
           onClick={() => {
-            setMobileView("events");
+            // setMobileView("events");
+            navigate(`/chats/${currentGroupData.group_id}/events`);
             if (currentScreen == "xl") {
               //   setShowEvents(true);
             }

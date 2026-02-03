@@ -10,6 +10,7 @@ import CreateGroupForm from "@/features/chats/CreateGroupForm.js";
 import GroupDetails from "@/features/chats/GroupDetails.js";
 import { useApi } from "@/contexts/ApiContext";
 import EventDetailsMobile from "@/features/events/EventDetailsMobile";
+import { Outlet } from "react-router";
 const LayoutChatMobile = () => {
   const { fetchGroups } = useChat();
   const { error, loading } = useApi();
@@ -54,33 +55,35 @@ const LayoutChatMobile = () => {
       );
     }
 
-    if (mobileView == "groups") {
-      return (
-        <>
-          <div className="overflow-hidden">
-            <ChatsSidebar />
-          </div>
-          <div>
-            <BottomNav />
-          </div>
-        </>
-      );
-    }
-    if (mobileView == "events") {
-      return <ChatsEvents />;
-    }
-    if (mobileView == "chat") {
-      return <Chats />;
-    }
+    // if (mobileView == "groups") {
+    //   return (
+    //     <>
+    //       <div className="overflow-hidden">
+    //         <ChatsSidebar />
+    //       </div>
+    //       <div>
+    //         <BottomNav />
+    //       </div>
+    //     </>
+    //   );
+    // }
+    // if (mobileView == "events") {
+    //   return <ChatsEvents />;
+    // }
+    // if (mobileView == "chat") {
+    //   return <Chats />;
+    // }
     if (mobileView == "CREATE_EVENT") {
       return <CreateEventForm />;
     }
     if (mobileView == "CREATE_GROUP") {
       return <CreateGroupForm />;
     }
-    if (mobileView == "GROUP_DETAILS") {
-      return <GroupDetails />;
-    }
+    // if (mobileView == "GROUP_DETAILS") {
+    //   return <GroupDetails />;
+    // }
+
+    return <Outlet />;
 
     return (
       <p className="p-4 text-center text-gray-500">

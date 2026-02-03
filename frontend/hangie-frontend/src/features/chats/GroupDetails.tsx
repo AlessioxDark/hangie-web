@@ -12,6 +12,7 @@ import EditableImg from "../groups/groupsDetails/EditableImg.tsx";
 import LeaveButton from "../groups/groupsDetails/LeaveButton.tsx";
 import { useApi } from "@/contexts/ApiContext.tsx";
 import { ApiCalls } from "@/services/api.tsx";
+import { useNavigate } from "react-router";
 
 const GroupDetails = () => {
   const { currentScreen } = useScreen();
@@ -20,6 +21,7 @@ const GroupDetails = () => {
   const { currentGroupData, currentGroup, setCurrentGroupData, setGroupsData } =
     useChat();
   const { setMobileView } = useMobileLayout();
+  const navigate = useNavigate();
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const { executeApiCall } = useApi();
   const [formError, setFormError] = useState(null);
@@ -249,7 +251,8 @@ const GroupDetails = () => {
                 <button
                   onClick={() => {
                     console.log("lista aggiornata", currentGroupData);
-                    setMobileView("chat");
+                    // setMobileView("chat");
+                    navigate(-1);
                   }}
                   className="w-7 h-7"
                 >

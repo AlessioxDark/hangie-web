@@ -185,7 +185,7 @@ const CreateEventForm = () => {
         };
         const messageDetails = dataArrived.messageDetails;
         sendEvent(newEventId, newEventDetails, messageDetails);
-        setMobileView("chat");
+        setMobileView("");
       } catch (error) {
         console.log(error);
         setError("root", {
@@ -245,7 +245,7 @@ const CreateEventForm = () => {
     if (currentStep >= 2) {
       setCurrentStep((lastStep) => lastStep - 1);
     } else {
-      setMobileView("chat");
+      setMobileView("");
     }
   };
   useEffect(() => {

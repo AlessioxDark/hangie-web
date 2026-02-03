@@ -10,6 +10,7 @@ import ChevronLeft from "@/assets/icons/ChevronLeft";
 import RenderLoadingState from "../utils/RenderLoadingState";
 import RenderErrorState from "../utils/RenderErrorState";
 import { useApi } from "@/contexts/ApiContext";
+import { useNavigate } from "react-router";
 
 const FILTER_TYPES = ["accepted", "pending", "archive"];
 const ChatsEvents = () => {
@@ -19,6 +20,7 @@ const ChatsEvents = () => {
   const { session } = useAuth();
   const { currentScreen } = useScreen();
   const { setMobileView } = useMobileLayout();
+  const navigate = useNavigate();
   const { error, loading } = useApi();
 
   const getEventStatus = (event) => {
@@ -105,7 +107,12 @@ const ChatsEvents = () => {
       <div className=" 2xl:p-6 flex flex-col gap-3 2xl:gap-8 ">
         <div className="px-2 py-3 bg-white z-[100] w-full flex flex-row items-center gap-2 border-b border-gray-200 sticky top-0">
           {currentScreen == "xs" && (
-            <div className="w-8 h-8" onClick={() => setMobileView("chat")}>
+            <div
+              className="w-8 h-8"
+              onClick={() => {
+                navigate(-1);
+              }}
+            >
               <ChevronLeft color="#2463eb" />
             </div>
           )}

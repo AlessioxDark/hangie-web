@@ -2,6 +2,7 @@ import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useChat } from "@/contexts/ChatContext";
 import { useNotification } from "@/contexts/NotificationContext";
 import type { GroupData, Message, Participant, UUID } from "@/types/chat";
+import { useNavigate } from "react-router";
 interface GroupCardInterface {
   nome: string;
   partecipanti_gruppo: Participant[];
@@ -26,6 +27,7 @@ const GroupCard = ({
 }: GroupCardInterface) => {
   const { setCurrentGroup, setCurrentGroupData, currentGroup } = useChat();
   const { currentNotifications } = useNotification();
+  const navigate = useNavigate();
   const displayImage = group_cover_img
     ? `${group_cover_img}?v=${updated_at || Date.now()}`
     : null;
@@ -59,6 +61,7 @@ const GroupCard = ({
         : "bg-white  hover:bg-gray-100 active:bg-gray-100"
     }`}
       onClick={() => {
+        navigate(`/chats/${group_id}`);
         setCurrentGroup(group_id);
         setCurrentGroupData(fullGroup);
       }}

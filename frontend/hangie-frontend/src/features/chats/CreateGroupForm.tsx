@@ -141,7 +141,7 @@ const CreateGroupForm = () => {
         finalImgUrl,
         session.user.id,
       );
-      setMobileView("groups");
+      setMobileView("");
     } catch (error) {
       setError("root", { message: `errore: ${error}` });
     }
@@ -166,7 +166,7 @@ const CreateGroupForm = () => {
               <div
                 className="w-6 h-6"
                 onClick={() => {
-                  setMobileView("groups");
+                  setMobileView("");
                 }}
               >
                 <ChevronLeft color={"#2463eb"} />

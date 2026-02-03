@@ -10,6 +10,10 @@ import Home from "./pages/Home";
 import ModalHandler from "@/features/modal/ModalHandler";
 import EventDetailsModal from "@/features/modal/EventDetailsModal";
 import EventDetailsParticipants from "@/features/events/EventDetailsParticipants";
+import Chats from "./pages/Chats";
+import ChatsSidebar from "@/features/chats/ChatsSidebar";
+import ChatsEvents from "@/features/chats/ChatsEvents";
+import GroupDetails from "@/features/chats/GroupDetails";
 const AppRouter = () => {
   const location = useLocation();
   const background = location.state && location.state.backgroundLocation;
@@ -38,13 +42,28 @@ const AppRouter = () => {
             </ResponsiveLayoutWrapper>
           }
         ></Route>
-        <Route
+        {/* <Route
           path="/chats"
           element={
             <ResponsiveLayoutWrapper layoutType="chat"></ResponsiveLayoutWrapper>
           }
-        ></Route>
+        ></Route> */}
+        <Route
+          path="/chats"
+          element={<ResponsiveLayoutWrapper layoutType="chat" />}
+        >
+          {/* 1. Cosa vedi appena entri in /chats? */}
+          {/* Su Desktop l'Outlet sarà vuoto (o un messaggio "Seleziona chat") */}
+          {/* Su Mobile l'Outlet mostrerà la lista */}
+          <Route index element={<ChatsSidebar />} />
 
+          {/* 2. Rotta per la conversazione: /chats/123 */}
+          <Route path=":groupId" element={<Chats />} />
+          <Route path=":groupId/details" element={<GroupDetails />} />
+
+          {/* 3. Rotta per gli eventi: /chats/123/events */}
+          <Route path=":groupId/events" element={<ChatsEvents />} />
+        </Route>
         <Route
           path="/"
           element={
