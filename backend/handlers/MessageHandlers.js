@@ -188,9 +188,18 @@ const messageHandlers = (io, socket) => {
         .select("*")
         .eq("group_id", group_id);
       console.log("ecco gli event details", eventDetails);
+      const risposte_evento = participants.map((p) => {
+        return {
+          status:
+            eventDetails.created_by == p.partecipante_id
+              ? "accepted"
+              : "pending",
+          utenti: { user_id: p.partecipante_id },
+        };
+      });
       participants.forEach((p) => {
         io.to(p.partecipante_id).emit("sent_event", {
-          eventi: { ...eventDetails, event_id: eventId, status: p.part },
+          eventi: { ...eventDetails, event_id: eventId, risposte_evento },
           messageDetails,
           group_id,
         });

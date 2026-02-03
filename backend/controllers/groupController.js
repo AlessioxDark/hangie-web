@@ -7,22 +7,43 @@ const getAllGroups = async (req, res) => {
     const { data, error } = await Group.getAll(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
 
-    const formattedData = data.map((row) => {
-      let ultimoMessaggio = null;
-      row.gruppi.messaggi.forEach((messaggio) => {
-        console.log(messaggio);
-        if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
-          ultimoMessaggio = messaggio;
-        }
-      });
+    const formattedData = await Promise.all(
+      data.map(async (row) => {
+        let ultimoMessaggio = null;
 
-      const { gruppi } = row;
-      console.log("gruppi", gruppi);
-      return {
-        ...gruppi,
-        ultimoMessaggio: ultimoMessaggio,
-      };
-    });
+        // Usiamo for...of che supporta correttamente l'await
+        for (const messaggio of row.gruppi.messaggi) {
+          if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
+            if (messaggio.type === "event") {
+              const { data: titoloData, error: titoloError } = await supabase
+                .from("eventi")
+                .select("titolo")
+                .eq("event_id", messaggio.event_id)
+                .single();
+
+              if (titoloError) {
+                console.error("Errore recupero titolo:", titoloError);
+                ultimoMessaggio = messaggio; // Fallback se la query fallisce
+              } else {
+                ultimoMessaggio = {
+                  ...messaggio,
+                  type: "event",
+                  content: titoloData.titolo, // Sostituiamo il contenuto col titolo dell'evento
+                };
+              }
+            } else {
+              ultimoMessaggio = messaggio;
+            }
+          }
+        }
+
+        const { gruppi } = row;
+        return {
+          ...gruppi,
+          ultimoMessaggio: ultimoMessaggio,
+        };
+      }),
+    );
     res.status(200).json({
       success: true,
       message: "Operazione completata con successo",

@@ -86,9 +86,7 @@ const GroupCard = ({
 
           <div className="flex justify-between items-center">
             <span className="text-text-2 font-body 2xl:text-lg leading-5 line-clamp-1 mr-2">
-              {ultimoMessaggio?.type == "event"
-                ? `evento`
-                : ultimoMessaggio?.content}
+              {`${ultimoMessaggio?.type == "event" ? "evento: " : ""}${ultimoMessaggio?.content}`}
             </span>
             {unreadMsgNotifications > 0 && (
               <div className="bg-primary  flex items-center justify-center w-6 h-6 text-center font-bold text-white rounded-full text-base flex-shrink-0">

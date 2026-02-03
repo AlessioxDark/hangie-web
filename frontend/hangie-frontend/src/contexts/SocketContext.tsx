@@ -328,6 +328,7 @@ export const SocketProvider = ({ children }) => {
         event_details: { ...data.eventi, status: myStatus },
         isUser: session.user.id == data.messageDetails.user_id,
         group_id: data.group_id,
+        event_id: data.eventi.event_id,
       };
       if (currentGroup == data.group_id) {
         setCurrentChatData((prev) => {
@@ -366,6 +367,21 @@ export const SocketProvider = ({ children }) => {
           };
         });
       }
+      setGroupsData((prevData) => {
+        return prevData.map((g) => {
+          if (g.group_id == data.group_id) {
+            return {
+              ...g,
+              ultimoMessaggio: {
+                type: "event",
+                content: data.eventi.titolo,
+                sent_at: Date.now(),
+              },
+            };
+          }
+          return g;
+        });
+      });
     });
     socket.on("give_read_bulk", (data) => {
       // notifica
@@ -446,11 +462,9 @@ export const SocketProvider = ({ children }) => {
       // notifica
       console.log("arrivato voted_event");
       const { event_id, group_id, status, sender_id, prevStatus } = data;
-      // setMessagesMap((messMap) => {
-      //   const { [group_id]: removed, ...newMessMap } = messMap;
-      //   return newMessMap;
-      // });
+
       console.log({ event_id, group_id, status, sender_id, prevStatus });
+
       if (sender_id == session.user.id) {
         // bug con i partecipanti dell'evento al cambio per il sender
         console.log("modifichiamo per sender");
@@ -476,8 +490,13 @@ export const SocketProvider = ({ children }) => {
             ),
           };
         });
-
+        console.log(
+          "controllo se i due event id sono uguali",
+          currentEventData.event_id,
+          event_id,
+        );
         if (currentEventData && currentEventData.event_id == event_id) {
+          console.log("lo sono");
           setCurrentEventData((prev) => {
             const newResponses = prev.risposte_evento.filter(
               (r) => r.utenti.user_id !== sender_id,
@@ -495,40 +514,7 @@ export const SocketProvider = ({ children }) => {
       }
       if (currentGroup == group_id) {
         console.log("qui lo toglo");
-        setCurrentChatData((prevData) => {
-          if (!prevData) return prevData;
-          return {
-            ...prevData,
-            messaggi: prevData.messaggi.map((m) => {
-              if (m.type == "event" && m.event_id == event_id) {
-                console.log(
-                  "prima di modifica",
-                  m.event_details.risposte_evento,
-                );
-                const altreRisposte = m.event_details.risposte_evento.filter(
-                  (r) => r.utenti?.user_id !== sender_id,
-                );
 
-                const newRisposte =
-                  status !== "pending"
-                    ? [
-                        ...altreRisposte,
-                        { status, utenti: { user_id: sender_id } },
-                      ]
-                    : altreRisposte;
-                return {
-                  ...m,
-                  event_details: {
-                    ...m.event_details,
-                    status,
-                    risposte_evento: newRisposte,
-                  },
-                };
-              }
-              return m;
-            }),
-          };
-        });
         setGroupEventsData((prevEvents) => {
           return prevEvents.map((e) => {
             if (e.event_id == event_id) {
@@ -570,10 +556,7 @@ export const SocketProvider = ({ children }) => {
           if (event.event_id == event_id) {
             const newRisposte = [
               ...event.risposte_evento
-                .filter(
-                  (e) =>
-                    e.utenti.user_id !== sender_id && e.status == prevStatus,
-                )
+                .filter((e) => e.utenti.user_id !== sender_id)
                 .map((e) => {
                   return { ...e, utenti: { user_id: e.user_id } };
                 }),
@@ -585,6 +568,34 @@ export const SocketProvider = ({ children }) => {
           }
         });
         return { ...prevEvents, [category]: categoryEvents };
+      });
+      setCurrentChatData((prevData) => {
+        console.log("prev", prevData);
+        if (!prevData) return prevData;
+        const newMessaggi = prevData.messaggi.map((m) => {
+          console.log(m.event_id, event_id);
+          if (m.type == "event" && m.event_id == event_id) {
+            const newRisposte = m.event_details.risposte_evento.map((r) => {
+              return r.utenti?.user_id == sender_id
+                ? { ...r, status, ok: "ok" }
+                : r;
+            });
+            console.log(newRisposte);
+            return {
+              ...m,
+              event_details: {
+                ...m.event_details,
+                status,
+                risposte_evento: newRisposte,
+              },
+            };
+          }
+          return m;
+        });
+        return {
+          ...prevData,
+          messaggi: newMessaggi,
+        };
       });
     });
 
