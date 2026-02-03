@@ -9,7 +9,6 @@ import { useNavigate } from "react-router";
 
 const ChatHeader = () => {
   const { currentScreen } = useScreen();
-  const { setMobileView } = useMobileLayout();
   const { currentGroupData, setCurrentGroup } = useChat();
   const displayImage = currentGroupData.group_cover_img
     ? `${currentGroupData.group_cover_img}?v=${
@@ -25,7 +24,6 @@ const ChatHeader = () => {
           <div
             className="w-7 h-7"
             onClick={() => {
-              // setMobileView("groups");
               navigate(-1);
               setCurrentGroup(null);
             }}
@@ -37,7 +35,6 @@ const ChatHeader = () => {
           className="flex flex-row items-center gap-3 2xl:gap-6  flex-grow"
           onClick={() => {
             navigate(`/chats/${currentGroupData.group_id}/details`);
-            // setMobileView("GROUP_DETAILS")
           }}
         >
           {displayImage ? (
@@ -68,7 +65,6 @@ const ChatHeader = () => {
       <div className="flex items-center gap-1">
         <button
           onClick={() => {
-            // setMobileView("events");
             navigate(`/chats/${currentGroupData.group_id}/events`);
             if (currentScreen == "xl") {
               //   setShowEvents(true);

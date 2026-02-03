@@ -7,14 +7,12 @@ import Chats from "@/app/pages/Chats.js";
 import BottomNav from "@/app/pages/mobile/BottomNav.js";
 import CreateEventForm from "@/features/events/CreateEventForm.js";
 import CreateGroupForm from "@/features/chats/CreateGroupForm.js";
-import GroupDetails from "@/features/chats/GroupDetails.js";
 import { useApi } from "@/contexts/ApiContext";
-import EventDetailsMobile from "@/features/events/EventDetailsMobile";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 const LayoutChatMobile = () => {
   const { fetchGroups } = useChat();
   const { error, loading } = useApi();
-
+  const location = useLocation();
   const { mobileView } = useMobileLayout();
 
   const renderContent = () => {
@@ -55,41 +53,23 @@ const LayoutChatMobile = () => {
       );
     }
 
-    // if (mobileView == "groups") {
-    //   return (
-    //     <>
-    //       <div className="overflow-hidden">
-    //         <ChatsSidebar />
-    //       </div>
-    //       <div>
-    //         <BottomNav />
-    //       </div>
-    //     </>
-    //   );
-    // }
-    // if (mobileView == "events") {
-    //   return <ChatsEvents />;
-    // }
-    // if (mobileView == "chat") {
-    //   return <Chats />;
-    // }
     if (mobileView == "CREATE_EVENT") {
       return <CreateEventForm />;
     }
     if (mobileView == "CREATE_GROUP") {
       return <CreateGroupForm />;
     }
-    // if (mobileView == "GROUP_DETAILS") {
-    //   return <GroupDetails />;
-    // }
 
+    console.log(location);
+    if (location.pathname == "/chats") {
+      return (
+        <>
+          <Outlet />
+          <BottomNav />
+        </>
+      );
+    }
     return <Outlet />;
-
-    return (
-      <p className="p-4 text-center text-gray-500">
-        Vista non valida. {`${mobileView}`}
-      </p>
-    );
   };
   return (
     <div className="h-screen w-full flex flex-col justify-between ">

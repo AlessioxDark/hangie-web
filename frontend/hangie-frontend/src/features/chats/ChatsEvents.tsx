@@ -19,7 +19,6 @@ const ChatsEvents = () => {
   const [query, setQuery] = useState("");
   const { session } = useAuth();
   const { currentScreen } = useScreen();
-  const { setMobileView } = useMobileLayout();
   const navigate = useNavigate();
   const { error, loading } = useApi();
 

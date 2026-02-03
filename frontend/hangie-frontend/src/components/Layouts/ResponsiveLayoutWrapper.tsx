@@ -4,9 +4,6 @@ import ResponsiveLayoutChat from "@/components/Layouts/chats/ResponsiveLayoutCha
 import { useScreen } from "@/contexts/ScreenContext";
 import { useEffect, useState } from "react";
 const ResponsiveLayoutWrapper = ({ children, layoutType = "standard" }) => {
-  // L'hook è chiamato correttamente qui, al top-level del componente wrapper.
-  // const isDesktop = useMediaQuery("(min-width: 1280px)");
-  // console.log(isDesktop);
   const { currentScreen } = useScreen();
   const [isDesktop, setisDesktop] = useState(null);
 

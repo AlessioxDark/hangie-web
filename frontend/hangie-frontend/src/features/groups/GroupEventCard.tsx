@@ -89,8 +89,7 @@ const GroupEventCard = ({
   };
 
   const { openModal } = useModal();
-  const { setMobileView } = useMobileLayout();
-  const numPartecipanti = risposte_evento.filter(
+ì  const numPartecipanti = risposte_evento.filter(
     (r) => r.status == "accepted",
   ).length;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

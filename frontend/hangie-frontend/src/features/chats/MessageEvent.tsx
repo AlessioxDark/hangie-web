@@ -21,7 +21,6 @@ import { useScreen } from "@/contexts/ScreenContext";
 import { useSocket } from "@/contexts/SocketContext";
 const MessageEvent = ({ event_details, group_id }) => {
   const { openModal } = useModal();
-  const { setMobileView } = useMobileLayout();
   const { session } = useAuth();
   const location = useLocation();
   const { currentScreen } = useScreen();

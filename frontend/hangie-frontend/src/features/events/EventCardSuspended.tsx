@@ -122,7 +122,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
     return `${currentScreen !== "xs" ? "Scade tra " : ""}${parti.slice(0, 2).join(" e ")}`; // Mostra solo le due unità più grandi
   };
   const { openModal } = useModal();
-  const { setMobileView } = useMobileLayout();
   const navigate = useNavigate();
   const { handleEventDecision } = useChat();
   const { currentSocket } = useSocket();

@@ -20,7 +20,6 @@ const GroupDetails = () => {
 
   const { currentGroupData, currentGroup, setCurrentGroupData, setGroupsData } =
     useChat();
-  const { setMobileView } = useMobileLayout();
   const navigate = useNavigate();
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const { executeApiCall } = useApi();
@@ -251,7 +250,6 @@ const GroupDetails = () => {
                 <button
                   onClick={() => {
                     console.log("lista aggiornata", currentGroupData);
-                    // setMobileView("chat");
                     navigate(-1);
                   }}
                   className="w-7 h-7"

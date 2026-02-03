@@ -43,7 +43,6 @@ const EventCard = ({ event }) => {
 
   const { openModal } = useModal();
   const { currentScreen } = useScreen();
-  const { setMobileView } = useMobileLayout();
   const { setCurrentEventData } = useChat();
   const location = useLocation();
   return (

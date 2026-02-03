@@ -153,8 +153,6 @@ export const ChatProvider = ({ children }) => {
           ...prev,
           [groupId]: [...mappedMessages],
         }));
-
-        setMobileView("chat");
       };
 
       executeApiCall(

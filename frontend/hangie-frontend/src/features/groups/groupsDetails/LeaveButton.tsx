@@ -5,16 +5,18 @@ import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useSocket } from "@/contexts/SocketContext";
 import { ApiCalls } from "@/services/api";
 import React from "react";
+import { useNavigate } from "react-router";
 
 const LeaveButton = () => {
   const { session } = useAuth();
-  const { setMobileView } = useMobileLayout();
   const { currentGroup, setCurrentGroup } = useChat();
   const { currentSocket } = useSocket();
   const { executeApiCall } = useApi();
+
+  const navigate = useNavigate();
   const handleLeaveGroup = async () => {
     const saveData = (data) => {
-      setMobileView("groups");
+      navigate("/chats");
       setCurrentGroup(null);
       currentSocket.emit("leave_group", currentGroup, session.user.id);
     };
