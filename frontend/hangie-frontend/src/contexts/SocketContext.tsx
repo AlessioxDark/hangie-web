@@ -575,7 +575,7 @@ export const SocketProvider = ({ children }) => {
         const category = status;
         console.log("la category è", category);
         const categoryEvents = prevEvents[category].map((event) => {
-          if (event.event_id == event_id) {
+          if (event?.event_id == event_id) {
             const newRisposte = [
               ...event.risposte_evento
                 .filter((e) => e.utenti.user_id !== sender_id)

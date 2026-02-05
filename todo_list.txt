@@ -1,5 +1,9 @@
 
 
+add participants deve avere aggiutna eventi come pending
+rendere possibile votare eventi dopo aggiunta a gruppo tramite socket
+rimovere elementi quando abbamdoni o rimuovi partecipanti
+
 fare eliminazione e gestione eventi
 rifare gestione view del mobile
 aggiungere resonsive
