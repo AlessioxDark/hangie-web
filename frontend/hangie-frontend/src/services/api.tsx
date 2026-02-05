@@ -38,6 +38,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleRemoveParticipant: async (token, groupId, dataToSend) => {
+    console.log("remove participant fetch");
     const res = await fetch(
       `${BASE_URL}/groups/remove/participants/${groupId}`,
       {

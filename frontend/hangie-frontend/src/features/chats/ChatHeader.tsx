@@ -40,6 +40,7 @@ const ChatHeader = () => {
           {displayImage ? (
             <img
               src={displayImage}
+              loading="eager"
               className="w-10 h-10 2xl:w-16 2xl:h-16 rounded-full"
               alt=""
             />

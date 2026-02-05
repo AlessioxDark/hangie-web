@@ -284,11 +284,19 @@ const getOrCreateLuogo = async (realBody) => {
     .maybeSingle(); // Più pulito di .single() se può non esistere
   if (error) throw error;
   if (luogo) return luogo.luogo_id;
-
+  console.log(realBody);
+  const { cap, indirizzo, citta } = realBody;
   const { data: nuovoLuogo, error: insertError } = await supabase
     .from("luoghi")
     .insert([
-      { ...realBody, nome: realBody.nome_luogo, latitudine, longitudine },
+      {
+        cap,
+        indirizzo,
+        citta,
+        nome: realBody.nome_luogo,
+        latitudine,
+        longitudine,
+      },
     ])
     .select("luogo_id")
     .single();

@@ -52,16 +52,11 @@ const AppRouter = () => {
           path="/chats"
           element={<ResponsiveLayoutWrapper layoutType="chat" />}
         >
-          {/* 1. Cosa vedi appena entri in /chats? */}
-          {/* Su Desktop l'Outlet sarà vuoto (o un messaggio "Seleziona chat") */}
-          {/* Su Mobile l'Outlet mostrerà la lista */}
           <Route index element={<ChatsSidebar />} />
 
-          {/* 2. Rotta per la conversazione: /chats/123 */}
           <Route path=":groupId" element={<Chats />} />
           <Route path=":groupId/details" element={<GroupDetails />} />
 
-          {/* 3. Rotta per gli eventi: /chats/123/events */}
           <Route path=":groupId/events" element={<ChatsEvents />} />
         </Route>
         <Route

@@ -7,7 +7,6 @@ import { useModal } from "@/contexts/ModalContext";
 import { useSocket } from "@/contexts/SocketContext";
 import { ApiCalls } from "@/services/api";
 import { Plus } from "lucide-react";
-import React from "react";
 
 const ParticipantsSection = ({
   handleParticipantsAdd,
@@ -39,16 +38,22 @@ const ParticipantsSection = ({
     const saveData = (data) => {
       currentSocket.emit("remove_participant", currentGroup, partecipante);
     };
+    console.log("ora la chiamo");
 
     executeApiCall(
       "remove_participant",
-      () => {
-        return () => {
-          ApiCalls.editGroupField(session.access_token, currentGroup, {
-            user_id: partecipante.user_id,
-          });
-        };
-      },
+      () =>
+        ApiCalls.handleRemoveParticipant(session.access_token, currentGroup, {
+          user_id: partecipante.user_id,
+        }),
+      // () => {
+      //   return () => {
+      //     console.log("sto rimuovendo participant");
+      //     ApiCalls.handleRemoveParticipant(session.access_token, currentGroup, {
+      //       user_id: partecipante.user_id,
+      //     });
+      //   };
+      // },
       saveData,
     );
   };

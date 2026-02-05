@@ -90,6 +90,7 @@ const getGroup = async (req) => {
       )
       .in("event_id", eventIds);
     console.log("gli eventsDetails", eventsDetails);
+    console.log("gli eventsDetails risposte", eventsDetails[0].risposte_evento);
     const newEventsDetails = eventsDetails.map((e) => {
       const risposta = e.risposte_evento.find((r) => r.user_id == user.id);
       return { ...e, status: risposta.status };
@@ -432,26 +433,68 @@ const addParticipants = async (req) => {
         role: "member",
       };
     });
-    const { data, error } = await supabase
+    const { error: participantInsertError } = await supabase
       .from("partecipanti_gruppo")
       .insert(participantsInsert);
-    if (error) throw error;
-    return { data, error: null };
+    if (participantInsertError) throw participantInsertError;
+
+    const { data: groupEvents, error: groupEventsError } = await supabase
+      .from("eventi_gruppo")
+      .select("event_id")
+      .eq("group_id", group_id);
+    if (groupEventsError) throw groupEvents;
+
+    const groupEventsIds = groupEvents.map((e) => e.event_id);
+    let finaleventResponses = [];
+    groupEvents.forEach((e) => {
+      participantsIds.forEach((p) => {
+        finaleventResponses.push({
+          event_id: e.event_id,
+          user_id: p.user_id,
+          status: "pending",
+        });
+      });
+    });
+
+    const { data: groupEventsData, error: groupEventsDataError } =
+      await supabase
+        .from("risposte_eventi")
+        .insert(finaleventResponses)
+        .in("event_id", groupEventsIds)
+        .select("*");
+    if (groupEventsDataError) throw groupEventsDataError;
+
+    return { data: { groupEventsData, finaleventResponses }, error: null };
   } catch (err) {
     return { error: err, data: null };
   }
 };
 const removeParticipant = async (req) => {
   try {
+    console.log("tolto p");
+
     const { group_id } = req.params;
     const { user_id } = req.body;
-    const { data, error } = await supabase
+    const { error: participantError } = await supabase
       .from("partecipanti_gruppo")
       .delete()
       .eq("group_id", group_id)
       .eq("partecipante_id", user_id);
-    if (error) throw error;
-    return { data, error: null };
+    if (participantError) throw participantError;
+    const { data: rowsToDelete, error: ErrorRowsDelete } = await supabase
+      .from("risposte_eventi")
+      .select("response_id,eventi(group_id)")
+      .eq("user_id", user_id);
+    if (ErrorRowsDelete) throw ErrorRowsDelete;
+    const newRowsToDelete = rowsToDelete
+      .filter((r) => r.eventi.group_id == group_id)
+      .map((r) => r.response_id);
+    const { error: eventsError } = await supabase
+      .from("risposte_eventi")
+      .delete()
+      .in("response_id", newRowsToDelete);
+    if (eventsError) throw eventsError;
+    return { data: {}, error: null };
   } catch (err) {
     return { error: err, data: null };
   }

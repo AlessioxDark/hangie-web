@@ -221,7 +221,7 @@ export const SocketProvider = ({ children }) => {
       });
       if (currentGroupData.group_id == data.group_id) {
         if (isMe) {
-          setMobileView("groups");
+          navigate(-1);
           setCurrentGroup(null);
           return;
         }
@@ -230,8 +230,30 @@ export const SocketProvider = ({ children }) => {
             (p) =>
               (p.partecipante_id || p.user_id) !== data.participant.user_id, // Verifica se la chiave è user_id o partecipante_id
           );
+
           return { ...prev, partecipanti_gruppo: newParticipants };
         });
+        if (!isMe) {
+          setCurrentChatData((prevChat) => {
+            const newMessaggi = prevChat.messaggi.map((m) => {
+              if (m.type == "event") {
+                console.log(m, m.risposte_Evento);
+                const newRisposte = m.event_details.risposte_evento.filter(
+                  (r) => r.utenti.user_id !== data.participant.user_id,
+                );
+                return {
+                  ...m,
+                  event_details: {
+                    ...m.event_Details,
+                    risposte_evento: newRisposte,
+                  },
+                };
+              }
+              return m;
+            });
+            return { ...prevChat, messaggi: newMessaggi };
+          });
+        }
       }
     });
     socket.on("added_participants", (data) => {
