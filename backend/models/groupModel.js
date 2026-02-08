@@ -437,34 +437,50 @@ const addParticipants = async (req) => {
       .from("partecipanti_gruppo")
       .insert(participantsInsert);
     if (participantInsertError) throw participantInsertError;
-
-    const { data: groupEvents, error: groupEventsError } = await supabase
-      .from("eventi_gruppo")
+    const { data: events, error: eventsError } = await supabase
+      .from("eventi")
       .select("event_id")
       .eq("group_id", group_id);
-    if (groupEventsError) throw groupEvents;
 
-    const groupEventsIds = groupEvents.map((e) => e.event_id);
-    let finaleventResponses = [];
-    groupEvents.forEach((e) => {
-      participantsIds.forEach((p) => {
-        finaleventResponses.push({
-          event_id: e.event_id,
-          user_id: p.user_id,
-          status: "pending",
-        });
-      });
+    if (eventsError) throw eventsError;
+
+    // 2. Crea le righe di inserimento partendo dagli EVENTI, non dalle risposte vecchie
+    const insertData = events.flatMap((e) => {
+      return participantsIds.map((p) => ({
+        event_id: e.event_id,
+        user_id: p.user_id,
+        status: "pending",
+        is_creator: false,
+      }));
     });
 
-    const { data: groupEventsData, error: groupEventsDataError } =
-      await supabase
-        .from("risposte_eventi")
-        .insert(finaleventResponses)
-        .in("event_id", groupEventsIds)
-        .select("*");
-    if (groupEventsDataError) throw groupEventsDataError;
+    console.log("aggiungo insertdata", insertData);
 
-    return { data: { groupEventsData, finaleventResponses }, error: null };
+    const { data: groupEventsData, error: insertError } = await supabase
+      .from("risposte_eventi")
+      .insert(insertData).select(`
+    event_id,
+    status,
+    is_creator,
+    created_at,
+    user_id,
+    utente:utenti(*) 
+  `); // Fondamentale per avere i nomi degli utenti nel frontend
+    if (insertError) throw insertError;
+
+    const finalEventsResponses = groupEventsData.reduce((acc, response) => {
+      if (!acc[response.event_id]) acc[response.event_id] = [];
+
+      acc[response.event_id].push({
+        utenti: { user_id: response.user_id },
+        status: response.status,
+        is_creator: response.is_creator,
+        created_at: response.created_at,
+      });
+      return acc;
+    }, {});
+    console.log("le final responses da model", finalEventsResponses);
+    return { data: { groupEventsData, finalEventsResponses }, error: null };
   } catch (err) {
     return { error: err, data: null };
   }

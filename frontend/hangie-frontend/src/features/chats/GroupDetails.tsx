@@ -80,6 +80,7 @@ const GroupDetails = () => {
         "add_participants",
         currentGroup,
         session.access_token,
+        data.finalEventsResponses,
       );
     };
 

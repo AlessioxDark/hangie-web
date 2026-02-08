@@ -1,5 +1,5 @@
 
-
+add participants nel socket manca modifica rispsote_evento prendere eventi con messaggi perchè serve modifica anche a messaggi
 add participants deve avere aggiutna eventi come pending
 rendere possibile votare eventi dopo aggiunta a gruppo tramite socket
 rimovere elementi quando abbamdoni o rimuovi partecipanti

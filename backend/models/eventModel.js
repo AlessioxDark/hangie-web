@@ -51,7 +51,6 @@ const getCoords = async ({ indirizzo, citta, cap }) => {
 const getAll = async (req) => {
   try {
     const EVENTSINPAGE = 12;
-
     const { offset } = req.body;
     const authHeader = req.headers.authorization;
     if (!authHeader) throw new Error({ message: "Token mancante" });
@@ -68,17 +67,22 @@ const getAll = async (req) => {
       )
       .range(offset, offset + EVENTSINPAGE - 1)
       .eq("user_id", user.id);
-
+    if (eventsList.length == 0) return { data: [], error: null };
     const eventIds = eventsList.map((e) => e.event_id);
     const groupIds = eventsList.map((e) => e.eventi.gruppi.group_id);
     if (error) throw error;
     const { data: risposte, error: risposteError } = await supabase
       .from("risposte_eventi")
-      .select("user_id,is_creator,status,eventi(*,gruppi(*))")
+      .select(
+        "user_id,is_creator,status, eventi!inner(event_id,gruppi(group_id))",
+      )
       .eq("status", "accepted")
       .in("eventi.event_id", eventIds)
       .in("eventi.gruppi.group_id", groupIds);
+    // risolvere bug ricerca eventi su incognito
     if (risposteError) throw risposteError;
+
+    console.log("risposte", risposte, eventsList);
     const risposteMap = risposte.reduce((acc, curr) => {
       if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
       acc[curr.eventi.event_id].push({
@@ -95,6 +99,7 @@ const getAll = async (req) => {
         .select("status,utente:utenti(*),eventi(*),created_at,is_creator")
         .in("eventi.event_id", eventIds);
 
+    console.log(risposte);
     const eventParticipantsMap = eventParticipants.reduce((acc, curr) => {
       if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
       acc[curr.eventi.event_id].push({
@@ -406,12 +411,7 @@ const newEvent = async (req) => {
           eventi: {
             ...messageData.eventi,
             event_imgs: [],
-            risposte_evento: [
-              ...newRisposte,
-              // rejected: newRisposte.filter((r) => r.status === "rejected"),
-              // accepted: newRisposte.filter((r) => r.status === "accepted"),
-              // pending: newRisposte.filter((r) => r.status === "pending"),
-            ],
+            risposte_evento: [...newRisposte],
           },
         },
       },

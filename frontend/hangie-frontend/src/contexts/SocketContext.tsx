@@ -234,17 +234,18 @@ export const SocketProvider = ({ children }) => {
           return { ...prev, partecipanti_gruppo: newParticipants };
         });
         if (!isMe) {
+          console.log("non sono io");
           setCurrentChatData((prevChat) => {
             const newMessaggi = prevChat.messaggi.map((m) => {
               if (m.type == "event") {
-                console.log(m, m.risposte_Evento);
+                console.log(m, m.risposte_evento);
                 const newRisposte = m.event_details.risposte_evento.filter(
                   (r) => r.utenti.user_id !== data.participant.user_id,
                 );
                 return {
                   ...m,
                   event_details: {
-                    ...m.event_Details,
+                    ...m.event_details,
                     risposte_evento: newRisposte,
                   },
                 };
@@ -257,6 +258,7 @@ export const SocketProvider = ({ children }) => {
       }
     });
     socket.on("added_participants", (data) => {
+      console.log("data dal socket", data);
       setGroupsData((prev) => {
         const groupExists = prev.find((g) => g.group_id === data.group_id);
         // Usiamo MAP per creare un nuovo array, non forEach
@@ -279,6 +281,52 @@ export const SocketProvider = ({ children }) => {
           return {
             ...prev,
             partecipanti_gruppo: data.newParticipants,
+          };
+        });
+
+        setCurrentChatData((prev) => {
+          const newMessaggi = prev.messaggi.map((m) => {
+            if (m.type == "event") {
+              const newRisposte = [
+                ...m.event_details.risposte_evento,
+                ...data.eventsResponses[m.event_id],
+              ];
+              return {
+                ...m,
+                event_details: {
+                  ...m.event_details,
+                  risposte_evento: newRisposte,
+                },
+              };
+            }
+            return m;
+          });
+          return { ...prev, messaggi: newMessaggi };
+        });
+      }
+
+      if (data.eventsDetails) {
+        console.log("c'è eventdetails");
+
+        // "L'OPPOSTO" DEL REDUCE: Trasformiamo l'oggetto in un array piatto
+        // data.eventsDetails è { "id1": [event], "id2": [event] }
+        const flatEvents = Object.values(data.eventsDetails).flat();
+
+        setHomeEventsData((prevData) => {
+          // Evitiamo duplicati: filtriamo gli eventi che sono già presenti in qualche categoria
+          const existingIds = new Set([
+            ...prevData.accepted.map((e) => e.event_id),
+            ...prevData.pending.map((e) => e.event_id),
+            ...prevData.rejected.map((e) => e.event_id),
+          ]);
+
+          const newPendingEvents = flatEvents.filter(
+            (e) => !existingIds.has(e.event_id),
+          );
+
+          return {
+            ...prevData,
+            pending: [...newPendingEvents, ...prevData.pending],
           };
         });
       }

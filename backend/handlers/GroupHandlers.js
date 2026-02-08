@@ -5,23 +5,26 @@ const groupHandlers = (io, socket) => {
     console.log("room_joinata");
     socket.join(room_id);
   });
-  socket.on("add_participants", async (groupId, token) => {
-    try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser(token);
+  socket.on(
+    "add_participants",
+    async (groupId, token, finalEventsResponses) => {
+      try {
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser(token);
+        if (userError) throw userError;
+        const { data: allParticipants, error: participantsError } =
+          await supabase
+            .from("partecipanti_gruppo")
+            .select("*,utenti(*),user_id:partecipante_id")
+            .eq("group_id", groupId);
+        if (participantsError) throw participantsError;
 
-      const { data: allParticipants, error: participantsError } = await supabase
-        .from("partecipanti_gruppo")
-        .select("*,utenti(*),user_id:partecipante_id")
-        .eq("group_id", groupId);
-      if (participantsError) throw participantsError;
-
-      const { data: groupInfo, error: groupError } = await supabase
-        .from("partecipanti_gruppo")
-        .select(
-          `
+        const { data: groupInfo, error: groupError } = await supabase
+          .from("partecipanti_gruppo")
+          .select(
+            `
       gruppi(
       *,
       messaggi(*),
@@ -31,35 +34,128 @@ const groupHandlers = (io, socket) => {
     )
   )  
       `,
-        )
-        .eq("group_id", groupId)
-        .eq("partecipante_id", user.id)
-        .single();
-      if (groupError) throw groupError;
-      console.log("i dati del gruppo", groupInfo);
-      let ultimoMessaggio = null;
-      groupInfo?.gruppi.messaggi.forEach((messaggio) => {
-        if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
-          ultimoMessaggio = messaggio;
-        }
-      });
-      const { gruppi } = groupInfo;
-      const formattedData = {
-        ...gruppi,
-        ultimoMessaggio,
-      };
-
-      allParticipants.forEach((p) => {
-        io.to(p.user_id).emit("added_participants", {
-          group_id: groupId,
-          newParticipants: allParticipants,
-          groupInfo: formattedData, // <--- FONDAMENTALE PER IL NUOVO UTENTE
+          )
+          .eq("group_id", groupId)
+          .eq("partecipante_id", user.id)
+          .single();
+        if (groupError) throw groupError;
+        console.log("i dati del gruppo", groupInfo);
+        let ultimoMessaggio = null;
+        groupInfo?.gruppi.messaggi.forEach((messaggio) => {
+          if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
+            ultimoMessaggio = messaggio;
+          }
         });
-      });
-    } catch (err) {
-      console.log("c'è un err", err);
-    }
-  });
+        const { gruppi } = groupInfo;
+        const formattedData = {
+          ...gruppi,
+          ultimoMessaggio,
+        };
+        const { data: groupEvents, error: groupsError } = await supabase
+          .from("eventi_gruppo")
+          .select("*")
+          .eq("group_id", groupId);
+
+        console.log("groupEvnts", groupEvents, { groupId, user_id: user.id });
+        if (groupsError) {
+          console.log("groupsError", groupsError);
+          throw groupsError;
+        }
+        const groupEventsIds = groupEvents.map((e) => e.event_id);
+        console.log(groupEventsIds);
+        const { data: eventsDetails, error: eventsError } = await supabase
+          .from("risposte_eventi")
+          .select(
+            `
+    status,
+    created_at,
+    is_creator,
+    utente:utenti(*),
+    eventi!inner(
+      *,
+      scadenza:data_scadenza,
+      luogo:luoghi(*),
+      utente:utenti(nome, user_id),
+      gruppo:gruppi(*),
+      cover_img,
+      created_by,
+      event_imgs(img_url)
+    )
+  `,
+          )
+          .in("event_id", groupEventsIds);
+        if (eventsError) {
+          console.log("c'è un eventsErro", eventsError);
+          throw eventsError;
+        }
+        const reducedEventsData = eventsDetails.reduce((acc, response) => {
+          // 1. L'evento è dentro response.eventi
+          const event = response.eventi;
+          const eventId = event.event_id;
+
+          // 2. Se è la prima volta che vediamo questo evento, creiamo l'oggetto base
+          if (!acc[eventId]) {
+            acc[eventId] = {
+              ...event,
+              risposte_evento: [], // Inizializziamo l'array delle risposte
+              status: response.status, // Lo status dell'utente attuale
+            };
+          }
+
+          // 3. Aggiungiamo la risposta corrente all'array dell'evento
+          acc[eventId].risposte_evento.push({
+            utenti: response.utente,
+            user_id: response.utente.user_id,
+            status: response.status,
+            created_at: response.created_at,
+            is_creator: response.is_creator,
+          });
+
+          return acc;
+        }, {});
+        // const reducedEventsData = eventsDetails.reduce((acc, response) => {
+        //   // 1. L'evento è dentro response.eventi
+        //   const event = response.eventi;
+        //   const eventId = event.event_id;
+
+        //   // 2. Se è la prima volta che vediamo questo evento, creiamo l'oggetto base
+        //   if (!acc[eventId]) {
+        //     acc[eventId] = {
+        //       ...event,
+        //       risposte_evento: [], // Inizializziamo l'array delle risposte
+        //       user_status: response.status, // Lo status dell'utente attuale
+        //     };
+        //   }
+
+        //   // 3. Aggiungiamo la risposta corrente all'array dell'evento
+        //   acc[eventId].risposte_evento.push({
+        //     utenti: response.utente,
+        //     user_id: response.utente.user_id,
+        //     status: response.status,
+        //     created_at: response.created_at,
+        //     is_creator: response.is_creator,
+        //   });
+
+        //   return acc;
+        // }, {});
+        console.log("le final responses", finalEventsResponses);
+        const finalEventsArray = Object.values(reducedEventsData);
+        allParticipants.forEach((p) => {
+          io.to(p.user_id).emit("added_participants", {
+            group_id: groupId,
+            newParticipants: allParticipants,
+            groupInfo: formattedData, // <--- FONDAMENTALE PER IL NUOVO UTENTE
+            eventsDetails: finalEventsArray,
+            eventsResponses: finalEventsResponses,
+            // eventi:
+            // finalEventResponses: finaleventResponses,
+          });
+        });
+      } catch (err) {
+        console.log("c'è un err", err);
+      }
+    },
+  );
   socket.on("edit_field", async (groupId, field, fieldValue) => {
     console.log("ricevuto add participants server.js");
     // manca creatore gruppo in participants
@@ -192,10 +288,19 @@ const groupHandlers = (io, socket) => {
         .from("partecipanti_gruppo")
         .select("*,user_id:partecipante_id")
         .eq("group_id", groupId);
+      if (participantsError) throw participantsError;
+      const { data: groupEvents, error: groupEventsError } = await supabase
+        .from("eventi_gruppo")
+        .select("event_id")
+        .eq("group_id", groupId);
+      if (groupEventsError) throw groupEventsError;
+
+      const groupEventsIds = groupEvents.map((e) => e.event_id);
       participants.forEach((p) => {
         io.to(p.user_id).emit("removed_participant", {
           group_id: groupId,
           participant,
+          groupEventsIds,
         });
       });
       if (participants.some((p) => p.user_id !== participant.user_id)) {
