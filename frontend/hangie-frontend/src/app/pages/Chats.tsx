@@ -7,9 +7,11 @@ import ChatsEvents from "@/features/chats/ChatsEvents.js";
 import ChatHeader from "@/features/chats/ChatHeader.js";
 import ChatView from "@/features/chats/ChatView.js";
 import RenderEmptyState from "@/features/utils/RenderEmptyState";
+import { useParams } from "react-router";
 const Chats = () => {
-  const { currentGroupData, currentChatData, currentGroup } = useChat();
-  const messaggi = currentChatData?.messaggi;
+  const { currentGroupData, currentChatData, currentGroup, setCurrentGroup } =
+    useChat();
+  const { groupId } = useParams();
   const { currentSocket } = useSocket();
   const [chatInput, setChatInput] = useState<string>("");
   const [showEvents, setShowEvents] = useState(false);
@@ -39,13 +41,22 @@ const Chats = () => {
     setChatInput("");
     if (chatInputRef.current) chatInputRef.current.textContent = "";
   };
+  // useEffect(() => {
+  //   console.log("faccio la fetchchat nuova", currentChatData);
+  //   if (!currentChatData) {
+  //     setCurrentGroup(groupId);
+  //   }
+  // }, []);
+
+  const messaggi = currentChatData?.messaggi;
+
   useEffect(() => {
     if (messaggi) {
       console.log("invio bulk ");
 
       const messaggiDaLeggere = messaggi
-        .filter((m) => !m.isRead && m.user_id !== session?.user?.id)
-        .map((m) => m.message_id);
+        ?.filter((m) => !m.isRead && m.user_id !== session?.user?.id)
+        ?.map((m) => m.message_id);
 
       if (currentSocket && messaggiDaLeggere?.length > 0) {
         // messaggiDaLeggere.forEach((mess) => {
@@ -65,7 +76,13 @@ const Chats = () => {
         );
       }
     }
-  }, [messaggi.length, currentSocket, session.user.id, currentGroup, messaggi]);
+  }, [
+    messaggi?.length,
+    currentSocket,
+    session.user.id,
+    currentGroup,
+    messaggi,
+  ]);
 
   if (!currentGroup) {
     return <RenderEmptyState type={"chat"} />;

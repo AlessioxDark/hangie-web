@@ -9,7 +9,7 @@ const ChatView = ({ messaggi }) => {
   });
   console.log(
     "messaggi arrivati",
-    messaggi.filter((m) => m.type == "event"),
+    messaggi?.filter((m) => m.type == "event"),
   );
   return (
     <div className="flex-1 overflow-y-auto  relative">

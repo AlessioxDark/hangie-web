@@ -11,7 +11,7 @@ import { useScreen } from "./ScreenContext.js";
 import { type Message, type UUID, type GroupData } from "../types/chat.tsx";
 import { ApiCalls } from "@/services/api.tsx";
 import { useApi } from "./ApiContext.tsx";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useSocket } from "./SocketContext.tsx";
 
 export const ChatContext = createContext({
@@ -77,6 +77,7 @@ export const ChatProvider = ({ children }) => {
   const { setMobileView } = useMobileLayout();
   const { currentScreen } = useScreen();
   const { session } = useAuth();
+  const { groupId } = useParams();
 
   const fetchEvents = useCallback(async (): Promise<void> => {
     const saveData = (data) => {
@@ -110,19 +111,23 @@ export const ChatProvider = ({ children }) => {
       saveData,
     );
   }, [homeOffset, session, executeApiCall]);
-  const fetchGroupEvents = useCallback(async () => {
-    const saveData = (data) => {
-      console.log("ecco i gruppi", data);
-      setGroupEventsData(data);
-    };
-    await executeApiCall(
-      "events",
-      () => {
-        return ApiCalls.fetchGroupEvents(currentGroup, session.access_token);
-      },
-      saveData,
-    );
-  }, [session, executeApiCall, currentGroup]);
+  const fetchGroupEvents = useCallback(
+    async (groupId) => {
+      const idToUse = groupId || currentGroup;
+      const saveData = (data) => {
+        console.log("ecco i gruppi", data);
+        setGroupEventsData(data);
+      };
+      executeApiCall(
+        "events",
+        () => {
+          return ApiCalls.fetchGroupEvents(idToUse, session.access_token);
+        },
+        saveData,
+      );
+    },
+    [session, executeApiCall, currentGroup],
+  );
   const fetchGroups = useCallback(async () => {
     const saveData = (data) => {
       setGroupsData(data);
@@ -196,12 +201,61 @@ export const ChatProvider = ({ children }) => {
   }, [homeOffset, session, fetchEvents]);
 
   useEffect(() => {
+    console.log("eccc", groupId, location.pathname);
     if (currentGroup) {
       fetchGroupEvents();
+      console.log("eccc");
       fetchChat(currentGroup);
     }
-  }, [currentGroup, fetchChat, fetchGroupEvents]);
+    const paramsGroupId = location.pathname.split("/")[2];
+    console.log(paramsGroupId);
+    if (paramsGroupId) {
+      loadAll(paramsGroupId);
+      console.log("Sincronizzazione currentGroupData effettuata", groupsData);
+      if (groupsData && groupsData.length > 0 && currentGroup) {
+        const foundGroup = groupsData.find((g) => g.group_id === currentGroup);
+        if (foundGroup) {
+          console.log("Sincronizzazione currentGroupData effettuata");
+          setCurrentGroupData(foundGroup);
+        }
+      }
+    }
+  }, [
+    currentGroup,
+    fetchChat,
+    fetchGroupEvents,
+    location.pathname,
+    // groupsData,
+  ]);
 
+  const loadAll = useCallback(
+    (id) => {
+      setCurrentGroup(id);
+      fetchGroups(); // Aggiorna la lista gruppi
+      fetchGroupEvents(id); // Carica eventi con ID fresco
+      fetchChat(id); // Carica chat con ID fresco
+    },
+    [fetchGroups, fetchGroupEvents, fetchChat],
+  );
+
+  useEffect(() => {
+    const paramsGroupId = location.pathname.split("/")[2];
+
+    // Se l'ID nell'URL è diverso da quello in stato, carichiamo tutto
+    if (paramsGroupId && paramsGroupId !== currentGroup) {
+      loadAll(paramsGroupId);
+    }
+  }, [location.pathname, currentGroup, loadAll]);
+
+  // EFFECT 2: Sincronizzazione Dati Gruppo (Quando la lista gruppi arriva dal server)
+  useEffect(() => {
+    if (groupsData?.length > 0 && currentGroup) {
+      const foundGroup = groupsData.find((g) => g.group_id === currentGroup);
+      if (foundGroup) {
+        setCurrentGroupData(foundGroup);
+      }
+    }
+  }, [groupsData, currentGroup]);
   useEffect(() => {
     const isLargeScreen = currentScreen && currentScreen !== "xs";
     if (

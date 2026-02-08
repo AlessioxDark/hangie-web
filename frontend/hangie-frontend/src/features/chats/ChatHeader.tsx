@@ -10,9 +10,9 @@ import { useNavigate } from "react-router";
 const ChatHeader = () => {
   const { currentScreen } = useScreen();
   const { currentGroupData, setCurrentGroup } = useChat();
-  const displayImage = currentGroupData.group_cover_img
-    ? `${currentGroupData.group_cover_img}?v=${
-        currentGroupData.updated_at || Date.now()
+  const displayImage = currentGroupData?.group_cover_img
+    ? `${currentGroupData?.group_cover_img}?v=${
+        currentGroupData?.updated_at || Date.now()
       }`
     : null;
 
@@ -34,7 +34,7 @@ const ChatHeader = () => {
         <div
           className="flex flex-row items-center gap-3 2xl:gap-6  flex-grow"
           onClick={() => {
-            navigate(`/chats/${currentGroupData.group_id}/details`);
+            navigate(`/chats/${currentGroupData?.group_id}/details`);
           }}
         >
           {displayImage ? (
