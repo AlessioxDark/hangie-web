@@ -256,6 +256,10 @@ export const SocketProvider = ({ children }) => {
           });
         }
       }
+
+      // if(isMe){
+
+      // }
     });
     socket.on("added_participants", (data) => {
       console.log("data dal socket", data);

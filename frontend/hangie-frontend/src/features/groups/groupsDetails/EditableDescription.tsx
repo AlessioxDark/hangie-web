@@ -26,7 +26,7 @@ const EditableDescription = ({
                 setCurrentEditingField("descrizione");
               } else {
                 if (
-                  localGroupData.descrizione !== currentGroupData.descrizione
+                  localGroupData?.descrizione !== currentGroupData?.descrizione
                 ) {
                   handleFinishEdit();
                 } else {
@@ -42,7 +42,7 @@ const EditableDescription = ({
       {currentEditingField == "descrizione" ? (
         <div className="flex flex-col gap-2">
           <textarea
-            value={localGroupData.descrizione}
+            value={localGroupData?.descrizione}
             className="text-text-1 font-body text-sm leading-relaxed w-full p-1.5 border-2 border-primary rounded-lg focus:outline-none resize-none "
             onChange={(e) =>
               setLocalGroupData((prevData) => {
@@ -61,9 +61,9 @@ const EditableDescription = ({
       ) : (
         <span className="text-text-1 font-body text-sm leading-relaxed">
           {isExpanded
-            ? localGroupData.descrizione
-            : `${localGroupData.descrizione.slice(0, 120)}`}
-          {localGroupData.descrizione.length > 120 && (
+            ? localGroupData?.descrizione
+            : `${localGroupData.descrizione?.slice(0, 120)}`}
+          {localGroupData.descrizione?.length > 120 && (
             <span
               className="text-primary font-semibold text-sm hover:underline"
               onClick={() => {

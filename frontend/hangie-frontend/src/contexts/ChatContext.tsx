@@ -77,7 +77,6 @@ export const ChatProvider = ({ children }) => {
   const { setMobileView } = useMobileLayout();
   const { currentScreen } = useScreen();
   const { session } = useAuth();
-  const { groupId } = useParams();
 
   const fetchEvents = useCallback(async (): Promise<void> => {
     const saveData = (data) => {
@@ -132,7 +131,8 @@ export const ChatProvider = ({ children }) => {
     const saveData = (data) => {
       setGroupsData(data);
     };
-    await executeApiCall(
+    console.log("come va gruppi?");
+    executeApiCall(
       "groups",
       () => {
         return ApiCalls.fetchGroups(session.access_token);
@@ -200,34 +200,6 @@ export const ChatProvider = ({ children }) => {
     }
   }, [homeOffset, session, fetchEvents]);
 
-  useEffect(() => {
-    console.log("eccc", groupId, location.pathname);
-    if (currentGroup) {
-      fetchGroupEvents();
-      console.log("eccc");
-      fetchChat(currentGroup);
-    }
-    const paramsGroupId = location.pathname.split("/")[2];
-    console.log(paramsGroupId);
-    if (paramsGroupId) {
-      loadAll(paramsGroupId);
-      console.log("Sincronizzazione currentGroupData effettuata", groupsData);
-      if (groupsData && groupsData.length > 0 && currentGroup) {
-        const foundGroup = groupsData.find((g) => g.group_id === currentGroup);
-        if (foundGroup) {
-          console.log("Sincronizzazione currentGroupData effettuata");
-          setCurrentGroupData(foundGroup);
-        }
-      }
-    }
-  }, [
-    currentGroup,
-    fetchChat,
-    fetchGroupEvents,
-    location.pathname,
-    // groupsData,
-  ]);
-
   const loadAll = useCallback(
     (id) => {
       setCurrentGroup(id);
@@ -239,15 +211,22 @@ export const ChatProvider = ({ children }) => {
   );
 
   useEffect(() => {
-    const paramsGroupId = location.pathname.split("/")[2];
-
+    const match = location.pathname.match(/\/chats\/([^\/]+)/);
+    const paramsGroupId = match ? match[1] : null;
     // Se l'ID nell'URL è diverso da quello in stato, carichiamo tutto
-    if (paramsGroupId && paramsGroupId !== currentGroup) {
-      loadAll(paramsGroupId);
+    if (paramsGroupId) {
+      if (paramsGroupId !== currentGroup) {
+        loadAll(paramsGroupId);
+      }
     }
-  }, [location.pathname, currentGroup, loadAll]);
+  }, [
+    location.pathname,
+    currentGroup,
+    location.pathname,
+    groupsData,
+    groupEventsData,
+  ]);
 
-  // EFFECT 2: Sincronizzazione Dati Gruppo (Quando la lista gruppi arriva dal server)
   useEffect(() => {
     if (groupsData?.length > 0 && currentGroup) {
       const foundGroup = groupsData.find((g) => g.group_id === currentGroup);
@@ -274,6 +253,10 @@ export const ChatProvider = ({ children }) => {
       console.log("currentChatData è cambiato", currentChatData?.messaggi);
     }
   }, [currentChatData]);
+  if (!session) {
+    console.log("ChatProvider in attesa di sessione...");
+    return <div>mp</div>; // O uno spinner di caricamento
+  }
   return (
     <ChatContext.Provider
       value={{

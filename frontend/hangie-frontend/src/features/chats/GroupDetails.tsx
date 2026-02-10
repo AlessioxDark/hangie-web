@@ -33,10 +33,11 @@ const GroupDetails = () => {
   }, [currentGroupData, session.user.id]);
 
   const { currentSocket } = useSocket();
+  console.log(currentGroupData);
   const [localGroupData, setLocalGroupData] = useState({
-    group_cover_img: currentGroupData.group_cover_img,
-    descrizione: currentGroupData.descrizione,
-    nome: currentGroupData.nome,
+    group_cover_img: currentGroupData?.group_cover_img,
+    descrizione: currentGroupData?.descrizione,
+    nome: currentGroupData?.nome,
   });
   const [currentEditingField, setCurrentEditingField] = useState(null);
   const [currentParticipants, setCurrentParticipants] = useState(() => {
@@ -59,7 +60,7 @@ const GroupDetails = () => {
   const handleSaveParticipants = async (updatedList) => {
     // 1. Troviamo chi è veramente nuovo (quelli in updatedList che non sono in currentGroupData)
     const newParticipants = updatedList.filter((participant) => {
-      return !currentGroupData.partecipanti_gruppo.some(
+      return !currentGroupData?.partecipanti_gruppo.some(
         (original) => original.utenti.user_id === participant.user_id,
       );
     });
@@ -99,11 +100,7 @@ const GroupDetails = () => {
   };
 
   useEffect(() => {
-    if (currentGroupData.partecipanti_gruppo) {
-      console.log(
-        "il nuovo partecipanti",
-        currentGroupData.partecipanti_gruppo,
-      );
+    if (currentGroupData?.partecipanti_gruppo) {
       setCurrentParticipants(
         currentGroupData?.partecipanti_gruppo?.map((partecipante) => {
           const { utenti, ...resto } = partecipante;
@@ -116,7 +113,7 @@ const GroupDetails = () => {
         }) || [],
       );
     }
-  }, [currentGroupData.partecipanti_gruppo]);
+  }, [currentGroupData?.partecipanti_gruppo]);
 
   useEffect(() => {
     if (currentGroupData) {
