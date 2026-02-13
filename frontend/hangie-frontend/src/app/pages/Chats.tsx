@@ -8,6 +8,7 @@ import ChatHeader from "@/features/chats/ChatHeader.js";
 import ChatView from "@/features/chats/ChatView.js";
 import RenderEmptyState from "@/features/utils/RenderEmptyState";
 import { useParams } from "react-router";
+import RenderLoadingState from "@/features/utils/RenderLoadingState";
 const Chats = () => {
   const { currentGroupData, currentChatData, currentGroup, setCurrentGroup } =
     useChat();
@@ -16,7 +17,7 @@ const Chats = () => {
   const [chatInput, setChatInput] = useState<string>("");
   const [showEvents, setShowEvents] = useState(false);
   const chatInputRef = useRef<HTMLInputElement>(null);
-  const { session } = useAuth();
+  const { session, isAuthLoading } = useAuth();
 
   console.log(currentGroupData);
   const sendMessage = async () => {
@@ -86,6 +87,10 @@ const Chats = () => {
 
   if (!currentGroup) {
     return <RenderEmptyState type={"chat"} />;
+  }
+  if (isAuthLoading) {
+    console.log("auth lo");
+    return <RenderLoadingState type={"chat"} />;
   }
 
   return (

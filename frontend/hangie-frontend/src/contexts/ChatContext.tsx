@@ -76,7 +76,7 @@ export const ChatProvider = ({ children }) => {
   const [currentEventData, setCurrentEventData] = useState({});
   const { setMobileView } = useMobileLayout();
   const { currentScreen } = useScreen();
-  const { session } = useAuth();
+  const { isAuthLoading, session } = useAuth();
 
   const fetchEvents = useCallback(async (): Promise<void> => {
     const saveData = (data) => {
@@ -142,7 +142,8 @@ export const ChatProvider = ({ children }) => {
   }, [session, executeApiCall]);
   const fetchChat = useCallback(
     async (groupId: UUID) => {
-      if (!groupId || !session) return;
+      console.log("carico chat", groupId, session);
+      if (!groupId || !session || isAuthLoading) return;
 
       const saveData = (groupData) => {
         const mappedMessages = groupData.messaggi.map((mess) => ({
@@ -168,7 +169,7 @@ export const ChatProvider = ({ children }) => {
         saveData,
       );
     },
-    [session, executeApiCall, setMobileView],
+    [session, executeApiCall],
   );
   const handleDeleteEvent = (eventId, saveData) => {
     executeApiCall(
@@ -202,29 +203,35 @@ export const ChatProvider = ({ children }) => {
 
   const loadAll = useCallback(
     (id) => {
+      if (!id || !session) return;
       setCurrentGroup(id);
       fetchGroups(); // Aggiorna la lista gruppi
       fetchGroupEvents(id); // Carica eventi con ID fresco
       fetchChat(id); // Carica chat con ID fresco
     },
-    [fetchGroups, fetchGroupEvents, fetchChat],
+    [fetchGroups, fetchGroupEvents, fetchChat, session],
   );
 
   useEffect(() => {
+    console.log("navigando");
     const match = location.pathname.match(/\/chats\/([^\/]+)/);
     const paramsGroupId = match ? match[1] : null;
+    console.log(paramsGroupId, currentGroup);
     // Se l'ID nell'URL è diverso da quello in stato, carichiamo tutto
     if (paramsGroupId) {
       if (paramsGroupId !== currentGroup) {
+        console.log("sono diversi load all");
         loadAll(paramsGroupId);
       }
     }
   }, [
     location.pathname,
     currentGroup,
-    location.pathname,
     groupsData,
     groupEventsData,
+    session,
+    loadAll,
+    isAuthLoading,
   ]);
 
   useEffect(() => {
@@ -248,15 +255,6 @@ export const ChatProvider = ({ children }) => {
     }
   }, [groupsData, currentGroup, currentScreen]);
 
-  useEffect(() => {
-    if (currentChatData) {
-      console.log("currentChatData è cambiato", currentChatData?.messaggi);
-    }
-  }, [currentChatData]);
-  if (!session) {
-    console.log("ChatProvider in attesa di sessione...");
-    return <div>mp</div>; // O uno spinner di caricamento
-  }
   return (
     <ChatContext.Provider
       value={{
@@ -267,7 +265,6 @@ export const ChatProvider = ({ children }) => {
         currentGroupData,
         setCurrentGroupData,
         groupsData,
-
         setGroupsData,
         fetchGroups,
         messagesMap,

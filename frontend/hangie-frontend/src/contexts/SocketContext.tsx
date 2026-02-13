@@ -287,7 +287,7 @@ export const SocketProvider = ({ children }) => {
             partecipanti_gruppo: data.newParticipants,
           };
         });
-
+        // MANCA CARICAMENTO DA ROUTE DI CURRENTCHATDATA E POI TESTIAMO TUTTO
         setCurrentChatData((prev) => {
           const newMessaggi = prev.messaggi.map((m) => {
             if (m.type == "event") {
