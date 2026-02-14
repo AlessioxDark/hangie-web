@@ -91,14 +91,11 @@ export const ChatProvider = ({ children }) => {
           new Map(mergePending.map((item) => [item.event_id, item])).values(),
         );
         console.log("il prev", prevData);
-        const mergeRejected = [...prevData.rejected, ...data.rejected];
-        const dedupRejected = Array.from(
-          new Map(mergeRejected.map((item) => [item.event_id, item])).values(),
-        );
+
         return {
           pending: dedupPending,
           accepted: dedupAccepted,
-          rejected: dedupRejected, // fai uguale se ti serve
+          rejected: prevData.rejected, // fai uguale se ti serve
         };
       });
     };

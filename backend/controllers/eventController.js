@@ -30,10 +30,6 @@ const getAllEvents = async (req, res) => {
       accepted: cleanData.filter((response) => {
         return response.status == "accepted";
       }),
-      rejected: cleanData.filter((response) => {
-        // ⬅️ Aggiungi 'refused' (o 'rejected' se usi quel termine)
-        return response.status == "rejected";
-      }),
     };
 
     res.status(200).json({
@@ -171,7 +167,7 @@ const deleteSpecificEvent = async (req, res) => {
 };
 const getSuspendedEvents = async (req, res) => {
   try {
-    const { data, error } = await Event.getSuspended(req); // Chiama il modello per ottenere gli eventi
+    const { data, error } = await Event.getSuspended(req);
     if (error) throw error;
     const cleanData = data.map((response) => {
       return {
@@ -186,18 +182,21 @@ const getSuspendedEvents = async (req, res) => {
         luogo: response.eventi.luoghi, // Attenzione, qui è 'luoghi' non 'luogo'
         utente: response.eventi.utenti,
         gruppo: response.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
-        scadenza: response.eventi.data_scadenza, // Attenzione, qui è 'gruppi' non 'gruppo'
+        scadenza: response.eventi.data_scadenza,
+        risposte_evento: response.partecipanti,
+        // Non includere ...dato (spread) qui se vuoi un oggetto pulito
       };
     });
+
     res.status(200).json({
       success: true,
       message: "Operazione completata con successo", // Opzionale, utile per i toast
-      data: cleanData,
+      data: cleanData, // <--- I dati reali che hai appena creato o modificato
     });
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Non siamo riusciti a trovare i tuoi eventi in sospeso", // Messaggio generico per l'utente
+      message: "Non siamo riusciti a trovare i tuoi eventi", // Messaggio generico per l'utente
       details: err.message,
     });
   }

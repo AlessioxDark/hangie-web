@@ -60,17 +60,34 @@ const getAll = async (req) => {
       error: tokenError,
     } = await supabase.auth.getUser(token);
     if (tokenError) throw tokenError;
-    const { data: eventsList, error } = await supabase
-      .from("risposte_eventi")
-      .select(
-        "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(group_id,nome,group_cover_img,partecipanti_gruppo(partecipante_id)))",
-      )
-      .range(offset, offset + EVENTSINPAGE - 1)
-      .eq("user_id", user.id);
+
+    const [
+      { data: acceptedEvents, error: acceptedEventsError },
+      { data: pendingEvents, error: pendingEventsError },
+    ] = await Promise.all([
+      supabase
+        .from("risposte_eventi")
+        .select(
+          "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(group_id,nome,group_cover_img,partecipanti_gruppo(partecipante_id)))",
+        )
+        .range(offset, offset + EVENTSINPAGE - 1)
+        .eq("user_id", user.id)
+        .eq("status", "accepted"),
+      supabase
+        .from("risposte_eventi")
+        .select(
+          "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(group_id,nome,group_cover_img,partecipanti_gruppo(partecipante_id)))",
+        )
+        .limit(3)
+        .eq("user_id", user.id)
+        .eq("status", "pending"),
+    ]);
+    if (acceptedEventsError) throw acceptedEventsError;
+    if (pendingEventsError) throw pendingEventsError;
+    const eventsList = [...acceptedEvents, ...pendingEvents];
     if (eventsList.length == 0) return { data: [], error: null };
     const eventIds = eventsList.map((e) => e.event_id);
     const groupIds = eventsList.map((e) => e.eventi.gruppi.group_id);
-    if (error) throw error;
     const { data: risposte, error: risposteError } = await supabase
       .from("risposte_eventi")
       .select(
@@ -83,15 +100,6 @@ const getAll = async (req) => {
     if (risposteError) throw risposteError;
 
     console.log("risposte", risposte, eventsList);
-    const risposteMap = risposte.reduce((acc, curr) => {
-      if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
-      acc[curr.eventi.event_id].push({
-        user_id: curr.user_id,
-        status: curr.status,
-        is_creator: curr.is_creator,
-      });
-      return acc;
-    }, {});
 
     const { data: eventParticipants, error: eventParticipantsError } =
       await supabase
@@ -99,7 +107,6 @@ const getAll = async (req) => {
         .select("status,utente:utenti(*),eventi(*),created_at,is_creator")
         .in("eventi.event_id", eventIds);
 
-    console.log(risposte);
     const eventParticipantsMap = eventParticipants.reduce((acc, curr) => {
       if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
       acc[curr.eventi.event_id].push({
@@ -124,17 +131,6 @@ const getAll = async (req) => {
   }
 };
 
-const getEvents = async () => {
-  // const { user_id } = req.params;
-  // const { data, error } = await supabase
-  // 	.from('risposte_eventi')
-  // 	.select(
-  // 		'eventi(event_id,luogo,costo,data,titolo,created_by,event_cover_img)'
-  // 	)
-  // 	// .eq('risposte_eventi.user_id', user_id)
-  // 	.eq('status', 'accepted');
-  // return { data, error };
-};
 const deleteEvent = async (req) => {
   try {
     console.log("provando ad eliminare");
@@ -190,15 +186,6 @@ const deleteEvent = async (req) => {
   } catch (err) {
     return { error: err, data: null };
   }
-  // const { user_id } = req.params;
-  // const { data, error } = await supabase
-  // 	.from('risposte_eventi')
-  // 	.select(
-  // 		'eventi(event_id,luogo,costo,data,titolo,created_by,event_cover_img)'
-  // 	)
-  // 	// .eq('risposte_eventi.user_id', user_id)
-  // 	.eq('status', 'accepted');
-  // return { data, error };
 };
 const getEvent = async (req) => {
   try {
@@ -443,21 +430,6 @@ const modifyResponse = async (req) => {
   } catch (err) {
     return { data: null, err: err };
   }
-  const token = req.headers.authorization.split(" ")[1];
-  let user_id;
-  const { user, error: userError } = await supabase.auth.getUser(token);
-  if (user) {
-    user_id = user.user_id;
-  }
-  if (userError) {
-    return { data: null, userError };
-  }
-  const finalData = { event_id, user_id, status: status };
-  const { data, error } = await supabase
-    .from("risposte_eventi")
-    .upsert(finalData, { onConflict: "user_id, event_id" })
-    .eq("event_id", event_id);
-  return { data, error };
 };
 const getSuspended = async (req) => {
   try {
@@ -472,16 +444,58 @@ const getSuspended = async (req) => {
       error: tokenError,
     } = await supabase.auth.getUser(token);
     if (tokenError) throw tokenError;
-    const { data, error } = await supabase
+    const { data: eventsList, error: eventsListError } = await supabase
       .from("risposte_eventi")
       .select(
-        "event_id,status,eventi(event_id,costo,data,titolo,utenti(user_id,nome,profile_pic),luoghi(*),descrizione,cover_img,data_scadenza,event_imgs(*),gruppi(*,partecipanti_gruppo(*)))",
+        "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(group_id,nome,group_cover_img,partecipanti_gruppo(partecipante_id)))",
       )
       .eq("user_id", user.id)
       .eq("status", "pending")
       .range(offset, offset + EVENTSINPAGE - 1);
-    if (error) throw error;
-    return { data, error: null };
+    if (eventsListError) throw eventsListError;
+
+    if (eventsList.length == 0) return { data: [], error: null };
+    const eventIds = eventsList.map((e) => e.event_id);
+    const groupIds = eventsList.map((e) => e.eventi.gruppi.group_id);
+    const { data: risposte, error: risposteError } = await supabase
+      .from("risposte_eventi")
+      .select(
+        "user_id,is_creator,status, eventi!inner(event_id,gruppi(group_id))",
+      )
+      .eq("status", "accepted")
+      .in("eventi.event_id", eventIds)
+      .in("eventi.gruppi.group_id", groupIds);
+    // risolvere bug ricerca eventi su incognito
+    if (risposteError) throw risposteError;
+
+    console.log("risposte", risposte, eventsList);
+
+    const { data: eventParticipants, error: eventParticipantsError } =
+      await supabase
+        .from("risposte_eventi")
+        .select("status,utente:utenti(*),eventi(*),created_at,is_creator")
+        .in("eventi.event_id", eventIds);
+
+    const eventParticipantsMap = eventParticipants.reduce((acc, curr) => {
+      if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
+      acc[curr.eventi.event_id].push({
+        utenti: curr.utente,
+        status: curr.status,
+        is_creator: curr.is_creator,
+        created_at: curr.created_at,
+      });
+      return acc;
+    }, {});
+    if (eventParticipantsError) throw eventParticipantsError;
+
+    const finalData = eventsList.map((e) => {
+      return {
+        ...e,
+        partecipanti: eventParticipantsMap[e.event_id],
+      };
+    });
+    console.log("ecco cosa invio", finalData);
+    return { data: finalData, error: null };
   } catch (err) {
     return { data: null, error: err };
   }

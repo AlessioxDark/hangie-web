@@ -321,7 +321,6 @@ export const SocketProvider = ({ children }) => {
           const existingIds = new Set([
             ...prevData.accepted.map((e) => e.event_id),
             ...prevData.pending.map((e) => e.event_id),
-            ...prevData.rejected.map((e) => e.event_id),
           ]);
 
           const newPendingEvents = flatEvents.filter(

@@ -23,8 +23,9 @@ const EventsSuspended = () => {
 
   const saveData = (data) => {
     if (data.length > 0) {
+      console.log("ecco i dati", data);
       setEventsData((prevData) => {
-        const mergeData = [...prevData, ...data.data];
+        const mergeData = [...prevData, ...data];
 
         const dedupData = Array.from(
           new Map(mergeData.map((item) => [item.event_id, item])).values(),
