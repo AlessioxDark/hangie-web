@@ -147,9 +147,9 @@ const MessageEvent = ({ event_details, group_id }) => {
       state={currentScreen != "xs" && { backgroundLocation: location }}
     >
       <div
-        className="flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden
+        className={` flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden
       shadow-xl transition-all duration-300   hover:shadow-2xl max-w-full mr-4
-       2xl:min-w-sm  my-2 cursor-pointer "
+       2xl:min-w-sm  my-2 cursor-pointer ${event_details.status == "rejected" && "grayscale opacity-75"}`}
         onClick={() => {
           openModal({
             type: "EVENT_MODAL",
@@ -158,7 +158,7 @@ const MessageEvent = ({ event_details, group_id }) => {
         }}
       >
         {/* Immagine di Copertina */}
-        <div className="w-56 2xl:w-full  relative cursor-pointer aspect-square 2xl:aspect-[16/9]">
+        <div className="w-58 2xl:w-full  relative cursor-pointer aspect-square 2xl:aspect-[16/9]">
           {/* L'immagine deve avere una dimensione fissa o responsive */}
           <img
             className="w-full h-full object-cover  "

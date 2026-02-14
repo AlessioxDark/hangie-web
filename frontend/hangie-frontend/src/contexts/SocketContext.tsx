@@ -576,7 +576,6 @@ export const SocketProvider = ({ children }) => {
             );
 
             const newRisposte = [
-              ...prev.risposte_evento,
               ...newResponses,
 
               { status, utenti: { user_id: sender_id } },

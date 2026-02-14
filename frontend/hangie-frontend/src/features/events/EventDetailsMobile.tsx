@@ -113,8 +113,7 @@ const EventDetailsMobile = () => {
     (r) => r.status == "accepted",
   );
   const allImgs = [cover_img, ...event_imgs?.map((e) => e.img_url)];
-  console.log(allImgs);
-  console.log(currentEventData);
+  console.log("l'evento è", status);
 
   const handleScroll = (e) => {
     const container = e.currentTarget;
@@ -207,18 +206,24 @@ const EventDetailsMobile = () => {
   const sendSocketDeleteEvent = () => {
     +currentSocket.emit("delete_event", eventId, gruppo.group_id);
   };
-  const sendSocketVoteEvent = (status, prevStatus) => {
-    setCurrentEventData((prev) => {
-      return { ...prev, status };
-    });
+  const sendSocketVoteEvent = (newStatus) => {
+    console.log(
+      "lo stato corrente è",
+      prevStatus,
+      "lo voglio cambiare in",
+      newStatus,
+    );
     currentSocket.emit(
       "vote_event",
       eventId,
       gruppo.group_id,
-      status,
+      newStatus,
       session.user.id,
-      prevStatus,
+      currentEventData?.status,
     );
+    setCurrentEventData((prev) => {
+      return { ...prev, status: newStatus };
+    });
   };
   return (
     <div className="">
@@ -447,8 +452,7 @@ const EventDetailsMobile = () => {
                       status: newStatus,
                     },
                     () => {
-                      sendSocketVoteEvent(newStatus, prevStatus);
-                      setPrevStatus(newStatus);
+                      sendSocketVoteEvent(newStatus);
                     },
                   );
                 }}
@@ -470,8 +474,7 @@ const EventDetailsMobile = () => {
                       status: newStatus,
                     },
                     () => {
-                      sendSocketVoteEvent(newStatus, prevStatus);
-                      setPrevStatus(newStatus);
+                      sendSocketVoteEvent(newStatus);
                     },
                   );
                 }}
