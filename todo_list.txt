@@ -1,9 +1,5 @@
-add participants deve avere aggiutna eventi come pending
 rimovere elementi quando abbamdoni o rimuovi partecipanti
 togliere eventi quando togli partecipanti
 evitare duplicazione a creazione eventi
-risolvere data backend risoluzione pagina eventi sospesi partire dal backend
 
-fare eliminazione e gestione eventi
-rifare gestione view del mobile
 aggiungere resonsive

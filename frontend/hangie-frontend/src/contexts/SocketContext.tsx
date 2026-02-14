@@ -195,6 +195,7 @@ export const SocketProvider = ({ children }) => {
       }
     });
     socket.on("removed_participant", (data) => {
+      console.log("rimosso");
       const isMe = session.user.id == data.participant.user_id;
       setGroupsData((prev) => {
         // Usiamo MAP per creare un nuovo array, non forEach
@@ -219,7 +220,7 @@ export const SocketProvider = ({ children }) => {
           });
         }
       });
-      if (currentGroupData.group_id == data.group_id) {
+      if (currentGroup && currentGroup == data.group_id) {
         if (isMe) {
           navigate(-1);
           setCurrentGroup(null);
@@ -256,7 +257,24 @@ export const SocketProvider = ({ children }) => {
           });
         }
       }
-
+      console.log("e qui ci sto");
+      if (isMe) {
+        console.log("tolgo eventi");
+        setHomeEventsData((prevEvents) => {
+          console.log("questi", prevEvents);
+          return {
+            pending: prevEvents.pending.filter(
+              (e) => e.group_id !== data.group_id,
+            ),
+            accepted: prevEvents.accepted.filter(
+              (e) => e.group_id !== data.group_id,
+            ),
+            rejected: prevEvents.rejected.filter(
+              (e) => e.group_id !== data.group_id,
+            ),
+          };
+        });
+      }
       // if(isMe){
 
       // }
@@ -577,7 +595,6 @@ export const SocketProvider = ({ children }) => {
 
             const newRisposte = [
               ...newResponses,
-
               { status, utenti: { user_id: sender_id } },
             ];
             return { ...prev, risposte_evento: newRisposte };
