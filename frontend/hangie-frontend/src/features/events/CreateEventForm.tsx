@@ -107,24 +107,6 @@ const CreateEventForm = () => {
       event_details,
       message_details,
     );
-
-    setCurrentChatData((prevData) => {
-      return {
-        ...prevData,
-        messaggi: [
-          ...prevData.messaggi,
-          {
-            group_id: currentGroupData.group_id,
-            user_id: session.user.id,
-            sent_at: Date.now(),
-            isUser: true,
-            event_id,
-            event_details,
-            type: "event",
-          },
-        ],
-      };
-    });
   };
 
   const onSubmit = async (data) => {

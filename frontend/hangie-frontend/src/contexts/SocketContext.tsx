@@ -473,6 +473,7 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("sent_event", (data) => {
       console.log("dati dall'invio eventi al socket", data);
+      console.log("sent_event");
       const myStatus =
         data.eventi.created_by == session.user.id ? "accepted" : "pending";
       const eventMessage = {
@@ -500,7 +501,6 @@ export const SocketProvider = ({ children }) => {
           };
         });
       }
-
       console.log("controllo se è user", eventMessage.isUser);
       if (eventMessage.isUser) {
         console.log("si, aggiungo evento", data.eventi);

@@ -183,10 +183,12 @@ const messageHandlers = (io, socket) => {
   socket.on(
     "send_event",
     async (eventId, group_id, eventDetails, messageDetails) => {
+      console.log("arrivato send_event");
       const { data: participants, error: participantsError } = await supabase
         .from("partecipanti_gruppo")
         .select("*")
         .eq("group_id", group_id);
+      if (participantsError) throw participantsError;
       console.log("ecco gli event details", eventDetails);
       const risposte_evento = participants.map((p) => {
         return {
@@ -197,6 +199,7 @@ const messageHandlers = (io, socket) => {
           utenti: { user_id: p.partecipante_id },
         };
       });
+      console.log("partecipanti", participants);
       participants.forEach((p) => {
         io.to(p.partecipante_id).emit("sent_event", {
           eventi: { ...eventDetails, event_id: eventId, risposte_evento },

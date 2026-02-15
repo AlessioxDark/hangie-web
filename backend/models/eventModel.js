@@ -161,19 +161,22 @@ const deleteEvent = async (req) => {
     if (eventError) throw eventError;
 
     // rimuovi immgaini
+    console.log("cerco le immagini");
     const { data: files, error: listError } = await supabase.storage
       .from("eventi")
-      .list(`/${event_id}`);
-
+      .list(`${event_id}`);
+    console.log("file ottenuti", files);
     if (listError) throw listError;
+    console.log("file ottenuti", files);
     if (!files || files.length === 0) {
       console.log(
         "La cartella è già vuota, procedo con l'eliminazione del record.",
       );
       return { data: { message: "ok" }, error: null };
     }
-    // 2. Crea i percorsi completi (folder/file.jpg)
     const filesToRemove = files.map((x) => `${event_id}/${x.name}`);
+    console.log("rimuoviamo ", filesToRemove);
+    // 2. Crea i percorsi completi (folder/file.jpg)
 
     // 3. Elimina i file in blocco
     const { error: deleteError } = await supabase.storage

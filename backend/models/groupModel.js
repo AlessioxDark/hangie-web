@@ -90,7 +90,6 @@ const getGroup = async (req) => {
       )
       .in("event_id", eventIds);
     console.log("gli eventsDetails", eventsDetails);
-    console.log("gli eventsDetails risposte", eventsDetails[0].risposte_evento);
     const newEventsDetails = eventsDetails.map((e) => {
       const risposta = e.risposte_evento.find((r) => r.user_id == user.id);
       return { ...e, status: risposta.status };
