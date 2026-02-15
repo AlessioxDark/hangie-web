@@ -41,11 +41,23 @@ const groupHandlers = (io, socket) => {
         if (groupError) throw groupError;
         console.log("i dati del gruppo", groupInfo);
         let ultimoMessaggio = null;
-        groupInfo?.gruppi.messaggi.forEach((messaggio) => {
+        groupInfo?.gruppi.messaggi.forEach(async (messaggio) => {
           if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
             ultimoMessaggio = messaggio;
           }
         });
+        if (ultimoMessaggio.type == "event") {
+          const { data: titoloData, error: titoloError } = await supabase
+            .from("eventi")
+            .select("titolo")
+            .eq("event_id", ultimoMessaggio.event_id)
+            .single();
+          ultimoMessaggio = {
+            ...ultimoMessaggio,
+            content: titoloData.titolo,
+          };
+          if (titoloError) throw titoloError;
+        }
         const { gruppi } = groupInfo;
         const formattedData = {
           ...gruppi,
@@ -140,6 +152,7 @@ const groupHandlers = (io, socket) => {
         // }, {});
         console.log("le final responses", finalEventsResponses);
         const finalEventsArray = Object.values(reducedEventsData);
+        console.log("i groupInfo", groupInfo, formattedData);
         allParticipants.forEach((p) => {
           io.to(p.user_id).emit("added_participants", {
             group_id: groupId,
@@ -270,10 +283,7 @@ const groupHandlers = (io, socket) => {
         io.to(p.user_id).emit("left_group", groupId, userId);
       });
       if (participants.some((p) => p.user_id !== userId)) {
-        io.to(userId).emit("left_group", {
-          groupId,
-          userId,
-        });
+        io.to(userId).emit("left_group", groupId, userId);
       }
     } catch (err) {
       console.log("c'è un err", err);

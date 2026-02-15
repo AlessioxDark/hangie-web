@@ -57,11 +57,13 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
   scadenza,
   risposte_evento,
   status,
+  group_id,
   line_clamp = "line-clamp-1",
 }) => {
   const risposteAccepted = risposte_evento.filter(
     (r) => r.status == "accepted",
   );
+  console.log("il group_id", group_id);
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
         day: "numeric",

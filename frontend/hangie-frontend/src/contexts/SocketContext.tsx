@@ -167,45 +167,124 @@ export const SocketProvider = ({ children }) => {
 
     socket.on("left_group", (groupId, userId) => {
       // notifica
-      if (session.user.id == userId) {
-        console.log("sono l'utente uscito");
-        setGroupsData((prev) => {
-          return prev.filter((group) => group.group_id !== groupId);
-        });
-      } else {
-        setGroupsData((prev) => {
-          return prev.map((group) => {
-            if (group.group_id == groupId) {
-              const newParticipants = group.partecipanti_gruppo.filter(
-                (p) => p.user_id !== userId,
-              );
-              return { ...group, partecipanti_gruppo: newParticipants };
-            }
-            return group;
-          });
-        });
-        if (currentGroupData.group_id == groupId) {
-          setCurrentGroupData((prev) => {
-            const newParticipants = prev.partecipanti_gruppo.filter(
-              (p) => p.user_id !== userId,
-            );
-            return { ...prev, partecipanti_gruppo: newParticipants };
-          });
-        }
-      }
-    });
-    socket.on("removed_participant", (data) => {
-      console.log("rimosso");
-      const isMe = session.user.id == data.participant.user_id;
+      //   if (session.user.id == userId) {
+      //     console.log("sono l'utente uscito");
+      //     setGroupsData((prev) => {
+      //       return prev.filter((group) => group.group_id !== groupId);
+      //     });
+      //   } else {
+      //     setGroupsData((prev) => {
+      //       return prev.map((group) => {
+      //         if (group.group_id == groupId) {
+      //           const newParticipants = group.partecipanti_gruppo.filter(
+      //             (p) => p.user_id !== userId,
+      //           );
+      //           return { ...group, partecipanti_gruppo: newParticipants };
+      //         }
+      //         return group;
+      //       });
+      //     });
+      //     if (currentGroupData.group_id == groupId) {
+      //       setCurrentGroupData((prev) => {
+      //         const newParticipants = prev.partecipanti_gruppo.filter(
+      //           (p) => p.user_id !== userId,
+      //         );
+      //         return { ...prev, partecipanti_gruppo: newParticipants };
+      //       });
+      //     }
+      //   }
+      // });
+      // socket.on("removed_participant", (data) => {
+      //   console.log("rimosso");
+      //   const isMe = session.user.id == data.participant.user_id;
+      //   setGroupsData((prev) => {
+      //     // Usiamo MAP per creare un nuovo array, non forEach
+      //     console.log("sono io ?", isMe);
+      //     if (!isMe) {
+      //       return prev.map((group) => {
+      //         if (group.group_id === data.group_id) {
+      //           const newParticipants = group.partecipanti_gruppo.filter(
+      //             (p) =>
+      //               (p.partecipante_id || p.user_id) !== data.participant.user_id,
+      //           );
+      //           return { ...group, partecipanti_gruppo: newParticipants };
+      //         }
+      //         return group;
+      //       });
+      //     } else {
+      //       console.log("non sono io controllo tra i gruppi");
+      //       return prev.filter((g) => {
+      //         console.log(g.group_id, data.group_id);
+
+      //         return g.group_id !== data.group_id;
+      //       });
+      //     }
+      //   });
+      //   if (currentGroup && currentGroup == data.group_id) {
+      //     if (isMe) {
+      //       navigate(-1);
+      //       setCurrentGroup(null);
+      //       return;
+      //     }
+      //     setCurrentGroupData((prev) => {
+      //       const newParticipants = prev.partecipanti_gruppo.filter(
+      //         (p) =>
+      //           (p.partecipante_id || p.user_id) !== data.participant.user_id, // Verifica se la chiave è user_id o partecipante_id
+      //       );
+
+      //       return { ...prev, partecipanti_gruppo: newParticipants };
+      //     });
+      //     if (!isMe) {
+      //       console.log("non sono io");
+      //       setCurrentChatData((prevChat) => {
+      //         const newMessaggi = prevChat.messaggi.map((m) => {
+      //           if (m.type == "event") {
+      //             console.log(m, m.risposte_evento);
+      //             const newRisposte = m.event_details.risposte_evento.filter(
+      //               (r) => r.utenti.user_id !== data.participant.user_id,
+      //             );
+      //             return {
+      //               ...m,
+      //               event_details: {
+      //                 ...m.event_details,
+      //                 risposte_evento: newRisposte,
+      //               },
+      //             };
+      //           }
+      //           return m;
+      //         });
+      //         return { ...prevChat, messaggi: newMessaggi };
+      //       });
+      //     }
+      //   }
+      //   console.log("e qui ci sto");
+      //   if (isMe) {
+      //     console.log("tolgo eventi");
+      //     setHomeEventsData((prevEvents) => {
+      //       console.log("questi", prevEvents);
+      //       return {
+      //         pending: prevEvents.pending.filter(
+      //           (e) => e.group_id !== data.group_id,
+      //         ),
+      //         accepted: prevEvents.accepted.filter(
+      //           (e) => e.group_id !== data.group_id,
+      //         ),
+      //         rejected: prevEvents.rejected.filter(
+      //           (e) => e.group_id !== data.group_id,
+      //         ),
+      //       };
+      //     });
+      //   }
+      console.log("leaving...", { groupId, userId, myid: session.user.id });
+      const isMe = session.user.id == userId;
       setGroupsData((prev) => {
         // Usiamo MAP per creare un nuovo array, non forEach
         console.log("sono io ?", isMe);
         if (!isMe) {
           return prev.map((group) => {
-            if (group.group_id === data.group_id) {
+            if (group.group_id === groupId) {
               const newParticipants = group.partecipanti_gruppo.filter(
-                (p) =>
-                  (p.partecipante_id || p.user_id) !== data.participant.user_id,
+                (p) => (p.partecipante_id || p.user_id) !== userId,
               );
               return { ...group, partecipanti_gruppo: newParticipants };
             }
@@ -214,22 +293,14 @@ export const SocketProvider = ({ children }) => {
         } else {
           console.log("non sono io controllo tra i gruppi");
           return prev.filter((g) => {
-            console.log(g.group_id, data.group_id);
-
-            return g.group_id !== data.group_id;
+            return g.group_id !== groupId;
           });
         }
       });
-      if (currentGroup && currentGroup == data.group_id) {
-        if (isMe) {
-          navigate(-1);
-          setCurrentGroup(null);
-          return;
-        }
+      if (currentGroup && currentGroup == groupId) {
         setCurrentGroupData((prev) => {
           const newParticipants = prev.partecipanti_gruppo.filter(
-            (p) =>
-              (p.partecipante_id || p.user_id) !== data.participant.user_id, // Verifica se la chiave è user_id o partecipante_id
+            (p) => (p.partecipante_id || p.user_id) !== userId, // Verifica se la chiave è user_id o partecipante_id
           );
 
           return { ...prev, partecipanti_gruppo: newParticipants };
@@ -241,7 +312,7 @@ export const SocketProvider = ({ children }) => {
               if (m.type == "event") {
                 console.log(m, m.risposte_evento);
                 const newRisposte = m.event_details.risposte_evento.filter(
-                  (r) => r.utenti.user_id !== data.participant.user_id,
+                  (r) => r.utenti.user_id !== userId,
                 );
                 return {
                   ...m,
@@ -263,21 +334,12 @@ export const SocketProvider = ({ children }) => {
         setHomeEventsData((prevEvents) => {
           console.log("questi", prevEvents);
           return {
-            pending: prevEvents.pending.filter(
-              (e) => e.group_id !== data.group_id,
-            ),
-            accepted: prevEvents.accepted.filter(
-              (e) => e.group_id !== data.group_id,
-            ),
-            rejected: prevEvents.rejected.filter(
-              (e) => e.group_id !== data.group_id,
-            ),
+            pending: prevEvents.pending.filter((e) => e.group_id !== groupId),
+            accepted: prevEvents.accepted.filter((e) => e.group_id !== groupId),
+            rejected: prevEvents.rejected.filter((e) => e.group_id !== groupId),
           };
         });
       }
-      // if(isMe){
-
-      // }
     });
     socket.on("added_participants", (data) => {
       console.log("data dal socket", data);

@@ -90,14 +90,23 @@ export const ApiCalls = {
       },
     }).then(handleResponse),
 
-  handleLeaveGroup: (token, groupId) =>
-    fetch(`${BASE_URL}/groups/leave/${groupId}`, {
+  handleLeaveGroup: async (token, groupId) => {
+    const res = await fetch(`${BASE_URL}/groups/leave/${groupId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-    }).then(handleResponse),
+    });
+    return await handleResponse(res);
+  },
+  // fetch(`${BASE_URL}/groups/leave/${groupId}`, {
+  //   method: "DELETE",
+  //   headers: {
+  //     Authorization: `Bearer ${token}`,
+  //     "Content-Type": "application/json",
+  //   },
+  // }).then(handleResponse),
   fetchChat: async (groupId, token) => {
     const res = await fetch(`${BASE_URL}/groups/${groupId}`, {
       method: "GET",

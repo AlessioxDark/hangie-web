@@ -301,10 +301,23 @@ const leave = async (req) => {
     if (userError) throw userError;
     const { data, error } = await supabase
       .from("partecipanti_gruppo")
-      .delete("*")
+      .delete()
       .eq("group_id", group_id)
       .eq("partecipante_id", user.id);
     if (error) throw error;
+    const { data: rowsToDelete, error: ErrorRowsDelete } = await supabase
+      .from("risposte_eventi")
+      .select("response_id,eventi(group_id)")
+      .eq("user_id", user.id);
+    if (ErrorRowsDelete) throw ErrorRowsDelete;
+    const newRowsToDelete = rowsToDelete
+      .filter((r) => r.eventi.group_id == group_id)
+      .map((r) => r.response_id);
+    const { error: eventsError } = await supabase
+      .from("risposte_eventi")
+      .delete()
+      .in("response_id", newRowsToDelete);
+    if (eventsError) throw eventsError;
 
     const { data: participantsData, error: participantsError } = await supabase
       .from("partecipanti_gruppo")

@@ -193,7 +193,10 @@ const leaveGroup = async (req, res) => {
   try {
     console.log("arrivati a leave");
     const { data, error } = await Group.leave(req); // Chiama il modello per ottenere gli eventi
-    if (error) throw error;
+    if (error) {
+      console.log("err", error);
+      throw error;
+    }
     res.status(200).json({
       success: true,
       message: "Operazione completata con successo",

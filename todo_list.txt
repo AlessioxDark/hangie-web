@@ -1,5 +1,5 @@
-rimovere elementi quando abbamdoni o rimuovi partecipanti
-togliere eventi quando togli partecipanti
-evitare duplicazione a creazione eventi
+rimovere elementi quando abbamdoni nel socket
+gestire storage quando elimini evento
+gestire eliminazione gruppo e storage
 
 aggiungere resonsive
