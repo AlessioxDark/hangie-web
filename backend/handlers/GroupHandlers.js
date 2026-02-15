@@ -271,7 +271,7 @@ const groupHandlers = (io, socket) => {
     }
   });
   socket.on("leave_group", async (groupId, userId) => {
-    console.log("ricevuto leave group server.js");
+    console.log("ricevuto leave group server.js", groupId, userId);
     // manca creatore gruppo in participants
     try {
       const { data: participants, error: participantsError } = await supabase
@@ -279,10 +279,16 @@ const groupHandlers = (io, socket) => {
         .select("*,user_id:partecipante_id")
         .eq("group_id", groupId);
       if (participantsError) throw participantsError;
+      console.log("i partecipanti", participants);
       participants.forEach((p) => {
+        console.log("adesso invio left group no user");
         io.to(p.user_id).emit("left_group", groupId, userId);
       });
-      if (participants.some((p) => p.user_id !== userId)) {
+      if (
+        participants.length == 0 ||
+        participants.some((p) => p.user_id !== userId)
+      ) {
+        console.log("adesso invio left group");
         io.to(userId).emit("left_group", groupId, userId);
       }
     } catch (err) {

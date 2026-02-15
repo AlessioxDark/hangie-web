@@ -331,26 +331,6 @@ const leave = async (req) => {
       .eq("group_id", group_id)
       .single();
     if (groupError) throw groupError;
-
-    const isAdmin = participantsData.some((p) => p.role == "admin");
-    const isCreator = participantsData.some(
-      (p) => p.partecipante_id == groupData.createdBy,
-    );
-    if (!isAdmin) {
-      const { data: adminData, error: adminError } = await supabase
-        .from("partecipanti_gruppo")
-        .update({ role: "admin" })
-        .eq("partecipante_id", participantsData[0].partecipante_id);
-      if (adminError) throw adminError;
-    }
-    if (!isCreator) {
-      const { data: adminGroupData, error: adminGroupError } = await supabase
-        .from("gruppi")
-        .update({ createdBy: participantsData[0].partecipante_id })
-        .eq("group_id", group_id);
-      if (adminGroupError) throw adminGroupError;
-    }
-
     const { count, error: countError } = await supabase
       .from("partecipanti_gruppo")
       .select("*", { count: "exact", head: true })
@@ -358,10 +338,17 @@ const leave = async (req) => {
     if (countError) throw countError;
 
     if (count == 0) {
+      console.log("eliminiamo il gruppo");
+      const { error: notificanError } = await supabase
+        .from("notifiche")
+        .delete()
+        .eq("group_id", group_id);
+      if (notificanError) throw notificanError;
       const { data: messages, error: messageError } = await supabase
         .from("messaggi")
         .select("message_id,type,event_id")
         .eq("group_id", group_id);
+
       if (messageError) throw messageError;
 
       const messageEvents = messages.filter((m) => m.type == "filter");
@@ -426,7 +413,28 @@ const leave = async (req) => {
         .delete()
         .eq("group_id", group_id);
       if (GroupsError) throw GroupsError;
+      return { data, error: null };
     }
+
+    const isAdmin = participantsData.some((p) => p.role == "admin");
+    const isCreator = participantsData.some(
+      (p) => p.partecipante_id == groupData.createdBy,
+    );
+    if (!isAdmin) {
+      const { error: adminError } = await supabase
+        .from("partecipanti_gruppo")
+        .update({ role: "admin" })
+        .eq("partecipante_id", participantsData[0].partecipante_id);
+      if (adminError) throw adminError;
+    }
+    if (!isCreator) {
+      const { data: adminGroupData, error: adminGroupError } = await supabase
+        .from("gruppi")
+        .update({ createdBy: participantsData[0].partecipante_id })
+        .eq("group_id", group_id);
+      if (adminGroupError) throw adminGroupError;
+    }
+
     return { data, error: null };
   } catch (err) {
     return { data: null, error: err };

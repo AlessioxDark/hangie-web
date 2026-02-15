@@ -1,5 +1,5 @@
-rimovere elementi quando abbamdoni nel socket
-gestire storage quando elimini evento
 gestire eliminazione gruppo e storage
-
+quando creo gruppo ultimomessaggiip è undefined
+quando elimino partecipanti dopo creo gruppo errore ne lsocket
+risolvere errori di npm run build
 aggiungere resonsive
