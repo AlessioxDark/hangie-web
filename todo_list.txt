@@ -1,6 +1,4 @@
 gestire eliminazione gruppo socket
-errore tornare indietro evento da chat
-gestione creazione evento created_by
 
 
 

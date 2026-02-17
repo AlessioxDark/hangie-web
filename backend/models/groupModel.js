@@ -382,10 +382,18 @@ const leave = async (req) => {
           }
         }
 
-        await supabase
+        const { error: eventsError } = await supabase
           .from("eventi")
           .delete()
           .in("event_id", messageEventsEventsIds);
+
+        if (eventsError) throw eventsError;
+        const { error: groupEventsError } = await supabase
+          .from("eventi_gruppo")
+          .delete()
+          .in("group_id", group_id);
+
+        if (groupEventsError) throw groupEventsError;
       }
       const { error: messagesError } = await supabase
         .from("messaggi")

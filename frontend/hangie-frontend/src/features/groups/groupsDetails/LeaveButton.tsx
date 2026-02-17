@@ -18,6 +18,7 @@ const LeaveButton = () => {
     const saveData = (data) => {
       navigate("/chats");
       setCurrentGroup(null);
+      console.log("adesso inviamo");
       currentSocket.emit("leave_group", currentGroup, session.user.id);
     };
 
