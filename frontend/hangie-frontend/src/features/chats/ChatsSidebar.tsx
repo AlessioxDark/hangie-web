@@ -20,7 +20,7 @@ const ChatsSidebar = () => {
       return <RenderErrorState type="groups" reloadFunction={fetchGroups} />;
     }
     if (groupsData?.length == 0) {
-      return <RenderEmptyState type="groups" />;
+      // return <RenderEmptyState type="groups" />;
     }
     if (groupsData) {
       return groupsData.map((group, i) => {

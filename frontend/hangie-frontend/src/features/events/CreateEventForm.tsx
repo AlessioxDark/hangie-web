@@ -110,14 +110,10 @@ const CreateEventForm = () => {
   };
 
   const onSubmit = async (data) => {
-    console.log("onsubmit pt-1");
-
     if (checkImagesError()) return;
 
-    console.log("onsubmit");
-
     const handleUploadAndSocket = async (dataArrived) => {
-      console.log("aggiunto al database");
+      console.log("inviato da", session.user.id);
       try {
         clearErrors("root");
         const newEventId = dataArrived.event_id;

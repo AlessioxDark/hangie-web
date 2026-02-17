@@ -85,9 +85,9 @@ const Chats = () => {
     messaggi,
   ]);
 
-  if (!currentGroup) {
-    return <RenderEmptyState type={"chat"} />;
-  }
+  // if (!currentGroup) {
+  //   // return <RenderEmptyState type={"chat"} />;
+  // }
   if (isAuthLoading) {
     console.log("auth lo");
     return <RenderLoadingState type={"chat"} />;

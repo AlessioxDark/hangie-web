@@ -309,7 +309,7 @@ const newEvent = async (req) => {
       error: authError,
     } = await supabase.auth.getUser(token);
     if (authError) throw authError;
-
+    console.log("inviato da", user.id);
     const { images, ...realBody } = req.body.data;
     const group_id = realBody.group_id;
     const luogoId = await getOrCreateLuogo(realBody);

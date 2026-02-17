@@ -651,23 +651,20 @@ export const SocketProvider = ({ children }) => {
               //   { ...eventToMove, status },
               // }
               console.log("le risposte evento", e.risposte_evento, e);
-              const altreRisposte = e.risposte_evento.filter(
-                (r) => r.user_id !== sender_id,
-              );
+              // const altreRisposte = e.risposte_evento.filter(
+              //   (r) => r.user_id !== sender_id,
+              // );
 
-              const newRisposte = [
-                ...altreRisposte,
-                { status, user_id: sender_id },
-              ];
+              const newRisposte = e.risposte_evento.map((r) => {
+                return r.user_id == sender_id
+                  ? { ...r, status, user_id: sender_id }
+                  : r;
+              });
 
               return {
                 ...e,
-                risposte_evento: [
-                  ...e.risposte_evento,
-                  ...altreRisposte,
-                  ...newRisposte,
-                ],
-                status,
+                risposte_evento: [...newRisposte],
+                status: session.user.id == sender_id ? status : e.status,
               };
             }
             return e;
@@ -676,24 +673,54 @@ export const SocketProvider = ({ children }) => {
       }
       console.log("non lo ho inviato io");
       setHomeEventsData((prevEvents) => {
-        const category = status;
-        console.log("la category è", category);
-        const categoryEvents = prevEvents[category].map((event) => {
-          if (event?.event_id == event_id) {
-            const newRisposte = [
-              ...event.risposte_evento
-                .filter((e) => e.utenti.user_id !== sender_id)
-                .map((e) => {
-                  return { ...e, utenti: { user_id: e.user_id } };
-                }),
-              { status: status, utenti: { user_id: sender_id } },
-            ];
-            return { ...event, risposte_evento: newRisposte };
-          } else {
-            return event;
-          }
-        });
-        return { ...prevEvents, [category]: categoryEvents };
+        const prevCategory = (
+          Object.keys(prevEvents) as Array<keyof typeof prevEvents>
+        ).find((cat) => prevEvents[cat].some((e) => e.event_id === event_id));
+
+        if (!prevCategory) return prevEvents; // Se non lo trova, non fare nulla
+
+        // 2. Trova l'oggetto evento originale
+        const eventToUpdate = prevEvents[prevCategory].find(
+          (e) => e.event_id === event_id,
+        );
+        if (!eventToUpdate) return prevEvents;
+
+        // 3. Crea il nuovo oggetto evento con le risposte aggiornate
+        const updatedEvent = {
+          ...eventToUpdate,
+          status: session.user.id === sender_id ? status : eventToUpdate.status,
+          risposte_evento: eventToUpdate.risposte_evento.map((r) =>
+            r.utenti.user_id === session.user.id
+              ? { ...r, status: status } // Aggiorna solo lo stato dell'utente corrente
+              : r,
+          ),
+        };
+
+        // 4. Se l'utente loggato è colui che ha cambiato stato, sposta l'evento di categoria
+        if (session.user.id === sender_id) {
+          const newCategory = status as keyof typeof prevEvents;
+
+          return {
+            ...prevEvents,
+            // Rimuovi dalla vecchia categoria
+            [prevCategory]: prevEvents[prevCategory].filter(
+              (e) => e.event_id !== event_id,
+            ),
+            // Aggiungi alla nuova categoria (evitando duplicati per sicurezza)
+            [newCategory]: [
+              ...prevEvents[newCategory].filter((e) => e.event_id !== event_id),
+              updatedEvent,
+            ],
+          };
+        }
+
+        // 5. Se è stato un altro utente, aggiorna l'evento restando nella stessa categoria
+        return {
+          ...prevEvents,
+          [prevCategory]: prevEvents[prevCategory].map((e) =>
+            e.event_id === event_id ? updatedEvent : e,
+          ),
+        };
       });
       setCurrentChatData((prevData) => {
         console.log("prev", prevData);
@@ -711,7 +738,10 @@ export const SocketProvider = ({ children }) => {
               ...m,
               event_details: {
                 ...m.event_details,
-                status,
+                status:
+                  session.user.id == sender_id
+                    ? status
+                    : m.event_details.status,
                 risposte_evento: newRisposte,
               },
             };
@@ -723,6 +753,21 @@ export const SocketProvider = ({ children }) => {
           messaggi: newMessaggi,
         };
       });
+      if (currentEventData.event_id == event_id) {
+        setCurrentEventData((event) => {
+          const newRisposte = event.risposte_evento.map((r) => {
+            return r.utenti.user_id == sender_id
+              ? {
+                  ...r,
+                  status,
+                  user_id: sender_id,
+                  utenti: { user_id: sender_id },
+                }
+              : r;
+          });
+          return { ...event, risposte_evento: newRisposte };
+        });
+      }
     });
 
     return () => {

@@ -1,5 +1,8 @@
-gestire eliminazione gruppo e storage
-quando creo gruppo ultimomessaggiip è undefined
-quando elimino partecipanti dopo creo gruppo errore ne lsocket
+gestire eliminazione gruppo socket
+errore tornare indietro evento da chat
+gestione creazione evento created_by
+
+
+
 risolvere errori di npm run build
 aggiungere resonsive

@@ -6,13 +6,14 @@ const getAllGroups = async (req, res) => {
   try {
     const { data, error } = await Group.getAll(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
-
     const formattedData = await Promise.all(
       data.map(async (row) => {
         let ultimoMessaggio = null;
 
         // Usiamo for...of che supporta correttamente l'await
         for (const messaggio of row.gruppi.messaggi) {
+          console.log("oi");
+
           if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
             if (messaggio.type === "event") {
               const { data: titoloData, error: titoloError } = await supabase
@@ -32,9 +33,15 @@ const getAllGroups = async (req, res) => {
                 };
               }
             } else {
+              console.log("vai qui");
+
               ultimoMessaggio = messaggio;
             }
+            console.log("c'è mess?", row.gruppi.messaggi.length);
           }
+        }
+        if (row.gruppi.messaggi.length == 0) {
+          ultimoMessaggio = { content: "", type: "message" };
         }
 
         const { gruppi } = row;

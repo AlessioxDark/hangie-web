@@ -42,12 +42,7 @@ const AppRouter = () => {
             </ResponsiveLayoutWrapper>
           }
         ></Route>
-        {/* <Route
-          path="/chats"
-          element={
-            <ResponsiveLayoutWrapper layoutType="chat"></ResponsiveLayoutWrapper>
-          }
-        ></Route> */}
+
         <Route
           path="/chats"
           element={<ResponsiveLayoutWrapper layoutType="chat" />}

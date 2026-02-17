@@ -24,8 +24,8 @@ const ChatHeader = () => {
           <div
             className="w-7 h-7"
             onClick={() => {
-              navigate(-1);
               setCurrentGroup(null);
+              navigate(-1);
             }}
           >
             <ChevronLeft color={"#2463eb"} />

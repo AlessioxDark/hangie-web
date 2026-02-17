@@ -220,6 +220,8 @@ export const ChatProvider = ({ children }) => {
         console.log("sono diversi load all");
         loadAll(paramsGroupId);
       }
+    } else {
+      setCurrentGroup(null);
     }
   }, [
     location.pathname,
@@ -251,7 +253,9 @@ export const ChatProvider = ({ children }) => {
       setCurrentGroupData(groupsData[0]);
     }
   }, [groupsData, currentGroup, currentScreen]);
-
+  useEffect(() => {
+    console.log("cambiato location", location.pathname);
+  }, [location.pathname]);
   return (
     <ChatContext.Provider
       value={{

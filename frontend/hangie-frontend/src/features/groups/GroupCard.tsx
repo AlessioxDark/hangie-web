@@ -49,7 +49,6 @@ const GroupCard = ({
   const unreadMsgNotifications = currentNotifications?.unread.filter((n) => {
     if (n.type == "new_message" && n.group_id == group_id) return n;
   }).length;
-  console.log("ultimo mess", ultimoMessaggio);
   return (
     <div
       className={`bg-bg-2 p-3 flex items-center w-full 
