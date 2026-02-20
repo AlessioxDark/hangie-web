@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev-hosted": "vite --host",
-    "build": "tsc --skipLibCheck || npx vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
