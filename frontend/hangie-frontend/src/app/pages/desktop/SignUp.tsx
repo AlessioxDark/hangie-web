@@ -160,7 +160,7 @@ const SignUp = () => {
       // 	});
       // }
 
-      fetch("http://https://hangie-web.onrender.com/api/auth/register", {
+      fetch("https://hangie-web.onrender.com/api/auth/register", {
         body: JSON.stringify(finalData),
         headers: {
           "Content-Type": "application/json",

@@ -92,7 +92,7 @@ const CreateGroupForm = () => {
     }
     try {
       const response = await fetch(
-        "http://https://hangie-web.onrender.com/api/groups/add/newGroup",
+        "https://hangie-web.onrender.com/api/groups/add/newGroup",
         {
           method: "POST",
           headers: {

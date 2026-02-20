@@ -29,7 +29,7 @@ const LayoutChatMedium = () => {
       } = await supabase.auth.getSession();
       if (session) {
         const response = await fetch(
-          `http://https://hangie-web.onrender.com/api/groups/${currentGroup}`,
+          `https://hangie-web.onrender.com/api/groups/${currentGroup}`,
           {
             method: "GET",
             headers: {
@@ -85,7 +85,7 @@ const LayoutChatMedium = () => {
       } = await supabase.auth.getSession();
       if (session) {
         const response = await fetch(
-          `http://https://hangie-web.onrender.com/api/groups/`,
+          `https://hangie-web.onrender.com/api/groups/`,
           {
             method: "GET",
             // body: JSON.stringify({ offset: offset }),

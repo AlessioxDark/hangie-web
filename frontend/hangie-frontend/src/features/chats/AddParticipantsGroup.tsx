@@ -29,7 +29,7 @@ const AddParticipantsGroup = ({
       setIsLoading(true);
       setError(null);
       const response = await fetch(
-        `http://https://hangie-web.onrender.com/api/friends/${session.user.id}/accepted`,
+        `https://hangie-web.onrender.com/api/friends/${session.user.id}/accepted`,
       );
 
       if (!response.ok)

@@ -52,7 +52,7 @@ export const SocketProvider = ({ children }) => {
     currentGroupDataRef.current = currentGroupData;
   }, [currentGroupData]);
 
-  const SERVER_URL = "http://https://hangie-web.onrender.com";
+  const SERVER_URL = "https://hangie-web.onrender.com";
   useEffect(() => {
     if (!session?.user?.id) {
       return;
