@@ -29,14 +29,14 @@ const LayoutChatMedium = () => {
       } = await supabase.auth.getSession();
       if (session) {
         const response = await fetch(
-          `http://localhost:3000/api/groups/${currentGroup}`,
+          `http://https://hangie-web.onrender.com/api/groups/${currentGroup}`,
           {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${session.access_token}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -44,7 +44,7 @@ const LayoutChatMedium = () => {
           setError(
             errorData.error?.message ||
               response.statusText ||
-              "Errore nel caricamento della chat"
+              "Errore nel caricamento della chat",
           );
           return;
         }
@@ -84,18 +84,21 @@ const LayoutChatMedium = () => {
         error,
       } = await supabase.auth.getSession();
       if (session) {
-        const response = await fetch(`http://localhost:3000/api/groups/`, {
-          method: "GET",
-          // body: JSON.stringify({ offset: offset }),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
+        const response = await fetch(
+          `http://https://hangie-web.onrender.com/api/groups/`,
+          {
+            method: "GET",
+            // body: JSON.stringify({ offset: offset }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
           },
-        });
+        );
         if (!response.ok) {
           console.log(response);
           setError(
-            response.statusText || "Errore nel caricamento degli eventi"
+            response.statusText || "Errore nel caricamento degli eventi",
           );
         }
 
