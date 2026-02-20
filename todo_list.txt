@@ -1,6 +1,2 @@
-gestire eliminazione gruppo socket
-
-
-
 risolvere errori di npm run build
 aggiungere resonsive

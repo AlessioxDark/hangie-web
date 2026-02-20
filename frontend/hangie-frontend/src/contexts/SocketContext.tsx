@@ -5,6 +5,7 @@ import { useChat } from "./ChatContext";
 import { type GroupData } from "@/types/chat";
 import { useMobileLayout } from "./MobileLayoutChatContext";
 import { useLocation, useNavigate } from "react-router";
+import { useFriends } from "./FriendsContext";
 
 const SocketContext = createContext({
   currentSocket: null,
@@ -41,6 +42,7 @@ export const SocketProvider = ({ children }) => {
   } = useChat();
   const { session } = useAuth();
   const { setMobileView } = useMobileLayout();
+  const { getFriendsData } = useFriends();
   const currentGroupDataRef = useRef<null | GroupData>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -769,6 +771,13 @@ export const SocketProvider = ({ children }) => {
         });
       }
     });
+    socket.on("sent_request", (data) => {
+      // notifica
+      console.log("arrivato sent_request");
+      if (getFriendsData) {
+        getFriendsData();
+      }
+    });
 
     return () => {
       console.log("Pulizia socket e rimozione listener...");
@@ -784,6 +793,7 @@ export const SocketProvider = ({ children }) => {
       socket.off("sent_event");
       socket.off("deleted_event");
       socket.off("voted_event");
+      socket.off("sent_request");
       socket.disconnect();
     };
   }, [

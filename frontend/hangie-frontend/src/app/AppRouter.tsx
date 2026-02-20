@@ -14,6 +14,7 @@ import Chats from "./pages/Chats";
 import ChatsSidebar from "@/features/chats/ChatsSidebar";
 import ChatsEvents from "@/features/chats/ChatsEvents";
 import GroupDetails from "@/features/chats/GroupDetails";
+import Friends from "./pages/Friends";
 const AppRouter = () => {
   const location = useLocation();
   const background = location.state && location.state.backgroundLocation;
@@ -59,6 +60,14 @@ const AppRouter = () => {
           element={
             <ResponsiveLayoutWrapper>
               <Home />
+            </ResponsiveLayoutWrapper>
+          }
+        />
+        <Route
+          path="/friends"
+          element={
+            <ResponsiveLayoutWrapper>
+              <Friends />
             </ResponsiveLayoutWrapper>
           }
         />

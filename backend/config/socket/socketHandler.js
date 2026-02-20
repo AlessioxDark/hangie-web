@@ -10,6 +10,10 @@ const socketHandler = (io) => {
     });
     messageHandlers(io, socket);
     groupHandlers(io, socket);
+
+    socket.on("send_request", (data) => {
+      io.to(data.receiver_id).emit("sent_request", data);
+    });
   });
 };
 module.exports = socketHandler;

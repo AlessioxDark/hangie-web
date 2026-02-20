@@ -10,7 +10,7 @@ const authContext = createContext({
 
 export const AuthContextProvider = ({ children }) => {
   const [session, setSession] = useState(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   // Sign Up
 
   const signUpNewUser = async ({ email, password }) => {

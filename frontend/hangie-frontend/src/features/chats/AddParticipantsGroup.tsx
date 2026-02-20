@@ -29,7 +29,7 @@ const AddParticipantsGroup = ({
       setIsLoading(true);
       setError(null);
       const response = await fetch(
-        `http://localhost:3000/api/friends/${session.user.id}`,
+        `http://localhost:3000/api/friends/${session.user.id}/accepted`,
       );
 
       if (!response.ok)

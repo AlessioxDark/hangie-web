@@ -56,6 +56,41 @@ export const ApiCalls = {
     );
     return await handleResponse(res);
   },
+  handleGetFriends: async (token: string, userId: string) => {
+    console.log("get friends fetch");
+    const res = await fetch(`${BASE_URL}/friends/${userId}`, {
+      method: "GET",
+
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return await handleResponse(res);
+  },
+  handleGetFriendsByQuery: async (token: string, query: string) => {
+    console.log("get friends fetch");
+    const res = await fetch(`${BASE_URL}/friends/query/${query}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return await handleResponse(res);
+  },
+  handleSendOrDeleteFriendRequest: async (token: string, dataToSend) => {
+    console.log("invio a ", `${BASE_URL}/friends/request`);
+    const res = await fetch(`${BASE_URL}/friends/request`, {
+      method: "POST",
+      body: JSON.stringify(dataToSend),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return await handleResponse(res);
+  },
   fetchSuspendedEvents: (token: string, offset: number) =>
     fetch(`${BASE_URL}/events/suspendedevenets/all`, {
       method: "POST",

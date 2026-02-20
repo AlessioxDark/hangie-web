@@ -25,6 +25,7 @@ import Notification from "./pages/Notification";
 import { ApiContextProvider } from "@/contexts/ApiContext";
 import EventDetailsMobile from "@/features/events/EventDetailsMobile";
 import AppRouter from "./AppRouter";
+import { FriendsProvider } from "@/contexts/FriendsContext";
 function App() {
   // const location = useLocation();
   // const background = location.state && location.state.backgroundLocation;
@@ -36,13 +37,15 @@ function App() {
           <ScreenProvider>
             <ApiContextProvider>
               <ChatProvider>
-                <SocketProvider>
-                  <NotificationProvider>
-                    <ModalProvider>
-                      <AppRouter />
-                    </ModalProvider>
-                  </NotificationProvider>
-                </SocketProvider>
+                <FriendsProvider>
+                  <SocketProvider>
+                    <NotificationProvider>
+                      <ModalProvider>
+                        <AppRouter />
+                      </ModalProvider>
+                    </NotificationProvider>
+                  </SocketProvider>
+                </FriendsProvider>
               </ChatProvider>
             </ApiContextProvider>
           </ScreenProvider>
