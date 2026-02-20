@@ -1,6 +1,6 @@
 import ResponsiveLayoutWrapper from "@/components/Layouts/ResponsiveLayoutWrapper";
 import React from "react";
-import { Route, Routes, useLocation } from "react-router";
+import { Navigate, Route, Routes, useLocation } from "react-router";
 import EventsSuspended from "./pages/EventsSuspended";
 import EventDetailsMobile from "@/features/events/EventDetailsMobile";
 import Login from "./pages/desktop/Login";
@@ -15,9 +15,11 @@ import ChatsSidebar from "@/features/chats/ChatsSidebar";
 import ChatsEvents from "@/features/chats/ChatsEvents";
 import GroupDetails from "@/features/chats/GroupDetails";
 import Friends from "./pages/Friends";
+import { useAuth } from "@/contexts/AuthContext";
 const AppRouter = () => {
   const location = useLocation();
   const background = location.state && location.state.backgroundLocation;
+
   return (
     <>
       <Routes location={background || location}>

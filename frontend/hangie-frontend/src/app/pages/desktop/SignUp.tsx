@@ -60,7 +60,7 @@ const SignUp = () => {
       .max(24, "L'username può essere lungo massimo 24 caratteri")
       .regex(
         /^[A-Za-z0-9_.]+$/,
-        "L'username può contenere solo lettere, numeri, punti e underscore."
+        "L'username può contenere solo lettere, numeri, punti e underscore.",
       ),
     email: z.string().min(1, "email is required").email("Email non valida"),
     password: z
@@ -110,7 +110,7 @@ const SignUp = () => {
   } = methods;
 
   const [currentStep, setCurrentStep] = useState(0);
-
+  const navigate = useNavigate();
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     console.log("inviato");
     const numeroMese = mesiValidi.indexOf(data.mese);
@@ -173,7 +173,7 @@ const SignUp = () => {
           if (!dati.success) {
             setError("root", { message: dati.error.message });
           } else {
-            <Navigate to={"/"} replace />;
+            navigate("/");
           }
         });
     } catch (error) {
@@ -305,8 +305,8 @@ const SignUp = () => {
                             isCompleted
                               ? "bg-primary"
                               : isActive
-                              ? "bg-primary"
-                              : "bg-[#e5e7eb]"
+                                ? "bg-primary"
+                                : "bg-[#e5e7eb]"
                           }
 	                      ${
                           isCompleted || isActive
@@ -368,8 +368,8 @@ const SignUp = () => {
                     {currentStep !== 2
                       ? "Continua"
                       : isSubmitting
-                      ? "Invio in corso..."
-                      : "Completa Registrazione"}
+                        ? "Invio in corso..."
+                        : "Completa Registrazione"}
                   </span>
                 </button>
               </div>

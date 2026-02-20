@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../config/db.js";
+import { useNavigate } from "react-router";
 
 const authContext = createContext({
   session: null,
@@ -12,6 +13,7 @@ export const AuthContextProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   // Sign Up
+  const navigate = useNavigate();
 
   const signUpNewUser = async ({ email, password }) => {
     const { data, error } = await supabase.auth.signUp({
@@ -41,19 +43,42 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  // useEffect(() => {
+  //   setIsAuthLoading(true);
+  //   supabase.auth.getSession().then(({ data: { session } }) => {
+  //     console.log(session);
+  //     setSession(session);
+  //     setIsAuthLoading(false);
+  //   });
+  //   supabase.auth.onAuthStateChange((_event, session) => {
+  //     console.log(session);
+  //     setSession(session);
+  //     setIsAuthLoading(false);
+  //   });
+  // }, []);
   useEffect(() => {
-    setIsAuthLoading(true);
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log(session);
+    // 1. Definiamo la funzione per recuperare la sessione
+    const getSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setSession(session);
+      setIsAuthLoading(false);
+    };
+
+    getSession();
+
+    // 2. Ascoltiamo i cambiamenti (login/logout)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setIsAuthLoading(false);
     });
-    supabase.auth.onAuthStateChange((_event, session) => {
-      console.log(session);
-      setSession(session);
-      setIsAuthLoading(false);
-    });
-  }, []);
+
+    // Clean up della sottoscrizione
+    return () => subscription.unsubscribe();
+  }, []); // Niente navigate qui dentro!
 
   return (
     <authContext.Provider

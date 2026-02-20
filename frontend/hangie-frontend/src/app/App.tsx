@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import Login from "./pages/desktop/Login";
 import SignUp from "./pages/desktop/SignUp";
 
@@ -26,6 +32,7 @@ import { ApiContextProvider } from "@/contexts/ApiContext";
 import EventDetailsMobile from "@/features/events/EventDetailsMobile";
 import AppRouter from "./AppRouter";
 import { FriendsProvider } from "@/contexts/FriendsContext";
+
 function App() {
   // const location = useLocation();
   // const background = location.state && location.state.backgroundLocation;

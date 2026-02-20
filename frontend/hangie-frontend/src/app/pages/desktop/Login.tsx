@@ -61,12 +61,12 @@ const Login = () => {
       }
 
       console.log("Registrazione completata con successo.");
+      navigate("/");
     } catch (error) {
       console.log(`errore ${error} `);
       setError("root", { message: `errore ${error} ` });
     } finally {
       setIsLoading(false);
-      <Navigate to={"/"} replace />;
     }
   };
 
