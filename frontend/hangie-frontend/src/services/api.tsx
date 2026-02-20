@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000/api";
+const BASE_URL = "https://hangie-web.onrender.com/api";
 const handleResponse = async (res) => {
   console.log("arrivata res", res);
   if (!res.ok) {

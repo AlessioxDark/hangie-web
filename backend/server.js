@@ -48,6 +48,6 @@ app.use("/api/friends", friendsRoutes);
 // app.listen(port, () => {
 // 	console.log(`Server is running on port ${port}`);
 // });
-server.listen(port, "0.0.0.0", () => {
+server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
