@@ -172,6 +172,32 @@ const getByQuery = async (req) => {
     return { data: null, error: err };
   }
 };
+const deleteFriend = async (req) => {
+  try {
+    console.log("ottenendo by query");
+    const { friend_id } = req.body;
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw { message: "Manca Header Auth" };
+    const token = req.headers.authorization.split(" ")[1];
+    const {
+      data: { user },
+      error: tokenError,
+    } = await supabase.auth.getUser(token);
+    if (tokenError) throw tokenError;
+    const { data: FriendsData, error: FriendsError } = await supabase
+      .from("amicizie")
+      .delete()
+      .or(
+        `and(user_id.eq.${user.id},amico_id.eq.${friend_id}),and(user_id.eq.${friend_id},amico_id.eq.${user.id})`,
+      );
+    if (FriendsError) throw FriendsError;
+
+    return { data: { success: true }, error: null };
+  } catch (err) {
+    return { data: null, error: err };
+  }
+};
 module.exports = {
   getAll,
   getPending,
@@ -180,4 +206,5 @@ module.exports = {
   denyRequest,
   getAccepted,
   getByQuery,
+  deleteFriend,
 };

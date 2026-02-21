@@ -14,6 +14,9 @@ const socketHandler = (io) => {
     socket.on("send_request", (data) => {
       io.to(data.receiver_id).emit("sent_request", data);
     });
+    socket.on("delete_friend", (data) => {
+      io.to(data.user_id).emit("deleted_friend", data.friend_id);
+    });
   });
 };
 module.exports = socketHandler;

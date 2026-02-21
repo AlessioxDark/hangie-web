@@ -59,7 +59,23 @@ const FriendItem = ({ friend, setFetchData, type }) => {
       updateUI,
     );
   };
-
+  const deleteFriend = async () => {
+    const saveData = (data) => {
+      currentSocket.emit("delete_friend", {
+        user_id: session.user.id,
+        friend_id: friend.user_id,
+      });
+    };
+    executeApiCall(
+      "friends",
+      () => {
+        return ApiCalls.handleDeleteFriend(session.access_token, {
+          friend_id: friend.user_id,
+        });
+      },
+      saveData,
+    );
+  };
   return (
     <div className="flex flex-row justify-between px-3 py-3 border-b border-[#E2E8F0] last:border-b-0 hover:bg-slate-50 transition-colors duration-200 items-center">
       <div className="flex flex-row items-center gap-3">
@@ -93,7 +109,12 @@ const FriendItem = ({ friend, setFetchData, type }) => {
           </button>
         </div>
       ) : friend.status === "accepted" ? (
-        <span className="text-xs text-green-500 font-bold px-2">Amico</span>
+        <button
+          className="text-xs px-2 py-1.5 bg-red-500 rounded-xl text-bg-1 font-semibold"
+          onClick={deleteFriend}
+        >
+          Rimuovi Amico
+        </button>
       ) : isSent ? (
         <button
           className="px-3 py-2.5 bg-gray-50 text-gray-400 border border-gray-200 rounded-xl text-xs font-semibold"

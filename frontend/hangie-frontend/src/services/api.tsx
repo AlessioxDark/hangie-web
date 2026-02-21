@@ -1,4 +1,4 @@
-const BASE_URL = "https://hangie-web.onrender.com/api";
+const BASE_URL = "http://localhost:3000/api";
 const handleResponse = async (res) => {
   console.log("arrivata res", res);
   if (!res.ok) {
@@ -61,6 +61,18 @@ export const ApiCalls = {
     const res = await fetch(`${BASE_URL}/friends/${userId}`, {
       method: "GET",
 
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return await handleResponse(res);
+  },
+  handleDeleteFriend: async (token: string, dataToSend) => {
+    console.log("gdelete friend");
+    const res = await fetch(`${BASE_URL}/friends/delete`, {
+      method: "DELETE",
+      body: JSON.stringify(dataToSend),
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

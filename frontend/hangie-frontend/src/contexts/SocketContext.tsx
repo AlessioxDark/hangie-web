@@ -52,7 +52,7 @@ export const SocketProvider = ({ children }) => {
     currentGroupDataRef.current = currentGroupData;
   }, [currentGroupData]);
 
-  const SERVER_URL = "https://hangie-web.onrender.com";
+  const SERVER_URL = "http://localhost:3000";
   useEffect(() => {
     if (!session?.user?.id) {
       return;
@@ -778,6 +778,13 @@ export const SocketProvider = ({ children }) => {
         getFriendsData();
       }
     });
+    socket.on("deleted_friend", (data) => {
+      // notifica
+      console.log("arrivato deleted_friend");
+      if (getFriendsData) {
+        getFriendsData();
+      }
+    });
 
     return () => {
       console.log("Pulizia socket e rimozione listener...");
@@ -794,6 +801,7 @@ export const SocketProvider = ({ children }) => {
       socket.off("deleted_event");
       socket.off("voted_event");
       socket.off("sent_request");
+      socket.off("deleted_friend");
       socket.disconnect();
     };
   }, [

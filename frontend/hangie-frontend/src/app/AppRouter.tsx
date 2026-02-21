@@ -16,6 +16,7 @@ import ChatsEvents from "@/features/chats/ChatsEvents";
 import GroupDetails from "@/features/chats/GroupDetails";
 import Friends from "./pages/Friends";
 import { useAuth } from "@/contexts/AuthContext";
+import Profile from "./pages/Profile";
 const AppRouter = () => {
   const location = useLocation();
   const background = location.state && location.state.backgroundLocation;
@@ -42,6 +43,14 @@ const AppRouter = () => {
           element={
             <ResponsiveLayoutWrapper>
               <Notification />
+            </ResponsiveLayoutWrapper>
+          }
+        ></Route>
+        <Route
+          path="/profile"
+          element={
+            <ResponsiveLayoutWrapper>
+              <Profile />
             </ResponsiveLayoutWrapper>
           }
         ></Route>

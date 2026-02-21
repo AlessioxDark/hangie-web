@@ -21,7 +21,7 @@ const EventDetailsModal = () => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `https://hangie-web.onrender.com/api/events/${eventId}`,
+        `http://localhost:3000/api/events/${eventId}`,
         {
           method: "GET",
           // body: JSON.stringify({ offset: offset }),

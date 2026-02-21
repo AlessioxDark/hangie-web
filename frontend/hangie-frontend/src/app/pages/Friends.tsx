@@ -102,7 +102,7 @@ const Friends = () => {
 
     if (query === "") {
       return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           {/* SEZIONE RICHIESTE PENDENTI */}
           <div className="flex flex-col gap-2">
             <div

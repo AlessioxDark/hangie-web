@@ -51,9 +51,9 @@ const acceptFriendRequest = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-const denyFriendRequest = async (req, res) => {
+const deleteFriend = async (req, res) => {
   try {
-    const { data, error } = await Friends.denyRequest(req); // Chiama il modello per ottenere gli eventi
+    const { data, error } = await Friends.deleteFriend(req); // Chiama il modello per ottenere gli eventi
     if (error) {
       console.log(error);
     }
@@ -95,7 +95,7 @@ module.exports = {
   getPendingFriends,
   sendFriendRequest,
   acceptFriendRequest,
-  denyFriendRequest,
+  deleteFriend,
   GetFriends,
   GetFriendsByQuery,
 };

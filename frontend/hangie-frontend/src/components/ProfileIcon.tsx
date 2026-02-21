@@ -29,7 +29,7 @@ const ProfileIcon = ({ user_id }) => {
     try {
       if (user_id != undefined) {
         const response = await fetch(
-          `https://hangie-web.onrender.com/api/profile/getpfp/${user_id}`,
+          `http://localhost:3000/api/profile/getpfp/${user_id}`,
           {
             method: "GET",
             headers: {
