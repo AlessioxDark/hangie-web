@@ -32,6 +32,7 @@ import { ApiContextProvider } from "@/contexts/ApiContext";
 import EventDetailsMobile from "@/features/events/EventDetailsMobile";
 import AppRouter from "./AppRouter";
 import { FriendsProvider } from "@/contexts/FriendsContext";
+import { ProfileProvider } from "@/contexts/ProfileContext";
 
 function App() {
   // const location = useLocation();
@@ -45,13 +46,15 @@ function App() {
             <ApiContextProvider>
               <ChatProvider>
                 <FriendsProvider>
-                  <SocketProvider>
-                    <NotificationProvider>
-                      <ModalProvider>
-                        <AppRouter />
-                      </ModalProvider>
-                    </NotificationProvider>
-                  </SocketProvider>
+                  <ProfileProvider>
+                    <SocketProvider>
+                      <NotificationProvider>
+                        <ModalProvider>
+                          <AppRouter />
+                        </ModalProvider>
+                      </NotificationProvider>
+                    </SocketProvider>
+                  </ProfileProvider>
                 </FriendsProvider>
               </ChatProvider>
             </ApiContextProvider>

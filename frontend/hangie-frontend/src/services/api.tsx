@@ -80,6 +80,17 @@ export const ApiCalls = {
     });
     return await handleResponse(res);
   },
+  handleGetProfile: async (token: string) => {
+    console.log("ottengo profile");
+    const res = await fetch(`${BASE_URL}/profile`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return await handleResponse(res);
+  },
   handleGetFriendsByQuery: async (token: string, query: string) => {
     console.log("get friends fetch");
     const res = await fetch(`${BASE_URL}/friends/query/${query}`, {

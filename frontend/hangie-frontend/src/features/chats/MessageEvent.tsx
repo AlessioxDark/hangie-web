@@ -67,76 +67,7 @@ const MessageEvent = ({ event_details, group_id }) => {
       prevStatus,
     );
   };
-  // --- Logica Contenuto Bottone ---
-  // const getButtonContent = useCallback(() => {
-  //   if (session.user.id === event_details.utente.user_id) {
-  //     return null;
-  //   }
-  //   if (isDeadlinePassed) {
-  //     return (
-  //       <button
-  //         disabled
-  //         className="w-full px-6 py-3 bg-gray-100 text-gray-700 border border-gray-300 font-bold rounded-xl
-  //                 transition-colors duration-300 text-lg shadow-inner cursor-not-allowed opacity-80"
-  //       >
-  //         Evento Concluso / Scaduto
-  //       </button>
-  //     );
-  //   } else {
-  //     console.log("lo status è", event_details.status);
-  //     return (
-  // <div className="w-full flex flex-row gap-4">
-  //   <button
-  //     className={`flex-1 ${event_details.status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-6 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer font-bold
-  //              hover:bg-primary/80`}
-  //     onClick={(e) => {
-  //       e.stopPropagation();
-  //       e.preventDefault();
-  //       const newStatus =
-  //         event_details.status == "accepted" ? "pending" : "accepted";
 
-  //       handleEventDecision(
-  //         event_details.event_id,
-  //         {
-  //           status: newStatus,
-  //         },
-  //         () => {
-  //           sendSocketVoteEvent(newStatus, prevStatus);
-  //           setPrevStatus(newStatus);
-  //         },
-  //       );
-  //     }}
-  //   >
-  //     Accetta
-  //   </button>
-
-  //   <button
-  //     className={`flex-1 ${event_details.status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-6 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer font-bold
-  //              hover:bg-primary/80`}
-  //     onClick={(e) => {
-  //       e.stopPropagation();
-  //       e.preventDefault();
-  //       const newStatus =
-  //         event_details.status == "rejected" ? "pending" : "rejected";
-
-  //       handleEventDecision(
-  //         event_details.event_id,
-  //         {
-  //           status: newStatus,
-  //         },
-  //         () => {
-  //           sendSocketVoteEvent(newStatus, prevStatus);
-  //           setPrevStatus(newStatus);
-  //         },
-  //       );
-  //     }}
-  //   >
-  //     Rifiuta
-  //   </button>
-  // </div>
-  //     );
-  //   }
-  // }, [event_details]);
   console.log("message", event_details);
   const acceptedParticipants = event_details.risposte_evento.filter(
     (r) => r.status == "accepted",
@@ -148,7 +79,7 @@ const MessageEvent = ({ event_details, group_id }) => {
     >
       <div
         className={` flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden
-      shadow-xl transition-all duration-300   hover:shadow-2xl max-w-full mr-4
+      shadow-xl transition-all duration-300   hover:shadow-2xl  mr-4
        2xl:min-w-sm  my-2 cursor-pointer ${event_details.status == "rejected" && "grayscale opacity-75"}`}
         onClick={() => {
           openModal({

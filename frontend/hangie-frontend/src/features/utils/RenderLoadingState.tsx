@@ -30,6 +30,10 @@ const RenderLoadingState = ({ type }) => {
       main: "Caricamento amici in corso in corso...",
       alt: "Stiamo cercando i tuoi amici",
     },
+    profile: {
+      main: "Caricamento del profilo in corso in corso...",
+      alt: "Stiamo cercando il tuo profilo",
+    },
   };
   return (
     <div className="flex flex-col items-center justify-center py-20 px-4 w-full h-full ">

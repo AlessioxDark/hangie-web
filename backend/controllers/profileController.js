@@ -1,19 +1,42 @@
-const Profile = require('../models/profileModel');
+const Profile = require("../models/profileModel");
 
 const getPfp = async (req, res) => {
-	const token = req.headers.authorization.split(' ')[1];
+  try {
+    const { data, error } = await Profile.getPfp(req);
+    if (error) throw error;
 
-	const { data, error } = await Profile.getPfp(req, token);
-	if (error) {
-		return res.status(400).json({
-			success: false,
-			error: { message: 'Token non valido o scaduto.' },
-		});
-	}
-
-	res.status(200).json({ success: true, message: 'pfp trovata', data: data });
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a trovare la pfp",
+      details: err.message,
+    });
+  }
+};
+const getData = async (req, res) => {
+  try {
+    const { data, error } = await Profile.getData(req);
+    if (error) throw error;
+    res.status(200).json({
+      success: true,
+      message: "Operazione completata con successo",
+      data: data,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Non siamo riusciti a trovare la pfp",
+      details: err.message,
+    });
+  }
 };
 
 module.exports = {
-	getPfp,
+  getPfp,
+  getData,
 };
