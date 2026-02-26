@@ -20,7 +20,6 @@ import Profile from "./pages/Profile";
 const AppRouter = () => {
   const location = useLocation();
   const background = location.state && location.state.backgroundLocation;
-
   return (
     <>
       <Routes location={background || location}>
@@ -47,7 +46,7 @@ const AppRouter = () => {
           }
         ></Route>
         <Route
-          path="/profile"
+          path="/profile/:userHandle"
           element={
             <ResponsiveLayoutWrapper>
               <Profile />

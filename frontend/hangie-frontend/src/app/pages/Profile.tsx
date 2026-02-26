@@ -1,12 +1,16 @@
+import ChevronLeft from "@/assets/icons/ChevronLeft";
 import KarmaBadge from "@/components/profile/KarmaBadge";
 import StatBlock from "@/components/profile/StatBlock";
 import ProfileIcon from "@/components/ProfileIcon";
 import { useApi } from "@/contexts/ApiContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import { useProfile } from "@/contexts/ProfileContext";
+import EventCard from "@/features/events/EventCard";
 import RenderErrorState from "@/features/utils/RenderErrorState";
 import RenderLoadingState from "@/features/utils/RenderLoadingState";
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 
 /* ─────────────────────────────────────────────────────────────
    Design Tokens (strict palette)
@@ -22,6 +26,7 @@ const P = {
   t2: "#64748b",
   t3: "#94a3b8",
 };
+
 /* ─────────────────────────────────────────────────────────────
    Helpers
 ───────────────────────────────────────────────────────────── */
@@ -274,7 +279,10 @@ const FriendStrip = ({ friends = [] }) => {
    MAIN COMPONENT
 ───────────────────────────────────────────────────────────── */
 const Profile = () => {
+  const navigate = useNavigate();
+
   const { profileData } = useProfile();
+  const { session } = useAuth();
   const { homeEventsData } = useChat();
   const { loading, error } = useApi();
   const [activeTab, setActiveTab] = useState("programma");
@@ -297,31 +305,34 @@ const Profile = () => {
         return d >= now && (e.status === "accepted" || e.status === "pending");
       });
     if (activeTab === "organizzati")
-      return allEvents.filter((e) => e.created_by === profileData.user_id);
+      return allEvents.filter((e) => e.created_by === session.user.id);
     if (activeTab === "passati")
       return allEvents.filter(
-        (e) => new Date(e.data) < now && e.status === "accepted",
+        (e) =>
+          new Date(e.data) < now &&
+          (e.status === "accepted" || e.status == "rejected"),
       );
     return [];
   };
-
+  // risolcvere bug eventi gestire aspetto
   const filtered = getFilteredEvents();
-  const totalAccepted = homeEventsData.accepted?.length ?? 0;
-  const totalOrganized = allEvents.filter(
-    (e) => e.created_by === profileData.user_id,
-  ).length;
-  const pastAttended = allEvents.filter(
-    (e) => new Date(e.data) < now && e.status === "accepted",
-  ).length;
+
   const karma = profileData?.karma ?? 82;
   const friends = profileData?.friends ?? [];
-  const isOwnProfile = true; // sostituisci con logica reale (es. profileData.user_id === currentUser.id)
+  const isOwnProfile = session.user.id == profileData?.user_id; // sostituisci con logica reale (es. profileData.user_id === currentUser.id)
 
   return (
-    <div className="flex flex-col " style={{ background: P.bg2 }}>
+    <div className="flex flex-col " style={{ background: P.bg1 }}>
       {/* ── HEADER CARD ── */}
       <div style={{ background: P.bg1, borderBottom: `1px solid ${P.bg3}` }}>
         {/* Avatar + Name + Karma */}
+        {!isOwnProfile && (
+          <div>
+            <div className="w-8 h-8" onClick={navigate(-1)}>
+              <ChevronLeft color={"#2463eb"} />
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between px-4 pt-8 pb-5">
           <div className="flex items-center gap-4">
             <div className="w-[60px] h-[60px] rounded-2xl overflow-hidden shrink-0">
@@ -372,7 +383,7 @@ const Profile = () => {
         </div>
 
         {/* CTA */}
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-4 " style={{ background: P.bg1 }}>
           {isOwnProfile ? (
             <button
               className="w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
@@ -392,7 +403,7 @@ const Profile = () => {
               >
                 Aggiungi amico
               </button>
-              <button
+              {/* <button
                 className="px-5 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
                 style={{
                   background: P.bg2,
@@ -401,7 +412,7 @@ const Profile = () => {
                 }}
               >
                 Messaggio
-              </button>
+              </button> */}
             </div>
           )}
         </div>
@@ -410,31 +421,40 @@ const Profile = () => {
         <FriendStrip friends={friends} />
 
         {/* Tabs */}
-        <TabBar active={activeTab} onChange={setActiveTab} />
-      </div>
-
-      {/* ── EVENTI ── */}
-      <div className="px-4 pt-4 space-y-3">
-        {filtered.length === 0 ? (
-          <EmptyState tab={activeTab} />
-        ) : (
-          filtered.map((event) => (
-            <EventRow
-              key={event.id}
-              event={event}
-              isOwner={event.created_by === profileData.user_id}
-            />
-          ))
+        {(isOwnProfile || profileData?.privacy_profilo !== "private") && (
+          <TabBar active={activeTab} onChange={setActiveTab} />
         )}
       </div>
 
-      {filtered.length > 0 && (
-        <p
-          className="text-center text-xs mt-6 pb-2 font-semibold"
-          style={{ color: P.t3 }}
-        >
-          {filtered.length} event{filtered.length !== 1 ? "i" : "o"}
-        </p>
+      {/* ── EVENTI ── */}
+      {isOwnProfile || profileData?.privacy_profilo !== "private" ? (
+        <>
+          <div className="px-4 pt-4 space-y-3 ">
+            {filtered.length === 0 ? (
+              <EmptyState tab={activeTab} />
+            ) : (
+              filtered.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  // isOwner={event.created_by === profileData.user_id}
+                />
+              ))
+            )}
+          </div>
+          {filtered.length > 0 && (
+            <p
+              className="text-center text-xs mt-6 pb-2 font-semibold"
+              style={{ color: P.t3 }}
+            >
+              {filtered.length} event{filtered.length !== 1 ? "i" : "o"}
+            </p>
+          )}
+        </>
+      ) : (
+        <div>
+          <p>questo profilo è privato</p>
+        </div>
       )}
     </div>
   );

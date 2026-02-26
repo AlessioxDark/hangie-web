@@ -80,12 +80,12 @@ export const ApiCalls = {
     });
     return await handleResponse(res);
   },
-  handleGetProfile: async (token: string) => {
+  handleGetProfile: async (handle: string) => {
     console.log("ottengo profile");
-    const res = await fetch(`${BASE_URL}/profile`, {
+    const res = await fetch(`${BASE_URL}/profile/${handle}`, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
+        // Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });

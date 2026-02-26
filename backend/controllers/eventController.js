@@ -13,6 +13,8 @@ const getAllEvents = async (req, res) => {
         titolo: response.eventi.titolo,
         group_id: response.eventi.group_id,
         descrizione: response.eventi.descrizione,
+        created_by: response.eventi.created_by,
+
         cover_img: response.eventi.cover_img,
         event_imgs: response.eventi.event_imgs,
         luogo: response.eventi.luoghi, // Attenzione, qui è 'luoghi' non 'luogo'
@@ -177,7 +179,6 @@ const getSuspendedEvents = async (req, res) => {
         costo: response.eventi.costo,
         data: response.eventi.data,
         group_id: response.eventi.group_id,
-
         titolo: response.eventi.titolo,
         descrizione: response.eventi.descrizione,
         cover_img: response.eventi.cover_img,

@@ -1,10 +1,11 @@
+import { useProfile } from "@/contexts/ProfileContext";
 import SidebarIcons from "@/utils/SidebarIcons";
 import React from "react";
 import { Link } from "react-router-dom";
 
 const BottomNav = () => {
   type ValidPath = `/${string}`;
-
+  const { defaultHandle } = useProfile();
   const isLinkActive = (linkPath: ValidPath): boolean => {
     // Gestione più robusta del path attivo
     if (linkPath === "/") {
@@ -41,7 +42,7 @@ const BottomNav = () => {
     {
       id: 4,
       title: "Profilo",
-      link: "/profile",
+      link: `/profile/${defaultHandle}`,
       description: "Impostazioni account",
     },
   ];
