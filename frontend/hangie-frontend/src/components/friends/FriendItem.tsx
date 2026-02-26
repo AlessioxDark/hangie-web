@@ -4,12 +4,14 @@ import { ApiCalls } from "@/services/api";
 import { useState } from "react";
 import ProfileIcon from "../ProfileIcon";
 import { useSocket } from "@/contexts/SocketContext";
+import { useNavigate } from "react-router";
 
 const FriendItem = ({ friend, setFetchData, type }) => {
   const [isSent, setIsSent] = useState(friend.status === "pending");
   const { executeApiCall } = useApi();
   const { session } = useAuth();
   const { currentSocket } = useSocket();
+  const navigate = useNavigate();
   const handleAction = async (actionType) => {
     // Mapping delle azioni verso lo status del DB
     const statusMap = {
@@ -77,7 +79,14 @@ const FriendItem = ({ friend, setFetchData, type }) => {
     );
   };
   return (
-    <div className="flex flex-row justify-between px-3 py-3 border-b border-[#E2E8F0] last:border-b-0 hover:bg-slate-50 transition-colors duration-200 items-center">
+    <div
+      className="flex flex-row justify-between px-3 py-3 border-b border-[#E2E8F0] last:border-b-0 hover:bg-slate-50 transition-colors duration-200 items-center"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        navigate(`/profile/${friend.handle}`);
+      }}
+    >
       <div className="flex flex-row items-center gap-3">
         <div className="w-12 h-12 flex-shrink-0">
           <ProfileIcon user_id={friend.user_id} />

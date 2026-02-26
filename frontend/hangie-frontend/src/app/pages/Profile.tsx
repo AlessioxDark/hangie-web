@@ -328,7 +328,7 @@ const Profile = () => {
         {/* Avatar + Name + Karma */}
         {!isOwnProfile && (
           <div>
-            <div className="w-8 h-8" onClick={navigate(-1)}>
+            <div className="w-8 h-8" onClick={() => navigate(-1)}>
               <ChevronLeft color={"#2463eb"} />
             </div>
           </div>
