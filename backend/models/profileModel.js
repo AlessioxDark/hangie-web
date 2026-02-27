@@ -48,6 +48,7 @@ const getData = async (req) => {
         .from("eventi")
         .select("*", { count: "exact", head: true })
         .eq("created_by", user_id);
+
     if (createdEventsCountError) throw createdEventsCountError;
     const { data: acceptedEvents, error: acceptedEventsError } = await supabase
       .from("risposte_eventi")
@@ -56,6 +57,55 @@ const getData = async (req) => {
       .eq("status", "accepted");
     if (acceptedEventsError) throw acceptedEventsError;
     console.log("i profilidata", profileData);
+
+    const { data: eventsData, error: eventsError } = await supabase
+      .from("risposte_eventi")
+      .select(
+        "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(group_id,nome,group_cover_img,group_id,partecipanti_gruppo(partecipante_id)))",
+      )
+      .eq("user_id", user_id);
+    const eventIds = eventsData.map((e) => e.eventi.event_id);
+
+    const { data: eventParticipants, error: eventParticipantsError } =
+      await supabase
+        .from("risposte_eventi")
+        .select("status,utente:utenti(*),eventi(*),created_at,is_creator")
+        .in("eventi.event_id", eventIds);
+
+    const eventParticipantsMap = eventParticipants.reduce((acc, curr) => {
+      if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
+      acc[curr.eventi.event_id].push({
+        utenti: curr.utente,
+        status: curr.status,
+        is_creator: curr.is_creator,
+        created_at: curr.created_at,
+      });
+      return acc;
+    }, {});
+    if (eventParticipantsError) throw eventParticipantsError;
+    if (eventsError) throw eventsError;
+
+    const newEventsData = eventsData.map((e) => {
+      return {
+        event_id: e.event_id,
+        status: e.status, // Stato (pending, accepted, refused)
+        costo: e.eventi.costo,
+        data: e.eventi.data,
+        titolo: e.eventi.titolo,
+        group_id: e.eventi.group_id,
+        descrizione: e.eventi.descrizione,
+        created_by: e.eventi.created_by,
+
+        cover_img: e.eventi.cover_img,
+        event_imgs: e.eventi.event_imgs,
+        luogo: e.eventi.luoghi, // Attenzione, qui è 'luoghi' non 'luogo'
+        utente: e.eventi.utenti,
+        gruppo: e.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
+        scadenza: e.eventi.data_scadenza,
+        risposte_evento: eventParticipantsMap[e.event_id],
+      };
+      // return { ...e.eventi, status: e.status };
+    });
     return {
       data: {
         ...profileData,
@@ -65,6 +115,7 @@ const getData = async (req) => {
         ).length,
         createdEventsCount,
         friendsCount,
+        newEventsData,
       },
       error: null,
     };

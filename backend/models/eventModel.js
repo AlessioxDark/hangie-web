@@ -99,7 +99,7 @@ const getAll = async (req) => {
     // risolvere bug ricerca eventi su incognito
     if (risposteError) throw risposteError;
 
-    console.log("risposte", risposte, eventsList);
+    // console.log("risposte", risposte, eventsList);
 
     const { data: eventParticipants, error: eventParticipantsError } =
       await supabase

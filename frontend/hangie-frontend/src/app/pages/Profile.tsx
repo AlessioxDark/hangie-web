@@ -293,9 +293,10 @@ const Profile = () => {
 
   const now = new Date();
   const allEvents = [
-    ...(homeEventsData.accepted ?? []),
-    ...(homeEventsData.rejected ?? []),
-    ...(homeEventsData.pending ?? []),
+    ...(profileData?.newEventsData ?? []),
+    // ...(homeEventsData.accepted ?? []),
+    // ...(homeEventsData.rejected ?? []),
+    // ...(homeEventsData.pending ?? []),
   ];
 
   const getFilteredEvents = () => {
@@ -333,7 +334,9 @@ const Profile = () => {
             </div>
           </div>
         )}
-        <div className="flex items-center justify-between px-4 pt-8 pb-5">
+        <div
+          className={`flex items-center justify-between px-4 ${isOwnProfile && "pt-8"} pb-5`}
+        >
           <div className="flex items-center gap-4">
             <div className="w-[60px] h-[60px] rounded-2xl overflow-hidden shrink-0">
               <ProfileIcon user_id={profileData?.user_id} />
@@ -384,18 +387,7 @@ const Profile = () => {
 
         {/* CTA */}
         <div className="px-4 pb-4 " style={{ background: P.bg1 }}>
-          {isOwnProfile ? (
-            <button
-              className="w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
-              style={{
-                background: P.bg2,
-                border: `1px solid ${P.bg3}`,
-                color: P.t1,
-              }}
-            >
-              Modifica Profilo
-            </button>
-          ) : (
+          {!isOwnProfile && (
             <div className="flex gap-3">
               <button
                 className="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
@@ -421,40 +413,30 @@ const Profile = () => {
         <FriendStrip friends={friends} />
 
         {/* Tabs */}
-        {(isOwnProfile || profileData?.privacy_profilo !== "private") && (
-          <TabBar active={activeTab} onChange={setActiveTab} />
-        )}
+        <TabBar active={activeTab} onChange={setActiveTab} />
       </div>
 
       {/* ── EVENTI ── */}
-      {isOwnProfile || profileData?.privacy_profilo !== "private" ? (
-        <>
-          <div className="px-4 pt-4 space-y-3 ">
-            {filtered.length === 0 ? (
-              <EmptyState tab={activeTab} />
-            ) : (
-              filtered.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  // isOwner={event.created_by === profileData.user_id}
-                />
-              ))
-            )}
-          </div>
-          {filtered.length > 0 && (
-            <p
-              className="text-center text-xs mt-6 pb-2 font-semibold"
-              style={{ color: P.t3 }}
-            >
-              {filtered.length} event{filtered.length !== 1 ? "i" : "o"}
-            </p>
-          )}
-        </>
-      ) : (
-        <div>
-          <p>questo profilo è privato</p>
-        </div>
+      <div className="px-4 pt-4 space-y-3 ">
+        {filtered.length === 0 ? (
+          <EmptyState tab={activeTab} />
+        ) : (
+          filtered.map((event) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              // isOwner={event.created_by === profileData.user_id}
+            />
+          ))
+        )}
+      </div>
+      {filtered.length > 0 && (
+        <p
+          className="text-center text-xs mt-6 pb-2 font-semibold"
+          style={{ color: P.t3 }}
+        >
+          {filtered.length} event{filtered.length !== 1 ? "i" : "o"}
+        </p>
       )}
     </div>
   );
