@@ -1,7 +1,6 @@
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
-import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import { useEffect, useMemo, useState } from "react";
 import AddParticipantsGroup from "./AddParticipantsGroup";

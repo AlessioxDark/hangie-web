@@ -6,7 +6,6 @@ import React, {
   useState,
 } from "react";
 import { useAuth } from "./AuthContext";
-import { useMobileLayout } from "./MobileLayoutChatContext.js";
 import { useScreen } from "./ScreenContext.js";
 import { type Message, type UUID, type GroupData } from "../types/chat.tsx";
 import { ApiCalls } from "@/services/api.tsx";
@@ -74,7 +73,6 @@ export const ChatProvider = ({ children }) => {
   const { currentSocket } = useSocket();
   const [groupEventsData, setGroupEventsData] = useState(null);
   const [currentEventData, setCurrentEventData] = useState({});
-  const { setMobileView } = useMobileLayout();
   const { currentScreen } = useScreen();
   const { isAuthLoading, session } = useAuth();
 

@@ -14,7 +14,6 @@ import FormInputCollection from "../CreateEventForm/FormInputCollection.js";
 import ChevronLeft from "@/assets/icons/ChevronLeft.tsx";
 import ChevronRight from "@/assets/icons/ChevronRight.tsx";
 import { useScreen } from "@/contexts/ScreenContext.tsx";
-import { useMobileLayout } from "@/contexts/MobileLayoutChatContext.js";
 import { useSocket } from "@/contexts/SocketContext.tsx";
 import { useApi } from "@/contexts/ApiContext.tsx";
 import { ApiCalls } from "@/services/api.tsx";
@@ -96,7 +95,6 @@ const CreateEventForm = () => {
   const { error: errorsApi } = useApi();
   const { currentScreen } = useScreen();
   const { executeApiCall, loading } = useApi();
-  const { setMobileView } = useMobileLayout();
   const [currentStep, setCurrentStep] = useState(1);
   const [imageError, setImageError] = useState(false); // Stato per l'errore
   const sendEvent = (event_id, event_details, message_details) => {

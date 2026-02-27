@@ -5,7 +5,6 @@ import ProfileIcon from "@/components/ProfileIcon";
 import { useModal } from "@/contexts/ModalContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import EventPageMobile from "./EventPageMobile";
-import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { Link, useLocation } from "react-router";
 import { useChat } from "@/contexts/ChatContext";
 

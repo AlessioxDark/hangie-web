@@ -1,2 +1,7 @@
-risolvere errori di npm run build
-aggiungere resonsive
+mettere messaggi schermi grandi
+sistemar register e login che vadano e no preferenze e data
+controllare che tutte le funzionalità funzionino
+
+TASTO LOG OUT sotto profilo
+
+risolvere bug lentezza desktop

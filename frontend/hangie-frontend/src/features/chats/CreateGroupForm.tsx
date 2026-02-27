@@ -1,5 +1,4 @@
 import ChevronLeft from "@/assets/icons/ChevronLeft";
-import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -31,8 +30,6 @@ const GroupSchema = z.object({
     .max(350, "La descrizione può essere massimo 350 caratteri"),
 });
 const CreateGroupForm = () => {
-  const { setMobileView } = useMobileLayout();
-
   const methods = useForm({
     resolver: zodResolver(GroupSchema),
     mode: "onSubmit",

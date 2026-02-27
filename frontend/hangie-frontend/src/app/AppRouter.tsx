@@ -5,7 +5,6 @@ import EventsSuspended from "./pages/EventsSuspended";
 import EventDetailsMobile from "@/features/events/EventDetailsMobile";
 import Login from "./pages/desktop/Login";
 import SignUp from "./pages/desktop/SignUp";
-import Notification from "./pages/Notification";
 import Home from "./pages/Home";
 import ModalHandler from "@/features/modal/ModalHandler";
 import EventDetailsModal from "@/features/modal/EventDetailsModal";
@@ -37,14 +36,7 @@ const AppRouter = () => {
             ></Route>
           </>
         )}
-        <Route
-          path="/notifications"
-          element={
-            <ResponsiveLayoutWrapper>
-              <Notification />
-            </ResponsiveLayoutWrapper>
-          }
-        ></Route>
+
         <Route
           path="/profile/:userHandle"
           element={

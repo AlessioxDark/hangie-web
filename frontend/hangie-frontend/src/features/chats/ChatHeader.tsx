@@ -2,7 +2,6 @@ import CalendarIcon from "@/assets/icons/CalendarIcon";
 import ChevronLeft from "@/assets/icons/ChevronLeft";
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useChat } from "@/contexts/ChatContext";
-import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import React from "react";
 import { useNavigate } from "react-router";

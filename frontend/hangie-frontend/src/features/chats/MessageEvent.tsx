@@ -15,7 +15,6 @@ import {
   XCircle,
 } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
-import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { Link, useLocation } from "react-router";
 import { useScreen } from "@/contexts/ScreenContext";
 import { useSocket } from "@/contexts/SocketContext";
@@ -223,6 +222,7 @@ const MessageEvent = ({ event_details, group_id }) => {
                       },
                     );
                   }}
+                  disabled={event_details.scadenza < new Date.now()}
                 >
                   Accetta
                 </button>
@@ -230,6 +230,7 @@ const MessageEvent = ({ event_details, group_id }) => {
                 <button
                   className={`flex-1 ${event_details.status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-6 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer font-bold
                      hover:bg-primary/80`}
+                  disabled={event_details.scadenza < new Date.now()}
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();

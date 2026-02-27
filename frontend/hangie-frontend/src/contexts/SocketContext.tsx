@@ -3,9 +3,9 @@ import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useChat } from "./ChatContext";
 import { type GroupData } from "@/types/chat";
-import { useMobileLayout } from "./MobileLayoutChatContext";
 import { useLocation, useNavigate } from "react-router";
 import { useFriends } from "./FriendsContext";
+import { useScreen } from "./ScreenContext";
 
 const SocketContext = createContext({
   currentSocket: null,
@@ -41,7 +41,7 @@ export const SocketProvider = ({ children }) => {
     setCurrentEventData,
   } = useChat();
   const { session } = useAuth();
-  const { setMobileView } = useMobileLayout();
+  const { currentScreen } = useScreen();
   const { getFriendsData } = useFriends();
   const currentGroupDataRef = useRef<null | GroupData>(null);
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ export const SocketProvider = ({ children }) => {
 
   const SERVER_URL = "http://localhost:3000";
   useEffect(() => {
-    if (!session?.user?.id) {
+    if (!session?.user?.id || currentScreen !== "xs") {
       return;
     }
 

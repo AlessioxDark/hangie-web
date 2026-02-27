@@ -106,9 +106,33 @@ const getData = async (req) => {
       };
       // return { ...e.eventi, status: e.status };
     });
+
+    const acceptedPastEvents = eventsData.filter(
+      (e) => e.eventi.data < new Date().toISOString() && e.status == "accepted",
+    );
+    const rejectedPastEvents = eventsData.filter(
+      (e) => e.eventi.data < new Date().toISOString() && e.status == "rejected",
+    );
+
+    console.log("acceptedpas", acceptedPastEvents, eventsData);
+    console.log("rejectedpast", rejectedPastEvents);
+    const bonusOrganizzatore = createdEventsCount * 20;
+    const nuovoKarma =
+      100 +
+      acceptedPastEvents.length * 10 -
+      rejectedPastEvents.length * 20 +
+      bonusOrganizzatore;
+    const { error: karmaError } = await supabase
+      .from("utenti")
+      .update({
+        karma: nuovoKarma,
+      })
+      .eq("user_id", user_id);
+    if (karmaError) throw karmaError;
     return {
       data: {
         ...profileData,
+        karma: nuovoKarma,
         acceptedEventsCount: acceptedEvents.length,
         pastAttendedCount: acceptedEvents.filter(
           (e) => e.eventi.data < Date.now(),

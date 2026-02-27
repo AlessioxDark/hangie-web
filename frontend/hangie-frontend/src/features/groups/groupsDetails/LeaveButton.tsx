@@ -1,7 +1,6 @@
 import { useApi } from "@/contexts/ApiContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
-import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 import { useSocket } from "@/contexts/SocketContext";
 import { ApiCalls } from "@/services/api";
 import React from "react";

@@ -24,10 +24,8 @@ import EventsSuspended from "./pages/EventsSuspended";
 import Home from "./pages/Home";
 import ResponsiveLayoutWrapper from "../components/Layouts/ResponsiveLayoutWrapper";
 import { ScreenProvider } from "@/contexts/ScreenContext";
-import { MobileLayoutChatProvider } from "@/contexts/MobileLayoutChatContext";
 import { SocketProvider } from "@/contexts/SocketContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
-import Notification from "./pages/Notification";
 import { ApiContextProvider } from "@/contexts/ApiContext";
 import EventDetailsMobile from "@/features/events/EventDetailsMobile";
 import AppRouter from "./AppRouter";
@@ -41,25 +39,23 @@ function App() {
   return (
     <BrowserRouter>
       <AuthContextProvider>
-        <MobileLayoutChatProvider>
-          <ScreenProvider>
-            <ApiContextProvider>
-              <ChatProvider>
-                <FriendsProvider>
-                  <ProfileProvider>
-                    <SocketProvider>
-                      <NotificationProvider>
-                        <ModalProvider>
-                          <AppRouter />
-                        </ModalProvider>
-                      </NotificationProvider>
-                    </SocketProvider>
-                  </ProfileProvider>
-                </FriendsProvider>
-              </ChatProvider>
-            </ApiContextProvider>
-          </ScreenProvider>
-        </MobileLayoutChatProvider>
+        <ScreenProvider>
+          <ApiContextProvider>
+            <ChatProvider>
+              <FriendsProvider>
+                <ProfileProvider>
+                  <SocketProvider>
+                    <NotificationProvider>
+                      <ModalProvider>
+                        <AppRouter />
+                      </ModalProvider>
+                    </NotificationProvider>
+                  </SocketProvider>
+                </ProfileProvider>
+              </FriendsProvider>
+            </ChatProvider>
+          </ApiContextProvider>
+        </ScreenProvider>
       </AuthContextProvider>
     </BrowserRouter>
   );

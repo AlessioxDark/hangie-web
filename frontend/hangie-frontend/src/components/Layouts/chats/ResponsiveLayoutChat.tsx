@@ -2,8 +2,6 @@ import { useScreen } from "@/contexts/ScreenContext";
 import React from "react";
 import LayoutChatDesktop from "./LayoutChatDesktop";
 import LayoutChatMedium from "./LayoutChatMedium";
-import LayoutChatMobile from "./LayoutChatMobile";
-import { MobileLayoutChatProvider } from "@/contexts/MobileLayoutChatContext";
 
 const ResponsiveLayoutChat = () => {
   const { currentScreen } = useScreen();

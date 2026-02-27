@@ -1,14 +1,12 @@
 import GroupCard from "@/features/groups/GroupCard.js";
 
 import { Plus } from "lucide-react";
-import { useMobileLayout } from "@/contexts/MobileLayoutChatContext.js";
 import { useChat } from "@/contexts/ChatContext.js";
 import RenderLoadingState from "../utils/RenderLoadingState";
 import RenderErrorState from "../utils/RenderErrorState";
 import RenderEmptyState from "../utils/RenderEmptyState";
 import { useApi } from "@/contexts/ApiContext";
 const ChatsSidebar = () => {
-  const { setMobileView } = useMobileLayout();
   const { groupsData, fetchGroups } = useChat();
   const { error, loading } = useApi();
 
@@ -37,9 +35,7 @@ const ChatsSidebar = () => {
           </h1>
           <div
             className="bg-primary rounded-full p-2 flex items-center justify-center "
-            onClick={() => {
-              setMobileView("CREATE_GROUP");
-            }}
+            onClick={() => {}}
           >
             <Plus className="text-bg-1" />
           </div>
