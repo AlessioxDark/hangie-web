@@ -172,13 +172,13 @@ const SignUp = () => {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentStep === 2) {
+    if (currentStep === 1) {
       next();
     }
   };
 
   return (
-    <div className="h-max w-full 2xl:p-5 flex justify-center items-center flex-col relative bg-bg-2">
+    <div className="min-h-screen w-full 2xl:p-5 flex justify-center items-center flex-col relative bg-white">
       {/* 60% - Primary dominance in header */}
       {/* <div className="absolute 2xl:top-5 flex w-full 2xl:h-1/4 justify-center items-center">
         <h1 className="font-bold font-title text-center text-sm 2xl:text-3xl text-primary">
@@ -187,7 +187,7 @@ const SignUp = () => {
       </div> */}
 
       {/* 30% - Neutral base */}
-      <div className="w-full h-max 2xl:w-3/10 flex flex-col items-center gap-8 rounded-lg shadow-lg bg-white p-8 pt-4 2xl:pt-8">
+      <div className="w-full h-max 2xl:w-3/10 flex flex-col items-center gap-8 bg-white p-8 pt-4 2xl:pt-8">
         <h1 className="font-bold font-title text-center text-4xl text-black">
           Registrati
         </h1>
@@ -196,9 +196,8 @@ const SignUp = () => {
           <FormProvider {...methods}>
             <form
               onSubmit={handleFormSubmit}
-              className="flex flex-col gap-2 2xl:gap-6 w-full"
+              className="flex flex-col gap-8 2xl:gap-6 w-full"
             >
-              {/* Progress Steps - 60% Primary */}
               <div className="flex w-full flex-col items-center">
                 <div className="flex items-center justify-between w-full relative">
                   <div className="absolute top-1/2 transform -translate-y-1/2 w-full px-8">
@@ -206,7 +205,7 @@ const SignUp = () => {
                       <div
                         className="h-full rounded-full transition-all duration-300 bg-primary"
                         style={{
-                          width: `${(currentStep / 2) * 100}%`,
+                          width: `${currentStep * 100}%`,
                         }}
                       ></div>
                     </div>
@@ -241,19 +240,21 @@ const SignUp = () => {
                 </div>
               </div>
               {/* <RegisterStep1 /> */}
-              {handleStepChange()}
+              <div className="flex flex-col gap-4">
+                {handleStepChange()}
 
-              {/* Login Link - Primary accent */}
-              <div className="w-full text-center text-[#6b7280]">
-                <span className="font-body">
-                  Hai già un account?{" "}
-                  <Link
-                    to="/login"
-                    className="font-body font-semibold hover:underline transition-colors duration-200 text-primary"
-                  >
-                    Accedi qui
-                  </Link>
-                </span>
+                {/* Login Link - Primary accent */}
+                <div className="w-full text-center text-[#6b7280]">
+                  <span className="font-body">
+                    Hai già un account?{" "}
+                    <Link
+                      to="/login"
+                      className="font-body font-semibold hover:underline transition-colors duration-200 text-primary"
+                    >
+                      Accedi qui
+                    </Link>
+                  </span>
+                </div>
               </div>
 
               {/* Navigation Buttons - 60% Primary dominance */}

@@ -20,7 +20,7 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
 		                         ${
                                error
                                  ? "border-red-500 border-2"
-                                 : "focus-within:border-primary focus-within:ring-2 focus-within:ring-primary"
+                                 : "focus-within:border-primary focus-within:ring-2 focus-within:ring-primary border-gray-200 ring-2 ring-gray-200"
                              }
 		                         shadow-inner-sm p-0.5`}
         >
@@ -45,10 +45,9 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
             id={id}
             type={type}
             placeholder={placeholder}
-            className={`w-full font-body text-sm 2xl:text-base 2xl:py-3 py-2.5 rounded-r-xl outline-none appearance-none bg-transparent
-		                             text-text-1
-																	placeholder-text-3
-		                            2xl:px-3 px-2.5
+            className={`w-full font-body text-sm 2xl:text-base 2xl:py-3 py-2.5
+               rounded-r-xl outline-none appearance-none bg-transparent
+		           text-text-1 placeholder-text-3 2xl:px-3 px-2.5
 		                             ${
                                    id === "costo" ||
                                    id === "indirizzo" ||
@@ -61,7 +60,9 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
         </div>
         {/* L'errore viene mostrato se esiste */}
         {error?.message && (
-          <p className="text-sm font-body  text-red-500 ">{error.message}</p>
+          <p className="text-sm font-body  text-red-500 px-1.5">
+            {error.message}
+          </p>
         )}
       </div>
     </div>

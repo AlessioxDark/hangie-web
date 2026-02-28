@@ -9,10 +9,7 @@ const RegisterStep1 = () => {
   } = useFormContext();
 
   return (
-    <div className="flex flex-col gap-5 w-full">
-      <h2 className="text-2xl font-semibold text-center font-title">
-        Inserisci le generalità
-      </h2>
+    <div className="flex flex-col gap-5 w-full h-full">
       <div className="flex flex-col gap-2 2xl:gap-4 w-full">
         <div>
           <FormInput

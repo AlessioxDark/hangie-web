@@ -43,7 +43,7 @@ const Login = () => {
     console.log(data);
     setIsLoading(true);
     try {
-      const { user_email, password } = data;
+      const { user_email, password, remember } = data;
       let realEmail = user_email;
       if (!realEmail.includes("@")) {
         supabase
@@ -53,7 +53,11 @@ const Login = () => {
           .single();
       }
 
-      const { authData, authError } = await LoginUser(realEmail, password);
+      const { authData, authError } = await LoginUser(
+        realEmail,
+        password,
+        remember,
+      );
 
       if (authError) {
         setError("root", { message: "Credenziali non corrette" });
@@ -191,36 +195,6 @@ const Login = () => {
               </button>
             </div>
           </form>
-
-          {/* Neutral divider */}
-          <div className="flex items-center justify-center gap-4">
-            <div className="flex-1 h-px bg-[#e5e7eb]"></div>
-            <span className="font-body text-sm px-4 text-[#6b7280]">
-              oppure continua con
-            </span>
-            <div className="flex-1 h-px bg-[#e5e7eb]"></div>
-          </div>
-
-          {/* Social Login - subtle accents */}
-          <div className="flex flex-row gap-4 items-center w-full justify-center">
-            {[
-              { src: googleLogo, alt: "Google" },
-              { src: appleLogo, alt: "Apple" },
-              { src: facebookLogo, alt: "Facebook" },
-            ].map((social, index) => (
-              <button
-                key={index}
-                type="button"
-                className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out border-2 hover:shadow-md bg-white border-[#e5e7eb] hover:border-primary hover:translate-y-[-1px]"
-              >
-                <img
-                  src={social.src}
-                  alt={`${social.alt} Logo`}
-                  className="w-5 h-5"
-                />
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </div>

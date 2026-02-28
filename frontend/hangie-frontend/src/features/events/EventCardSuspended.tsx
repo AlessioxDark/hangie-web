@@ -310,7 +310,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                 //    cursor-pointer
                 // "
                 className={`flex-1 ${status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-2.5 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer text-sm`}
-                disabled={scadenza < new Date.now()}
+                disabled={scadenza < Date.now()}
                 onClick={(e) => {
                   e.stopPropagation();
                   const newStatus =
@@ -331,23 +331,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                 Accetta Invito
               </button>
               <button
-                //   className="
-                //   flex-1
-                //  2xl:px-6 2xl:py-3
-                //   px-3 py-2.5
-                //   bg-bg-1 text-text-2
-                //   border-2 border-text-3/60
-                //   rounded-xl
-                //   font-bold
-                //   hover:bg-bg-2/80
-                //   hover:border-text-2/80
-                //   transition-colors
-                //   duration-300
-                //   text-sm
-                //   2xl:text-lg
-                //   cursor-pointer
-                // "
-                disabled={scadenza < new Date.now()}
+                disabled={scadenza < Date.now()}
                 className={`flex-1 ${status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-2.5 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer text-sm`}
                 onClick={(e) => {
                   e.stopPropagation();

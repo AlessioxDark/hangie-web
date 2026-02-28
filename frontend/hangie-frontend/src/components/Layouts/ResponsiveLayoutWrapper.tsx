@@ -1,15 +1,11 @@
 import LayoutDesktop from "@/components/Layouts/desktop/LayoutDesktop";
 import LayoutMobile from "@/components/Layouts/mobile/LayoutMobile";
 import ResponsiveLayoutChat from "@/components/Layouts/chats/ResponsiveLayoutChat";
-import { useScreen } from "@/contexts/ScreenContext";
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router";
 import RenderLoadingState from "@/features/utils/RenderLoadingState";
 const ResponsiveLayoutWrapper = ({ children, layoutType = "standard" }) => {
-  const { currentScreen } = useScreen();
   const { session, isAuthLoading } = useAuth();
-  console.log(currentScreen);
 
   if (isAuthLoading) {
     return <RenderLoadingState type="friends" />;

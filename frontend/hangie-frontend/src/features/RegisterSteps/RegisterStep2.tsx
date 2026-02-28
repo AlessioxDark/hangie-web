@@ -19,7 +19,7 @@ const RegisterStep2 = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   return (
-    <>
+    <div className="flex flex-col gap-3">
       <div>
         <FormInput
           error={errors.email}
@@ -32,47 +32,100 @@ const RegisterStep2 = () => {
       </div>
       <div>
         <div className="relative flex items-center justify-end">
-          <input
-            type={isPasswordVisible ? "text" : "password"}
-            className="w-full p-2.5 2xl:p-3  font-body 
-			rounded-lg ring ring-[#e5e7eb]
-			 focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md text-sm 2xl:text-base
-			  text-text-1 placeholder-text-3"
-            placeholder="Password"
-            {...register("password")}
-          />
-          <span
-            className="absolute right-3"
-            onClick={() => setIsPasswordVisible((lastVisible) => !lastVisible)}
-          >
-            {isPasswordVisible ? <Eye /> : <EyeOff />}
-          </span>
+          <div className="w-full flex flex-col gap-1">
+            <label
+              htmlFor={"password"}
+              className={`font-body text-text-1 text-sm 2xl:text-base font-medium`}
+            >
+              Password <span className="text-red-500 text-sm">*</span>
+            </label>
+            <div
+              className={`w-full flex items-center
+		                         bg-bg-1 rounded-xl
+		                         transition-all duration-200
+		                         ${
+                               errors?.password
+                                 ? "border-red-500 border-2"
+                                 : "focus-within:border-primary focus-within:ring-2 focus-within:ring-primary border-gray-200 ring-2 ring-gray-200"
+                             }
+		                         shadow-inner-sm p-0.5`}
+            >
+              <input
+                id={"password"}
+                type={isPasswordVisible ? "text" : "password"}
+                placeholder={"Password"}
+                className={`w-full font-body text-sm 2xl:text-base 2xl:py-3 py-2.5
+               rounded-r-xl outline-none appearance-none bg-transparent
+		           text-text-1 placeholder-text-3 2xl:px-3 px-2.5
+		                             
+		                             `}
+                // Uso corretto della funzione register
+                {...register("password")}
+              />
+              <span
+                className="absolute right-3"
+                onClick={() =>
+                  setIsPasswordVisible((lastVisible) => !lastVisible)
+                }
+              >
+                {isPasswordVisible ? <Eye /> : <EyeOff />}
+              </span>
+            </div>
+          </div>
         </div>
 
         {errors.password && (
-          <span className="px-1.5 text-sm font-semibold font-body text-error ">
+          <span className="px-1.5 text-sm  font-body text-red-500  ">
             {errors.password.message}
           </span>
         )}
       </div>
       <div>
-        <div className="relative flex items-center justify-end">
-          <input
-            type={isPasswordVisible ? "text" : "password"}
-            className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
-            placeholder="Conferma Password"
-            {...register("confermaPassword")}
-          />
-          <span
-            className="absolute right-3"
-            onClick={() => setIsPasswordVisible((lastVisible) => !lastVisible)}
+        <div className="w-full flex flex-col gap-1">
+          <label
+            htmlFor={"confermaPassword"}
+            className={`font-body text-text-1 text-sm 2xl:text-base font-medium`}
           >
-            {isPasswordVisible ? <Eye /> : <EyeOff />}
-          </span>
+            Conferma Password <span className="text-red-500 text-sm">*</span>
+          </label>
+          <div className="relative flex items-center justify-end">
+            <div
+              className={`w-full flex items-center
+		                         bg-bg-1 rounded-xl
+		                         transition-all duration-200
+		                         ${
+                               errors?.password
+                                 ? "border-red-500 border-2"
+                                 : "focus-within:border-primary focus-within:ring-2 focus-within:ring-primary border-gray-200 ring-2 ring-gray-200"
+                             }
+		                         shadow-inner-sm p-0.5`}
+            >
+              <input
+                id={"confermaPassword"}
+                type={isPasswordVisible ? "text" : "password"}
+                placeholder={"Conferma Password"}
+                className={`w-full font-body text-sm 2xl:text-base 2xl:py-3 py-2.5
+               rounded-r-xl outline-none appearance-none bg-transparent
+		           text-text-1 placeholder-text-3 2xl:px-3 px-2.5
+		                             
+		                             `}
+                // Uso corretto della funzione register
+                {...register("confermaPassword")}
+              />
+              <span
+                className="absolute right-3"
+                onClick={() =>
+                  setIsPasswordVisible((lastVisible) => !lastVisible)
+                }
+              >
+                {isPasswordVisible ? <Eye /> : <EyeOff />}
+              </span>
+            </div>
+          </div>
         </div>
 
         {errors.confermaPassword && (
-          <span className="px-1.5 text-sm font-semibold font-body text-error ">
+          <span className="px-1.5 text-sm font-body text-red-500 ">
             {errors.confermaPassword.message}
           </span>
         )}
@@ -89,18 +142,14 @@ const RegisterStep2 = () => {
             Accetta i termini e le condizioni
           </label>
         </div>
-        {errors.tos && (
-          <span className="text-sm font-semibold font-body text-error ">
-            {errors.tos.message}
-          </span>
-        )}
+
         {errors.root && (
-          <span className="px-1.5 text-sm font-semibold font-body text-error ">
+          <span className="px-1.5 text-sm font-body text-red-500 ">
             {errors.root.message}
           </span>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

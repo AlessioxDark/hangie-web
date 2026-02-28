@@ -439,7 +439,7 @@ const EventDetailsMobile = () => {
           <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-6 z-[110] shadow-[0_-10px_20px_-5px_rgba(0,0,0,0,0.05)]">
             <div className="w-full flex justify-between flex-row gap-6">
               <button
-                disabled={scadenza < new Date.now()}
+                disabled={scadenza < Date.now()}
                 className={`flex-1 ${status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-4 rounded-2xl  active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer`}
                 // className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
                 onClick={() => {
@@ -462,7 +462,7 @@ const EventDetailsMobile = () => {
               </button>
               {/* BOTTONE RIFIUTA: Più sobrio, per non distrarre */}
               <button
-                disabled={scadenza < new Date.now()}
+                disabled={scadenza < Date.now()}
                 // className="flex-1 bg-gray-50 text-gray-400 font-bold py-4 rounded-2xl border border-gray-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
                 className={`flex-1 ${status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-4 rounded-2xl  active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer`}
                 onClick={() => {

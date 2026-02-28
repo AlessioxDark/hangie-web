@@ -244,7 +244,7 @@ px-2 py-1 bg-amber-50 text-amber-600  border border-amber-100
           <button
             className={`flex-1 ${status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-4 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer text-xs font-bold
                      hover:bg-primary/80`}
-            disabled={scadenza < new Date.now()}
+            disabled={scadenza < Date.now()}
             onClick={(e) => {
               e.stopPropagation();
               const newStatus = status == "accepted" ? "pending" : "accepted";
@@ -266,7 +266,7 @@ px-2 py-1 bg-amber-50 text-amber-600  border border-amber-100
           <button
             className={`flex-1 ${status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"}  py-3 px-4 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer text-xs font-bold
                      hover:bg-primary/80`}
-            disabled={scadenza < new Date.now()}
+            disabled={scadenza < Date.now()}
             onClick={(e) => {
               e.stopPropagation();
               const newStatus = status == "rejected" ? "pending" : "rejected";
