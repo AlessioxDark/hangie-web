@@ -69,38 +69,11 @@ export const AuthContextProvider = ({ children }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_, session) => {
       setSession(session);
-      setIsAuthLoading(false);
+      // setIsAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []); // Niente navigate qui dentro!
-  // useEffect(() => {
-  //   // 1. Definiamo la funzione per recuperare la sessione
-  //   const getSession = async () => {
-  //     const {
-  //       data: { session },
-  //     } = await supabase.auth.getSession();
-  //     const isRememberMe = localStorage.getItem("to_remember") === "true";
-  //     if (!isRememberMe) {
-  //       setSession(null);
-  //     } else {
-  //       setSession(session);
-  //     }
-  //     setIsAuthLoading(false);
-  //   };
-  //   getSession();
-
-  //   // 2. Ascoltiamo i cambiamenti (login/logout)
-  //   const {
-  //     data: { subscription },
-  //   } = supabase.auth.onAuthStateChange((_event, session) => {
-  //     setSession(session);
-  //     setIsAuthLoading(false);
-  //   });
-
-  //   // Clean up della sottoscrizione
-  //   return () => subscription.unsubscribe();
-  // }, []); // Niente navigate qui dentro!
+  }, []);
 
   return (
     <authContext.Provider

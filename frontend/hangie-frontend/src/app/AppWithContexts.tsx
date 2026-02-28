@@ -1,5 +1,5 @@
 import { ApiContextProvider } from "@/contexts/ApiContext";
-import { AuthContextProvider } from "@/contexts/AuthContext";
+import { AuthContextProvider, useAuth } from "@/contexts/AuthContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import { FriendsProvider } from "@/contexts/FriendsContext";
 import { ModalProvider } from "@/contexts/ModalContext";
@@ -7,14 +7,23 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
 import { SocketProvider } from "@/contexts/SocketContext";
 import React from "react";
-import { BrowserRouter } from "react-router";
+import { BrowserRouter, Navigate } from "react-router";
 import AppRouter from "./AppRouter";
 import { useScreen } from "@/contexts/ScreenContext";
 import { MobileLayoutChatProvider } from "@/contexts/MobileLayoutChatContext";
+import RenderLoadingState from "@/features/utils/RenderLoadingState";
 
 const AppWithContexts = () => {
   const { currentScreen } = useScreen();
+  const { session, isAuthLoading } = useAuth();
 
+  if (isAuthLoading) {
+    return <RenderLoadingState type="home" />;
+  }
+
+  if (!currentScreen) {
+    return <RenderLoadingState type={"home"} />;
+  }
   if (currentScreen !== "xs") {
     return (
       <>
@@ -87,27 +96,23 @@ const AppWithContexts = () => {
     // return <LayoutDesktop>{children}</LayoutDesktop>;
   }
   return (
-    <BrowserRouter>
-      <AuthContextProvider>
-        <ApiContextProvider>
-          <ChatProvider>
-            <MobileLayoutChatProvider>
-              <FriendsProvider>
-                <ProfileProvider>
-                  <SocketProvider>
-                    <NotificationProvider>
-                      <ModalProvider>
-                        <AppRouter />
-                      </ModalProvider>
-                    </NotificationProvider>
-                  </SocketProvider>
-                </ProfileProvider>
-              </FriendsProvider>
-            </MobileLayoutChatProvider>
-          </ChatProvider>
-        </ApiContextProvider>
-      </AuthContextProvider>
-    </BrowserRouter>
+    <ApiContextProvider>
+      <ChatProvider>
+        <MobileLayoutChatProvider>
+          <FriendsProvider>
+            <ProfileProvider>
+              <SocketProvider>
+                <NotificationProvider>
+                  <ModalProvider>
+                    <AppRouter />
+                  </ModalProvider>
+                </NotificationProvider>
+              </SocketProvider>
+            </ProfileProvider>
+          </FriendsProvider>
+        </MobileLayoutChatProvider>
+      </ChatProvider>
+    </ApiContextProvider>
   );
 };
 

@@ -36,7 +36,11 @@ import AppWithContexts from "./AppWithContexts";
 function App() {
   return (
     <ScreenProvider>
-      <AppWithContexts></AppWithContexts>
+      <BrowserRouter>
+        <AuthContextProvider>
+          <AppWithContexts />
+        </AuthContextProvider>
+      </BrowserRouter>
     </ScreenProvider>
   );
 }

@@ -62,7 +62,7 @@ export const FriendsProvider = ({ children }) => {
     }
   }, [isAuthLoading, session, getFriendsData]);
   useEffect(() => {
-    if (!fetchData) return;
+    if (!fetchData || !session) return;
     setPendingFriends(
       fetchData.filter(
         (f) => f.status === "pending" && f.sender_id !== session.user.id,
