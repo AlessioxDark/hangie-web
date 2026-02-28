@@ -226,64 +226,14 @@ const EmptyState = ({ tab }) => {
 /* ─────────────────────────────────────────────────────────────
    Friends Avatars Strip
 ───────────────────────────────────────────────────────────── */
-const FriendStrip = ({ friends = [] }) => {
-  if (!friends.length) return null;
-  const MAX = 7;
-  const shown = friends.slice(0, MAX);
-  const extra = friends.length - MAX;
-  return (
-    <div className="px-4 py-4" style={{ borderTop: `1px solid ${P.bg3}` }}>
-      <div className="flex items-center justify-between mb-3">
-        <p
-          className="text-[10px] font-bold uppercase tracking-widest"
-          style={{ color: P.t3 }}
-        >
-          Amici
-        </p>
-        <span className="text-[10px] font-semibold" style={{ color: P.t3 }}>
-          {friends.length}
-        </span>
-      </div>
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-        {shown.map((f) => (
-          <div
-            key={f.user_id}
-            className="flex flex-col items-center gap-1 shrink-0"
-          >
-            <div className="w-10 h-10 rounded-full overflow-hidden">
-              <ProfileIcon user_id={f.user_id} />
-            </div>
-            <span className="text-[9px] font-semibold" style={{ color: P.t2 }}>
-              {f.handle}
-            </span>
-          </div>
-        ))}
-        {extra > 0 && (
-          <div
-            className="w-10 h-10 rounded-full shrink-0 flex items-enter justify-center text-xs font-bold"
-            style={{
-              background: P.bg2,
-              border: `2px solid ${P.bg3}`,
-              color: P.t2,
-            }}
-          >
-            +{extra}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 /* ─────────────────────────────────────────────────────────────
    MAIN COMPONENT
 ───────────────────────────────────────────────────────────── */
 const Profile = () => {
   const navigate = useNavigate();
-
   const { profileData } = useProfile();
-  const { session } = useAuth();
-  const { homeEventsData } = useChat();
+  const { session, LogoutUser } = useAuth();
   const { loading, error } = useApi();
   const [activeTab, setActiveTab] = useState("programma");
 
@@ -292,12 +242,7 @@ const Profile = () => {
     return <RenderErrorState type="profile" reloadFunction={() => {}} />;
 
   const now = new Date();
-  const allEvents = [
-    ...(profileData?.newEventsData ?? []),
-    // ...(homeEventsData.accepted ?? []),
-    // ...(homeEventsData.rejected ?? []),
-    // ...(homeEventsData.pending ?? []),
-  ];
+  const allEvents = [...(profileData?.newEventsData ?? [])];
 
   const getFilteredEvents = () => {
     if (activeTab === "programma")
@@ -319,7 +264,6 @@ const Profile = () => {
   const filtered = getFilteredEvents();
 
   const karma = profileData?.karma ?? 82;
-  const friends = profileData?.friends ?? [];
   const isOwnProfile = session.user.id == profileData?.user_id; // sostituisci con logica reale (es. profileData.user_id === currentUser.id)
 
   return (
@@ -327,15 +271,25 @@ const Profile = () => {
       {/* ── HEADER CARD ── */}
       <div style={{ background: P.bg1, borderBottom: `1px solid ${P.bg3}` }}>
         {/* Avatar + Name + Karma */}
-        {!isOwnProfile && (
+        {!isOwnProfile ? (
           <div>
             <div className="w-8 h-8" onClick={() => navigate(-1)}>
               <ChevronLeft color={"#2463eb"} />
             </div>
           </div>
+        ) : (
+          <div className="w-full flex justify-end px-4 pt-2.5">
+            {" "}
+            <button
+              className=" px-5 py-2 text-white text-sm font-body  bg-red-500 font-semibold rounded-2xl active:bg-red-400 transition-all shadow-sm"
+              onClick={LogoutUser}
+            >
+              Logout
+            </button>
+          </div>
         )}
         <div
-          className={`flex items-center justify-between px-4 ${isOwnProfile && "pt-8"} pb-5`}
+          className={`flex items-center justify-between px-4 ${isOwnProfile && "pt-6"} pb-5`}
         >
           <div className="flex items-center gap-4">
             <div className="w-[60px] h-[60px] rounded-2xl overflow-hidden shrink-0">
@@ -408,9 +362,6 @@ const Profile = () => {
             </div>
           )}
         </div>
-
-        {/* Friends strip */}
-        <FriendStrip friends={friends} />
 
         {/* Tabs */}
         <TabBar active={activeTab} onChange={setActiveTab} />

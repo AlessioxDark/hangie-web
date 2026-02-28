@@ -1,7 +1,4 @@
-mettere messaggi schermi grandi
-sistemar register e login che vadano e no preferenze e data
+SEMBRA FINITO mettere messaggi schermi grandi 
 controllare che tutte le funzionalità funzionino
-
 TASTO LOG OUT sotto profilo
-
-risolvere bug lentezza desktop
+SEMBRA FINITO risolvere bug lentezza desktop

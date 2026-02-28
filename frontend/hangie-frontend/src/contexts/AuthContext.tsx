@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../config/db.js";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 
 const authContext = createContext({
   session: null,
   signUpNewUser: (arg) => arg,
   LoginUser: () => {},
+  LogoutUser: () => {},
   isAuthLoading: false,
 });
 
@@ -46,6 +47,17 @@ export const AuthContextProvider = ({ children }) => {
       console.error("errore nel login", error);
     }
   };
+  const LogoutUser = async () => {
+    try {
+      await supabase.auth.signOut();
+      setSession(null);
+      localStorage.removeItem("to_remember");
+
+      return <Navigate to={"/login"} replace />;
+    } catch (error) {
+      console.error("errore nel login", error);
+    }
+  };
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -77,7 +89,7 @@ export const AuthContextProvider = ({ children }) => {
 
   return (
     <authContext.Provider
-      value={{ session, signUpNewUser, LoginUser, isAuthLoading }}
+      value={{ session, signUpNewUser, LoginUser, LogoutUser, isAuthLoading }}
     >
       {children}
     </authContext.Provider>
