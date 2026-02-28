@@ -1,7 +1,7 @@
 const supabase = require("../config/db");
 
 const createUser = async (req, token) => {
-  const { email, nomeCompleto, username, preferenze } = req.body;
+  const { email, nomeCompleto, username } = req.body;
 
   const {
     data: { user },
@@ -13,15 +13,13 @@ const createUser = async (req, token) => {
   }
   console.log("token", token);
 
-  const nuovePreferenze = preferenze.toString();
-  const { data: profileData, error: profileError } = await supabase
+  const { error: profileError } = await supabase
     .from("utenti")
     .insert([
       {
         nome: nomeCompleto,
         email: email,
         handle: username,
-        preferenze: nuovePreferenze,
         user_id: user.id,
       },
     ])
@@ -30,7 +28,7 @@ const createUser = async (req, token) => {
   if (profileError) {
     console.error(
       "Errore nell'inserimento del profilo utente:",
-      profileError.message
+      profileError.message,
     );
     return { user, error: profileError };
   }

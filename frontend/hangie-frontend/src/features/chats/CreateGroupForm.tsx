@@ -12,6 +12,7 @@ import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "../../config/db.js";
 import { useSocket } from "@/contexts/SocketContext.js";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext.js";
 const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 const GroupSchema = z.object({
   nome: z
@@ -40,6 +41,7 @@ const CreateGroupForm = () => {
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const [currentParticipants, setCurrentParticipants] = useState([]);
   const { session } = useAuth();
+  const { setMobileView } = useMobileLayout();
   const { currentSocket } = useSocket();
   const fileInputRef = useRef(null);
 

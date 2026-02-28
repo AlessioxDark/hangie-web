@@ -6,8 +6,10 @@ import RenderLoadingState from "../utils/RenderLoadingState";
 import RenderErrorState from "../utils/RenderErrorState";
 import RenderEmptyState from "../utils/RenderEmptyState";
 import { useApi } from "@/contexts/ApiContext";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext";
 const ChatsSidebar = () => {
   const { groupsData, fetchGroups } = useChat();
+  const { setMobileView } = useMobileLayout();
   const { error, loading } = useApi();
 
   const renderContent = () => {
@@ -35,7 +37,9 @@ const ChatsSidebar = () => {
           </h1>
           <div
             className="bg-primary rounded-full p-2 flex items-center justify-center "
-            onClick={() => {}}
+            onClick={() => {
+              setMobileView("CREATE_GROUP");
+            }}
           >
             <Plus className="text-bg-1" />
           </div>

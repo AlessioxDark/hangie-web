@@ -10,6 +10,7 @@ import React from "react";
 import { BrowserRouter } from "react-router";
 import AppRouter from "./AppRouter";
 import { useScreen } from "@/contexts/ScreenContext";
+import { MobileLayoutChatProvider } from "@/contexts/MobileLayoutChatContext";
 
 const AppWithContexts = () => {
   const { currentScreen } = useScreen();
@@ -90,17 +91,19 @@ const AppWithContexts = () => {
       <AuthContextProvider>
         <ApiContextProvider>
           <ChatProvider>
-            <FriendsProvider>
-              <ProfileProvider>
-                <SocketProvider>
-                  <NotificationProvider>
-                    <ModalProvider>
-                      <AppRouter />
-                    </ModalProvider>
-                  </NotificationProvider>
-                </SocketProvider>
-              </ProfileProvider>
-            </FriendsProvider>
+            <MobileLayoutChatProvider>
+              <FriendsProvider>
+                <ProfileProvider>
+                  <SocketProvider>
+                    <NotificationProvider>
+                      <ModalProvider>
+                        <AppRouter />
+                      </ModalProvider>
+                    </NotificationProvider>
+                  </SocketProvider>
+                </ProfileProvider>
+              </FriendsProvider>
+            </MobileLayoutChatProvider>
           </ChatProvider>
         </ApiContextProvider>
       </AuthContextProvider>

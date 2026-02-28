@@ -18,6 +18,7 @@ import { useSocket } from "@/contexts/SocketContext.tsx";
 import { useApi } from "@/contexts/ApiContext.tsx";
 import { ApiCalls } from "@/services/api.tsx";
 import RenderLoadingState from "../utils/RenderLoadingState.js";
+import { useMobileLayout } from "@/contexts/MobileLayoutChatContext.js";
 
 const EventSchema = z
   .object({
@@ -74,7 +75,8 @@ const CreateEventForm = () => {
   const IMAGE_LIMIT = 4;
   const { closeModal } = useModal();
   const { session } = useAuth();
-  const { setCurrentChatData } = useChat();
+  // const { setCurrentChatData } = useChat();
+  const { setMobileView } = useMobileLayout();
   const { currentSocket } = useSocket();
   const [images, setImages] = useState([]);
 

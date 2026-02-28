@@ -1,50 +1,22 @@
 import RegisterStep1 from "@/features/RegisterSteps/RegisterStep1";
 import RegisterStep2 from "@/features/RegisterSteps/RegisterStep2";
-import RegisterStep3 from "@/features/RegisterSteps/RegisterStep3";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm, type SubmitHandler } from "react-hook-form";
 import { Link, Navigate, useNavigate } from "react-router";
 import { z } from "zod";
-import appleLogo from "../../../assets/Apple_logo.svg";
-import facebookLogo from "../../../assets/Facebook_logo.svg";
-import googleLogo from "../../../assets/Google_logo.svg";
+
 import { supabase } from "../../../config/db.js";
 import { useAuth } from "../../../contexts/AuthContext.js";
-const mesiValidi = [
-  "Gennaio",
-  "Febbraio",
-  "Marzo",
-  "Aprile",
-  "Maggio",
-  "Giugno",
-  "Luglio",
-  "Agosto",
-  "Settembre",
-  "Ottobre",
-  "Novembre",
-  "Dicembre",
-];
 
 const steps = [
   {
     id: "step 1",
-    fields: [
-      "nomeCompleto",
-      "username",
-      "tos",
-      "email",
-      "password",
-      "confermaPassword",
-    ],
+    fields: ["nomeCompleto", "username"],
   },
   {
     id: "step 2",
-    fields: ["giorno", "mese", "anno"],
-  },
-  {
-    id: "step 3",
-    fields: ["preferenze"],
+    fields: ["password", "email", "confermaPassword", "tos"],
   },
 ];
 const SignUp = () => {
@@ -77,24 +49,11 @@ const SignUp = () => {
     tos: z.boolean().refine((val) => val === true, {
       message: "Devi accettare i termini e le condizioni",
     }),
-    giorno: z.coerce
-      .number()
-      .min(1, "Il giorno deve essere almeno 1")
-      .max(31, "Il giorno deve essere al massimo 31"),
-    mese: z.enum(mesiValidi, "Inserisci un mese"),
-    anno: z.coerce
-      .number()
-      .min(1920, "L'anno deve essere almeno 1920")
-      .max(new Date().getFullYear(), "L'anno non può essere futuro"),
-    preferenze: z.array(z.string()),
   });
   type FormFields = z.infer<typeof schema>;
   const methods = useForm<FormFields>({
     resolver: zodResolver(schema),
     mode: "onTouched",
-    defaultValues: {
-      preferenze: [],
-    },
   });
 
   const {
@@ -113,10 +72,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     console.log("inviato");
-    const numeroMese = mesiValidi.indexOf(data.mese);
-    const dataGiorno = new Date(data.anno, numeroMese, data.giorno);
-    const { giorno, mese, anno, confermaPassword, ...datiUtili } = data;
-    const finalData = { ...datiUtili, data: dataGiorno };
+    const finalData = data;
 
     const { data: datiUsername, error: erroreUsername } = await supabase
       .from("utenti")
@@ -150,15 +106,6 @@ const SignUp = () => {
         });
         return;
       }
-      // const {
-      // 	data: { session },
-      // 	error: erroreSession,
-      // } = await supabase.auth.getSession();
-      // if (erroreSession) {
-      // 	setError('root', {
-      // 		message: 'errore durante la creazione di una sessione',
-      // 	});
-      // }
 
       fetch("http://localhost:3000/api/auth/register", {
         body: JSON.stringify(finalData),
@@ -189,46 +136,17 @@ const SignUp = () => {
         return <RegisterStep1 />;
       case 1:
         return <RegisterStep2 />;
-      case 2:
-        return <RegisterStep3 />;
     }
   };
   const validateCustomRules = async () => {
     // Clear previous errors
-    clearErrors(["giorno", "confermaPassword"]);
+    clearErrors(["confermaPassword"]);
 
-    if (currentStep === 0) {
+    if (currentStep === 1) {
       const { password, confermaPassword } = getValues();
       if (password && confermaPassword && password !== confermaPassword) {
         setError("confermaPassword", {
           message: "Le password non corrispondono",
-        });
-        return false;
-      }
-    }
-
-    if (currentStep === 1) {
-      const { giorno, mese, anno } = getValues();
-
-      if (!giorno || !mese || !anno) return true; // Let zod handle required fields
-
-      const numeroMese = mesiValidi.indexOf(mese);
-      const data = new Date(anno, numeroMese, giorno);
-
-      // Validate date
-      if (
-        data.getFullYear() !== Number(anno) ||
-        data.getMonth() !== numeroMese ||
-        data.getDate() !== Number(giorno)
-      ) {
-        setError("giorno", { message: "Data non valida" });
-        return false;
-      }
-
-      // Check if date is not in the future
-      if (data > new Date()) {
-        setError("giorno", {
-          message: "La data non può essere più grande di oggi",
         });
         return false;
       }
@@ -245,7 +163,7 @@ const SignUp = () => {
     const customValidationPassed = await validateCustomRules();
     if (!customValidationPassed) return;
 
-    if (currentStep < 2) {
+    if (currentStep < 1) {
       setCurrentStep((lastStep) => lastStep + 1);
     } else {
       handleSubmit(onSubmit)();
@@ -293,7 +211,7 @@ const SignUp = () => {
                       ></div>
                     </div>
                   </div>
-                  {[1, 2, 3].map((step) => {
+                  {[1, 2].map((step) => {
                     const isCompleted = step < currentStep + 1;
                     const isActive = step === currentStep + 1;
                     return (
@@ -322,7 +240,7 @@ const SignUp = () => {
                   })}
                 </div>
               </div>
-
+              {/* <RegisterStep1 /> */}
               {handleStepChange()}
 
               {/* Login Link - Primary accent */}
@@ -356,7 +274,7 @@ const SignUp = () => {
                   type="button"
                   className={`px-8 py-3 font-title font-bold rounded-lg cursor-pointer transition-all duration-200 ease-in-out 
 									${
-                    currentStep === 2
+                    currentStep === 1
                       ? "bg-primary hover:bg-primary/80"
                       : "bg-primary hover:bg-primary/80"
                   }
@@ -365,45 +283,16 @@ const SignUp = () => {
                   disabled={isSubmitting}
                 >
                   <span className="text-lg">
-                    {currentStep !== 2
+                    {currentStep !== 1
                       ? "Continua"
                       : isSubmitting
                         ? "Invio in corso..."
-                        : "Completa Registrazione"}
+                        : "Registrati"}
                   </span>
                 </button>
               </div>
             </form>
           </FormProvider>
-          {/* Neutral divider */}
-          <div className="flex items-center justify-center gap-4">
-            <div className="flex-1 h-px bg-[#e5e7eb]"></div>
-            <span className="font-body text-sm px-4 text-[#6b7280]">
-              oppure continua con
-            </span>
-            <div className="flex-1 h-px bg-[#e5e7eb]"></div>
-          </div>
-
-          {/* Social Login - subtle accents */}
-          <div className="flex flex-row gap-4 items-center w-full justify-center">
-            {[
-              { src: googleLogo, alt: "Google" },
-              { src: appleLogo, alt: "Apple" },
-              { src: facebookLogo, alt: "Facebook" },
-            ].map((social, index) => (
-              <button
-                key={index}
-                type="button"
-                className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out border-2 hover:shadow-md bg-white border-[#e5e7eb] hover:border-primary hover:translate-y-[-1px]"
-              >
-                <img
-                  src={social.src}
-                  alt={`${social.alt} Logo`}
-                  className="w-5 h-5"
-                />
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </div>
