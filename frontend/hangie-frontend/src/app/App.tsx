@@ -31,33 +31,13 @@ import EventDetailsMobile from "@/features/events/EventDetailsMobile";
 import AppRouter from "./AppRouter";
 import { FriendsProvider } from "@/contexts/FriendsContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
+import AppWithContexts from "./AppWithContexts";
 
 function App() {
-  // const location = useLocation();
-  // const background = location.state && location.state.backgroundLocation;
-
   return (
-    <BrowserRouter>
-      <AuthContextProvider>
-        <ScreenProvider>
-          <ApiContextProvider>
-            <ChatProvider>
-              <FriendsProvider>
-                <ProfileProvider>
-                  <SocketProvider>
-                    <NotificationProvider>
-                      <ModalProvider>
-                        <AppRouter />
-                      </ModalProvider>
-                    </NotificationProvider>
-                  </SocketProvider>
-                </ProfileProvider>
-              </FriendsProvider>
-            </ChatProvider>
-          </ApiContextProvider>
-        </ScreenProvider>
-      </AuthContextProvider>
-    </BrowserRouter>
+    <ScreenProvider>
+      <AppWithContexts></AppWithContexts>
+    </ScreenProvider>
   );
 }
 

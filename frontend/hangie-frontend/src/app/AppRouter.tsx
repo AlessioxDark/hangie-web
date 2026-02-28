@@ -14,11 +14,11 @@ import ChatsSidebar from "@/features/chats/ChatsSidebar";
 import ChatsEvents from "@/features/chats/ChatsEvents";
 import GroupDetails from "@/features/chats/GroupDetails";
 import Friends from "./pages/Friends";
-import { useAuth } from "@/contexts/AuthContext";
 import Profile from "./pages/Profile";
 const AppRouter = () => {
   const location = useLocation();
   const background = location.state && location.state.backgroundLocation;
+
   return (
     <>
       <Routes location={background || location}>
