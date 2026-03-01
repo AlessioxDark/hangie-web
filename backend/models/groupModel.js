@@ -292,7 +292,7 @@ const leave = async (req) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) throw { message: "Manca Auth Header" };
     const token = authHeader.split(" ")[1];
-
+    console.log("ecco il group id", group_id);
     const {
       data: { user },
       error: userError,
@@ -350,11 +350,10 @@ const leave = async (req) => {
         .eq("group_id", group_id);
 
       if (messageError) throw messageError;
-
+      console.log("arrivo ai messaggi");
       const messageEvents = messages.filter((m) => m.type == "filter");
+      const messageIds = messages.map((m) => m.message_id);
       if (messages && messages.length > 0) {
-        const messageIds = messages.map((m) => m.message_id);
-
         // 2. Elimina gli stati per quei messaggi
         await supabase
           .from("messaggi_status")
@@ -381,26 +380,35 @@ const leave = async (req) => {
             await supabase.storage.from("eventi").remove(filesToDelete);
           }
         }
-
+        console.log("arrivo agli eventi");
+        console.log("promo a rimuovere gli eventi", messageEventsEventsIds);
         const { error: eventsError } = await supabase
           .from("eventi")
           .delete()
           .in("event_id", messageEventsEventsIds);
 
+        console.log("promo a rimuovere eventi gruppo", messageEventsEventsIds);
         if (eventsError) throw eventsError;
         const { error: groupEventsError } = await supabase
           .from("eventi_gruppo")
           .delete()
-          .in("group_id", group_id);
+          .eq("group_id", group_id);
 
+        console.log("promo a rimuovere eventi gruppo", messageEventsEventsIds);
         if (groupEventsError) throw groupEventsError;
       }
+      console.log("ecco i message ids", messageIds);
+      const { error: messagesStatusError } = await supabase
+        .from("messaggi_status")
+        .delete()
+        .in("message_id", messageIds);
+      if (messagesStatusError) throw messagesStatusError;
       const { error: messagesError } = await supabase
         .from("messaggi")
         .delete()
-        .eq("group_id", group_id);
+        .in("message_id", messageIds);
       if (messagesError) throw messagesError;
-
+      console.log("arrivo a folder");
       const { data: folderContent, error: folderError } = await supabase.storage
         .from("group_cover_imgs")
         .list(group_id);

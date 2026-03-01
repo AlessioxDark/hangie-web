@@ -487,7 +487,7 @@ export const SocketProvider = ({ children }) => {
       });
       if (currentGroup && currentGroup == data.group_id) {
         if (isMe) {
-          navigate(-1);
+          navigate("/chats");
           setCurrentGroup(null);
           return;
         }

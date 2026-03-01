@@ -1,3 +1,8 @@
 controllare che tutte le funzionalità funzionino
 
-togliere pagine commentate
+togliere pagine commentateù
+
+
+errore eliminando gruppo da creatores
+
+unfiromare stile inputs

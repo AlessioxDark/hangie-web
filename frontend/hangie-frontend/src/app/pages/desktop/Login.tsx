@@ -39,18 +39,21 @@ const Login = () => {
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    console.log("inviato");
     console.log(data);
     setIsLoading(true);
     try {
       const { user_email, password, remember } = data;
       let realEmail = user_email;
+      console.log("ha chioccola", realEmail.includes("@"));
       if (!realEmail.includes("@")) {
-        supabase
+        const {
+          data: { email: emailFound },
+        } = await supabase
           .from("utenti")
           .select("email")
           .eq("handle", user_email)
           .single();
+        realEmail = emailFound;
       }
 
       const { authData, authError } = await LoginUser(
