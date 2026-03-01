@@ -15,6 +15,7 @@ import ChatsEvents from "@/features/chats/ChatsEvents";
 import GroupDetails from "@/features/chats/GroupDetails";
 import Friends from "./pages/Friends";
 import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
 const AppRouter = () => {
   const location = useLocation();
   const background = location.state && location.state.backgroundLocation;
@@ -81,6 +82,7 @@ const AppRouter = () => {
             </ResponsiveLayoutWrapper>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {background && (
         <Routes>

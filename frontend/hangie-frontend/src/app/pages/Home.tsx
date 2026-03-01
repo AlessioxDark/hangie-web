@@ -40,7 +40,7 @@ type EventDataTypesArray = {
 const EVENTSINPAGE = 12;
 const Home = () => {
   const sliderRef = useRef<HTMLDivElement>(null);
-  const { homeEventsData, setHomeOffset } = useChat();
+  const { homeEventsData, setHomeOffset, fetchEvents } = useChat();
   const { error, loading } = useApi();
   useEffect(() => {
     const slider = sliderRef.current;
@@ -62,7 +62,7 @@ const Home = () => {
   const renderContent = useCallback(
     (type: string) => {
       if (error.home) {
-        return <RenderErrorState reloadFunction={() => {}} type="home" />;
+        return <RenderErrorState reloadFunction={fetchEvents} type="home" />;
       }
       if (loading.home) {
         return <RenderLoadingState type={"home"} />;

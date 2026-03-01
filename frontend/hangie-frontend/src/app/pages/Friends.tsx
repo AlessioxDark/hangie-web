@@ -12,13 +12,8 @@ import { useFriends } from "@/contexts/FriendsContext";
 const Friends = () => {
   const [query, setQuery] = useState("");
   const { error, loading, executeApiCall } = useApi();
-  // const { session, isAuthLoading } = useAuth();
-  // const [acceptedFriends, setAcceptedFriends] = useState([]);
-  // const [pendingFriends, setPendingFriends] = useState([]);
   const [isPendingCollapsed, setIsPendingCollapsed] = useState(false);
   const [isAcceptedCollapsed, setIsAcceptedCollapsed] = useState(false);
-  // const [fetchData, setFetchData] = useState(null);
-  // const [globalFriendships, setGlobalFriendShips] = useState(null);
   const {
     friendsData,
     globalFriendships,
@@ -29,57 +24,7 @@ const Friends = () => {
 
     setGlobalFriendships,
   } = useFriends();
-  // Usiamo useCallback per stabilizzare la funzione e poterla usare nelle dipendenze
-  // const getFriendsData = useCallback(async () => {
-  //   if (!session?.access_token || !session?.user?.id) return;
 
-  //   const saveData = (data) => {
-  //     setFetchData(data);
-  //   };
-
-  //   executeApiCall(
-  //     "friends",
-  //     () => ApiCalls.handleGetFriends(session.access_token, session.user.id),
-  //     saveData,
-  //   );
-  // }, [session, executeApiCall]);
-  // const getFriendsByQuery = useCallback(
-  //   async (myQuery) => {
-  //     if (!session?.access_token || !session?.user?.id) return;
-
-  //     const saveData = (data) => {
-  //       setGlobalFriendShips(data);
-  //     };
-
-  //     executeApiCall(
-  //       "friends",
-  //       () => ApiCalls.handleGetFriendsByQuery(session.access_token, myQuery),
-  //       saveData,
-  //     );
-  //   },
-  //   [session, executeApiCall],
-  // );
-
-  // // Effetto 1: Caricamento dati al montaggio o al cambio sessione
-  // useEffect(() => {
-  //   if (!isAuthLoading && session) {
-  //     getFriendsData();
-  //   }
-  // }, [isAuthLoading, session, getFriendsData]);
-  // useEffect(() => {
-  //   console.log(globalFriendships);
-  // }, [globalFriendships]);
-  // // Effetto 2: Filtraggio dati quando arriva la risposta dall'API
-  // useEffect(() => {
-  //   if (!fetchData) return;
-  //   setPendingFriends(
-  //     fetchData.filter(
-  //       (f) => f.status === "pending" && f.sender_id !== session.user.id,
-  //     ),
-  //   );
-  //   setAcceptedFriends(fetchData.filter((f) => f.status === "accepted"));
-  //   console.log(fetchData);
-  // }, [fetchData]);
   useEffect(() => {
     if (query.length < 3) {
       setGlobalFriendships([]);
@@ -97,7 +42,7 @@ const Friends = () => {
     //   return <RenderLoadingState type={"friends"} />;
     // }
     if (error && error?.friends) {
-      return <RenderErrorState reloadFunction={() => {}} type={"friends"} />;
+      return <RenderErrorState reloadFunction={friendsData} type={"friends"} />;
     }
 
     if (query === "") {

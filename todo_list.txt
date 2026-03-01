@@ -1,4 +1,3 @@
-SEMBRA FINITO mettere messaggi schermi grandi 
 controllare che tutte le funzionalità funzionino
-TASTO LOG OUT sotto profilo
-SEMBRA FINITO risolvere bug lentezza desktop
+
+togliere pagine commentate

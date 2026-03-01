@@ -232,14 +232,14 @@ const EmptyState = ({ tab }) => {
 ───────────────────────────────────────────────────────────── */
 const Profile = () => {
   const navigate = useNavigate();
-  const { profileData } = useProfile();
+  const { profileData, getProfileData } = useProfile();
   const { session, LogoutUser } = useAuth();
   const { loading, error } = useApi();
   const [activeTab, setActiveTab] = useState("programma");
 
   if (loading?.profile) return <RenderLoadingState type="profile" />;
   if (error?.profile)
-    return <RenderErrorState type="profile" reloadFunction={() => {}} />;
+    return <RenderErrorState type="profile" reloadFunction={getProfileData} />;
 
   const now = new Date();
   const allEvents = [...(profileData?.newEventsData ?? [])];

@@ -11,6 +11,7 @@ import RenderLoadingState from "@/features/utils/RenderLoadingState";
 import { useApi } from "@/contexts/ApiContext";
 import { ApiCalls } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useChat } from "@/contexts/ChatContext";
 const EVENTSINPAGE = 12;
 
 const EventsSuspended = () => {
@@ -20,6 +21,7 @@ const EventsSuspended = () => {
   const { currentScreen } = useScreen();
   const { executeApiCall, loading, error } = useApi();
   const { session } = useAuth();
+  const { fetchEvents } = useChat();
 
   const saveData = (data) => {
     if (data.length > 0) {
@@ -62,13 +64,10 @@ const EventsSuspended = () => {
     return () => slider.removeEventListener("scroll", onScroll);
   }, [loading.home_events]);
 
-  {
-    /* <div className="flex flex-col items-center justify-center py-20"></div> */
-  }
   const renderContent = useCallback(() => {
     if (error.home_events) {
       return (
-        <RenderErrorState type={"home_events"} reloadFunction={() => {}} />
+        <RenderErrorState type={"home_events"} reloadFunction={fetchEvents} />
       );
     }
     if (loading.home_events) {

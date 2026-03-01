@@ -82,13 +82,6 @@ const EventDetailsMobile = () => {
     console.log("qui arrivo");
     fetchEvent();
   }, []);
-  // if (error && error?.event !== null) {
-  //   return <RenderErrorState reloadFunction={() => {}} type="event" />;
-  // }
-  // if (loading.event) {
-  //   return <RenderLoadingState type={"event"} />;
-  // }
-  console.log(currentEventData);
 
   if (Object.keys(currentEventData).length == 0) {
     return <RenderLoadingState type={"event"} />;

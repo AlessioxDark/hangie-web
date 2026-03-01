@@ -13,6 +13,7 @@ import { useLocation } from "react-router";
 
 const ProfileContext = createContext({
   ProfileData: null,
+  getProfileData: (arg) => arg,
 });
 
 export const ProfileProvider = ({ children }) => {
@@ -24,7 +25,6 @@ export const ProfileProvider = ({ children }) => {
 
   const getDefaulHandle = async () => {
     if (!session?.access_token || !session?.user?.id) return;
-    console.log("session user c'è", session.user.id);
     try {
       const {
         data: { handle },
@@ -74,31 +74,7 @@ export const ProfileProvider = ({ children }) => {
       getProfileData(splittedLoation[2]);
     }
   }, [location.pathname]);
-  // const { executeApiCall } = useApi();
-  // const [profileData, setProfileData] = useState(null);
-  // const { session, isAuthLoading } = useAuth();
-  // const getProfileData = useCallback(async () => {
-  // if (!session?.access_token || !session?.user?.id) return;
 
-  //   const saveData = (data) => {
-  //     setProfileData(data);
-  //   };
-
-  //   executeApiCall(
-  //     "profile",
-  //     () => ApiCalls.handleGetProfile(session.access_token),
-  //     saveData,
-  //   );
-  // }, [session, executeApiCall]);
-
-  // useEffect(() => {
-  //   if (session && !isAuthLoading) {
-  //     getProfileData();
-  //   }
-  // }, [session, isAuthLoading]);
-  useEffect(() => {
-    console.log("profile", profileData);
-  }, [profileData]);
   return (
     <ProfileContext.Provider
       value={{
