@@ -55,13 +55,11 @@ const SortableImg = ({ image, index, removeImg }) => {
           </div>
         </div>
       )}
-      {/* 1. Legend: Solo testo 'cover' */}
 
-      {/* Bottone di rimozione (Deve usare z-index alto per essere cliccabile) */}
       <div
         className="absolute top-1 2xl:top-2 right-1 2xl:right-2 p-1 2xl:p-1.5 rounded-full bg-text-2 hover:bg-text-2/80 transition-colors cursor-pointer text-white z-20 shadow-lg"
         onClick={(e) => {
-          e.stopPropagation(); // Importante per non attivare il D&D sul click del bottone
+          e.stopPropagation();
           removeImg(image);
         }}
         aria-label={`Rimuovi immagine ${index + 1}`}
@@ -77,6 +75,5 @@ const SortableImg = ({ image, index, removeImg }) => {
     </div>
   );
 };
-// **********************************************
 
 export default SortableImg;

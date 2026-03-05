@@ -62,7 +62,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
   const risposteAccepted = risposte_evento.filter(
     (r) => r.status == "accepted",
   );
-  console.log("il group_id", group_id);
+  ("il group_id", group_id);
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
         day: "numeric",
@@ -85,7 +85,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
     }
 
     let tempo_residuo = distanza_ms;
-    console.log(scadenza_timestamp, distanza_ms);
+    (scadenza_timestamp, distanza_ms);
     // 2. Calcoli basati su millisecondi medi per anno/mese (ATTENZIONE: impreciso)
 
     // Anni: 365.25 giorni * 24h * 60m * 60s * 1000ms
@@ -164,9 +164,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
       `}
       onClick={() => navigate(`/events/${event_id}`)}
     >
-      {/* ═══════════════════════════════════════════════════
-          HEADER - Gruppo + Scadenza
-      ════════════════════════════════════════════════════ */}
       <div
         className="
         flex items-center justify-between gap-4
@@ -175,7 +172,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
       
       "
       >
-        {/* ✅ BADGE GRUPPO - Sinistra */}
         {gruppo && (
           <div className=" max-w-[90%]">
             <div className="px-3 py-1.5 2xl:py-2 bg-black/60 backdrop-blur-md rounded-xl shadow-lg">
@@ -192,7 +188,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
           </div>
         )}
 
-        {/* ✅ BADGE SCADENZA - Destra */}
         <div
           className={`
           flex items-center gap-2
@@ -222,11 +217,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════
-          CONTENT - Info Evento
-      ════════════════════════════════════════════════════ */}
       <div className="2xl:p-6 p-4 pt-2.5 flex flex-col justify-between h-full ">
-        {/* Data + Titolo */}
         <div className="flex flex-col gap-2 2xl:gap-4">
           <div className="flex flex-col ">
             <time className="text-xs 2xl:text-base block text-primary font-semibold uppercase tracking-wider">
@@ -239,7 +230,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
             </h3>
           </div>
 
-          {/* Partecipanti */}
           <div className="ml-1 2xl:ml-2">
             <div className="flex items-center gap-2 2xl:gap-4 ">
               <div className=" 2xl:w-7 2xl:h-7 w-5 h-5 flex-shrink-0 text-gray-400">
@@ -274,9 +264,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
           </div>
         </div>
 
-        {/* ═══════════════════════════════════════════════════
-            ORGANIZZATORE
-        ════════════════════════════════════════════════════ */}
         <div>
           <div className="pb-1 pt-3 2xl:pb-2 2xl:pt-4  ">
             <div className="flex items-center gap-3">
@@ -294,21 +281,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
           <div className="pt-2.5 2xl:pt-5  border-t border-gray-100 ">
             <div className="flex gap-3">
               <button
-                //   className="
-                //   flex-1
-                //   2xl:px-6 2xl:py-3
-                //   px-3 py-2.5
-                //   bg-primary text-bg-1
-                //   rounded-xl
-                //   font-bold
-                //   hover:bg-primary/80
-                //   transition-colors
-                //   duration-300
-
-                //    2xl:text-lg
-                //    text-sm
-                //    cursor-pointer
-                // "
                 className={`flex-1 ${status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-2.5 rounded-xl   active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer text-sm`}
                 disabled={scadenza < Date.now()}
                 onClick={(e) => {
@@ -355,10 +327,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
             </div>
           </div>
         </div>
-
-        {/* ═══════════════════════════════════════════════════
-            AZIONI - Accetta/Rifiuta
-        ════════════════════════════════════════════════════ */}
       </div>
     </article>
   );

@@ -17,7 +17,6 @@ const LayoutDesktop = ({ children }) => {
                   Trova l'esperienza perfetta per te
                 </p>
               </div>
-              {/* <ProfileIcon /> */}
             </div>
           </div>
         </header>
@@ -25,7 +24,6 @@ const LayoutDesktop = ({ children }) => {
           {children}
         </main>
       </div>
-      {/* {children} */}
     </div>
   );
 };

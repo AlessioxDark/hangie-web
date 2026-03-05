@@ -49,7 +49,7 @@ const CreateGroupForm = () => {
     const file = event.target.files[0];
     if (!file) return;
     const ext = file.type.split("/")[1];
-    console.log(file.name);
+    file.name;
     if (!ACCEPTED_EXTENSIONS.includes(ext)) {
       setImageError({
         message: `Accettiamo solo ${ACCEPTED_EXTENSIONS.join(", ")}`,
@@ -60,7 +60,7 @@ const CreateGroupForm = () => {
     } else {
       setImageError(null);
     }
-    console.log(file.name.split(".").pop());
+    file.name.split(".").pop();
     setGroupImage({
       file: file, // <--- Qui salviamo l'oggetto File integro
       type: file.type,
@@ -108,7 +108,7 @@ const CreateGroupForm = () => {
       let finalImgUrl = null;
       if (!response.ok)
         throw new Error(result.error || "Errore creazione evento");
-      console.log("Wquesto è il result", result);
+      ("Wquesto è il result", result);
       const groupId = result.data.group_id;
       if (groupImage) {
         const fileName = `${groupId}/cover.${groupImage.ext}`;

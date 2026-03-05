@@ -63,7 +63,6 @@ const KarmaBadge = ({ points = 82 }) => {
         boxShadow: `0 4px 12px ${color}10`,
       }}
     >
-      {/* 1. STATUS: Icona e Label */}
       <div className="flex items-center gap-1.5">
         <span className="text-base leading-none drop-shadow-sm">{icon}</span>
         <span
@@ -74,7 +73,6 @@ const KarmaBadge = ({ points = 82 }) => {
         </span>
       </div>
 
-      {/* 2. PUNTI: Ben visibili al centro */}
       <div className="flex items-baseline gap-0.5 leading-none">
         <span
           className="text-xl font-black tracking-tighter leading-none"
@@ -90,7 +88,6 @@ const KarmaBadge = ({ points = 82 }) => {
         </span>
       </div>
 
-      {/* 3. PROGRESSO: La barra sottile che crea "dipendenza" */}
       <div className="w-full ">
         <div
           className="w-full h-1 rounded-full overflow-hidden"

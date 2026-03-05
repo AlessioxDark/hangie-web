@@ -113,7 +113,7 @@ const CreateEventForm = () => {
     if (checkImagesError()) return;
 
     const handleUploadAndSocket = async (dataArrived) => {
-      console.log("inviato da", session.user.id);
+      ("inviato da", session.user.id);
       try {
         clearErrors("root");
         const newEventId = dataArrived.event_id;
@@ -137,7 +137,7 @@ const CreateEventForm = () => {
           return urlData.publicUrl;
         });
         const uploadedUrls = await Promise.all(uploadPromises);
-        console.log("url caricati", uploadedUrls);
+        ("url caricati", uploadedUrls);
         const cover_url = uploadedUrls[0];
         const { error: coverError } = await supabase
           .from("eventi")
@@ -148,15 +148,15 @@ const CreateEventForm = () => {
         const otherImages = uploadedUrls
           .filter((url) => url !== cover_url)
           .map((url) => ({ img_url: url, event_id: newEventId }));
-        console.log("altre immagini no cover", otherImages);
+        ("altre immagini no cover", otherImages);
         if (otherImages.length > 0) {
           const { error: imgError } = await supabase
             .from("event_imgs")
             .insert(otherImages);
           if (imgError) throw imgError;
-          console.log("inseriti other img");
+          ("inseriti other img");
         }
-        console.log("ecco cover", cover_url);
+        ("ecco cover", cover_url);
         const newEventDetails = {
           ...dataArrived.messageDetails.eventi,
           cover_img: cover_url,
@@ -165,7 +165,7 @@ const CreateEventForm = () => {
         sendEvent(newEventId, newEventDetails, messageDetails);
         setMobileView("");
       } catch (error) {
-        console.log(error);
+        error;
         setError("root", {
           message: error.message || "Qualcosa è andato storto",
         });
@@ -227,7 +227,7 @@ const CreateEventForm = () => {
     }
   };
   useEffect(() => {
-    console.log("cambiato errr");
+    ("cambiato errr");
     if (errorsApi?.add_event) {
       setError("root", {
         message: errorsApi.add_event.message,

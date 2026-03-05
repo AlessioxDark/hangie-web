@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import React from "react";
 
 const ParticipantCard = ({ handle, user_id, setCurrentParticipants }) => {
-  console.log(handle);
+  handle;
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="w-16 h-16 relative">

@@ -25,7 +25,7 @@ const GroupEventCard = ({
   status,
   created_by,
 }) => {
-  console.log("ris", risposte_evento);
+  ("ris", risposte_evento);
 
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
@@ -51,7 +51,7 @@ const GroupEventCard = ({
     }
 
     let residuo = distanza_ms;
-    console.log(scadenza_timestamp, distanza_ms);
+    (scadenza_timestamp, distanza_ms);
     const units = [
       {
         label: "y",
@@ -201,7 +201,7 @@ px-2 py-1 bg-amber-50 text-amber-600  border border-amber-100
                     <button
                       className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 transition-colors flex items-center gap-2"
                       onClick={() => {
-                        console.log("click");
+                        ("click");
                         handleDeleteEvent(event_id, sendSocket);
                       }}
                     >
@@ -285,12 +285,6 @@ px-2 py-1 bg-amber-50 text-amber-600  border border-amber-100
           >
             Rifiuta
           </button>
-          {/* <button className="flex-1 px-4 py-3 bg-primary text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 hover:brightness-110 transition-all">
-            Accetta
-          </button>
-          <button className="flex-1 bg-gray-50 text-gray-400 font-bold px-4 py-3 text-xs hover:text-slate-600 transition-colors rounded-xl border border-gray-200">
-            Ignora
-          </button> */}
         </div>
       )}
     </div>

@@ -116,7 +116,7 @@ const ChatInput = ({
                 >
                   <div
                     onClick={() => {
-                      console.log("cambio mobil");
+                      ("cambio mobil");
                       setMobileView("CREATE_EVENT");
                     }}
                     className="flex flex-col items-center gap-1"
@@ -128,22 +128,11 @@ const ChatInput = ({
                       Crea Evento
                     </span>
                   </div>
-                  {/* <div className="w-full text-center hover:bg-bg-3/60 py-2 cursor-pointer transition-all rounded-t-xl">
-                    <span
-                      className="text-text-1 font-body font-medium  w-full"
-                      onClick={() => {
-                        handleDropdownChoice("CREATE_EVENT_MODAL");
-                      }}
-                    >
-                      Crea Evento
-                    </span>
-                  </div> */}
                 </div>
               ))}
           </div>
 
           <div
-            // CRUCIALE: Disabilita l'editing quando il dropdown è aperto
             contentEditable={!isDropdownOpen}
             ref={chatInputRef}
             className={`
@@ -165,7 +154,7 @@ const ChatInput = ({
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                if (isSendActive) sendMessage(); // Invia solo se attivo
+                if (isSendActive) sendMessage();
               }
             }}
             data-placeholder="Scrivi un messaggio..."

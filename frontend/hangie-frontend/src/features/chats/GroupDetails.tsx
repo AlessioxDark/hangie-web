@@ -32,7 +32,7 @@ const GroupDetails = () => {
   }, [currentGroupData, session.user.id]);
 
   const { currentSocket } = useSocket();
-  console.log(currentGroupData);
+  currentGroupData;
   const [localGroupData, setLocalGroupData] = useState({
     group_cover_img: currentGroupData?.group_cover_img,
     descrizione: currentGroupData?.descrizione,
@@ -84,7 +84,7 @@ const GroupDetails = () => {
       );
     };
 
-    console.log("invio richiesta api");
+    ("invio richiesta api");
     executeApiCall(
       "add_participants",
       () => {
@@ -246,12 +246,12 @@ const GroupDetails = () => {
               {currentScreen === "xs" && (
                 <button
                   onClick={() => {
-                    console.log("lista aggiornata", currentGroupData);
+                    ("lista aggiornata", currentGroupData);
                     navigate(-1);
                   }}
                   className="w-7 h-7"
                 >
-                  <ChevronLeft color={"#007AFF"} /> {/* Blue Apple Color */}
+                  <ChevronLeft color={"#007AFF"} />
                 </button>
               )}
               <h2 className="text-lg font-semibold text-text-1">Info Gruppo</h2>

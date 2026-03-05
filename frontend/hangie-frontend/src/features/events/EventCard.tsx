@@ -4,14 +4,9 @@ import ParticipantsIcon from "@/assets/icons/ParticipantsIcon";
 import ProfileIcon from "@/components/ProfileIcon";
 import { useModal } from "@/contexts/ModalContext";
 import { useScreen } from "@/contexts/ScreenContext";
-import EventPageMobile from "./EventPageMobile";
 import { Link, useLocation } from "react-router";
 import { useChat } from "@/contexts/ChatContext";
 
-/*
-todo
-Non toccare niente altro, cerca di risolvere al meglio rpoblema altezze diverse, 
-magari potresti centrare tutta la parte ceh non riguarda pfp in tutto lo spazio rimanente */
 const EventCard = ({ event }) => {
   const {
     titolo,
@@ -139,7 +134,6 @@ const EventCard = ({ event }) => {
                           );
                         })}
 
-                        {/* Counter per rimanenti */}
                         {risposteAccepted.length > 3 && (
                           <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center">
                             <span className="text-xs font-bold text-text-2">

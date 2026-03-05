@@ -1,15 +1,15 @@
 const BASE_URL = "http://localhost:3000/api";
 const handleResponse = async (res) => {
-  console.log("arrivata res", res);
+  ("arrivata res", res);
   if (!res.ok) {
-    console.log("non è ok");
+    ("non è ok");
     const errorData = await res.json().catch(() => ({}));
-    console.log("errore durante api call di:", errorData.message, res.status);
+    ("errore durante api call di:", errorData.message, res.status);
     throw { ...errorData, status: res.status };
   }
-  console.log("è ok");
+  ("è ok");
   const dataToSend = await res.json();
-  console.log("invio datatosend", dataToSend);
+  ("invio datatosend", dataToSend);
 
   return dataToSend.data !== undefined ? dataToSend.data : dataToSend;
 };
@@ -26,7 +26,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   AddParticipants: async (token: string, groupId: string, dataToSend) => {
-    console.log("data da inviare", { token, groupId, dataToSend });
+    ("data da inviare", { token, groupId, dataToSend });
     const res = await fetch(`${BASE_URL}/groups/add/participants/${groupId}`, {
       method: "PATCH",
       body: JSON.stringify(dataToSend),
@@ -42,7 +42,7 @@ export const ApiCalls = {
     groupId: string,
     dataToSend,
   ) => {
-    console.log("remove participant fetch");
+    ("remove participant fetch");
     const res = await fetch(
       `${BASE_URL}/groups/remove/participants/${groupId}`,
       {
@@ -57,7 +57,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleGetFriends: async (token: string, userId: string) => {
-    console.log("get friends fetch");
+    ("get friends fetch");
     const res = await fetch(`${BASE_URL}/friends/${userId}`, {
       method: "GET",
 
@@ -69,7 +69,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleDeleteFriend: async (token: string, dataToSend) => {
-    console.log("gdelete friend");
+    ("gdelete friend");
     const res = await fetch(`${BASE_URL}/friends/delete`, {
       method: "DELETE",
       body: JSON.stringify(dataToSend),
@@ -81,7 +81,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleGetProfile: async (handle: string) => {
-    console.log("ottengo profile");
+    ("ottengo profile");
     const res = await fetch(`${BASE_URL}/profile/${handle}`, {
       method: "GET",
       headers: {
@@ -92,7 +92,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleGetFriendsByQuery: async (token: string, query: string) => {
-    console.log("get friends fetch");
+    ("get friends fetch");
     const res = await fetch(`${BASE_URL}/friends/query/${query}`, {
       method: "GET",
       headers: {
@@ -103,7 +103,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleSendOrDeleteFriendRequest: async (token: string, dataToSend) => {
-    console.log("invio a ", `${BASE_URL}/friends/request`);
+    ("invio a ", `${BASE_URL}/friends/request`);
     const res = await fetch(`${BASE_URL}/friends/request`, {
       method: "POST",
       body: JSON.stringify(dataToSend),
@@ -194,7 +194,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   voteEvent: async (eventId: string, token: string, body) => {
-    console.log({ eventId, token, body });
+    ({ eventId, token, body });
     const res = await fetch(`${BASE_URL}/events/answer/${eventId}`, {
       method: "PATCH",
       body: JSON.stringify(body),

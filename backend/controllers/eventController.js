@@ -59,7 +59,7 @@ const getMyEvents = async (req, res) => {
 
     // Assicurati che finalData non sia undefined o null
     const responseData = finalData || [];
-    console.log("Dati da inviare:", responseData);
+    ("Dati da inviare:", responseData);
 
     // Invia la risposta JSON con i dati, o un array vuoto se i dati non sono stati trovati
     res.json({ data: responseData });
@@ -72,7 +72,7 @@ const getMyEvents = async (req, res) => {
 const getSpecificEvent = async (req, res) => {
   try {
     const { data, error } = await Event.getEvent(req);
-    console.log(data);
+    data;
     if (error) throw error;
     let newData = {
       event_id: data.event_id,
@@ -90,7 +90,7 @@ const getSpecificEvent = async (req, res) => {
       created_by: data.eventi.created_by,
       risposte_evento: data.partecipanti,
     };
-    console.log("data che invio", newData);
+    ("data che invio", newData);
 
     res.status(200).json({
       success: true,
@@ -152,9 +152,9 @@ const modifyResponseEvent = async (req, res) => {
 const deleteSpecificEvent = async (req, res) => {
   try {
     const { data, error } = await Event.deleteEvent(req); // Chiama il modello per ottenere gli eventi
-    console.log("error", error);
+    ("error", error);
     if (error) throw error;
-    console.log("è andata bene");
+    ("è andata bene");
     res.status(200).json({
       success: true,
       message: "Operazione completata con successo", // Opzionale, utile per i toast

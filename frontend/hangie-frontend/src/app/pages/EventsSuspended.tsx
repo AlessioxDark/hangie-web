@@ -25,7 +25,7 @@ const EventsSuspended = () => {
 
   const saveData = (data) => {
     if (data.length > 0) {
-      console.log("ecco i dati", data);
+      ("ecco i dati", data);
       setEventsData((prevData) => {
         const mergeData = [...prevData, ...data];
 

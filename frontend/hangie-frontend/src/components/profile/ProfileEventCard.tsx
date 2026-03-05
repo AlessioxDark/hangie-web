@@ -156,7 +156,6 @@ const ProfileEventCard = ({ event }) => {
                           );
                         })}
 
-                        {/* Counter per rimanenti */}
                         {risposteAccepted.length > 3 && (
                           <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center">
                             <span className="text-xs font-bold text-text-2">
@@ -244,7 +243,6 @@ const ProfileEventCard = ({ event }) => {
                 </button>
               </div>
             ) : null}
-            {/* {getButtonContent(event_details.status)} */}
           </div>
         </div>
       </article>

@@ -95,11 +95,6 @@ const MessageCard = ({
               {formatDate(sent_at)}
             </span>
 
-            {/* {isUser && (
-              <div className="w-5 h-4.5">
-                {isSent ? <DoubleTick /> : <TickIcon color={"#ffffff"} />}
-              </div>
-            )} */}
             {renderTick()}
           </div>
         </div>

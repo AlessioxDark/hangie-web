@@ -31,7 +31,7 @@ const getAll = async (req) => {
 };
 const getPending = async (req) => {
   const { user_id } = req.params;
-  console.log("le ha chieste", user_id);
+  ("le ha chieste", user_id);
   const { data, error } = await supabase
     .from("amicizie")
     .select(
@@ -48,7 +48,7 @@ const getPending = async (req) => {
 };
 const sendRequest = async (req) => {
   try {
-    console.log("inviata richiesta con", req.body);
+    ("inviata richiesta con", req.body);
     const { friend_id, user_id, status } = req.body;
     if (status == "pending") {
       const { data: FriendData, error: friendError } = await supabase
@@ -129,7 +129,7 @@ const getAccepted = async (req) => {
 };
 const getByQuery = async (req) => {
   try {
-    console.log("ottenendo by query");
+    ("ottenendo by query");
     const { query } = req.params;
 
     const authHeader = req.headers.authorization;
@@ -150,7 +150,7 @@ const getByQuery = async (req) => {
       f.user_id === user.id ? f.amico_id : f.user_id,
     );
 
-    console.log(friendsIds);
+    friendsIds;
     const { data, error } = await supabase
       .from("utenti")
       .select(
@@ -165,7 +165,7 @@ const getByQuery = async (req) => {
     const finalData = data.map((f) => {
       return f;
     });
-    console.log("ottenendo by query eccolo il data", data);
+    ("ottenendo by query eccolo il data", data);
 
     return { data: finalData, error: null };
   } catch (err) {
@@ -174,7 +174,7 @@ const getByQuery = async (req) => {
 };
 const deleteFriend = async (req) => {
   try {
-    console.log("ottenendo by query");
+    ("ottenendo by query");
     const { friend_id } = req.body;
 
     const authHeader = req.headers.authorization;

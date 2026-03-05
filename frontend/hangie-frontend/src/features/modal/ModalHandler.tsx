@@ -6,7 +6,7 @@ import EventDetailsModal from "./EventDetailsModal";
 import ParticipantActionsModal from "./ParticipantActionsModal";
 
 const ModalHandler = () => {
-  console.log("ok");
+  ("ok");
   const { modalType } = useModal();
 
   if (modalType == null) return <></>;

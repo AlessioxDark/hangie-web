@@ -27,7 +27,7 @@ const getAll = async (req) => {
     if (error) throw error;
     return { data, error: null };
   } catch (err) {
-    console.log("ho trowato", err);
+    ("ho trowato", err);
     return { data: null, error: err };
   }
 };
@@ -89,12 +89,12 @@ const getGroup = async (req) => {
             `,
       )
       .in("event_id", eventIds);
-    console.log("gli eventsDetails", eventsDetails);
+    ("gli eventsDetails", eventsDetails);
     const newEventsDetails = eventsDetails.map((e) => {
       const risposta = e.risposte_evento.find((r) => r.user_id == user.id);
       return { ...e, status: risposta.status };
     });
-    console.log("i nuovi eventsDetails", newEventsDetails);
+    ("i nuovi eventsDetails", newEventsDetails);
     if (eventsError) throw eventsError;
 
     const eventDetail = newEventsDetails.reduce((acc, event) => {
@@ -132,7 +132,7 @@ const getGroup = async (req) => {
       error: null,
     };
   } catch (err) {
-    console.log("ecco", err);
+    ("ecco", err);
     return { data: null, error: err };
   }
 };
@@ -148,7 +148,7 @@ const getEvents = async (req) => {
       )
       .eq("group_id", group_id);
     if (eventsError) throw eventsError;
-    console.log("trovando eventi_gruppo");
+    ("trovando eventi_gruppo");
     const eventIds = eventsData.map((e) => e.event_id);
 
     const { data: risposte, error: risposteError } = await supabase
@@ -175,19 +175,19 @@ const getEvents = async (req) => {
     } = await supabase.auth.getUser(token);
     if (tokenError) throw tokenError;
     const newData = eventsData.map((e) => {
-      console.log("risp", newRisposte, e.event_id);
+      ("risp", newRisposte, e.event_id);
       const eventStatus = newRisposte[e.event_id].find(
         (r) => r.user_id == user.id,
       );
-      console.log("questo è e", e);
+      ("questo è e", e);
       return {
         ...e,
         partecipanti: newRisposte[e.event_id],
         status: eventStatus.status,
       };
     });
-    console.log("ecco il newData", newData);
-    console.log("ecco il newRispsote", newRisposte);
+    ("ecco il newData", newData);
+    ("ecco il newRispsote", newRisposte);
     // ottenere partecipanti confermati per tutti, seguire esempio event
     return { data: newData, error: null };
   } catch (err) {
@@ -224,7 +224,7 @@ const newGroup = async (req) => {
     } = await supabase.auth.getUser(token);
 
     if (userError) throw userError;
-    console.log("ci siamo?");
+    ("ci siamo?");
     const { data: groupData, error: groupError } = await supabase
       .from("gruppi")
       .insert([{ ...newBody, createdBy: user.id }])
@@ -292,7 +292,7 @@ const leave = async (req) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) throw { message: "Manca Auth Header" };
     const token = authHeader.split(" ")[1];
-    console.log("ecco il group id", group_id);
+    ("ecco il group id", group_id);
     const {
       data: { user },
       error: userError,
@@ -338,7 +338,7 @@ const leave = async (req) => {
     if (countError) throw countError;
 
     if (count == 0) {
-      console.log("eliminiamo il gruppo");
+      ("eliminiamo il gruppo");
       const { error: notificanError } = await supabase
         .from("notifiche")
         .delete()
@@ -350,7 +350,7 @@ const leave = async (req) => {
         .eq("group_id", group_id);
 
       if (messageError) throw messageError;
-      console.log("arrivo ai messaggi");
+      ("arrivo ai messaggi");
       const messageEvents = messages.filter((m) => m.type == "filter");
       const messageIds = messages.map((m) => m.message_id);
       if (messages && messages.length > 0) {
@@ -380,24 +380,24 @@ const leave = async (req) => {
             await supabase.storage.from("eventi").remove(filesToDelete);
           }
         }
-        console.log("arrivo agli eventi");
-        console.log("promo a rimuovere gli eventi", messageEventsEventsIds);
+        ("arrivo agli eventi");
+        ("promo a rimuovere gli eventi", messageEventsEventsIds);
         const { error: eventsError } = await supabase
           .from("eventi")
           .delete()
           .in("event_id", messageEventsEventsIds);
 
-        console.log("promo a rimuovere eventi gruppo", messageEventsEventsIds);
+        ("promo a rimuovere eventi gruppo", messageEventsEventsIds);
         if (eventsError) throw eventsError;
         const { error: groupEventsError } = await supabase
           .from("eventi_gruppo")
           .delete()
           .eq("group_id", group_id);
 
-        console.log("promo a rimuovere eventi gruppo", messageEventsEventsIds);
+        ("promo a rimuovere eventi gruppo", messageEventsEventsIds);
         if (groupEventsError) throw groupEventsError;
       }
-      console.log("ecco i message ids", messageIds);
+      ("ecco i message ids", messageIds);
       const { error: messagesStatusError } = await supabase
         .from("messaggi_status")
         .delete()
@@ -408,7 +408,7 @@ const leave = async (req) => {
         .delete()
         .in("message_id", messageIds);
       if (messagesError) throw messagesError;
-      console.log("arrivo a folder");
+      ("arrivo a folder");
       const { data: folderContent, error: folderError } = await supabase.storage
         .from("group_cover_imgs")
         .list(group_id);
@@ -490,7 +490,7 @@ const addParticipants = async (req) => {
       }));
     });
 
-    console.log("aggiungo insertdata", insertData);
+    ("aggiungo insertdata", insertData);
 
     const { data: groupEventsData, error: insertError } = await supabase
       .from("risposte_eventi")
@@ -515,7 +515,7 @@ const addParticipants = async (req) => {
       });
       return acc;
     }, {});
-    console.log("le final responses da model", finalEventsResponses);
+    ("le final responses da model", finalEventsResponses);
     return { data: { groupEventsData, finalEventsResponses }, error: null };
   } catch (err) {
     return { error: err, data: null };
@@ -523,7 +523,7 @@ const addParticipants = async (req) => {
 };
 const removeParticipant = async (req) => {
   try {
-    console.log("tolto p");
+    ("tolto p");
 
     const { group_id } = req.params;
     const { user_id } = req.body;

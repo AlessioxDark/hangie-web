@@ -101,7 +101,6 @@ const FriendItem = ({ friend, setFetchData, type }) => {
         </div>
       </div>
 
-      {/* Logica Bottone: Mostriamo "Annulla" se isSent è true, altrimenti "Invia" */}
       {type == "friend_request" ? (
         <div className="flex flex-row gap-2">
           <button

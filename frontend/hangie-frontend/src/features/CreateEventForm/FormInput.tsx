@@ -12,20 +12,17 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
         {label} <span className="text-red-500 text-sm">*</span>
       </label>
       <div className="flex flex-col gap-0.5">
-        {/* bg-bg-2  */}
         <div
           className={`flex items-center
-		                         bg-bg-1 rounded-xl
+		                         bg-bg-2 rounded-xl
 		                         transition-all duration-200
 		                         ${
                                error
                                  ? "border-red-500 border-2"
-                                 : "focus-within:border-primary focus-within:ring-2 focus-within:ring-primary border-gray-200 ring-2 ring-gray-200"
+                                 : "focus-within:border-primary  focus-within:ring-primary  ring-2 ring-gray-200"
                              }
 		                         shadow-inner-sm p-0.5`}
         >
-          {/* Icona a sinistra */}
-
           {id == "costo" && (
             <div className="h-full flex items-center justify-center">
               <div className="w-8 h-8">
@@ -58,7 +55,6 @@ const FormInput = ({ id, label, type, placeholder, register, error }) => {
             {...register(id)}
           />
         </div>
-        {/* L'errore viene mostrato se esiste */}
         {error?.message && (
           <p className="text-sm font-body  text-red-500 px-1.5">
             {error.message}

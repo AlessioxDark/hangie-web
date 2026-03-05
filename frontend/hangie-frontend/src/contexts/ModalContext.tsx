@@ -29,15 +29,15 @@ export const ModalProvider = ({ children }) => {
     if (!type) {
       throw new Error("devi Inserire un tipo");
     }
-    console.log("sto per cambiare modal");
+    ("sto per cambiare modal");
     setModalState({ type, data });
-    console.log("cambiato modal");
+    ("cambiato modal");
   };
   const closeModal = () => {
     setModalState({ type: null, data: null });
   };
   useEffect(() => {
-    console.log("modaltype:", modalType);
+    ("modaltype:", modalType);
   }, [modalType]);
 
   return (

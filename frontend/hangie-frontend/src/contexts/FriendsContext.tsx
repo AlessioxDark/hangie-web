@@ -69,7 +69,10 @@ export const FriendsProvider = ({ children }) => {
       ),
     );
     setAcceptedFriends(fetchData.filter((f) => f.status === "accepted"));
-    console.log(fetchData);
+    fetchData;
+  }, [fetchData]);
+  useEffect(() => {
+    console.log("modificato fetchdata", fetchData);
   }, [fetchData]);
   return (
     <FriendsContext.Provider

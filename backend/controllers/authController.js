@@ -1,7 +1,7 @@
 const Auth = require("../models/authModel");
 const jwt = require("jsonwebtoken");
 const Signup = async (req, res) => {
-  console.log("registrandoti...");
+  ("registrandoti...");
   const token = req.headers.authorization.split(" ")[1];
   const { user, error } = await Auth.createUser(req, token);
   if (error) {

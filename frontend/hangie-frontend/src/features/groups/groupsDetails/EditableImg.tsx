@@ -50,7 +50,7 @@ const EditableImg = ({
           cacheControl: "3600",
         });
       if (uploadError) {
-        console.log(uploadError);
+        uploadError;
         setFormError("img", { message: uploadError.message });
         return;
       }
@@ -132,9 +132,9 @@ const EditableImg = ({
               <div
                 className="absolute rounded-full -top-2.5 -right-5 rotate-270 p-1.5 bg-primary"
                 onClick={() => {
-                  console.log("voglio modificare il titolo");
+                  ("voglio modificare il titolo");
                   if (currentEditingField != "nome") {
-                    console.log("era false lo metto true");
+                    ("era false lo metto true");
                     setCurrentEditingField("nome");
                   } else {
                     if (localGroupData.nome !== currentGroupData.nome) {

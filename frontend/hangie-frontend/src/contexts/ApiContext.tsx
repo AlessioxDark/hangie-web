@@ -71,7 +71,7 @@ export const ApiContextProvider = ({ children }) => {
       onSuccess,
     ) => {
       // if (loading[type]) return;
-      console.log("eseguo type", type);
+      ("eseguo type", type);
       try {
         setError((prev) => ({ ...prev, [type]: null }));
         setLoading((prev) => {
@@ -80,7 +80,7 @@ export const ApiContextProvider = ({ children }) => {
         const data = await fetchCall();
         onSuccess(data);
       } catch (err: any) {
-        console.log("metto error", err);
+        ("metto error", err);
 
         setError((prev) => {
           return {

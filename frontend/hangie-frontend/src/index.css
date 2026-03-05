@@ -10,13 +10,7 @@
   --color-text-1: #0f172a;
   --color-text-2: #64748b;
   --color-text-3: #94a3b8;
-  /* --color-complementary: #f97316;
-	--color-accent: #10b981;
-	--color-neutral-white: #ffffff;
-	--color-neutral-white-2: #fbfbfe;
-	--color-neutral-black: #090909; */
 
-  /* support colors */
   --color-success: #10b981;
   --color-danger: hsl(40, 60%, 47%);
   --color-warning: hsl(0, 60%, 47%);
@@ -28,9 +22,6 @@
   --font-test: "Mona Sans", "serif";
 
   --breakpoint-xs: 600px;
-
-  @keyframes {
-  }
 }
 
 [contenteditable][data-placeholder] {
@@ -38,22 +29,17 @@
 }
 
 [contenteditable][data-placeholder]:empty::before {
-  content: attr(data-placeholder); /* Legge da data-placeholder */
-
-  /* Posizionamento e comportamento */
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  left: 8px; /* p-2 tailwind (8px) */
+  left: 8px;
   right: 8px;
   pointer-events: none;
   user-select: none;
   display: block;
 
-  /* Stili Tailwind-like integrati */
   z-index: 9;
   opacity: 0.8;
-  /* Per il colore e line-height useremo le classi direttamente nel JSX */
 }
 
 [contenteditable][data-placeholder]:empty:focus::before {
@@ -64,8 +50,7 @@
   display: none;
 }
 
-/* Nasconde la scrollbar per IE, Edge e Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

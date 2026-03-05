@@ -8,10 +8,10 @@ const createUser = async (req, token) => {
     error: userError,
   } = await supabase.auth.getUser(token);
   if (userError) {
-    console.log("errore ottenere utente da token", token);
+    ("errore ottenere utente da token", token);
     return { user, error: userError };
   }
-  console.log("token", token);
+  ("token", token);
 
   const { error: profileError } = await supabase
     .from("utenti")

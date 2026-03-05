@@ -72,7 +72,7 @@ export const NotificationProvider = ({ children }) => {
       )
       .eq("user_id", session.user.id)
       .order("created_at", { ascending: false });
-    console.log(notificationData);
+    notificationData;
     if (notificationError) return;
     const read = notificationData.filter((notif) => {
       if (notif.is_read) return notif;

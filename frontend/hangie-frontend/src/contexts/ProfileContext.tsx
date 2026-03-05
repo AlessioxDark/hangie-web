@@ -14,6 +14,7 @@ import { useLocation } from "react-router";
 const ProfileContext = createContext({
   ProfileData: null,
   getProfileData: (arg) => arg,
+  setProfileData: (arg) => arg,
 });
 
 export const ProfileProvider = ({ children }) => {
@@ -34,11 +35,11 @@ export const ProfileProvider = ({ children }) => {
         .select("handle")
         .eq("user_id", session?.user.id)
         .single();
-      console.log("trovato userhandle", handle, userError);
+      ("trovato userhandle", handle, userError);
       if (userError) throw userError;
       return handle;
     } catch (err) {
-      console.log("err", err);
+      ("err", err);
       // return err;
     }
   };
@@ -55,7 +56,6 @@ export const ProfileProvider = ({ children }) => {
   }, [session, isAuthLoading]);
 
   const getProfileData = useCallback(async (userHandle) => {
-    console.log("qui arrivo", userHandle);
     const saveData = (data) => {
       setProfileData(data);
     };
@@ -68,8 +68,8 @@ export const ProfileProvider = ({ children }) => {
   }, []);
   useEffect(() => {
     const splittedLoation = location.pathname.split("/");
-    console.log(splittedLoation);
-    console.log("sess", session);
+    splittedLoation;
+    ("sess", session);
     if (splittedLoation[1] == "profile") {
       getProfileData(splittedLoation[2]);
     }
@@ -81,6 +81,7 @@ export const ProfileProvider = ({ children }) => {
         profileData,
         getProfileData,
         defaultHandle,
+        setProfileData,
       }}
     >
       {children}

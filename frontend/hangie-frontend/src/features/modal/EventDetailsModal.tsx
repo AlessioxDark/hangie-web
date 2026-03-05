@@ -15,7 +15,7 @@ const EventDetailsModal = () => {
   const [error, setError] = useState(false);
   const [eventData, setEventData] = useState([]);
   const [currentPage, setCurrentPage] = useState("");
-  console.log("aprire event modal desktop");
+  ("aprire event modal desktop");
   const fetchEvent = async () => {
     if (isLoading) return;
     try {
@@ -32,11 +32,11 @@ const EventDetailsModal = () => {
         },
       );
       if (!response.ok) {
-        console.log(response);
+        response;
         setError(response.statusText || "Errore nel caricamento degli eventi");
       }
       const data = await response.json();
-      console.log(data);
+      data;
       setEventData(data);
     } catch (err: any) {
       console.error("Errore fetch eventi:", err);
@@ -80,7 +80,6 @@ const EventDetailsModal = () => {
             <h3 className="text-lg font-medium text-text-1 mb-2">
               Ops! Qualcosa è andato storto
             </h3>
-            {/* <p className="text-gray-500 mb-6 text-center">{error}</p> */}
             <button
               onClick={() => fetchEvent()}
               className="bg-primary hover:bg-primary/90 text-bg-1 px-6 py-3 rounded-lg font-medium transition-colors"
@@ -139,7 +138,6 @@ const EventDetailsModal = () => {
         <div className=" bg-bg-1  rounded-2xl p-8 w-70/100  overflow-y-auto">
           {renderContent()}
         </div>
-        {/* <EventDetails {...eventData} /> */}
       </div>
     </>,
     MountElement,

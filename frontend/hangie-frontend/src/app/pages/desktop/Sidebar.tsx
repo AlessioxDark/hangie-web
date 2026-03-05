@@ -1,7 +1,6 @@
 import SidebarIcons from "@/utils/SidebarIcons";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-/** */
 type ValidPath = `/${string}`;
 type SidebarLinksType = {
   id: number;
@@ -52,12 +51,6 @@ const Sidebar = () => {
     <aside className="xl:h-full  xl:p-6 flex flex-col 2xl:gap-28 shadow-xl bg-bg-1 sticky z-20  top-10">
       <header className="flex w-full flex-row gap-4 items-center py-4">
         <div className="hidden 2xl:block">
-          {/* <img
-						src={logo}
-						alt="Hangie Logo"
-						className="w-15 h-15"
-						loading="lazy"
-					/> */}
           <div className="bg-primary rounded-2xl py-2 px-4">
             <span className="font-body text-bg-1 font-black text-5xl">H</span>
           </div>

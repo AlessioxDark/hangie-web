@@ -48,15 +48,12 @@ const EventDetails = ({
     }
   };
   useEffect(() => {
-    // Aggiungo un piccolo ritardo per assicurarmi che il DOM abbia finito di renderizzare
-    // prima di misurare l'elemento, cosa cruciale per le dimensioni reattive.
     const timeoutId = setTimeout(() => {
       calculateScrollWidth();
     }, 100);
 
     window.addEventListener("resize", calculateScrollWidth);
 
-    // Cleanup
     return () => {
       clearTimeout(timeoutId);
       window.removeEventListener("resize", calculateScrollWidth);
@@ -108,10 +105,9 @@ const EventDetails = ({
     .map((risposta) => {
       return risposta.utenti.nome;
     });
-  console.log(partecipanti);
+  partecipanti;
   return (
     <div className="">
-      {/* <h1>Evento</h1> */}
       <div className="flex flex-col gap-6">
         <div className="w-full flex justify-between">
           <h1 className="text-text-1 font.body font-bold text-4xl">{titolo}</h1>
@@ -124,9 +120,7 @@ const EventDetails = ({
             <X width={40} height={40} />
           </div>
         </div>
-        {/* Carosello */}
         <div className="w-full relative overflow-hidden rounded-xl ">
-          {/* Freccia Sinistra (Previous) */}
           <button
             className={`absolute top-1/2 -translate-y-1/2 left-4 p-2 rounded-full z-20 
                         bg-white/70 hover:bg-white transition-opacity duration-300 shadow-md 
@@ -141,12 +135,10 @@ const EventDetails = ({
           >
             <ChevronLeft />
           </button>
-          {/* Contenitore Immagini (si muove con la trasformazione) */}
           <div
             className={`flex flex-row gap-4 transition-transform duration-500 ease-in-out`}
             ref={carouselRef}
             style={{
-              // Logica di scorrimento fondamentale: Spostamento = Indice * Larghezza_Blocco_Misurata
               transform: `translateX(-${currentCarouselIndex * scrollWidth}px)`,
             }}
           >
@@ -164,7 +156,6 @@ const EventDetails = ({
             })}
           </div>
 
-          {/* Indicatori di Paginazione */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
             {(
               Array.from({
@@ -185,7 +176,6 @@ const EventDetails = ({
             ))}
           </div>
 
-          {/* Freccia Destra (Next) */}
           <button
             className={`absolute top-1/2 -translate-y-1/2 right-4 p-2 rounded-full z-20 
                         bg-white/70 hover:bg-white transition-opacity duration-300 shadow-md 
@@ -202,10 +192,7 @@ const EventDetails = ({
           </button>
         </div>
 
-        {/* Copiare il layout di claude ai su questa pagina soprattuto su questi riquadri, fare ritocchi a uqesti rquadri a tutte le cose nuove e passare lla pagina partecipanti, aggiungere chips, searchbar */}
-
         <div className="grid grid-cols-2 gap-4">
-          {/* Data & Ora - INFO PRIMARIA */}
           <div className="col-span-2 flex items-start gap-4 p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
             <div className="w-12 h-12 text-white">
               <CalendarIcon color={"#2463eb"} />
@@ -225,7 +212,6 @@ const EventDetails = ({
             </div>
           </div>
 
-          {/* Luogo */}
           <div className="flex items-start gap-3 p-4 bg-green-50 rounded-xl border border-green-200">
             <div className="w-12 h-12 text-white">
               <MapIcon color={"#008236"} />
@@ -245,7 +231,6 @@ const EventDetails = ({
             </div>
           </div>
 
-          {/* Costo */}
           <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-xl border border-purple-200">
             <div className="w-12 h-12 text-white">
               <DollarIcon color={"#8200db"} />
@@ -295,7 +280,6 @@ const EventDetails = ({
           </div>
         </div>
 
-        {/* Organizzatore */}
         <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl ring ring-gray-300">
           <div className="w-16 h-16">
             <ProfileIcon user_id={utenti?.user_id} />

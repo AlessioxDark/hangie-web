@@ -79,7 +79,7 @@ export const ChatProvider = ({ children }) => {
 
   const fetchEvents = useCallback(async (): Promise<void> => {
     const saveData = (data) => {
-      console.log("event dalla home", data);
+      ("event dalla home", data);
       setHomeEventsData((prevData) => {
         const mergeAccepted = [...prevData.accepted, ...data.accepted];
         const dedupAccepted = Array.from(
@@ -89,7 +89,7 @@ export const ChatProvider = ({ children }) => {
         const dedupPending = Array.from(
           new Map(mergePending.map((item) => [item.event_id, item])).values(),
         );
-        console.log("il prev", prevData);
+        ("il prev", prevData);
 
         return {
           pending: dedupPending,
@@ -110,7 +110,7 @@ export const ChatProvider = ({ children }) => {
     async (groupId) => {
       const idToUse = groupId || currentGroup;
       const saveData = (data) => {
-        console.log("ecco i gruppi", data);
+        ("ecco i gruppi", data);
         setGroupEventsData(data);
       };
       executeApiCall(
@@ -127,7 +127,6 @@ export const ChatProvider = ({ children }) => {
     const saveData = (data) => {
       setGroupsData(data);
     };
-    console.log("come va gruppi?");
     executeApiCall(
       "groups",
       () => {
@@ -138,7 +137,7 @@ export const ChatProvider = ({ children }) => {
   }, [session, executeApiCall]);
   const fetchChat = useCallback(
     async (groupId: UUID) => {
-      console.log("carico chat", groupId, session);
+      ("carico chat", groupId, session);
       if (!groupId || !session || isAuthLoading) return;
 
       const saveData = (groupData) => {
@@ -209,14 +208,14 @@ export const ChatProvider = ({ children }) => {
   );
 
   useEffect(() => {
-    console.log("navigando");
+    ("navigando");
     const match = location.pathname.match(/\/chats\/([^\/]+)/);
     const paramsGroupId = match ? match[1] : null;
-    console.log(paramsGroupId, currentGroup);
+    (paramsGroupId, currentGroup);
     // Se l'ID nell'URL è diverso da quello in stato, carichiamo tutto
     if (paramsGroupId) {
       if (paramsGroupId !== currentGroup) {
-        console.log("sono diversi load all");
+        ("sono diversi load all");
         loadAll(paramsGroupId);
       }
     } else {
@@ -253,7 +252,7 @@ export const ChatProvider = ({ children }) => {
     }
   }, [groupsData, currentGroup, currentScreen]);
   useEffect(() => {
-    console.log("cambiato location", location.pathname);
+    ("cambiato location", location.pathname);
   }, [location.pathname]);
   return (
     <ChatContext.Provider

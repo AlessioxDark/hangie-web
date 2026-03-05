@@ -38,7 +38,7 @@ const ParticipantsSection = ({
     const saveData = (data) => {
       currentSocket.emit("remove_participant", currentGroup, partecipante);
     };
-    console.log("ora la chiamo");
+    ("ora la chiamo");
 
     executeApiCall(
       "remove_participant",
@@ -48,7 +48,7 @@ const ParticipantsSection = ({
         }),
       // () => {
       //   return () => {
-      //     console.log("sto rimuovendo participant");
+      //      ("sto rimuovendo participant");
       //     ApiCalls.handleRemoveParticipant(session.access_token, currentGroup, {
       //       user_id: partecipante.user_id,
       //     });
@@ -75,7 +75,7 @@ const ParticipantsSection = ({
             <div
               className="w-13 h-13 shrink-0 "
               onClick={() => {
-                console.log("apro profilo di", partecipante.nome);
+                ("apro profilo di", partecipante.nome);
               }}
             >
               <ProfileIcon user_id={partecipante.user_id} />
@@ -84,7 +84,7 @@ const ParticipantsSection = ({
               className="flex flex-col min-w-0 flex-1"
               onClick={() => {
                 if (partecipante.user_id !== session.user.id) {
-                  console.log("apro action sheet di", partecipante.nome);
+                  ("apro action sheet di", partecipante.nome);
                   openModal({
                     type: "PARTICIPANT_ACTIONS",
                     data: {
@@ -126,7 +126,7 @@ const ParticipantsSection = ({
             <div
               className="w-5 h-5"
               onClick={() => {
-                console.log("apro profilo di", partecipante.nome);
+                ("apro profilo di", partecipante.nome);
               }}
             >
               <ChevronRight color={"#64748b"} />

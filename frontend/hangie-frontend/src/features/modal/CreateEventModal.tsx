@@ -20,12 +20,10 @@ const CreateEventModal = () => {
           aria-labelledby="modal-title"
         >
           <CreateEventForm />
-
-          {/* <EventDetails {...eventData} /> */}
         </div>
       )}
     </>,
-    MountElement
+    MountElement,
   );
 };
 

@@ -30,7 +30,6 @@ const FormInputCollection = ({
                 setImages={setImages}
               />
 
-              {/* Titolo e Descrizione */}
               <div className="flex flex-col gap-3">
                 <FormInput
                   id="titolo"
@@ -135,7 +134,6 @@ const FormInputCollection = ({
               setImages={setImages}
             />
 
-            {/* Titolo e Descrizione */}
             <div className="flex flex-col gap-3">
               <FormInput
                 id="titolo"
@@ -154,7 +152,6 @@ const FormInputCollection = ({
               />
             </div>
 
-            {/* Date e Costo */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormInput
                 id="data"

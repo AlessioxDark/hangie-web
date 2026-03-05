@@ -63,7 +63,7 @@ const GroupCard = ({
       onClick={() => {
         navigate(`/chats/${group_id}`);
         setCurrentGroupData(fullGroup);
-        console.log("cliccato card cambiati stati");
+        ("cliccato card cambiati stati");
       }}
     >
       <div className="flex flex-row items-stretch w-full h-full gap-4 ">

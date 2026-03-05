@@ -17,125 +17,145 @@ const getPfp = async (req) => {
 const getData = async (req) => {
   try {
     const { userHandle } = req.params;
-    console.log("ciao da profile", userHandle);
-    const {
-      data: { user_id },
-      error: userError,
-    } = await supabase
+
+    // 1. Recupero ID Utente
+    const { data: userData, error: userError } = await supabase
       .from("utenti")
       .select("user_id")
       .eq("handle", userHandle)
       .single();
-    console.log("ecco user_id", user_id);
-    if (userError) throw userError;
 
-    const { data: profileData, error: profileError } = await supabase
-      .from("utenti")
-      .select("*")
-      .eq("user_id", user_id)
-      .single();
-    if (profileError) throw profileError;
-    const { count: friendsCount, error: friendsCountError } = await supabase
-      .from("amicizie")
-      .select("*", { count: "exact", head: true })
-      .or(`user_id.eq.${user_id},amico_id.eq.${user_id}`)
-      .eq("status", "accepted");
-    console.log("i friends", friendsCount, friendsCountError);
-    if (friendsCountError) throw friendsCountError;
+    if (userError || !userData) throw new Error("Utente non trovato");
+    const user_id = userData.user_id;
 
-    const { count: createdEventsCount, error: createdEventsCountError } =
-      await supabase
-        .from("eventi")
-        .select("*", { count: "exact", head: true })
-        .eq("created_by", user_id);
+    // 2. Recupero Profilo e Conteggi Base (Friends/Created)
+    // Usiamo Promise.all per velocizzare
+    const [profileRes, friendsRes, createdRes, acceptedRes] = await Promise.all(
+      [
+        supabase.from("utenti").select("*").eq("user_id", user_id).single(),
+        supabase
+          .from("amicizie")
+          .select("*", { count: "exact", head: true })
+          .or(`user_id.eq.${user_id},amico_id.eq.${user_id}`)
+          .eq("status", "accepted"),
+        supabase
+          .from("eventi")
+          .select("*", { count: "exact", head: true })
+          .eq("created_by", user_id),
+        supabase
+          .from("risposte_eventi")
+          .select("eventi(data)")
+          .eq("user_id", user_id)
+          .eq("status", "accepted"),
+      ],
+    );
 
-    if (createdEventsCountError) throw createdEventsCountError;
-    const { data: acceptedEvents, error: acceptedEventsError } = await supabase
-      .from("risposte_eventi")
-      .select("eventi(data)")
-      .eq("user_id", user_id)
-      .eq("status", "accepted");
-    if (acceptedEventsError) throw acceptedEventsError;
-    console.log("i profilidata", profileData);
+    if (profileRes.error) throw profileRes.error;
 
+    // Variabili di appoggio con valori di default
+    let newEventsData = [];
+    let nuovoKarma = profileRes.data.karma || 100; // Default al karma attuale o 100
+    const profileData = profileRes.data;
+    const friendsCount = friendsRes.count || 0;
+    const createdEventsCount = createdRes.count || 0;
+    const acceptedEvents = acceptedRes.data || [];
+
+    // 3. Recupero Eventi a cui partecipa
     const { data: eventsData, error: eventsError } = await supabase
       .from("risposte_eventi")
       .select(
-        "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(group_id,nome,group_cover_img,group_id,partecipanti_gruppo(partecipante_id)))",
+        `
+        event_id, 
+        status, 
+        eventi(
+          event_id, costo, created_at, created_by, data, titolo, descrizione, 
+          data_scadenza, cover_img, event_imgs(*), utenti(user_id, nome), 
+          luoghi(*), gruppi(group_id, nome, group_cover_img, partecipanti_gruppo(partecipante_id))
+        )
+      `,
       )
       .eq("user_id", user_id);
-    const eventIds = eventsData.map((e) => e.eventi.event_id);
 
-    const { data: eventParticipants, error: eventParticipantsError } =
-      await supabase
-        .from("risposte_eventi")
-        .select("status,utente:utenti(*),eventi(*),created_at,is_creator")
-        .in("eventi.event_id", eventIds);
-
-    const eventParticipantsMap = eventParticipants.reduce((acc, curr) => {
-      if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
-      acc[curr.eventi.event_id].push({
-        utenti: curr.utente,
-        status: curr.status,
-        is_creator: curr.is_creator,
-        created_at: curr.created_at,
-      });
-      return acc;
-    }, {});
-    if (eventParticipantsError) throw eventParticipantsError;
     if (eventsError) throw eventsError;
 
-    const newEventsData = eventsData.map((e) => {
-      return {
-        event_id: e.event_id,
-        status: e.status, // Stato (pending, accepted, refused)
-        costo: e.eventi.costo,
-        data: e.eventi.data,
-        titolo: e.eventi.titolo,
-        group_id: e.eventi.group_id,
-        descrizione: e.eventi.descrizione,
-        created_by: e.eventi.created_by,
+    // 4. Se ci sono eventi, elaboriamo i dettagli e il Karma
+    if (eventsData && eventsData.length > 0) {
+      const eventIds = eventsData
+        .map((e) => e?.eventi?.event_id)
+        .filter((id) => id);
 
-        cover_img: e.eventi.cover_img,
-        event_imgs: e.eventi.event_imgs,
-        luogo: e.eventi.luoghi, // Attenzione, qui è 'luoghi' non 'luogo'
-        utente: e.eventi.utenti,
-        gruppo: e.eventi.gruppi, // Attenzione, qui è 'gruppi' non 'gruppo'
-        scadenza: e.eventi.data_scadenza,
-        risposte_evento: eventParticipantsMap[e.event_id],
-      };
-      // return { ...e.eventi, status: e.status };
-    });
+      if (eventIds.length > 0) {
+        const { data: eventParticipants, error: eventParticipantsError } =
+          await supabase
+            .from("risposte_eventi")
+            .select(
+              "status, utente:utenti(*), eventi(*), created_at, is_creator",
+            )
+            .in("event_id", eventIds);
 
-    const acceptedPastEvents = eventsData.filter(
-      (e) => e.eventi.data < new Date().toISOString() && e.status == "accepted",
-    );
-    const rejectedPastEvents = eventsData.filter(
-      (e) => e.eventi.data < new Date().toISOString() && e.status == "rejected",
-    );
+        const eventParticipantsMap = (eventParticipants || []).reduce(
+          (acc, curr) => {
+            const id = curr?.eventi?.event_id;
+            if (id) {
+              if (!acc[id]) acc[id] = [];
+              acc[id].push({
+                utenti: curr?.utente,
+                status: curr?.status,
+                is_creator: curr?.is_creator,
+                created_at: curr?.created_at,
+              });
+            }
+            return acc;
+          },
+          {},
+        );
 
-    console.log("acceptedpas", acceptedPastEvents, eventsData);
-    console.log("rejectedpast", rejectedPastEvents);
-    const bonusOrganizzatore = createdEventsCount * 20;
-    const nuovoKarma =
-      100 +
-      acceptedPastEvents.length * 10 -
-      rejectedPastEvents.length * 20 +
-      bonusOrganizzatore;
-    const { error: karmaError } = await supabase
-      .from("utenti")
-      .update({
-        karma: nuovoKarma,
-      })
-      .eq("user_id", user_id);
-    if (karmaError) throw karmaError;
+        newEventsData = eventsData.map((e) => ({
+          event_id: e?.event_id,
+          status: e?.status,
+          costo: e?.eventi?.costo,
+          data: e?.eventi?.data,
+          titolo: e?.eventi?.titolo,
+          group_id: e?.eventi?.group_id,
+          descrizione: e?.eventi?.descrizione,
+          created_by: e?.eventi?.created_by,
+          cover_img: e?.eventi?.cover_img,
+          event_imgs: e?.eventi?.event_imgs,
+          luogo: e?.eventi?.luoghi,
+          utente: e?.eventi?.utenti,
+          gruppo: e?.eventi?.gruppi,
+          scadenza: e?.eventi?.data_scadenza,
+          risposte_evento: eventParticipantsMap[e?.event_id] || [],
+        }));
+
+        // Calcolo Karma
+        const now = new Date().toISOString();
+        const acceptedPast = eventsData.filter(
+          (e) => e?.eventi?.data < now && e.status === "accepted",
+        ).length;
+        const rejectedPast = eventsData.filter(
+          (e) => e?.eventi?.data < now && e.status === "rejected",
+        ).length;
+
+        nuovoKarma =
+          100 + acceptedPast * 10 - rejectedPast * 20 + createdEventsCount * 20;
+
+        // Aggiorna il Karma nel DB
+        await supabase
+          .from("utenti")
+          .update({ karma: nuovoKarma })
+          .eq("user_id", user_id);
+      }
+    }
+
+    // 5. Return Finale (Tutte le variabili sono definite grazie ai default sopra)
     return {
       data: {
         ...profileData,
         karma: nuovoKarma,
         acceptedEventsCount: acceptedEvents.length,
         pastAttendedCount: acceptedEvents.filter(
-          (e) => e.eventi.data < Date.now(),
+          (e) => e.eventi?.data && new Date(e.eventi.data) < new Date(),
         ).length,
         createdEventsCount,
         friendsCount,
@@ -144,7 +164,8 @@ const getData = async (req) => {
       error: null,
     };
   } catch (err) {
-    return { data: null, error: err };
+    console.error("Crash in getData:", err.message);
+    return { data: null, error: err.message };
   }
 };
 module.exports = {

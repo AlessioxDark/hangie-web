@@ -58,7 +58,7 @@ const LayoutChatMobile = () => {
       return <CreateGroupForm />;
     }
 
-    console.log(location);
+    location;
     if (location.pathname == "/chats") {
       return (
         <>

@@ -71,7 +71,7 @@ const SignUp = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    console.log("inviato");
+    ("inviato");
     const finalData = data;
 
     const { data: datiUsername, error: erroreUsername } = await supabase
@@ -91,9 +91,9 @@ const SignUp = () => {
     try {
       const { email, password } = finalData;
       const { authData, authError } = await signUpNewUser({ email, password });
-      console.log(email, password);
+      (email, password);
       if (authError) {
-        console.log(authError);
+        authError;
         setError("root", {
           message: `Utente già registrato`,
         });
@@ -179,14 +179,6 @@ const SignUp = () => {
 
   return (
     <div className="min-h-screen w-full 2xl:p-5 flex justify-center items-center flex-col relative bg-white">
-      {/* 60% - Primary dominance in header */}
-      {/* <div className="absolute 2xl:top-5 flex w-full 2xl:h-1/4 justify-center items-center">
-        <h1 className="font-bold font-title text-center text-sm 2xl:text-3xl text-primary">
-          Benvenuto ad Hangie
-        </h1>
-      </div> */}
-
-      {/* 30% - Neutral base */}
       <div className="w-full h-max 2xl:w-3/10 flex flex-col items-center gap-8 bg-white p-8 pt-4 2xl:pt-8">
         <h1 className="font-bold font-title text-center text-4xl text-black">
           Registrati
@@ -239,11 +231,9 @@ const SignUp = () => {
                   })}
                 </div>
               </div>
-              {/* <RegisterStep1 /> */}
               <div className="flex flex-col gap-4">
                 {handleStepChange()}
 
-                {/* Login Link - Primary accent */}
                 <div className="w-full text-center text-[#6b7280]">
                   <span className="font-body">
                     Hai già un account?{" "}
@@ -257,7 +247,6 @@ const SignUp = () => {
                 </div>
               </div>
 
-              {/* Navigation Buttons - 60% Primary dominance */}
               <div className="w-full flex justify-center gap-4">
                 {currentStep > 0 && (
                   <button

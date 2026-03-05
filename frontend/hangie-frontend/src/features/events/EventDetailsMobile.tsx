@@ -38,20 +38,17 @@ const EventDetailsMobile = () => {
   const [prevStatus, setPrevStatus] = useState(currentEventData?.status);
 
   const fetchEvent = () => {
-    console.log("qui arrivo 2");
-
     executeApiCall(
       "event",
       () => {
         return ApiCalls.fetchEvent(eventId, session.access_token);
       },
       (data) => {
-        console.log("ecco i dati", data);
         setCurrentEventData(data);
       },
       // (data) => {
-      //   console.log(" data è arrivato", data);
-      //   console.log(" invece l'evento era", currentEventData);
+      //
+      //
       //   const usefulFields = [
       //     "descrizione",
       //     "titolo",
@@ -79,7 +76,6 @@ const EventDetailsMobile = () => {
   };
 
   useEffect(() => {
-    console.log("qui arrivo");
     fetchEvent();
   }, []);
 
@@ -105,7 +101,6 @@ const EventDetailsMobile = () => {
     (r) => r.status == "accepted",
   );
   const allImgs = [cover_img, ...event_imgs?.map((e) => e.img_url)];
-  console.log("l'evento è", status);
 
   const handleScroll = (e) => {
     const container = e.currentTarget;
@@ -182,7 +177,7 @@ const EventDetailsMobile = () => {
 
   // const handleDeleteEvent = () => {
   //   const saveData = (data) => {
-  //     console.log("eliminato");
+  //
   //     navigate(-1);
   //     currentSocket.emit("delete_event", eventId, gruppo.group_id);
   //   };
@@ -229,7 +224,6 @@ const EventDetailsMobile = () => {
       </div>
       <div className="space-y-2">
         <div className="w-full relative overflow-hidden ">
-          {/* Contenitore Immagini (si muove con la trasformazione) */}
           <div
             className={`flex flex-row transition-transform overflow-x-auto duration-500 ease-in-out snap-x snap-mandatory no-scrollbar`}
             ref={carouselRef}
@@ -249,7 +243,6 @@ const EventDetailsMobile = () => {
             })}
           </div>
 
-          {/* Indicatori di Paginazione */}
           <div className="absolute bottom-0 w-full h-8 bg-gradient-to-t from-black/20 to-transparent" />
           <div className="absolute bottom-2.5 left-0 right-0 flex justify-center space-x-2 border- ">
             {(
@@ -275,13 +268,11 @@ const EventDetailsMobile = () => {
         <div className={`px-4 ${status !== "pending" && "pb-4"} space-y-2.5`}>
           <div>
             <div className="flex items-center justify-between text-sm my-3">
-              {/* GRUPPO: Cliccabile, sobrio, stile Apple/Google */}
               <div
                 onClick={() => navigate(`/group/${gruppo.group_id}`)} // implementare sistema eventi anche con gruppo
                 className="flex items-center gap-2.5 group active:opacity-60 transition-opacity cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-full ">
-                  {/*w-6 h-6*/}
                   {gruppo.group_cover_img !== null ? (
                     <img
                       src={gruppo.group_cover_img}
@@ -299,7 +290,6 @@ const EventDetailsMobile = () => {
                 </span>
               </div>
 
-              {/* SCADENZA: Solo se pending, stile "Urgenza Gentile" */}
               {status === "pending" && (
                 <div
                   className={`flex items-center gap-1.5 px-2.5 py-1 ${getStatusColor(scadenza)} rounded-full border  animate-pulse-slow`}
@@ -317,7 +307,6 @@ const EventDetailsMobile = () => {
           </div>
           <div className="">
             <div className="flex flex-col gap-3 border-b pb-6 border-gray-200">
-              {/* Ogni riga ha lo stesso stile: sfondo neutro, bordo leggero */}
               {[
                 {
                   icon: <CalendarIcon color="#2463eb" />,
@@ -374,12 +363,8 @@ const EventDetailsMobile = () => {
                   </span>
                 </p>
               </div>
-              <button
-                // onClick={() => router.push("/partecipanti")}
-                className="w-full flex items-center justify-between p-3 bg-orange-50 rounded-2xl border border-orange-100 active:scale-95 transition-transform"
-              >
+              <button className="w-full flex items-center justify-between p-3 bg-orange-50 rounded-2xl border border-orange-100 active:scale-95 transition-transform">
                 <div className="flex items-center gap-1.5">
-                  {/* Mini Avatar impilati */}
                   <div className="flex -space-x-2">
                     {acceptedParticipants.slice(0, 3).map((p) => (
                       <div className="w-8 h-8">
@@ -434,7 +419,6 @@ const EventDetailsMobile = () => {
               <button
                 disabled={scadenza < Date.now()}
                 className={`flex-1 ${status == "accepted" ? "bg-primary text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-4 rounded-2xl  active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer`}
-                // className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
                 onClick={() => {
                   const newStatus =
                     status == "accepted" ? "pending" : "accepted";
@@ -451,12 +435,9 @@ const EventDetailsMobile = () => {
                 }}
               >
                 Accetta
-                {/* { ATTENZIONE RISOLVERE PENDING POSSIBILE E SWTICH} */}
               </button>
-              {/* BOTTONE RIFIUTA: Più sobrio, per non distrarre */}
               <button
                 disabled={scadenza < Date.now()}
-                // className="flex-1 bg-gray-50 text-gray-400 font-bold py-4 rounded-2xl border border-gray-200 active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer"
                 className={`flex-1 ${status == "rejected" ? "bg-red-500 text-white" : "bg-gray-50 text-gray-400 border border-gray-200"} font-bold py-4 rounded-2xl  active:scale-[0.97] transition-all duration-200 flex items-center justify-center cursor-pointer`}
                 onClick={() => {
                   const newStatus =

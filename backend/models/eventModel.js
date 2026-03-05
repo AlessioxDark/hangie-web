@@ -5,9 +5,8 @@ const getCoords = async ({ indirizzo, citta, cap }) => {
   const queryCodificata = encodeURIComponent(queryCompleta);
   const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${queryCodificata}&format=json&limit=1`;
   try {
-    console.log("coords prima fetch");
     const response = await fetch(nominatimUrl);
-    console.log("coords dopo fetch");
+
     if (!response.ok) {
       console.error(
         `Errore nella richiesta API: Stato ${response.status} - ${response.statusText}`,
@@ -19,22 +18,14 @@ const getCoords = async ({ indirizzo, citta, cap }) => {
     const data = await response.json();
 
     // 6. Elabora il risultato
-    console.log("coords ho trovato data", data);
 
     if (data.length > 0) {
-      console.log("coords eseguo calcoli");
-
       // L'API restituisce un array, prendiamo il primo risultato
       const primoRisultato = data[0];
 
       // Le coordinate sono presenti come stringhe, le convertiamo in numeri
       const latitudine = parseFloat(primoRisultato.lat);
       const longitudine = parseFloat(primoRisultato.lon);
-
-      console.log(`Geocoding Riuscito:`);
-      console.log(` - Trovato: ${primoRisultato.display_name}`);
-      console.log(` - Latitudine (lat): ${latitudine}`);
-      console.log(` - Longitudine (lon): ${longitudine}`);
 
       return { latitudine, longitudine, error: null };
     } else {
@@ -99,7 +90,7 @@ const getAll = async (req) => {
     // risolvere bug ricerca eventi su incognito
     if (risposteError) throw risposteError;
 
-    // console.log("risposte", risposte, eventsList);
+    //
 
     const { data: eventParticipants, error: eventParticipantsError } =
       await supabase
@@ -133,9 +124,8 @@ const getAll = async (req) => {
 
 const deleteEvent = async (req) => {
   try {
-    console.log("provando ad eliminare");
     const { event_id } = req.params;
-    console.log("id evento", event_id);
+
     const { error: messageError } = await supabase
       .from("messaggi")
       .delete()
@@ -161,13 +151,13 @@ const deleteEvent = async (req) => {
     if (eventError) throw eventError;
 
     // rimuovi immgaini
-    console.log("cerco le immagini");
+
     const { data: files, error: listError } = await supabase.storage
       .from("eventi")
       .list(`${event_id}`);
-    console.log("file ottenuti", files);
+
     if (listError) throw listError;
-    console.log("file ottenuti", files);
+
     if (!files || files.length === 0) {
       console.log(
         "La cartella è già vuota, procedo con l'eliminazione del record.",
@@ -175,7 +165,7 @@ const deleteEvent = async (req) => {
       return { data: { message: "ok" }, error: null };
     }
     const filesToRemove = files.map((x) => `${event_id}/${x.name}`);
-    console.log("rimuoviamo ", filesToRemove);
+
     // 2. Crea i percorsi completi (folder/file.jpg)
 
     // 3. Elimina i file in blocco
@@ -224,7 +214,6 @@ const getEvent = async (req) => {
       .single();
     if (eventError) throw eventError;
 
-    console.log("datipls", eventData);
     const { data: eventParticipants, error: eventParticipantsError } =
       await supabase
         .from("risposte_eventi")
@@ -279,7 +268,7 @@ const getOrCreateLuogo = async (realBody) => {
     .maybeSingle(); // Più pulito di .single() se può non esistere
   if (error) throw error;
   if (luogo) return luogo.luogo_id;
-  console.log(realBody);
+
   const { cap, indirizzo, citta } = realBody;
   const { data: nuovoLuogo, error: insertError } = await supabase
     .from("luoghi")
@@ -309,7 +298,7 @@ const newEvent = async (req) => {
       error: authError,
     } = await supabase.auth.getUser(token);
     if (authError) throw authError;
-    console.log("inviato da", user.id);
+
     const { images, ...realBody } = req.body.data;
     const group_id = realBody.group_id;
     const luogoId = await getOrCreateLuogo(realBody);
@@ -346,7 +335,7 @@ const newEvent = async (req) => {
         .select("user_id:partecipante_id")
         .eq("group_id", group_id),
     ]);
-    console.log("questi sono i dati dei partecipanti", participantsData);
+
     if (errorMessage) throw errorMessage;
     if (eventGroupError) throw eventGroupError;
     if (participantsError) throw participantsError;
@@ -358,7 +347,7 @@ const newEvent = async (req) => {
         is_creator: participant.user_id === user.id,
       };
     });
-    console.log("aggiungo queste alle risposte degli eventi", answersToInsert);
+
     const { error: answerError } = await supabase
       .from("risposte_eventi")
       .insert(answersToInsert);
@@ -380,7 +369,7 @@ const newEvent = async (req) => {
         is_creator: risposta.is_creator,
       };
     });
-    console.log("questo è message data per gli eventi", messageData.eventi);
+
     console.log("aggiunto nuovo evento", {
       event_imgs: [],
       ...messageData.eventi,
@@ -471,8 +460,6 @@ const getSuspended = async (req) => {
     // risolvere bug ricerca eventi su incognito
     if (risposteError) throw risposteError;
 
-    console.log("risposte", risposte, eventsList);
-
     const { data: eventParticipants, error: eventParticipantsError } =
       await supabase
         .from("risposte_eventi")
@@ -497,7 +484,7 @@ const getSuspended = async (req) => {
         partecipanti: eventParticipantsMap[e.event_id],
       };
     });
-    console.log("ecco cosa invio", finalData);
+
     return { data: finalData, error: null };
   } catch (err) {
     return { data: null, error: err };

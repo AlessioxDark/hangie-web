@@ -51,7 +51,7 @@ const LayoutChatMedium = () => {
 
         const result = await response.json();
         const groupData = result;
-        console.log(result);
+        result;
         if (groupData) {
           const mappedMessages = groupData.messaggi.map((mess) => ({
             ...mess,
@@ -75,7 +75,7 @@ const LayoutChatMedium = () => {
   };
   const fetchFirstGroup = async () => {
     if (isLoading) return;
-    console.log("sto fetchando first group");
+    ("sto fetchando first group");
     try {
       setError(null);
       setIsLoading(true);
@@ -93,18 +93,18 @@ const LayoutChatMedium = () => {
           },
         });
         if (!response.ok) {
-          console.log(response);
+          response;
           setError(
             response.statusText || "Errore nel caricamento degli eventi",
           );
         }
 
         const data = await response.json();
-        console.log(data);
+        data;
 
         setCurrentGroup(data[0].group_id);
         setCurrentGroupData(data[0]);
-        console.log("ottenuti dati");
+        ("ottenuti dati");
       }
     } catch (err: any) {
       console.error("Errore fetch eventi:", err);
@@ -162,8 +162,8 @@ const LayoutChatMedium = () => {
       );
     }
     if (currentChatData && currentGroupData && currentChatData.messaggi) {
-      console.log("sto renderizzando chat");
-      console.log(currentChatData);
+      ("sto renderizzando chat");
+      currentChatData;
       // return currentChatData.map((chat, chatIndex) => {
       // 	return <Chats {...chat} />;
       // });
@@ -189,7 +189,6 @@ const LayoutChatMedium = () => {
           {renderContent()}
         </main>
       </div>
-      {/* <ChatsEvents /> */}
     </div>
   );
 };

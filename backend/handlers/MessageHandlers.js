@@ -75,12 +75,9 @@ const messageHandlers = (io, socket) => {
       });
       const { data: notificationData, error: errorNotification } =
         await supabase.from("notifiche").insert(notificationInsert);
-    } catch (err) {
-      console.log("c'è un errore", err);
-    }
+    } catch (err) {}
   });
   socket.on("message_sent", async (message_id, user_id, group_id) => {
-    console.log("arrivato message_sent a server");
     try {
       const [
         { error: statusError },
@@ -105,7 +102,6 @@ const messageHandlers = (io, socket) => {
         .eq("status", "sent");
       if (countError) throw countError;
 
-      console.log("conto è ", count);
       if (count == 0) {
         partecipantiDB.forEach((p) => {
           io.to(p.user_id).emit("message_arrived", {
@@ -114,13 +110,10 @@ const messageHandlers = (io, socket) => {
           });
         });
       }
-    } catch (err) {
-      console.log("c'è un err", err);
-    }
+    } catch (err) {}
   });
 
   socket.on("message_read_bulk", async (message_ids, user_id, group_id) => {
-    console.log("arrivato bulk backend", message_ids);
     try {
       const [
         { data: partecipantiDB, error: errorParticipants },
@@ -168,7 +161,6 @@ const messageHandlers = (io, socket) => {
 
       if (countError) throw countError;
       if (count == 0) {
-        console.log("il conto è zero mando read", group_id);
         partecipantiDB.forEach((p) => {
           io.to(p.user_id).emit("give_read_bulk", {
             message_ids,
@@ -176,20 +168,17 @@ const messageHandlers = (io, socket) => {
           });
         });
       }
-    } catch (err) {
-      console.log("c'è err", err);
-    }
+    } catch (err) {}
   });
   socket.on(
     "send_event",
     async (eventId, group_id, eventDetails, messageDetails) => {
-      console.log("arrivato send_event");
       const { data: participants, error: participantsError } = await supabase
         .from("partecipanti_gruppo")
         .select("*")
         .eq("group_id", group_id);
       if (participantsError) throw participantsError;
-      console.log("ecco gli event details", eventDetails);
+
       const risposte_evento = participants.map((p) => {
         return {
           status:
@@ -199,7 +188,7 @@ const messageHandlers = (io, socket) => {
           utenti: { user_id: p.partecipante_id },
         };
       });
-      console.log("partecipanti", participants);
+
       participants.forEach((p) => {
         io.to(p.partecipante_id).emit("sent_event", {
           eventi: { ...eventDetails, event_id: eventId, risposte_evento },
@@ -214,7 +203,7 @@ const messageHandlers = (io, socket) => {
       .from("partecipanti_gruppo")
       .select("*")
       .eq("group_id", groupId);
-    console.log("ecco i partecipanti", participants, participantsError);
+
     participants.forEach((p) => {
       io.to(p.partecipante_id).emit("deleted_event", {
         event_id: eventId,
@@ -238,7 +227,7 @@ const messageHandlers = (io, socket) => {
         .from("partecipanti_gruppo")
         .select("*")
         .eq("group_id", groupId);
-      console.log("ecco i partecipanti", participants, participantsError);
+
       participants.forEach((p) => {
         io.to(p.partecipante_id).emit("voted_event", {
           event_id: eventId,

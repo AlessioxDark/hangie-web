@@ -11,7 +11,7 @@ import FriendItem from "@/components/friends/FriendItem";
 import { useFriends } from "@/contexts/FriendsContext";
 const Friends = () => {
   const [query, setQuery] = useState("");
-  const { error, loading, executeApiCall } = useApi();
+  const { error } = useApi();
   const [isPendingCollapsed, setIsPendingCollapsed] = useState(false);
   const [isAcceptedCollapsed, setIsAcceptedCollapsed] = useState(false);
   const {
@@ -33,14 +33,11 @@ const Friends = () => {
 
     const handler = setTimeout(() => {
       getFriendsByQuery(query);
-    }, 500); // Aspetta 500ms di "silenzio" prima di sparare l'API
+    }, 500);
 
-    return () => clearTimeout(handler); // Pulisce il timer se l'utente digita ancora
+    return () => clearTimeout(handler);
   }, [query, getFriendsByQuery]);
   const renderContent = () => {
-    // if (loading?.friends) {
-    //   return <RenderLoadingState type={"friends"} />;
-    // }
     if (error && error?.friends) {
       return <RenderErrorState reloadFunction={friendsData} type={"friends"} />;
     }
@@ -86,7 +83,6 @@ const Friends = () => {
             </div>
           </div>
 
-          {/* SEZIONE AMICI ACCETTATI */}
           <div className="flex flex-col gap-2">
             <div
               className="flex flex-row justify-between items-center cursor-pointer"
@@ -153,7 +149,7 @@ const Friends = () => {
       );
     }
 
-    return null; // Aggiungi qui la logica per quando query != ""
+    return null;
   };
 
   return (

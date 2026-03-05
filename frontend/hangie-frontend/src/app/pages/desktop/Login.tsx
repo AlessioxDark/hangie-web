@@ -1,19 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, UserCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm, type SubmitHandler } from "react-hook-form";
 import { Link, Navigate, useNavigate } from "react-router";
 import { email, z } from "zod";
 
-import appleLogo from "../../../assets/Apple_logo.svg";
-import facebookLogo from "../../../assets/Facebook_logo.svg";
-import googleLogo from "../../../assets/Google_logo.svg";
 import { supabase } from "../../../config/db.js";
 import { useAuth } from "../../../contexts/AuthContext.js";
+import { useApi } from "@/contexts/ApiContext.js";
+import { ApiCalls } from "@/services/api.js";
+import { useProfile } from "@/contexts/ProfileContext.js";
+import { useFriends } from "@/contexts/FriendsContext.js";
+import { useChat } from "@/contexts/ChatContext.js";
 
 const Login = () => {
-  const { LoginUser } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { LoginUser, handleGuestSignIn } = useAuth();
+  const { executeApiCall } = useApi();
+  const { setProfileData } = useProfile();
+  const { getFriendsData } = useFriends();
+  const { fetchGroups } = useChat();
   const schema = z.object({
     user_email: z.string().min(1, "il campo è obbligatorio"),
     password: z.string().min(1, "la password è obbligatoria"),
@@ -39,12 +44,9 @@ const Login = () => {
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    console.log(data);
-    setIsLoading(true);
     try {
       const { user_email, password, remember } = data;
       let realEmail = user_email;
-      console.log("ha chioccola", realEmail.includes("@"));
       if (!realEmail.includes("@")) {
         const {
           data: { email: emailFound },
@@ -56,46 +58,45 @@ const Login = () => {
         realEmail = emailFound;
       }
 
-      const { authData, authError } = await LoginUser(
-        realEmail,
-        password,
-        remember,
-      );
-
+      const { authError } = await LoginUser(realEmail, password, remember);
       if (authError) {
         setError("root", { message: "Credenziali non corrette" });
         return;
       }
+      setProfileData({ is_guest: false });
+      if (!authError) {
+        await getFriendsData();
+        await fetchGroups();
+      }
 
-      console.log("Registrazione completata con successo.");
       navigate("/");
     } catch (error) {
-      console.log(`errore ${error} `);
       setError("root", { message: `errore ${error} ` });
-    } finally {
-      setIsLoading(false);
+    }
+  };
+  const onsGuestSignIn: SubmitHandler<FormFields> = async () => {
+    try {
+      console.log("provo a anonymous");
+      const { authError } = await handleGuestSignIn();
+      console.log("errore", authError);
+      if (authError) throw authError;
+      setProfileData({ is_guest: true });
+      navigate("/");
+    } catch (error) {
+      setError("root", { message: `errore ${error} ` });
     }
   };
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   return (
     <div className=" h-screen w-full 2xl:p-5 flex justify-center items-center flex-col relative bg-bg-2">
-      {/* 60% - Primary dominance in header */}
-      {/* <div className="absolute top-5 flex w-full h-1/4 justify-center items-center">
-        <h1 className="font-bold font-title text-center text-5xl text-primary">
-          Benvenuto ad Hangie
-        </h1>
-      </div> */}
-
-      {/* 30% - Neutral base */}
-      <div className="w-full h-full 2xl:w-3/10 flex flex-col items-center gap-8 rounded-lg shadow-lg bg-white p-8">
+      <div className="w-full h-full 2xl:w-3/10 flex flex-col items-center gap-8 rounded-lg shadow-lg bg-white p-8 py-8 pb-8">
         <h1 className="font-bold font-title text-center text-4xl text-black">
           Accedi
         </h1>
 
         <div className="flex flex-col gap-4 2xl:gap-6 w-full">
           <form className="flex flex-col gap-3 2xl:gap-6 w-full">
-            {/* Progress Steps - 60% Primary */}
             <div className="flex flex-col gap-5 w-full">
               <h2 className="text-2xl font-semibold text-center font-body">
                 Inserisci le generalità
@@ -164,7 +165,6 @@ const Login = () => {
                 </div>
               </div>
             </div>
-            {/* Login Link - Primary accent */}
             <div className="w-full text-center text-[#6b7280]">
               <span className="font-body">
                 Sei nuovo qui?{" "}
@@ -177,11 +177,10 @@ const Login = () => {
               </span>
             </div>
 
-            {/* Navigation Buttons - 60% Primary dominance */}
-            <div className="w-full flex justify-center gap-4">
+            <div className="space-y-3 pt-2 flex flex-col justify-center">
               <button
                 type="button"
-                className={`px-8 py-3 font-title font-bold rounded-lg cursor-pointer transition-all duration-200 ease-in-out 
+                className={`px-8 py-3 font-title rounded-2xl font-bold  cursor-pointer transition-all duration-200 ease-in-out 
                   
 											bg-primary hover:bg-primary/80
 											
@@ -195,6 +194,23 @@ const Login = () => {
                 <span className="text-lg">
                   {isSubmitting ? "Invio in corso..." : "Accedi"}
                 </span>
+              </button>
+
+              <div className="flex items-center gap-4 my-4">
+                <div className="h-px bg-slate-100 flex-1"></div>
+                <span className="text-[10px] font-body font-black uppercase tracking-widest text-text-3">
+                  oppure
+                </span>
+                <div className="h-px bg-slate-100 flex-1"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onsGuestSignIn}
+                className="w-full py-3.5 bg-white border-2 border-slate-100 hover:border-slate-200 text-slate-600 font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              >
+                <UserCircle size={18} className="text-slate-400" />
+                Continua come ospite
               </button>
             </div>
           </form>

@@ -43,8 +43,8 @@ const ImageInput = ({
     }
     for (let i = 0; i < files.length; i++) {
       const ext = files[i].type.split("/")[1];
-      console.log(ext, files[i].type);
-      console.log(ext);
+      (ext, files[i].type);
+      ext;
       if (!ACCEPTED_EXTENSIONS.includes(ext)) {
         setImageError({
           message: `Accettiamo solo ${ACCEPTED_EXTENSIONS.join(", ")}`,
@@ -66,10 +66,10 @@ const ImageInput = ({
             ? "cover"
             : images.length
           : index == 0
-          ? "cover"
-          : index,
+            ? "cover"
+            : index,
     }));
-    console.log(newImages);
+    newImages;
     // Aggiungiamo i nuovi URL all'array di immagini esistente
     setImages((prevImages) => [...prevImages, ...newImages]);
 
@@ -88,7 +88,7 @@ const ImageInput = ({
       setImages((currentImages) => {
         // Trova gli indici degli elementi trascinati in base all'ID (l'URL)
         const oldIndex = currentImages.findIndex(
-          (img) => img.url === active.id
+          (img) => img.url === active.id,
         );
         const newIndex = currentImages.findIndex((img) => img.url === over.id);
 
@@ -105,7 +105,7 @@ const ImageInput = ({
     }
   };
   const desktopSensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }) // Consente un leggero movimento prima di attivare il D&D
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), // Consente un leggero movimento prima di attivare il D&D
   );
   const mobileSensors = useSensors(
     useSensor(TouchSensor, {
@@ -113,7 +113,7 @@ const ImageInput = ({
         delay: 100, // FONDAMENTALE: devi tenere premuto per 250ms prima che parta il drag
         tolerance: 8,
       },
-    }) // Consente un leggero movimento prima di attivare il D&D
+    }), // Consente un leggero movimento prima di attivare il D&D
   );
 
   const { currentScreen } = useScreen();
@@ -134,7 +134,6 @@ const ImageInput = ({
       </h1>
       <div className="flex flex-col gap-0.5">
         <div className="flex flex-row  gap-2 2xl:gap-4 overflow-x-auto pb-2 2xl:pb-4 items-end">
-          {/* Bottone Aggiungi Immagine */}
           <div
             className={`bg-bg-2 rounded-xl border-2 ${
               imageError
@@ -155,12 +154,11 @@ const ImageInput = ({
 
           <DndContext
             sensors={currentScreen == "xs" ? mobileSensors : desktopSensors}
-            collisionDetection={closestCenter} // Strategia di collisione
-            onDragEnd={handleDragEnd} // Funzione di callback
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            {/* Il SortableContext contiene gli elementi da trascinare */}
             <SortableContext
-              items={images.map((img) => img.url)} // Array di ID (URL) degli elementi trascinabili
+              items={images.map((img) => img.url)}
               strategy={horizontalListSortingStrategy}
             >
               <div className="flex flex-row gap-2 2xl:gap-4">
@@ -175,7 +173,6 @@ const ImageInput = ({
               </div>
             </SortableContext>
           </DndContext>
-          {/* Anteprime Immagini */}
         </div>
         {imageError && (
           <p className="text-sm  text-red-600 -mt-2">{imageError.message}</p>

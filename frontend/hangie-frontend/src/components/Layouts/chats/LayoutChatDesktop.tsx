@@ -60,8 +60,8 @@ const LayoutChatDesktop = ({}) => {
       );
     }
     if (currentChatData && currentGroupData && currentChatData.messaggi) {
-      console.log("sto renderizzando chat");
-      console.log(currentChatData);
+      ("sto renderizzando chat");
+      currentChatData;
       // return currentChatData.map((chat, chatIndex) => {
       // 	return <Chats {...chat} />;
       // });

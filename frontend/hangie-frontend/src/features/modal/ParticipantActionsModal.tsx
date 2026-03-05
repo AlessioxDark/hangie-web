@@ -33,9 +33,7 @@ const ParticipantActionsModal = () => {
             >
               <span>Visualizza Profilo</span>
             </div>
-            {/* {partecipante.role !== "admin" && (
-             
-            )} */}
+
             {isAdmin && (
               <>
                 {partecipante.role !== "admin" && (
@@ -63,7 +61,6 @@ const ParticipantActionsModal = () => {
               </>
             )}
           </div>
-          {/* <EventDetails {...eventData} /> */}
         </div>
       )}
     </>,

@@ -1,9 +1,6 @@
 import BottomNav from "@/app/pages/mobile/BottomNav";
-import { useNotification } from "@/contexts/NotificationContext";
-import React from "react";
-import { Link, useLocation } from "react-router";
+import { useLocation } from "react-router";
 const LayoutMobile = ({ children }) => {
-  const { currentNotifications } = useNotification();
   const location = useLocation();
   return (
     <div className="h-screen w-full flex flex-col justify-between ">
@@ -21,11 +18,6 @@ const LayoutMobile = ({ children }) => {
                   HANGIE
                 </h1>
               </div>
-              <Link to="/notifications" className="relative">
-                {currentNotifications.unread.length > 0 && (
-                  <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-red-500 border-2 border-white" />
-                )}
-              </Link>
             </header>
           </div>
 

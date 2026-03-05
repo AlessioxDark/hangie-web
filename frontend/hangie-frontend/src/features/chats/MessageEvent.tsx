@@ -42,7 +42,7 @@ const MessageEvent = ({ event_details, group_id }) => {
       return dateString;
     }
   };
-  console.log("dettagli evento del socket", event_details);
+  ("dettagli evento del socket", event_details);
   // Determina se la data di scadenza è passata
 
   const isDeadlinePassed = useMemo(() => {
@@ -67,7 +67,7 @@ const MessageEvent = ({ event_details, group_id }) => {
     );
   };
 
-  console.log("message", event_details);
+  ("message", event_details);
   const acceptedParticipants = event_details.risposte_evento.filter(
     (r) => r.status == "accepted",
   ).length;
@@ -87,9 +87,7 @@ const MessageEvent = ({ event_details, group_id }) => {
           });
         }}
       >
-        {/* Immagine di Copertina */}
         <div className="w-58 2xl:w-full  relative cursor-pointer aspect-square 2xl:aspect-[16/9]">
-          {/* L'immagine deve avere una dimensione fissa o responsive */}
           <img
             className="w-full h-full object-cover  "
             src={event_details.cover_img}
@@ -108,14 +106,11 @@ const MessageEvent = ({ event_details, group_id }) => {
           )}
         </div>
 
-        {/* Contenuto della Card */}
         <div className="p-2.5 2xl:p-5 flex flex-col gap-3">
-          {/* Titolo e Data Evento */}
           <div className="flex flex-col ">
             <h1 className="font-bold text-base 2xl:text-2xl text-text-1 leading-snug mb-2">
               {event_details.titolo}
             </h1>
-            {/* Data Evento in alto a destra */}
             <div className="flex items-center gap-1 2xl:gap-2 text-primary text-sm font-semibold">
               <Calendar className="w-4 h-4" />
               <span className="font-body text-primary text-xs 2xl:text-sm font-semibold">
@@ -124,14 +119,10 @@ const MessageEvent = ({ event_details, group_id }) => {
             </div>
           </div>
 
-          {/* Dettagli (Luogo, Costo, Creatore) */}
           <div className="flex flex-col gap-1 2xl:gap-2.5">
             <div className="flex flex-col gap-1 2xl:gap-2.5 border-gray-200 ">
-              {/* Luogo e Indirizzo */}
-
               <div className="flex items-center gap-1 2xl:gap-2">
                 <div className="w-5 h-5 2xl:w-6 2xl:h-6 flex-shrink-0">
-                  {/* Usa la Sostituzione MapIcon */}
                   <MapIcon color={"#64758b"} />
                 </div>
                 <span
@@ -141,10 +132,8 @@ const MessageEvent = ({ event_details, group_id }) => {
                 </span>
               </div>
 
-              {/* Costo */}
               <div className="flex items-center gap-1 2xl:gap-2">
                 <div className="w-5 h-5 2xl:w-6 2xl:h-6 flex-shrink-0">
-                  {/* Usa la Sostituzione DollarIcon */}
                   <DollarIcon
                     color={event_details.costo == 0 ? "#16a34a" : "#64748b"}
                   />
@@ -163,7 +152,6 @@ const MessageEvent = ({ event_details, group_id }) => {
 
             <div className="">
               <div className="col-span-2 flex items-center gap-2 pt-3 border-t border-gray-200 font-body">
-                {/* <Users className="w-4 h-4 text-blue-600" /> */}
                 <div className="w-5 h-5 2xl:w-6 2xl:h-6">
                   <ParticipantsIcon color={"#64758b"} />
                 </div>
@@ -179,7 +167,6 @@ const MessageEvent = ({ event_details, group_id }) => {
               <div className="flex justify-between items-center pt-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 2xl:w-12 2xl:h-12 flex-shrink-0">
-                    {/* Usa la Sostituzione ProfileIcon */}
                     <ProfileIcon user_id={event_details.utente?.user_id} />
                   </div>
                   <span className="font-medium text-xs 2xl:text-sm text-text-2 font-body truncate">
@@ -189,14 +176,10 @@ const MessageEvent = ({ event_details, group_id }) => {
                     </span>
                   </span>
                 </div>
-
-                {/* Contatore Partecipanti */}
               </div>
             </div>
-            {/* Creatore e Partecipanti (Sezione 3) */}
           </div>
 
-          {/* Bottoni di Risposta (Sezione 4) */}
           <div className="flex gap-2   ">
             {event_details.created_by !== session.user.id ? (
               <div className="w-full flex flex-row gap-4">
@@ -255,7 +238,6 @@ const MessageEvent = ({ event_details, group_id }) => {
                 </button>
               </div>
             ) : null}
-            {/* {getButtonContent(event_details.status)} */}
           </div>
         </div>
       </div>

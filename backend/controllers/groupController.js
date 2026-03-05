@@ -12,7 +12,7 @@ const getAllGroups = async (req, res) => {
 
         // Usiamo for...of che supporta correttamente l'await
         for (const messaggio of row.gruppi.messaggi) {
-          console.log("oi");
+          ("oi");
 
           if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
             if (messaggio.type === "event") {
@@ -33,11 +33,11 @@ const getAllGroups = async (req, res) => {
                 };
               }
             } else {
-              console.log("vai qui");
+              ("vai qui");
 
               ultimoMessaggio = messaggio;
             }
-            console.log("c'è mess?", row.gruppi.messaggi.length);
+            ("c'è mess?", row.gruppi.messaggi.length);
           }
         }
         if (row.gruppi.messaggi.length == 0) {
@@ -57,7 +57,7 @@ const getAllGroups = async (req, res) => {
       data: formattedData,
     });
   } catch (err) {
-    console.log("ecco err", err.message);
+    ("ecco err", err.message);
     res.status(500).json({
       success: false,
       message: "Non siamo riusciti a trovare i tuoi gruppi",
@@ -87,7 +87,7 @@ const getGroupEvents = async (req, res) => {
   try {
     const { data, error } = await Group.getEvents(req);
     if (error) throw error;
-    console.log("da group events ecco data", data);
+    ("da group events ecco data", data);
     const cleanData = data.map((response) => {
       // Estrae l'oggetto evento dal campo 'eventi' e aggiunge lo 'status'
       return {
@@ -145,10 +145,10 @@ const getSpecificGroupEvent = async (req, res) => {
 const addNewGroup = async (req, res) => {
   try {
     const { data, error } = await Group.newGroup(req);
-    console.log("c'è data o errore", { data, error });
+    ("c'è data o errore", { data, error });
     if (error) throw error;
     const { groupData, participants, creator } = data;
-    console.log({ groupData, participants, creator });
+    ({ groupData, participants, creator });
     const notificationInsert = participants
       .filter((p) => p.user_id !== creator.id)
       .map((p) => {
@@ -198,10 +198,10 @@ const modifyGroup = async (req, res) => {
 };
 const leaveGroup = async (req, res) => {
   try {
-    console.log("arrivati a leave");
+    ("arrivati a leave");
     const { data, error } = await Group.leave(req); // Chiama il modello per ottenere gli eventi
     if (error) {
-      console.log("err", error);
+      ("err", error);
       throw error;
     }
     res.status(200).json({
@@ -219,7 +219,7 @@ const leaveGroup = async (req, res) => {
 };
 const addParticipants = async (req, res) => {
   try {
-    console.log("ci siamo?");
+    ("ci siamo?");
     const { data, error } = await Group.addParticipants(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
     res.status(200).json({
@@ -236,7 +236,7 @@ const addParticipants = async (req, res) => {
   }
 };
 const removeParticipant = async (req, res) => {
-  console.log("remove participant al backend");
+  ("remove participant al backend");
   try {
     const { data, error } = await Group.removeParticipant(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;

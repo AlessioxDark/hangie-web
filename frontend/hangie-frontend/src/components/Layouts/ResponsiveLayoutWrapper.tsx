@@ -6,9 +6,9 @@ import { Navigate } from "react-router";
 import RenderLoadingState from "@/features/utils/RenderLoadingState";
 const ResponsiveLayoutWrapper = ({ children, layoutType = "standard" }) => {
   const { session } = useAuth();
-  console.log("ecco session", session);
+  ("ecco session", session);
   if (!session) {
-    console.log("ti rimando al login");
+    ("ti rimando al login");
     return <Navigate to="/login" replace />;
   }
   // Se desktop, usa il LayoutDesktop

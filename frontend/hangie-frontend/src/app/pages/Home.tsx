@@ -133,15 +133,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen  flex ">
-      {/* Sidebar qui se ce l'hai */}
-
       <div className="flex-1">
-        {/* ✅ HEADER Sticky */}
-
-        {/* ✅ MAIN CONTENT - Scrollabile */}
         <main ref={sliderRef} className=" ">
           <div className=" flex flex-col gap-16">
-            {/* EVENTI IN SOSPESO */}
             <section>
               <div className="flex justify-between items-center mb-5 2xl:mb-8">
                 <div className="w-full">
@@ -175,7 +169,6 @@ const Home = () => {
               {renderContent("pending")}
             </section>
 
-            {/* EVENTI FUTURI */}
             <section>
               <div className="flex justify-between items-center mb-4 2xl:mb-8">
                 <div>

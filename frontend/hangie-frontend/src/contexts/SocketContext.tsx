@@ -60,7 +60,6 @@ export const SocketProvider = ({ children }) => {
 
     const socket = io(SERVER_URL);
     socket.on("connect", () => {
-      console.log("Socket.IO Connesso! ID:", socket.id);
       socket.emit("identify_user", session.user.id);
       setCurrentSocket(socket);
     });
@@ -99,7 +98,6 @@ export const SocketProvider = ({ children }) => {
       if (data.group_id == currentGroup) {
         setCurrentChatData((prevData) => {
           if (!prevData) {
-            console.log("Nessuna chat aperta (prevData è null)");
             return prevData;
           }
 
@@ -153,7 +151,6 @@ export const SocketProvider = ({ children }) => {
     });
 
     socket.on("added_new_group", (groupId, data, participants, imgUrl) => {
-      console.log("qui arrivo", { groupId, data, participants, imgUrl });
       setGroupsData((prev) => {
         return [
           ...prev,
@@ -169,11 +166,10 @@ export const SocketProvider = ({ children }) => {
     });
 
     socket.on("left_group", (groupId, userId) => {
-      console.log("leaving...", { groupId, userId, myid: session.user.id });
       const isMe = session.user.id == userId;
       setGroupsData((prev) => {
         // Usiamo MAP per creare un nuovo array, non forEach
-        console.log("sono io ?", isMe);
+
         if (!isMe) {
           return prev.map((group) => {
             if (group.group_id === groupId) {
@@ -185,7 +181,6 @@ export const SocketProvider = ({ children }) => {
             return group;
           });
         } else {
-          console.log("non sono io controllo tra i gruppi");
           return prev.filter((g) => {
             return g.group_id !== groupId;
           });
@@ -200,11 +195,9 @@ export const SocketProvider = ({ children }) => {
           return { ...prev, partecipanti_gruppo: newParticipants };
         });
         if (!isMe) {
-          console.log("non sono io");
           setCurrentChatData((prevChat) => {
             const newMessaggi = prevChat.messaggi.map((m) => {
               if (m.type == "event") {
-                console.log(m, m.risposte_evento);
                 const newRisposte = m.event_details.risposte_evento.filter(
                   (r) => r.utenti.user_id !== userId,
                 );
@@ -222,11 +215,9 @@ export const SocketProvider = ({ children }) => {
           });
         }
       }
-      console.log("e qui ci sto");
+
       if (isMe) {
-        console.log("tolgo eventi");
         setHomeEventsData((prevEvents) => {
-          console.log("questi", prevEvents);
           return {
             pending: prevEvents.pending.filter((e) => e.group_id !== groupId),
             accepted: prevEvents.accepted.filter((e) => e.group_id !== groupId),
@@ -236,7 +227,6 @@ export const SocketProvider = ({ children }) => {
       }
     });
     socket.on("added_participants", (data) => {
-      console.log("data dal socket", data);
       setGroupsData((prev) => {
         const groupExists = prev.find((g) => g.group_id === data.group_id);
         // Usiamo MAP per creare un nuovo array, non forEach
@@ -284,8 +274,6 @@ export const SocketProvider = ({ children }) => {
       }
 
       if (data.eventsDetails) {
-        console.log("c'è eventdetails");
-
         // "L'OPPOSTO" DEL REDUCE: Trasformiamo l'oggetto in un array piatto
         // data.eventsDetails è { "id1": [event], "id2": [event] }
         const flatEvents = Object.values(data.eventsDetails).flat();
@@ -366,8 +354,6 @@ export const SocketProvider = ({ children }) => {
       }
     });
     socket.on("sent_event", (data) => {
-      console.log("dati dall'invio eventi al socket", data);
-      console.log("sent_event");
       const myStatus =
         data.eventi.created_by == session.user.id ? "accepted" : "pending";
       const eventMessage = {
@@ -396,9 +382,7 @@ export const SocketProvider = ({ children }) => {
         });
       }
 
-      console.log("controllo se è user", eventMessage.isUser);
       if (eventMessage.isUser) {
-        console.log("si, aggiungo evento", data.eventi);
         setHomeEventsData((prevEvents) => {
           const category = eventMessage.isUser ? "accepted" : "pending";
           return {
@@ -407,7 +391,6 @@ export const SocketProvider = ({ children }) => {
           };
         });
       } else {
-        console.log("no, aggiungo evento", data.eventi);
         setHomeEventsData((prevEvents) => {
           return {
             ...prevEvents,
@@ -433,7 +416,6 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("give_read_bulk", (data) => {
       // notifica
-      console.log("arrivato bulk frontend");
 
       setMessagesMap((messMap) => {
         return {
@@ -460,11 +442,10 @@ export const SocketProvider = ({ children }) => {
       }
     });
     socket.on("removed_participant", (data) => {
-      console.log("rimosso");
       const isMe = session.user.id == data.participant.user_id;
       setGroupsData((prev) => {
         // Usiamo MAP per creare un nuovo array, non forEach
-        console.log("sono io ?", isMe);
+
         if (!isMe) {
           return prev.map((group) => {
             if (group.group_id === data.group_id) {
@@ -477,10 +458,7 @@ export const SocketProvider = ({ children }) => {
             return group;
           });
         } else {
-          console.log("non sono io controllo tra i gruppi");
           return prev.filter((g) => {
-            console.log(g.group_id, data.group_id);
-
             return g.group_id !== data.group_id;
           });
         }
@@ -500,11 +478,9 @@ export const SocketProvider = ({ children }) => {
           return { ...prev, partecipanti_gruppo: newParticipants };
         });
         if (!isMe) {
-          console.log("non sono io");
           setCurrentChatData((prevChat) => {
             const newMessaggi = prevChat.messaggi.map((m) => {
               if (m.type == "event") {
-                console.log(m, m.risposte_evento);
                 const newRisposte = m.event_details.risposte_evento.filter(
                   (r) => r.utenti.user_id !== data.participant.user_id,
                 );
@@ -522,11 +498,9 @@ export const SocketProvider = ({ children }) => {
           });
         }
       }
-      console.log("e qui ci sto");
+
       if (isMe) {
-        console.log("tolgo eventi");
         setHomeEventsData((prevEvents) => {
-          console.log("questi", prevEvents);
           return {
             pending: prevEvents.pending.filter(
               (e) => e.group_id !== data.group_id,
@@ -544,11 +518,9 @@ export const SocketProvider = ({ children }) => {
     socket.on("deleted_event", (data) => {
       // notifica
 
-      console.log("arrivato deleted_event");
       const { event_id, group_id } = data;
 
       if (currentPath == `/events/${event_id}`) {
-        console.log("stesso event_id");
         navigate(-1);
       }
       setMessagesMap((messMap) => {
@@ -564,10 +536,9 @@ export const SocketProvider = ({ children }) => {
         };
       });
       if (currentGroup == group_id) {
-        console.log("qui lo toglo");
         setCurrentChatData((prevData) => {
           if (!prevData) return prevData;
-          console.log("prima", prevData.messaggi);
+
           console.log("restituisco", {
             messaggi: prevData.messaggi.filter((m) => {
               if (m?.event_id == null) return true;
@@ -582,7 +553,7 @@ export const SocketProvider = ({ children }) => {
             }),
           };
         });
-        console.log(groupEventsData);
+
         setGroupEventsData((prevEvents) => {
           return prevEvents.filter((e) => e.event_id !== event_id);
         });
@@ -590,20 +561,17 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("voted_event", (data) => {
       // notifica
-      console.log("arrivato voted_event");
-      const { event_id, group_id, status, sender_id, prevStatus } = data;
 
-      console.log({ event_id, group_id, status, sender_id, prevStatus });
+      const { event_id, group_id, status, sender_id, prevStatus } = data;
 
       if (sender_id == session.user.id) {
         // bug con i partecipanti dell'evento al cambio per il sender
-        console.log("modifichiamo per sender");
+
         setHomeEventsData((prevEvents) => {
           const eventToMove = prevEvents[prevStatus].find(
             (e) => e.event_id == event_id,
           );
-          console.log("prevEvents", prevEvents);
-          console.log("evento da spostare", eventToMove);
+
           console.log("risultato", {
             ...prevEvents,
             [status]: [eventToMove, ...prevEvents[status]],
@@ -626,7 +594,6 @@ export const SocketProvider = ({ children }) => {
           event_id,
         );
         if (currentEventData && currentEventData.event_id == event_id) {
-          console.log("lo sono");
           setCurrentEventData((prev) => {
             const newResponses = prev.risposte_evento.filter(
               (r) => r.utenti.user_id !== sender_id,
@@ -641,8 +608,6 @@ export const SocketProvider = ({ children }) => {
         }
       }
       if (currentGroup == group_id) {
-        console.log("qui lo toglo");
-
         setGroupEventsData((prevEvents) => {
           return prevEvents.map((e) => {
             if (e.event_id == event_id) {
@@ -652,7 +617,7 @@ export const SocketProvider = ({ children }) => {
               //   ),
               //   { ...eventToMove, status },
               // }
-              console.log("le risposte evento", e.risposte_evento, e);
+
               // const altreRisposte = e.risposte_evento.filter(
               //   (r) => r.user_id !== sender_id,
               // );
@@ -673,7 +638,7 @@ export const SocketProvider = ({ children }) => {
           });
         });
       }
-      console.log("non lo ho inviato io");
+
       setHomeEventsData((prevEvents) => {
         const prevCategory = (
           Object.keys(prevEvents) as Array<keyof typeof prevEvents>
@@ -725,17 +690,15 @@ export const SocketProvider = ({ children }) => {
         };
       });
       setCurrentChatData((prevData) => {
-        console.log("prev", prevData);
         if (!prevData) return prevData;
         const newMessaggi = prevData.messaggi.map((m) => {
-          console.log(m.event_id, event_id);
           if (m.type == "event" && m.event_id == event_id) {
             const newRisposte = m.event_details.risposte_evento.map((r) => {
               return r.utenti?.user_id == sender_id
                 ? { ...r, status, ok: "ok" }
                 : r;
             });
-            console.log(newRisposte);
+
             return {
               ...m,
               event_details: {
@@ -773,21 +736,20 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("sent_request", (data) => {
       // notifica
-      console.log("arrivato sent_request");
+
       if (getFriendsData) {
         getFriendsData();
       }
     });
     socket.on("deleted_friend", (data) => {
       // notifica
-      console.log("arrivato deleted_friend");
+
       if (getFriendsData) {
         getFriendsData();
       }
     });
 
     return () => {
-      console.log("Pulizia socket e rimozione listener...");
       socket.off("receive_message");
       socket.off("message_arrived");
       socket.off("added_new_group");

@@ -1,10 +1,3 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import React, { useState } from "react";

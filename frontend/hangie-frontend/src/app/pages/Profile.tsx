@@ -12,24 +12,6 @@ import RenderLoadingState from "@/features/utils/RenderLoadingState";
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 
-/* ─────────────────────────────────────────────────────────────
-   Design Tokens (strict palette)
-───────────────────────────────────────────────────────────── */
-const P = {
-  primary: "#2463eb",
-  primaryLight: "#eff4ff",
-  primaryMid: "#dbeafe",
-  bg1: "#ffffff",
-  bg2: "#f8fafc",
-  bg3: "#e2e8f0",
-  t1: "#0f172a",
-  t2: "#64748b",
-  t3: "#94a3b8",
-};
-
-/* ─────────────────────────────────────────────────────────────
-   Helpers
-───────────────────────────────────────────────────────────── */
 const formatDate = (dateStr) => {
   const d = new Date(dateStr);
   return {
@@ -39,13 +21,8 @@ const formatDate = (dateStr) => {
   };
 };
 
-const Sep = () => (
-  <div className="w-px h-7 rounded-full" style={{ background: P.bg3 }} />
-);
+const Sep = () => <div className="w-px h-7 rounded-full bg-bg-3" />;
 
-/* ─────────────────────────────────────────────────────────────
-   Tab Bar
-───────────────────────────────────────────────────────────── */
 const TABS = [
   { id: "programma", label: "In programma" },
   { id: "organizzati", label: "Organizzati" },
@@ -53,20 +30,14 @@ const TABS = [
 ];
 
 const TabBar = ({ active, onChange }) => (
-  <div className="flex" style={{ borderBottom: `1.5px solid ${P.bg3}` }}>
+  <div className="flex border-b border-bg-3">
     {TABS.map((t) => {
       const on = active === t.id;
       return (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
-          className="flex-1 py-3.5 text-[11px] font-bold uppercase tracking-widest transition-colors"
-          style={{
-            color: on ? P.primary : P.t3,
-            borderBottom: on
-              ? `2px solid ${P.primary}`
-              : "2px solid transparent",
-          }}
+          className={`flex-1 py-3.5 text-[11px] font-bold uppercase tracking-widest transition-colors border-b-2 ${on ? "text-primary border-primary" : "text-text-3"}`}
         >
           {t.label}
         </button>
@@ -85,7 +56,7 @@ const STATUS_MAP = {
 };
 
 const StatusBadge = ({ status }) => {
-  const s = STATUS_MAP[status] ?? { dot: P.t3, label: status };
+  const s = STATUS_MAP[status] ?? { dot: "#94a3b8", label: status };
   return (
     <span className="flex items-center gap-1.5">
       <span
@@ -99,85 +70,6 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-/* ─────────────────────────────────────────────────────────────
-   Event Row
-───────────────────────────────────────────────────────────── */
-const EventRow = ({ event, isOwner }) => {
-  const { day, month } = formatDate(event.data);
-  return (
-    <div
-      className="flex items-center gap-4 px-4 py-4 rounded-2xl active:opacity-70 transition-opacity cursor-pointer"
-      style={{ background: P.bg1, border: `1px solid ${P.bg3}` }}
-    >
-      {/* Date block */}
-      <div
-        className="w-12 h-12 shrink-0 rounded-xl flex flex-col items-center justify-center"
-        style={{
-          background: P.primaryLight,
-          border: `1px solid ${P.primaryMid}`,
-        }}
-      >
-        <span
-          className="text-[8px] font-black uppercase tracking-wider"
-          style={{ color: P.primary }}
-        >
-          {month}
-        </span>
-        <span
-          className="text-xl font-black leading-none"
-          style={{ color: P.primary }}
-        >
-          {day}
-        </span>
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <h3
-            className="font-bold text-[14px] truncate"
-            style={{ color: P.t1 }}
-          >
-            {event.titolo}
-          </h3>
-          {isOwner && (
-            <span
-              className="text-[9px] font-black px-2 py-0.5 rounded-full shrink-0"
-              style={{ background: P.primaryMid, color: P.primary }}
-            >
-              ORG
-            </span>
-          )}
-        </div>
-        {/* {event.luogo && (
-          <p className="text-xs truncate mt-0.5" style={{ color: P.t3 }}>
-            {event.luogo}
-          </p>
-        )} */}
-        <div className="mt-1.5">
-          <StatusBadge status={event.status} />
-        </div>
-      </div>
-
-      {/* Arrow */}
-      <svg
-        width="16"
-        height="16"
-        fill="none"
-        stroke={P.t3}
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-        className="shrink-0"
-      >
-        <path d="M9 5l7 7-7 7" />
-      </svg>
-    </div>
-  );
-};
-
-/* ─────────────────────────────────────────────────────────────
-   Empty State
-───────────────────────────────────────────────────────────── */
 const EMPTY_MAP = {
   programma: {
     label: "Nessun evento in programma",
@@ -197,15 +89,12 @@ const EmptyState = ({ tab }) => {
   const e = EMPTY_MAP[tab] ?? EMPTY_MAP.programma;
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-      <div
-        className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
-        style={{ background: P.bg2, border: `1px solid ${P.bg3}` }}
-      >
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-bg-2 botder border-bg-3">
         <svg
           width="20"
           height="20"
           fill="none"
-          stroke={P.t3}
+          stroke={"#94a3b8"}
           strokeWidth="1.5"
           viewBox="0 0 24 24"
         >
@@ -213,23 +102,12 @@ const EmptyState = ({ tab }) => {
           <path d="M16 2v4M8 2v4M3 10h18" />
         </svg>
       </div>
-      <p className="font-bold text-sm" style={{ color: P.t1 }}>
-        {e.label}
-      </p>
-      <p className="text-xs mt-1 leading-relaxed" style={{ color: P.t3 }}>
-        {e.sub}
-      </p>
+      <p className="font-bold text-sm text-text-1">{e.label}</p>
+      <p className="text-xs mt-1 leading-relaxed text-text-3">{e.sub}</p>
     </div>
   );
 };
 
-/* ─────────────────────────────────────────────────────────────
-   Friends Avatars Strip
-───────────────────────────────────────────────────────────── */
-
-/* ─────────────────────────────────────────────────────────────
-   MAIN COMPONENT
-───────────────────────────────────────────────────────────── */
 const Profile = () => {
   const navigate = useNavigate();
   const { profileData, getProfileData } = useProfile();
@@ -267,9 +145,9 @@ const Profile = () => {
   const isOwnProfile = session.user.id == profileData?.user_id; // sostituisci con logica reale (es. profileData.user_id === currentUser.id)
 
   return (
-    <div className="flex flex-col " style={{ background: P.bg1 }}>
+    <div className="flex flex-col bg-bg-1">
       {/* ── HEADER CARD ── */}
-      <div style={{ background: P.bg1, borderBottom: `1px solid ${P.bg3}` }}>
+      <div className="bg-bg-1 border-b border-bg-3">
         {/* Avatar + Name + Karma */}
         {!isOwnProfile ? (
           <div>
@@ -288,40 +166,33 @@ const Profile = () => {
             </button>
           </div>
         )}
+        {/* rimozione ecc firneds, eventi e cosi in login ospite*/}
         <div
-          className={`flex items-center justify-between px-4 ${isOwnProfile && "pt-6"} pb-5`}
+          className={`flex items-center justify-between gap-3  ${isOwnProfile && "pt-6"} pb-5 min-w-0 `}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-[60px] h-[60px] rounded-2xl overflow-hidden shrink-0">
               <ProfileIcon user_id={profileData?.user_id} />
             </div>
-            <div>
-              <h1
-                className="text-[18px] font-black leading-tight"
-                style={{ color: P.t1 }}
-              >
+            <div className="min-w-0">
+              <h1 className="text-base font-black leading-tight text-text-1 truncate">
                 {profileData?.nome ?? "Utente"}
               </h1>
-              <p className="text-sm mt-0.5" style={{ color: P.t3 }}>
+              <p className="text-sm mt-0.5 text-text-3 truncate">
                 @{profileData?.handle}
               </p>
             </div>
           </div>
           <KarmaBadge points={karma} />
         </div>
-
         {/* Bio */}
         {profileData?.biografia && (
           <div className="mx-4 mb-4 px-4 py-3 rounded-xl">
-            <p
-              className="text-sm leading-relaxed break-words"
-              style={{ color: P.t2 }}
-            >
+            <p className="text-sm leading-relaxed break-words text-text-2">
               {profileData.biografia}
             </p>
           </div>
         )}
-
         {/* Stats */}
         <div className="flex items-center justify-around px-4 pb-5">
           <StatBlock
@@ -338,31 +209,16 @@ const Profile = () => {
           <Sep />
           <StatBlock value={profileData?.friendsCount} label="Amici" />
         </div>
-
         {/* CTA */}
-        <div className="px-4 pb-4 " style={{ background: P.bg1 }}>
+        <div className="px-4 pb-4 bg-bg-1">
           {!isOwnProfile && (
             <div className="flex gap-3">
-              <button
-                className="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
-                style={{ background: P.primary }}
-              >
+              <button className="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-95 bg-primary">
                 Aggiungi amico
               </button>
-              {/* <button
-                className="px-5 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
-                style={{
-                  background: P.bg2,
-                  border: `1px solid ${P.bg3}`,
-                  color: P.t2,
-                }}
-              >
-                Messaggio
-              </button> */}
             </div>
           )}
         </div>
-
         {/* Tabs */}
         <TabBar active={activeTab} onChange={setActiveTab} />
       </div>
@@ -382,10 +238,7 @@ const Profile = () => {
         )}
       </div>
       {filtered.length > 0 && (
-        <p
-          className="text-center text-xs mt-6 pb-2 font-semibold"
-          style={{ color: P.t3 }}
-        >
+        <p className="text-center text-xs mt-6 pb-2 font-semibold text-text-3">
           {filtered.length} event{filtered.length !== 1 ? "i" : "o"}
         </p>
       )}
