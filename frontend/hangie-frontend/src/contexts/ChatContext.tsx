@@ -71,7 +71,6 @@ export const ChatProvider = ({ children }) => {
     accepted: [],
     rejected: [],
   });
-  const { currentSocket } = useSocket();
   const [groupEventsData, setGroupEventsData] = useState(null);
   const [currentEventData, setCurrentEventData] = useState({});
   const { currentScreen } = useScreen();
@@ -110,13 +109,12 @@ export const ChatProvider = ({ children }) => {
     async (groupId) => {
       const idToUse = groupId || currentGroup;
       const saveData = (data) => {
-        ("ecco i gruppi", data);
         setGroupEventsData(data);
       };
       executeApiCall(
         "events",
         () => {
-          return ApiCalls.fetchGroupEvents(idToUse, session.access_token);
+          return ApiCalls.fetchGroupEvents(idToUse, session?.access_token);
         },
         saveData,
       );
@@ -124,13 +122,15 @@ export const ChatProvider = ({ children }) => {
     [session, executeApiCall, currentGroup],
   );
   const fetchGroups = useCallback(async () => {
+    console.log("faccio fetchgroups", session);
     const saveData = (data) => {
+      console.log("ecco il data", data);
       setGroupsData(data);
     };
     executeApiCall(
       "groups",
       () => {
-        return ApiCalls.fetchGroups(session.access_token);
+        return ApiCalls.fetchGroups(session?.access_token);
       },
       saveData,
     );
@@ -208,14 +208,11 @@ export const ChatProvider = ({ children }) => {
   );
 
   useEffect(() => {
-    ("navigando");
     const match = location.pathname.match(/\/chats\/([^\/]+)/);
     const paramsGroupId = match ? match[1] : null;
-    (paramsGroupId, currentGroup);
     // Se l'ID nell'URL è diverso da quello in stato, carichiamo tutto
     if (paramsGroupId) {
       if (paramsGroupId !== currentGroup) {
-        ("sono diversi load all");
         loadAll(paramsGroupId);
       }
     } else {
@@ -251,9 +248,7 @@ export const ChatProvider = ({ children }) => {
       setCurrentGroupData(groupsData[0]);
     }
   }, [groupsData, currentGroup, currentScreen]);
-  useEffect(() => {
-    ("cambiato location", location.pathname);
-  }, [location.pathname]);
+
   return (
     <ChatContext.Provider
       value={{

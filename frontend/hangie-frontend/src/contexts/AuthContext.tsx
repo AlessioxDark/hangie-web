@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "../config/db.js";
 import { Navigate, useNavigate } from "react-router";
 import { ApiCalls } from "@/services/api.js";
@@ -84,6 +84,45 @@ const groupTemplates = {
     "La cucina fusion tra messicano e giapponese è il futuro.",
   ],
 };
+
+const initialEvents = [
+  {
+    titolo: "Escursione Alba sul Gran Sasso",
+    descrizione:
+      "Partenza notturna per godersi l'alba dalla vetta. Portare abbigliamento a strati e torcia frontale.",
+    data: "2026-05-15T03:30:00Z",
+    data_scadenza: "2026-05-10T23:59:59Z",
+    costo: 15.0,
+    luogo_id: "08509cb5-1b88-4adc-9643-4aa50d6efa83",
+    created_by: "983d5e8e-a192-4887-a9b3-c827f2a25535", // Marco Rossi
+    cover_img:
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80",
+  },
+  {
+    titolo: "Meeting Pianificazione Viaggio Giappone",
+    descrizione:
+      "Ci incontriamo per definire l'itinerario finale e prenotare i Japan Rail Pass.",
+    data: "2026-06-01T18:00:00Z",
+    data_scadenza: "2026-05-25T23:59:59Z",
+    costo: 0.0,
+    luogo_id: "a12caf83-3238-4161-9573-8c921115b305",
+    created_by: "4bf31b17-a97a-44ae-9893-82e6e5649c6a", // Sara Bianchi
+    cover_img:
+      "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80",
+  },
+  {
+    titolo: "Cena Post-WOD: Pizza e Carboidrati",
+    descrizione:
+      "Dopo l'allenamento intenso di sabato, reintegriamo con la migliore pizza di Napoli.",
+    data: "2026-04-20T20:30:00Z",
+    data_scadenza: "2026-04-18T12:00:00Z",
+    costo: 25.0,
+    luogo_id: "59553005-66bf-497e-919f-7919110121af",
+    created_by: "a9f85964-3588-4e88-924f-95358a8c3424", // Luca Moretti
+    cover_img:
+      "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80",
+  },
+];
 const authContext = createContext({
   session: null,
   signUpNewUser: (arg) => arg,
@@ -96,8 +135,9 @@ const authContext = createContext({
 export const AuthContextProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [groupIds, setGroupIds] = useState([]);
+  const [eventsIds, setEventsIds] = useState([]);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-
+  const isPopulatingGuest = useRef(false);
   const signUpNewUser = async ({ email, password }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -121,7 +161,6 @@ export const AuthContextProvider = ({ children }) => {
         console.error("errore nel login", error);
         return { success: false, authError: error.message };
       }
-      ("signed in succesfully", data);
 
       return { success: true, authData: data };
     } catch (error) {
@@ -130,23 +169,11 @@ export const AuthContextProvider = ({ children }) => {
   };
   const LogoutUser = async () => {
     try {
-      const isGuest = session?.user.is_anonymous;
+      console.log("faccio il logout");
       await supabase.auth.signOut();
       setSession(null);
       localStorage.removeItem("to_remember");
-      if (isGuest) {
-        await supabase.from("utenti").delete().eq("user_id", session?.user?.id);
-        await supabase
-          .from("amicizie")
-          .delete()
-          .eq("user_id", session?.user?.id);
-        await supabase.from("gruppi").delete().in("group_id", groupIds);
-        await supabase
-          .from("partecipanti_gruppo")
-          .delete()
-          .in("group_id", groupIds);
-        // rimuovi profilo
-      }
+
       return <Navigate to={"/login"} replace />;
     } catch (error) {
       console.error("errore nel login", error);
@@ -159,85 +186,130 @@ export const AuthContextProvider = ({ children }) => {
 
     const { data: authData, error: authError } =
       await supabase.auth.signInAnonymously();
+    if (authError || !authData?.user) {
+      return {
+        authData: null,
+        authError: authError?.message || "Errore sconosciuto",
+      };
+    }
+    let guestData = {};
     if (authData?.user) {
-      console.log("c'è user");
-
-      await supabase.from("utenti").insert({
+      isPopulatingGuest.current = true;
+      guestData = {
         user_id: authData.user.id,
         handle: `guest_${Math.floor(Math.random() * 10000)}`,
         nome: `Ospite ${Math.random() * 1000}`,
         email: authData.user.id + "@guest.com",
         is_guest: true,
+      };
+      await ApiCalls.addGuest(authData.session.access_token, {
+        guestData,
       });
-      const newData = initialFriends.map((f) => {
-        return {
-          user_id: authData.user.id,
-          sender_id: authData.user.id,
-          amico_id: f,
-          status: "accepted",
-        };
-      });
-      await supabase.from("amicizie").insert(newData);
-      const { data: groupData, error } = await supabase
-        .from("gruppi")
-        .insert(initialGroups)
-        .select("group_id,createdBy");
-      if (error) console.log(error);
-      const newParticipantsData = groupData
-        .map((g) => {
-          return [
-            ...initialFriends.map((f) => {
-              return f == g.createdBy
-                ? {
-                    group_id: g.group_id,
-                    role: "member",
-                    partecipante_id: authData.user.id,
-                  }
-                : {
-                    partecipante_id: f,
-                    group_id: g.group_id,
-                    role: g.createdBy == f ? "admin" : "member",
-                  };
-            }),
-          ];
-        })
-        .flat();
-      groupData.forEach((group) => {
-        setGroupIds((prevGroups) => {
-          return [...prevGroups, group.group_id];
-        });
-      });
-      const { error: participantsError } = await supabase
-        .from("partecipanti_gruppo")
-        .insert(newParticipantsData);
+      console.log("c'è user");
 
-      const theMessages = initialGroups.flatMap((group, index) => {
-        const gid = groupData[index].group_id;
-        const messageCount = 5;
+      // //1. Inserisci profilo
+      // await supabase.from("utenti").insert(guestData);
 
-        const hasEvent = index < 3;
-        return Array.from({ length: messageCount }).map((_, i) => {
-          const sender_id =
-            i === 0
-              ? group.createdBy
-              : initialFriends[i % initialFriends.length];
-          const isEvent = hasEvent && i === 0;
+      // // 2. inserisci amici
+      // const newData = initialFriends.map((f) => {
+      //   return {
+      //     user_id: authData.user.id,
+      //     sender_id: authData.user.id,
+      //     amico_id: f,
+      //     status: "accepted",
+      //   };
+      // });
+      // await supabase.from("amicizie").insert(newData);
 
-          return {
-            group_id: gid,
-            user_id: sender_id,
-            type: isEvent ? "event" : "message",
-            content: isEvent ? null : groupTemplates[group.nome][i - 1],
-          };
-        });
-      });
-      const { error: messagesError } = await supabase
-        .from("messaggi")
-        .insert(theMessages);
-      console.log("i mess", theMessages);
-      console.log("mess err", messagesError);
+      // // 3. inserisci gruppi
+      // const { data: groupData, error } = await supabase
+      //   .from("gruppi")
+      //   .insert(initialGroups)
+      //   .select("group_id,createdBy,nome");
+      // if (error) console.log(error);
+      // const gIds = groupData.map((g) => g.group_id);
+      // setGroupIds(gIds);
+
+      // // 4. Inserisci Partecipanti (Guest + Amici)
+
+      // const newParticipantsData = groupData.flatMap((g) => {
+      //   const participants = initialFriends.map((f) => ({
+      //     group_id: g.group_id,
+      //     partecipante_id: f,
+      //     role: g.createdBy === f ? "admin" : "member",
+      //   }));
+      //   // Aggiungiamo anche il Guest stesso come membro
+      //   participants.push({
+      //     group_id: g.group_id,
+      //     partecipante_id: authData.user.id,
+      //     role: "member",
+      //   });
+      //   return participants;
+      // });
+      // await supabase.from("partecipanti_gruppo").insert(newParticipantsData);
+
+      // const eventsWithGroup = initialEvents.map((event, index) => ({
+      //   ...event,
+      //   group_id: gIds[index], // Colleghiamo l'evento al gruppo corrispondente
+      // }));
+      // const { data: eventData, error: eError } = await supabase
+      //   .from("eventi")
+      //   .insert(eventsWithGroup)
+      //   .select("event_id, created_by, group_id");
+
+      // // 6. Inserisci Risposte Eventi
+      // const risposte_eventi = eventData.flatMap((e) => {
+      //   return [...initialFriends, authData.user.id].map((uId) => ({
+      //     status:
+      //       uId === e.created_by
+      //         ? "accepted"
+      //         : uId === authData.user.id
+      //           ? "accepted"
+      //           : "pending",
+      //     user_id: uId,
+      //     event_id: e.event_id,
+      //   }));
+      // });
+      // await supabase.from("risposte_eventi").insert(risposte_eventi);
+
+      // // 7. Inserisci Messaggi (inclusi gli Eventi nel feed)
+
+      // const theMessages = groupData.flatMap((group, index) => {
+      //   const hasEvent = index < 3;
+      //   const relatedEvent = hasEvent
+      //     ? eventData.find((e) => e.group_id === group.group_id)
+      //     : null;
+      //   console.log(
+      //     "rel eve",
+      //     groupTemplates[`${group.nome}`],
+      //     group.nome,
+      //     groupTemplates,
+      //   );
+
+      //   return Array.from({ length: 5 }).map((_, i) => {
+      //     const isEvent = hasEvent && i === 0;
+      //     const sender_id =
+      //       i === 0
+      //         ? group.createdBy
+      //         : initialFriends[i % initialFriends.length];
+
+      //     return {
+      //       group_id: group.group_id,
+      //       user_id: sender_id,
+      //       type: isEvent ? "event" : "message",
+      //       content: isEvent ? null : groupTemplates[group.nome][i],
+      //       event_id: isEvent ? relatedEvent?.event_id : null,
+      //     };
+      //   });
+      // });
+      // await supabase.from("messaggi").insert(theMessages);
+
+      // console.log("hai impostato tutti i dati, imposto sessione");
+      isPopulatingGuest.current = false;
+      setSession(authData?.session);
     }
-    return { authData, authError };
+
+    return { authData: { ...authData, guestData }, authError };
   };
 
   useEffect(() => {
@@ -261,11 +333,16 @@ export const AuthContextProvider = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_, session) => {
+      if (isPopulatingGuest.current) return;
       setSession(session);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    console.log("cambiata session", session);
+  }, [session]);
 
   return (
     <authContext.Provider

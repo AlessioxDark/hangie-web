@@ -9,8 +9,9 @@ import { useProfile } from "@/contexts/ProfileContext";
 import EventCard from "@/features/events/EventCard";
 import RenderErrorState from "@/features/utils/RenderErrorState";
 import RenderLoadingState from "@/features/utils/RenderLoadingState";
+import { ApiCalls } from "@/services/api";
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 
 const formatDate = (dateStr) => {
   const d = new Date(dateStr);
@@ -112,7 +113,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { profileData, getProfileData } = useProfile();
   const { session, LogoutUser } = useAuth();
-  const { loading, error } = useApi();
+  const { loading, error, executeApiCall } = useApi();
   const [activeTab, setActiveTab] = useState("programma");
 
   if (loading?.profile) return <RenderLoadingState type="profile" />;
@@ -144,6 +145,19 @@ const Profile = () => {
   const karma = profileData?.karma ?? 82;
   const isOwnProfile = session.user.id == profileData?.user_id; // sostituisci con logica reale (es. profileData.user_id === currentUser.id)
 
+  const handleLogoutUser = async () => {
+    const isGuest = session?.user.is_anonymous;
+    const token = session?.access_token;
+    console.log(session);
+    if (isGuest) {
+      await ApiCalls.deleteGuest(token);
+    }
+    LogoutUser();
+    // if(isGuest){
+
+    // }
+    // return <Navigate replace to={"/login"} />;
+  };
   return (
     <div className="flex flex-col bg-bg-1">
       {/* ── HEADER CARD ── */}
@@ -160,7 +174,7 @@ const Profile = () => {
             {" "}
             <button
               className=" px-5 py-2 text-white text-sm font-body  bg-red-500 font-semibold rounded-2xl active:bg-red-400 transition-all shadow-sm"
-              onClick={LogoutUser}
+              onClick={handleLogoutUser}
             >
               Logout
             </button>

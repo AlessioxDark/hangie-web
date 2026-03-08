@@ -77,7 +77,7 @@ const getAll = async (req) => {
     if (pendingEventsError) throw pendingEventsError;
     const eventsList = [...acceptedEvents, ...pendingEvents];
     if (eventsList.length == 0) return { data: [], error: null };
-    const eventIds = eventsList.map((e) => e.event_id);
+    const eventIds = eventsList.map((e) => e?.event_id);
     const groupIds = eventsList.map((e) => e.eventi.gruppi.group_id);
     const { data: risposte, error: risposteError } = await supabase
       .from("risposte_eventi")
@@ -99,8 +99,8 @@ const getAll = async (req) => {
         .in("eventi.event_id", eventIds);
 
     const eventParticipantsMap = eventParticipants.reduce((acc, curr) => {
-      if (!acc[curr.eventi.event_id]) acc[curr.eventi.event_id] = [];
-      acc[curr.eventi.event_id].push({
+      if (!acc[curr.eventi?.event_id]) acc[curr.eventi?.event_id] = [];
+      acc[curr.eventi?.event_id].push({
         utenti: curr.utente,
         status: curr.status,
         is_creator: curr.is_creator,
@@ -113,7 +113,7 @@ const getAll = async (req) => {
     const finalData = eventsList.map((e) => {
       return {
         ...e,
-        partecipanti: eventParticipantsMap[e.event_id],
+        partecipanti: eventParticipantsMap[e?.event_id],
       };
     });
     return { data: finalData, error: null };

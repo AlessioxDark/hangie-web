@@ -16,6 +16,7 @@ import { useChat } from "@/contexts/ChatContext.js";
 const Login = () => {
   const { LoginUser, handleGuestSignIn } = useAuth();
   const { executeApiCall } = useApi();
+  const { session } = useAuth();
   const { setProfileData } = useProfile();
   const { getFriendsData } = useFriends();
   const { fetchGroups } = useChat();
@@ -58,16 +59,16 @@ const Login = () => {
         realEmail = emailFound;
       }
 
-      const { authError } = await LoginUser(realEmail, password, remember);
+      const { authData, authError } = await LoginUser(
+        realEmail,
+        password,
+        remember,
+      );
       if (authError) {
         setError("root", { message: "Credenziali non corrette" });
         return;
       }
       setProfileData({ is_guest: false });
-      if (!authError) {
-        await getFriendsData();
-        await fetchGroups();
-      }
 
       navigate("/");
     } catch (error) {
@@ -77,10 +78,10 @@ const Login = () => {
   const onsGuestSignIn: SubmitHandler<FormFields> = async () => {
     try {
       console.log("provo a anonymous");
-      const { authError } = await handleGuestSignIn();
+      const { authData, authError } = await handleGuestSignIn();
       console.log("errore", authError);
       if (authError) throw authError;
-      setProfileData({ is_guest: true });
+      setProfileData(authData.guestData);
       navigate("/");
     } catch (error) {
       setError("root", { message: `errore ${error} ` });

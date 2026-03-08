@@ -223,4 +223,25 @@ export const ApiCalls = {
       },
       body: JSON.stringify({ offset }),
     }).then(handleResponse),
+  deleteGuest: async (token: string) => {
+    const res = await fetch(`${BASE_URL}/profile/guest/removeall`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await handleResponse(res);
+  },
+  addGuest: async (token: string, dataToSend) => {
+    const res = await fetch(`${BASE_URL}/profile/guest/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dataToSend),
+    });
+    return await handleResponse(res);
+  },
 };
