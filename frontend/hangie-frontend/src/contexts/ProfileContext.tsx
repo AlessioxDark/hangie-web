@@ -15,6 +15,7 @@ const ProfileContext = createContext({
   ProfileData: null,
   getProfileData: (arg) => arg,
   setProfileData: (arg) => arg,
+  setDefaultHandle: (arg) => arg,
 });
 
 export const ProfileProvider = ({ children }) => {
@@ -27,19 +28,20 @@ export const ProfileProvider = ({ children }) => {
   const getDefaulHandle = async () => {
     if (!session?.access_token || !session?.user?.id) return;
     try {
-      const {
-        data: { handle },
-        error: userError,
-      } = await supabase
+      console.log("sess", session.user.id);
+      const { data, error } = await supabase
         .from("utenti")
         .select("handle")
-        .eq("user_id", session?.user.id)
-        .single();
-      ("trovato userhandle", handle, userError);
-      if (userError) throw userError;
-      return handle;
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      console.log("ricevuto", data);
+      if (error) {
+        console.warn("Handle non ancora trovato, riprovo...");
+        throw error;
+      }
+      return data.handle;
     } catch (err) {
-      ("err", err);
+      console.log("err", err);
       // return err;
     }
   };
@@ -82,6 +84,7 @@ export const ProfileProvider = ({ children }) => {
         getProfileData,
         defaultHandle,
         setProfileData,
+        setDefaultHandle,
       }}
     >
       {children}

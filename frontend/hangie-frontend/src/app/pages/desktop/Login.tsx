@@ -17,9 +17,8 @@ const Login = () => {
   const { LoginUser, handleGuestSignIn } = useAuth();
   const { executeApiCall } = useApi();
   const { session } = useAuth();
-  const { setProfileData } = useProfile();
-  const { getFriendsData } = useFriends();
-  const { fetchGroups } = useChat();
+  const { setProfileData, setDefaultHandle } = useProfile();
+
   const schema = z.object({
     user_email: z.string().min(1, "il campo è obbligatorio"),
     password: z.string().min(1, "la password è obbligatoria"),
@@ -81,6 +80,8 @@ const Login = () => {
       const { authData, authError } = await handleGuestSignIn();
       console.log("errore", authError);
       if (authError) throw authError;
+      setDefaultHandle(authData.guestData.handle);
+      console.log("guestData", authData.guestData);
       setProfileData(authData.guestData);
       navigate("/");
     } catch (error) {

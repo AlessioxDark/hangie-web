@@ -317,7 +317,7 @@ const deleteGuest = async (req) => {
     const { data: participantsData, error: participantsError } = await supabase
       .from("partecipanti_gruppo")
       .select("group_id")
-      .eq("partecipante_id", user.id);
+      .in("partecipante_id", [...initialFriends, user.id]);
     if (participantsError) throw participantsError;
     const groupIds = participantsData.map((g) => g.group_id);
 
@@ -329,7 +329,8 @@ const deleteGuest = async (req) => {
     const { error: notificanError } = await supabase
       .from("notifiche")
       .delete()
-      .in("group_id", groupIds);
+      .in("group_id", groupIds)
+      .in("user_id", [...initialFriends, user.id]);
     if (notificanError) throw notificanError;
     const { data: messagesData, error: messagesSelectError } = await supabase
       .from("messaggi")

@@ -1,5 +1,5 @@
-controllare che tutte le funzionalità funzionino
-aggiungere possibilità accesso come ospite
+controllare che tutte le funzionalità funzionino FATTO?
+aggiungere possibilità accesso come ospite FATTO?
 spostare tutte chiamate fetch in un solo punto
 
 come elimino partecipanti fittizzi di guest?
