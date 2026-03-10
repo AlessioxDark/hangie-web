@@ -5,7 +5,6 @@ const getAll = async (req) => {
 
     if (!authHeader) throw { message: "Manca Header Auth" };
     const token = req.headers.authorization.split(" ")[1];
-    console.log("token gruppi", token);
     const {
       data: { user },
       error: tokenError,

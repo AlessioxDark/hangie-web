@@ -14,6 +14,14 @@ const RenderLoadingState = ({ type }) => {
       main: "Caricamento degli amici in corso...",
       alt: "Stiamo cercando i tuoi amici",
     },
+    add_participants: {
+      main: "Caricamento degli amici in corso...",
+      alt: "Stiamo cercando i tuoi amici",
+    },
+    new_group: {
+      main: "creazione gruppo in corso...",
+      alt: "Stiamo creando il tuo gruppo",
+    },
     home: {
       main: "Caricamento degli eventi in corso...",
       alt: "Stiamo cercando i tuoi eventi",

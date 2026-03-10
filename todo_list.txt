@@ -1,5 +1,7 @@
 controllare che tutte le funzionalità funzionino FATTO?
-aggiungere possibilità accesso come ospite FATTO?
-spostare tutte chiamate fetch in un solo punto
+spostare tutte chiamate fetch in un solo punto FATTTO?
+errore scroll gruppi 
 
-come elimino partecipanti fittizzi di guest?
+creazione guest no dati errore
+
+FORSE RISOLTO?

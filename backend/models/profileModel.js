@@ -124,14 +124,14 @@ const initialEvents = [
 const getPfp = async (req) => {
   try {
     const { user_id } = req.params;
-
+    console.log("ecco pfp", user_id);
     const { data, error } = await supabase
       .from("utenti")
       .select("profile_pic")
       .eq("user_id", user_id);
-
+    console.log("dati ottenuti", data, error);
     if (error) throw error;
-    return { data, error: null };
+    return { data: data, error: null };
   } catch (err) {
     return { data: null, error: err };
   }

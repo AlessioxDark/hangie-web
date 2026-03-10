@@ -16,7 +16,7 @@ export const AuthContextProvider = ({ children }) => {
   const [session, setSession] = useState(null);
 
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const isPopulatingGuest = useRef(false);
+  const isPopulatingRef = useRef(false);
   const signUpNewUser = async ({ email, password }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -40,7 +40,7 @@ export const AuthContextProvider = ({ children }) => {
         console.error("errore nel login", error);
         return { success: false, authError: error.message };
       }
-
+      console.log("loginnato");
       return { success: true, authData: data };
     } catch (error) {
       console.error("errore nel login", error);
@@ -62,7 +62,7 @@ export const AuthContextProvider = ({ children }) => {
   const handleGuestSignIn = async () => {
     console.log("ci proviamo");
     localStorage.setItem("to_remember", "true");
-
+    isPopulatingRef.current = true;
     const { data: authData, error: authError } =
       await supabase.auth.signInAnonymously();
     if (authError || !authData?.user) {
@@ -73,7 +73,7 @@ export const AuthContextProvider = ({ children }) => {
     }
     let guestData = {};
     if (authData?.user) {
-      isPopulatingGuest.current = true;
+      console.log("metto isPopulating a true");
       guestData = {
         user_id: authData.user.id,
         handle: `guest_${Math.floor(Math.random() * 10000)}`,
@@ -85,7 +85,8 @@ export const AuthContextProvider = ({ children }) => {
         guestData,
       });
       console.log("c'è user");
-      isPopulatingGuest.current = false;
+      isPopulatingRef.current = false;
+      console.log("lo metto false");
       setSession(authData?.session);
     }
 
@@ -97,12 +98,14 @@ export const AuthContextProvider = ({ children }) => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
+      console.log("controllo");
       const wantToBeRemembered = localStorage.getItem("to_remember") === "true";
       if (session && !wantToBeRemembered) {
+        console.log("esco");
         await supabase.auth.signOut();
-
         setSession(null);
       } else {
+        console.log("metto la sessione");
         setSession(session);
       }
       setIsAuthLoading(false);
@@ -113,7 +116,9 @@ export const AuthContextProvider = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_, session) => {
-      if (isPopulatingGuest.current) return;
+      console.log("cambiato stato", session);
+      if (isPopulatingRef.current) return;
+
       setSession(session);
     });
 

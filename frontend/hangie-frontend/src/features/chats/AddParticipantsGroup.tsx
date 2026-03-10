@@ -8,6 +8,7 @@ import { useChat } from "@/contexts/ChatContext";
 import RenderLoadingState from "../utils/RenderLoadingState";
 import RenderErrorState from "../utils/RenderErrorState";
 import { useApi } from "@/contexts/ApiContext";
+import { ApiCalls } from "@/services/api";
 
 const AddParticipantsGroup = ({
   setIsParticipantsAdd,
@@ -22,24 +23,28 @@ const AddParticipantsGroup = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const { session } = useAuth();
-  const { error: errorApi } = useApi();
+  const { error: errorApi, executeApiCall, loading } = useApi();
   const [error, setError] = useState(null);
   const fetchFriends = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch(
-        `http://localhost:3000/api/friends/${session.user.id}/accepted`,
+
+      const saveData = (data) => {
+        const acceptedFriends = data.filter((f) => f.status == "accepted");
+        setFriendsData(acceptedFriends);
+        setCurrentFriendsData(acceptedFriends);
+      };
+      executeApiCall(
+        "add_participants",
+        () => {
+          return ApiCalls.handleGetFriends(
+            session.access_token,
+            session.user.id,
+          );
+        },
+        saveData,
       );
-
-      if (!response.ok)
-        throw new Error(
-          response.message || "Errore nella ricerca dei partecipanti",
-        );
-
-      const result = await response.json();
-      setFriendsData(result);
-      setCurrentFriendsData(result);
     } catch (error) {
       setError({ message: error.message });
     } finally {
@@ -69,6 +74,10 @@ const AddParticipantsGroup = ({
   }, [query]);
   const [localParticipants, setLocalParticipants] =
     useState(currentParticipants);
+
+  if (loading?.add_participants) {
+    return <RenderLoadingState type={"add_participants"} />;
+  }
   return (
     <div className="flex flex-col gap-3">
       <div className="w-full  p-2 border-b border-bg-3 items-center flex flex-row justify-between">

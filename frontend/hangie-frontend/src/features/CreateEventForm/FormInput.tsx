@@ -5,12 +5,14 @@ import React from "react";
 const FormInput = ({ id, label, type, placeholder, register, error }) => {
   return (
     <div className="flex flex-col gap-1.5 2xl:gap-1 w-full group">
-      <label
-        htmlFor={id}
-        className={`font-body text-text-1 text-sm 2xl:text-base font-medium`}
-      >
-        {label} <span className="text-red-500 text-sm">*</span>
-      </label>
+      {label !== "" && (
+        <label
+          htmlFor={id}
+          className={`font-body text-text-1 text-sm 2xl:text-base font-medium`}
+        >
+          {label} <span className="text-red-500 text-sm">*</span>
+        </label>
+      )}
       <div className="flex flex-col gap-0.5">
         <div
           className={`flex items-center

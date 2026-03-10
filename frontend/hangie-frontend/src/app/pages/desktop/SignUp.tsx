@@ -8,6 +8,8 @@ import { z } from "zod";
 
 import { supabase } from "../../../config/db.js";
 import { useAuth } from "../../../contexts/AuthContext.js";
+import { ApiCalls } from "@/services/api.js";
+import { useApi } from "@/contexts/ApiContext.js";
 
 const steps = [
   {
@@ -21,7 +23,7 @@ const steps = [
 ];
 const SignUp = () => {
   const { signUpNewUser, session } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { executeApiCall } = useApi();
   const schema = z.object({
     // Definizione dei campi
     nomeCompleto: z.string().min(1, "Il nome completo è obbligatorio"),
@@ -71,7 +73,6 @@ const SignUp = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    ("inviato");
     const finalData = data;
 
     const { data: datiUsername, error: erroreUsername } = await supabase
@@ -87,13 +88,10 @@ const SignUp = () => {
       setError("root", { message: "L'username è già in uso." });
       return;
     }
-    setIsLoading(true);
     try {
       const { email, password } = finalData;
       const { authData, authError } = await signUpNewUser({ email, password });
-      (email, password);
       if (authError) {
-        authError;
         setError("root", {
           message: `Utente già registrato`,
         });
@@ -107,26 +105,10 @@ const SignUp = () => {
         return;
       }
 
-      fetch("http://localhost:3000/api/auth/register", {
-        body: JSON.stringify(finalData),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authData.session.access_token}`,
-        },
-        method: "POST",
-      })
-        .then((res) => res.json())
-        .then((dati) => {
-          if (!dati.success) {
-            setError("root", { message: dati.error.message });
-          } else {
-            navigate("/");
-          }
-        });
+      await ApiCalls.signUp(authData.session.access_token, finalData);
+      navigate("/");
     } catch (error) {
       setError("root", { message: error });
-    } finally {
-      setIsLoading(false);
     }
   };
 

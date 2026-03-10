@@ -57,7 +57,6 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleGetFriends: async (token: string, userId: string) => {
-    ("get friends fetch");
     const res = await fetch(`${BASE_URL}/friends/${userId}`, {
       method: "GET",
 
@@ -81,7 +80,6 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleGetProfile: async (handle: string) => {
-    ("ottengo profile");
     const res = await fetch(`${BASE_URL}/profile/${handle}`, {
       method: "GET",
       headers: {
@@ -238,6 +236,38 @@ export const ApiCalls = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dataToSend),
+    });
+    return await handleResponse(res);
+  },
+  signUp: async (token: string, dataToSend) => {
+    const res = await fetch(`${BASE_URL}/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dataToSend),
+    });
+    return await handleResponse(res);
+  },
+  getPfp: async (token: string, user_id) => {
+    const res = await fetch(`${BASE_URL}/profile/getpfp/${user_id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await handleResponse(res);
+  },
+  createGroup: async (token: string, dataToSend) => {
+    const res = await fetch(`${BASE_URL}/groups/add/newGroup`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(dataToSend),

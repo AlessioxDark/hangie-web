@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 
 import { useAuth } from "@/contexts/AuthContext.js";
+import { useProfile } from "@/contexts/ProfileContext";
+import { useApi } from "@/contexts/ApiContext";
+import { ApiCalls } from "@/services/api";
 const defaultPfp = () => {
   return (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,41 +28,30 @@ const defaultPfp = () => {
 const ProfileIcon = ({ user_id }) => {
   const [userPfp, setUserPfp] = useState("");
   const { session } = useAuth();
+  const { executeApiCall } = useApi();
   const findProfilePic = async () => {
-    try {
-      if (user_id != undefined) {
-        const response = await fetch(
-          `http://localhost:3000/api/profile/getpfp/${user_id}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          },
-        );
-
-        if (!response.ok) {
-          setUserPfp(defaultPfp);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.data[0].profile_pic == null) {
-          setUserPfp(defaultPfp);
-        } else {
-          setUserPfp(
-            <img
-              src={data.data[0].profile_pic}
-              className="w-full h-full rounded-full"
-              alt="profile pic"
-            />,
-          );
-        }
+    const saveData = (data) => {
+      if (data.profile_pic == null) {
+        setUserPfp(defaultPfp);
       } else {
-        // navigate('/login');
+        setUserPfp(
+          <img
+            src={data.profile_pic}
+            className="w-full h-full rounded-full"
+            alt="profile pic"
+          />,
+        );
       }
-    } catch (err) {
+    };
+    if (user_id !== undefined) {
+      executeApiCall(
+        "home",
+        () => {
+          return ApiCalls.getPfp(session.access_token, user_id);
+        },
+        saveData,
+      );
+    } else {
       setUserPfp(defaultPfp);
     }
   };

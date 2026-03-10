@@ -13,6 +13,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "../../config/db.js";
 import { useSocket } from "@/contexts/SocketContext.js";
 import { useMobileLayout } from "@/contexts/MobileLayoutChatContext.js";
+import { useApi } from "@/contexts/ApiContext.js";
+import { ApiCalls } from "@/services/api.js";
 const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 const GroupSchema = z.object({
   nome: z
@@ -41,6 +43,7 @@ const CreateGroupForm = () => {
   const [isParticipantsAdd, setIsParticipantsAdd] = useState(false);
   const [currentParticipants, setCurrentParticipants] = useState([]);
   const { session } = useAuth();
+  const { executeApiCall, error, loading } = useApi();
   const { setMobileView } = useMobileLayout();
   const { currentSocket } = useSocket();
   const fileInputRef = useRef(null);
@@ -90,57 +93,104 @@ const CreateGroupForm = () => {
       setParticipantsError(null);
     }
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/groups/add/newGroup",
-        {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
+      const saveData = async (data) => {
+        let finalImgUrl = null;
+        console.log(data);
+        const groupId = data.group_id;
+        if (groupImage) {
+          const fileName = `${groupId}/cover.${groupImage.ext}`;
+          const filePath = `${fileName}`;
+          const { data: uploadData, error: uploadError } =
+            await supabase.storage
+              .from("group_cover_pics")
+              .upload(filePath, groupImage.file, {
+                upsert: true,
+                contentType: groupImage.type,
+                cacheControl: "3600",
+              });
+          if (uploadError) throw new Error(uploadError);
+          const { data: urlData } = supabase.storage
+            .from("group_cover_pics")
+            .getPublicUrl(uploadData.path);
+
+          const { data: coverData, error: coverError } = await supabase
+            .from("gruppi")
+            .update({ group_cover_img: urlData.publicUrl })
+            .eq("group_id", groupId);
+          if (coverError) throw new Error(coverError);
+          finalImgUrl = urlData.publicUrl;
+        }
+        currentSocket.emit(
+          "add_new_group",
+          groupId,
+          data.groupData,
+
+          finalImgUrl,
+          session.user.id,
+        );
+        setMobileView("");
+      };
+
+      executeApiCall(
+        "new_group",
+        () => {
+          return ApiCalls.createGroup(session.access_token, {
             ...data,
             participants: currentParticipants,
-          }),
-        },
-      );
-      const result = await response.json();
-      let finalImgUrl = null;
-      if (!response.ok)
-        throw new Error(result.error || "Errore creazione evento");
-      ("Wquesto è il result", result);
-      const groupId = result.data.group_id;
-      if (groupImage) {
-        const fileName = `${groupId}/cover.${groupImage.ext}`;
-        const filePath = `${fileName}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("group_cover_pics")
-          .upload(filePath, groupImage.file, {
-            upsert: true,
-            contentType: groupImage.type,
-            cacheControl: "3600",
           });
-        if (uploadError) throw new Error(uploadError);
-        const { data: urlData } = supabase.storage
-          .from("group_cover_pics")
-          .getPublicUrl(uploadData.path);
-
-        const { data: coverData, error: coverError } = await supabase
-          .from("gruppi")
-          .update({ group_cover_img: urlData.publicUrl })
-          .eq("group_id", groupId);
-        if (coverError) throw new Error(coverError);
-        finalImgUrl = urlData.publicUrl;
-      }
-      currentSocket.emit(
-        "add_new_group",
-        groupId,
-        result.data.groupData,
-
-        finalImgUrl,
-        session.user.id,
+        },
+        saveData,
       );
-      setMobileView("");
+      // const response = await fetch(
+      //   "http://localhost:3000/api/groups/add/newGroup",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-type": "application/json",
+      //       Authorization: `Bearer ${session.access_token}`,
+      //     },
+      //     body: JSON.stringify({
+      //       ...data,
+      //       participants: currentParticipants,
+      //     }),
+      //   },
+      // );
+      // const result = await response.json();
+      // let finalImgUrl = null;
+      // if (!response.ok)
+      //   throw new Error(result.error || "Errore creazione evento");
+      // const groupId = result.data.group_id;
+      // if (groupImage) {
+      //   const fileName = `${groupId}/cover.${groupImage.ext}`;
+      //   const filePath = `${fileName}`;
+      //   const { data: uploadData, error: uploadError } = await supabase.storage
+      //     .from("group_cover_pics")
+      //     .upload(filePath, groupImage.file, {
+      //       upsert: true,
+      //       contentType: groupImage.type,
+      //       cacheControl: "3600",
+      //     });
+      //   if (uploadError) throw new Error(uploadError);
+      //   const { data: urlData } = supabase.storage
+      //     .from("group_cover_pics")
+      //     .getPublicUrl(uploadData.path);
+
+      //   const { data: coverData, error: coverError } = await supabase
+      //     .from("gruppi")
+      //     .update({ group_cover_img: urlData.publicUrl })
+      //     .eq("group_id", groupId);
+      //   if (coverError) throw new Error(coverError);
+      //   finalImgUrl = urlData.publicUrl;
+      // }
+      // currentSocket.emit(
+      //   "add_new_group",
+      //   groupId,
+      //   result.data.groupData,
+
+      //   finalImgUrl,
+      //   session.user.id,
+      // );
+      // setMobileView("");
     } catch (error) {
       setError("root", { message: `errore: ${error}` });
     }

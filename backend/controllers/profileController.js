@@ -8,7 +8,7 @@ const getPfp = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Operazione completata con successo",
-      data: data,
+      data,
     });
   } catch (err) {
     res.status(500).json({
@@ -30,7 +30,7 @@ const getData = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Non siamo riusciti a trovare la pfp",
+      message: "Non siamo riusciti a trovare i dati del profilo",
       details: err.message,
     });
   }
@@ -48,7 +48,7 @@ const deleteGuest = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Non siamo riusciti a trovare la pfp",
+      message: "Non siamo riusciti chiudere la sessione",
       details: err.message,
     });
   }
@@ -65,7 +65,7 @@ const addGuest = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Non siamo riusciti a trovare la pfp",
+      message: "Non siamo creare la sessione",
       details: err.message,
     });
   }

@@ -33,6 +33,7 @@ export const ApiContextProvider = ({ children }) => {
     vote_event: false,
     friends: false,
     profile: false,
+    new_group: false,
   });
   const [error, setError] = useState({
     chat: null,
@@ -51,6 +52,7 @@ export const ApiContextProvider = ({ children }) => {
     vote_event: null,
     friends: null,
     profile: null,
+    new_group: null,
   });
 
   const executeApiCall = useCallback(
@@ -66,12 +68,12 @@ export const ApiContextProvider = ({ children }) => {
         | "delete_event"
         | "vote_event"
         | "friends"
-        | "profile",
+        | "profile"
+        | "new_group",
       fetchCall,
       onSuccess,
     ) => {
       // if (loading[type]) return;
-      ("eseguo type", type);
       try {
         setError((prev) => ({ ...prev, [type]: null }));
         setLoading((prev) => {

@@ -12,6 +12,7 @@ import { ApiCalls } from "@/services/api.js";
 import { useProfile } from "@/contexts/ProfileContext.js";
 import { useFriends } from "@/contexts/FriendsContext.js";
 import { useChat } from "@/contexts/ChatContext.js";
+import FormInput from "@/features/CreateEventForm/FormInput.js";
 
 const Login = () => {
   const { LoginUser, handleGuestSignIn } = useAuth();
@@ -67,6 +68,7 @@ const Login = () => {
         setError("root", { message: "Credenziali non corrette" });
         return;
       }
+      console.log("finito", authData);
       setProfileData({ is_guest: false });
 
       navigate("/");
@@ -105,44 +107,60 @@ const Login = () => {
               </h2>
               <div className="flex flex-col gap-2 2xl:gap-4 w-full">
                 <div>
-                  <input
-                    type="text"
-                    className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
-                    placeholder="Email o Username"
-                    {...register("user_email")}
+                  <FormInput
+                    error={errors.user_email}
+                    id={"user_email"}
+                    label={""}
+                    placeholder={"Inserisci email"}
+                    register={register}
+                    type={"email"}
                   />
-                  {errors.user_email && (
-                    <span className="px-1.5 text-sm font-semibold font-body text-error ">
-                      {errors.user_email.message}
-                    </span>
-                  )}
                 </div>
 
-                <div className="flex flex-col ">
-                  <div className="relative flex items-center">
-                    <input
-                      type={isPasswordVisible ? "text" : "password"}
-                      className="w-full p-3 rounded-lg border border-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-primary transition-colors shadow-sm hover:shadow-md"
-                      placeholder="Password"
-                      {...register("password")}
-                    />
-                    <span
-                      className="absolute right-3"
-                      onClick={() =>
-                        setIsPasswordVisible((lastVisible) => !lastVisible)
-                      }
-                    >
-                      {isPasswordVisible ? <Eye /> : <EyeOff />}
-                    </span>
+                <div>
+                  <div className="relative flex items-center justify-end">
+                    <div className="w-full flex flex-col gap-1">
+                      <div
+                        className={`w-full flex items-center
+                             bg-bg-2 rounded-xl
+                             transition-all duration-200
+                             ${
+                               errors?.password
+                                 ? "border-red-500 border-2"
+                                 : "focus-within:border-primary focus-within:ring-2 focus-within:ring-primary border-gray-200 ring-2 ring-gray-200"
+                             }
+                             shadow-inner-sm p-0.5`}
+                      >
+                        <input
+                          id={"password"}
+                          type={isPasswordVisible ? "text" : "password"}
+                          placeholder={"Password"}
+                          className={`w-full font-body text-sm 2xl:text-base 2xl:py-3 py-2.5
+               rounded-r-xl outline-none appearance-none bg-transparent
+               text-text-1 placeholder-text-3 2xl:px-3 px-2.5
+                                 
+                                 `}
+                          // Uso corretto della funzione register
+                          {...register("password")}
+                        />
+                        <span
+                          className="absolute right-3"
+                          onClick={() =>
+                            setIsPasswordVisible((lastVisible) => !lastVisible)
+                          }
+                        >
+                          {isPasswordVisible ? <Eye /> : <EyeOff />}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   {errors.password && (
-                    <span className="mt-1 px-1.5 text-sm font-semibold font-body text-error ">
+                    <span className="px-1.5 text-sm  font-body text-red-500  ">
                       {errors.password.message}
                     </span>
                   )}
                 </div>
-
                 <div className="px-1.5">
                   <div className="w-full flex items-center  gap-2">
                     <input

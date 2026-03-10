@@ -27,13 +27,14 @@ export const ProfileProvider = ({ children }) => {
 
   const getDefaulHandle = async () => {
     if (!session?.access_token || !session?.user?.id) return;
+    console.log("sess", session.user.id);
+    // await new Promise((resolve) => setTimeout(resolve, 200));
     try {
-      console.log("sess", session.user.id);
       const { data, error } = await supabase
         .from("utenti")
         .select("handle")
         .eq("user_id", session.user.id)
-        .maybeSingle();
+        .single();
       console.log("ricevuto", data);
       if (error) {
         console.warn("Handle non ancora trovato, riprovo...");
@@ -42,20 +43,32 @@ export const ProfileProvider = ({ children }) => {
       return data.handle;
     } catch (err) {
       console.log("err", err);
-      // return err;
+      return "non c'è data";
     }
   };
   useEffect(() => {
-    if (session && !isAuthLoading) {
+    console.log("avviato in profile", session, isAuthLoading, defaultHandle);
+    if (session && !isAuthLoading && !defaultHandle) {
+      console.log("session c'è");
+      console.log("eccola", session);
       executeApiCall(
         "profile",
         () => {
           return getDefaulHandle();
         },
-        (data) => setDefaultHandle(data),
+        (data) => {
+          console.log("ris", data);
+          if (data) {
+            setDefaultHandle(data);
+          } else {
+            console.log(
+              "DB non ancora pronto, mantengo lo stato attuale o riproverò al refresh",
+            );
+          }
+        },
       );
     }
-  }, [session, isAuthLoading]);
+  }, [session, isAuthLoading, defaultHandle]);
 
   const getProfileData = useCallback(async (userHandle) => {
     const saveData = (data) => {
