@@ -15,7 +15,6 @@ const EventDetailsModal = () => {
   const [error, setError] = useState(false);
   const [eventData, setEventData] = useState([]);
   const [currentPage, setCurrentPage] = useState("");
-  ("aprire event modal desktop");
   const fetchEvent = async () => {
     if (isLoading) return;
     try {
@@ -24,7 +23,6 @@ const EventDetailsModal = () => {
         `http://localhost:3000/api/events/${eventId}`,
         {
           method: "GET",
-          // body: JSON.stringify({ offset: offset }),
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
@@ -36,7 +34,7 @@ const EventDetailsModal = () => {
         setError(response.statusText || "Errore nel caricamento degli eventi");
       }
       const data = await response.json();
-      data;
+
       setEventData(data);
     } catch (err: any) {
       console.error("Errore fetch eventi:", err);

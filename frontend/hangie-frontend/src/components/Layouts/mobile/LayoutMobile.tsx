@@ -3,7 +3,7 @@ import { useLocation } from "react-router";
 const LayoutMobile = ({ children }) => {
   const location = useLocation();
   return (
-    <div className="h-screen w-full flex flex-col justify-between ">
+    <div className="h-screen w-full flex flex-col justify-between min-h-screen max-h-screen overflow-hidden ">
       {location.pathname == "/" ? (
         <div className="">
           <div className="w-full flex items-center flex-row  sticky bg-bg-1 z-30 top-0">
@@ -24,8 +24,11 @@ const LayoutMobile = ({ children }) => {
           <div className={`${"p-4 pt-2.5 pb-20"}`}>{children}</div>
         </div>
       ) : (
-        <div className={`${"p-4 pt-2.5 pb-20"}`}>{children}</div>
+        <div className={`${"p-4 pt-2.5 pb-20"} overflow-hidden`}>
+          {children}
+        </div>
       )}
+
       <BottomNav />
     </div>
   );

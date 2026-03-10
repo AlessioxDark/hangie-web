@@ -141,56 +141,6 @@ const CreateGroupForm = () => {
         },
         saveData,
       );
-      // const response = await fetch(
-      //   "http://localhost:3000/api/groups/add/newGroup",
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-type": "application/json",
-      //       Authorization: `Bearer ${session.access_token}`,
-      //     },
-      //     body: JSON.stringify({
-      //       ...data,
-      //       participants: currentParticipants,
-      //     }),
-      //   },
-      // );
-      // const result = await response.json();
-      // let finalImgUrl = null;
-      // if (!response.ok)
-      //   throw new Error(result.error || "Errore creazione evento");
-      // const groupId = result.data.group_id;
-      // if (groupImage) {
-      //   const fileName = `${groupId}/cover.${groupImage.ext}`;
-      //   const filePath = `${fileName}`;
-      //   const { data: uploadData, error: uploadError } = await supabase.storage
-      //     .from("group_cover_pics")
-      //     .upload(filePath, groupImage.file, {
-      //       upsert: true,
-      //       contentType: groupImage.type,
-      //       cacheControl: "3600",
-      //     });
-      //   if (uploadError) throw new Error(uploadError);
-      //   const { data: urlData } = supabase.storage
-      //     .from("group_cover_pics")
-      //     .getPublicUrl(uploadData.path);
-
-      //   const { data: coverData, error: coverError } = await supabase
-      //     .from("gruppi")
-      //     .update({ group_cover_img: urlData.publicUrl })
-      //     .eq("group_id", groupId);
-      //   if (coverError) throw new Error(coverError);
-      //   finalImgUrl = urlData.publicUrl;
-      // }
-      // currentSocket.emit(
-      //   "add_new_group",
-      //   groupId,
-      //   result.data.groupData,
-
-      //   finalImgUrl,
-      //   session.user.id,
-      // );
-      // setMobileView("");
     } catch (error) {
       setError("root", { message: `errore: ${error}` });
     }

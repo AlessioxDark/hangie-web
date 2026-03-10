@@ -29,23 +29,21 @@ const ChatsSidebar = () => {
     }
   };
   return (
-    <div className="h-screen bg-bg-1 xl:w-5/12 2xl:w-1/4">
-      <div className="flex flex-col xl:gap-0 2xl:gap-12">
-        <div className="p-4 flex flex-row justify-between items-center xl:p-6 2xl:p-14">
-          <h1 className="font-body font-bold text-text-1 text-2xl xl:text-3xl 2xl:text-5xl">
-            Messaggi
-          </h1>
-          <div
-            className="bg-primary rounded-full p-2 flex items-center justify-center "
-            onClick={() => {
-              setMobileView("CREATE_GROUP");
-            }}
-          >
-            <Plus className="text-bg-1" />
-          </div>
+    <div className="xl:gap-0 2xl:gap-12 xl:w-5/12 2xl:w-1/4  h-screen bg-bg-1  flex flex-col overflow-hidden">
+      <div className="p-4 flex flex-row justify-between items-center xl:p-6 2xl:p-14">
+        <h1 className="font-body font-bold text-text-1 text-2xl xl:text-3xl 2xl:text-5xl">
+          Messaggi
+        </h1>
+        <div
+          className="bg-primary rounded-full p-2 flex items-center justify-center "
+          onClick={() => {
+            setMobileView("CREATE_GROUP");
+          }}
+        >
+          <Plus className="text-bg-1" />
         </div>
-        <div>{renderContent()}</div>
       </div>
+      <div className="flex-1 overflow-y-auto min-h-0"> {renderContent()}</div>
     </div>
   );
 };

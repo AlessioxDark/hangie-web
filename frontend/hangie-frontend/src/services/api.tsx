@@ -1,15 +1,10 @@
 const BASE_URL = "http://localhost:3000/api";
 const handleResponse = async (res) => {
-  ("arrivata res", res);
   if (!res.ok) {
-    ("non è ok");
     const errorData = await res.json().catch(() => ({}));
-    ("errore durante api call di:", errorData.message, res.status);
     throw { ...errorData, status: res.status };
   }
-  ("è ok");
   const dataToSend = await res.json();
-  ("invio datatosend", dataToSend);
 
   return dataToSend.data !== undefined ? dataToSend.data : dataToSend;
 };

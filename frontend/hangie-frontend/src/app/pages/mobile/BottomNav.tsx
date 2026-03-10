@@ -50,8 +50,8 @@ const BottomNav = () => {
     // bottom-0 fixed
     <div
       className=" 
-   
-    w-full fixed bottom-0 h-16 border-t border-neutral-300 bg-bg-1 flex flex-row  items-center justify-around"
+   min-h-16 max-h-16
+    w-full  bottom-0 h-16 border-t border-neutral-300 bg-bg-1 flex flex-row  items-center justify-around"
     >
       {sidebarLinks.map((link) => {
         const isActive = isLinkActive(link.link);

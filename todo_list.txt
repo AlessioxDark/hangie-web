@@ -1,7 +1,1 @@
-controllare che tutte le funzionalità funzionino FATTO?
-spostare tutte chiamate fetch in un solo punto FATTTO?
-errore scroll gruppi 
-
-creazione guest no dati errore
-
-FORSE RISOLTO?
+FINITO TUTTO!
