@@ -29,7 +29,7 @@ const ChatsSidebar = () => {
     }
   };
   return (
-    <div className="xl:gap-0 2xl:gap-12 xl:w-5/12 2xl:w-1/4  h-screen bg-bg-1  flex flex-col overflow-hidden">
+    <div className="xl:gap-0 2xl:gap-12 xl:w-5/12 2xl:w-1/4  h-screen bg-bg-1  flex flex-col overflow-hidden pb-16">
       <div className="p-4 flex flex-row justify-between items-center xl:p-6 2xl:p-14">
         <h1 className="font-body font-bold text-text-1 text-2xl xl:text-3xl 2xl:text-5xl">
           Messaggi

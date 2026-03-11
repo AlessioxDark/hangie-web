@@ -70,7 +70,7 @@ const LayoutChatMobile = () => {
     return <Outlet />;
   };
   return (
-    <div className="h-screen w-full flex flex-col justify-between ">
+    <div className="h-screen w-full flex flex-col justify-between  ">
       {renderContent()}
     </div>
   );

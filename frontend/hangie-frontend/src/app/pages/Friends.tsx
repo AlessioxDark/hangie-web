@@ -153,7 +153,7 @@ const Friends = () => {
   };
 
   return (
-    <div className="pt-2 pb-20">
+    <div className="pt-2">
       <div className="space-y-4 mb-6">
         <h1 className="font-body text-2xl font-bold">Friends</h1>
         <SearchBar query={query} setQuery={setQuery} />
