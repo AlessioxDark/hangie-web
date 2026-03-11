@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 
-// Rinomina il componente in un hook per riflettere il suo uso (inizia con 'use')
 const useMediaQuery = (query) => {
-  // 1. STATO: Usiamo una funzione per l'inizializzazione lato client
   const [matches, setMatches] = useState(() => {
     if (typeof window !== "undefined") {
       return window.matchMedia(query).matches;
