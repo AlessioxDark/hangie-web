@@ -1,6 +1,7 @@
 # HANGIE
 
 > **Live Demo:** [http://www.hangie.vercel.app](http://www.hangie.vercel.app)
+
 > _Nota: L'applicazione è ottimizzata per la visualizzazione su dispositivi mobile._
 
 ---
