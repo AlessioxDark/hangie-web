@@ -24,38 +24,6 @@ const defaultPfp = (
   </svg>
 );
 const ProfileIcon = ({ user_id, profile_pic }) => {
-  const [userPfp, setUserPfp] = useState("");
-  const { session } = useAuth();
-  const { executeApiCall } = useApi();
-  // const findProfilePic = useCallback(async () => {
-  //   const saveData = (data) => {
-  //     if (data.profile_pic == null) {
-  //       setUserPfp(defaultPfp);
-  //     } else {
-  //       setUserPfp(
-  //         <img
-  //           src={data.profile_pic}
-  //           className="w-full h-full rounded-full"
-  //           alt="profile pic"
-  //         />,
-  //       );
-  //     }
-  //   };
-  //   if (user_id !== undefined) {
-  //     executeApiCall(
-  //       "home",
-  //       () => {
-  //         return ApiCalls.getPfp(session.access_token, user_id);
-  //       },
-  //       saveData,
-  //     );
-  //   } else {
-  //     setUserPfp(defaultPfp);
-  //   }
-  // }, [session, user_id, executeApiCall]);
-  // useEffect(() => {
-  //   findProfilePic();
-  // }, []);
   return (
     <div
       className="rounded-full w-full cursor-pointer"

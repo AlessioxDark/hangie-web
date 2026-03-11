@@ -2,6 +2,7 @@ import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useChat } from "@/contexts/ChatContext";
 import { useNotification } from "@/contexts/NotificationContext";
 import type { GroupData, Message, Participant, UUID } from "@/types/chat";
+import { useMemo } from "react";
 import { useNavigate } from "react-router";
 interface GroupCardInterface {
   nome: string;
@@ -25,12 +26,21 @@ const GroupCard = ({
   updated_at,
   fullGroup,
 }: GroupCardInterface) => {
-  const { setCurrentGroup, setCurrentGroupData, currentGroup } = useChat();
+  const {
+    setCurrentGroup,
+    setCurrentGroupData,
+    currentGroupData,
+    currentGroup,
+  } = useChat();
   const { currentNotifications } = useNotification();
   const navigate = useNavigate();
-  const displayImage = group_cover_img
-    ? `${group_cover_img}?v=${updated_at || Date.now()}`
-    : null;
+  const displayImage = useMemo(() => {
+    // Usa il timestamp dell'ultimo aggiornamento o una stringa fissa
+    // Se updated_at non c'è, non mettere Date.now(), metti una stringa vuota o nulla
+    const version = updated_at ? new Date(updated_at).getTime() : "1";
+
+    return `${group_cover_img}?v=${version}`;
+  }, [group_cover_img, updated_at]);
 
   const formatTime = (dateString: Date | string) => {
     const date = new Date(dateString);

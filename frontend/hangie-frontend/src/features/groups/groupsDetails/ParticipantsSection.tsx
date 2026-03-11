@@ -57,6 +57,7 @@ const ParticipantsSection = ({
       saveData,
     );
   };
+  console.log(currentParticipants);
   return (
     <section className="flex flex-col gap-2.5">
       <div className="w-full flex flex-row justify-between">

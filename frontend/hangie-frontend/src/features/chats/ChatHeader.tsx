@@ -3,17 +3,23 @@ import ChevronLeft from "@/assets/icons/ChevronLeft";
 import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useChat } from "@/contexts/ChatContext";
 import { useScreen } from "@/contexts/ScreenContext";
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router";
 
 const ChatHeader = () => {
   const { currentScreen } = useScreen();
   const { currentGroupData, setCurrentGroup } = useChat();
-  const displayImage = currentGroupData?.group_cover_img
-    ? `${currentGroupData?.group_cover_img}?v=${
-        currentGroupData?.updated_at || Date.now()
-      }`
-    : null;
+  const displayImage = useMemo(() => {
+    if (!currentGroupData?.group_cover_img) return null;
+
+    // Usa il timestamp dell'ultimo aggiornamento o una stringa fissa
+    // Se updated_at non c'è, non mettere Date.now(), metti una stringa vuota o nulla
+    const version = currentGroupData?.updated_at
+      ? new Date(currentGroupData.updated_at).getTime()
+      : "1";
+
+    return `${currentGroupData.group_cover_img}?v=${version}`;
+  }, [currentGroupData?.group_cover_img, currentGroupData?.updated_at]);
 
   const navigate = useNavigate();
   return (
@@ -21,7 +27,7 @@ const ChatHeader = () => {
       <div className="flex flex-row gap-1 items-center flex-1">
         {currentScreen == "xs" && (
           <div
-            className="w-7 h-7"
+            className="w-7 h-7 flex-shrink-0 flex items-center justify-center"
             onClick={() => {
               setCurrentGroup(null);
               navigate(-1);

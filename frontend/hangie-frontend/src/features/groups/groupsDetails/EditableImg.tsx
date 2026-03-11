@@ -2,7 +2,7 @@ import DefaultGroupIcon from "@/assets/icons/DefaultGroupIcon";
 import { useChat } from "@/contexts/ChatContext";
 import { useSocket } from "@/contexts/SocketContext";
 import { Edit2, X } from "lucide-react";
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { supabase } from "../../../config/db.js";
 const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 
@@ -20,11 +20,17 @@ const EditableImg = ({
   const { setGroupsData, currentGroupData, setCurrentGroupData, currentGroup } =
     useChat();
   const fileInputRef = useRef(null);
-  const displayImage = localGroupData?.group_cover_img
-    ? `${localGroupData.group_cover_img}?v=${
-        currentGroupData.updated_at || Date.now()
-      }`
-    : null;
+  const displayImage = useMemo(() => {
+    if (!localGroupData?.group_cover_img) return null;
+
+    // Usa il timestamp dell'ultimo aggiornamento o una stringa fissa
+    // Se updated_at non c'è, non mettere Date.now(), metti una stringa vuota o nulla
+    const version = currentGroupData?.updated_at
+      ? new Date(currentGroupData.updated_at).getTime()
+      : "1";
+
+    return `${localGroupData.group_cover_img}?v=${version}`;
+  }, [localGroupData?.group_cover_img, currentGroupData?.updated_at]);
   const { currentSocket } = useSocket();
 
   const handleFileChange = async (event) => {

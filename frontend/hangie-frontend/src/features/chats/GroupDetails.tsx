@@ -32,7 +32,6 @@ const GroupDetails = () => {
   }, [currentGroupData, session.user.id]);
 
   const { currentSocket } = useSocket();
-  currentGroupData;
   const [localGroupData, setLocalGroupData] = useState({
     group_cover_img: currentGroupData?.group_cover_img,
     descrizione: currentGroupData?.descrizione,
@@ -48,6 +47,7 @@ const GroupDetails = () => {
           nome: utenti.nome,
           handle: utenti.handle,
           user_id: utenti.user_id,
+          profile_pic: utenti.profile_pic || null,
         };
       }) || []
     );
@@ -108,6 +108,7 @@ const GroupDetails = () => {
             nome: utenti.nome,
             handle: utenti.handle,
             user_id: utenti.user_id,
+            profile_pic: utenti.profile_pic || null,
           };
         }) || [],
       );
@@ -246,7 +247,6 @@ const GroupDetails = () => {
               {currentScreen === "xs" && (
                 <button
                   onClick={() => {
-                    ("lista aggiornata", currentGroupData);
                     navigate(-1);
                   }}
                   className="w-7 h-7"
