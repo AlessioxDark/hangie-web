@@ -47,7 +47,7 @@ const PartecipanteCard = ({ utenti, created_at, status, is_creator }) => {
     >
       <div className="flex flex-row gap-2 2xl:gap-4 items-center">
         <div className="w-12 h-12 2xl:w-16 2xl:h-16">
-          <ProfileIcon user_id={utenti.user_id} />
+          <ProfileIcon profile_pic={utenti.profile_pic} />
         </div>
         <div className="flex flex-col ">
           <div className="flex flex-row gap-3 items-center">

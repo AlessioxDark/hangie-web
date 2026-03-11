@@ -18,7 +18,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useScreen } from "@/contexts/ScreenContext";
 import { useSocket } from "@/contexts/SocketContext";
-const MessageEvent = ({ event_details, group_id }) => {
+const MessageEvent = ({ event_details, group_id, utenti }) => {
   const { openModal } = useModal();
   const { session } = useAuth();
   const location = useLocation();
@@ -167,7 +167,8 @@ const MessageEvent = ({ event_details, group_id }) => {
               <div className="flex justify-between items-center pt-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 2xl:w-12 2xl:h-12 flex-shrink-0">
-                    <ProfileIcon user_id={event_details.utente?.user_id} />
+                    <ProfileIcon profile_pic={utenti.profile_pic} />
+                    {/* <ProfileIcon user_id={event_details.utente?.user_id} /> */}
                   </div>
                   <span className="font-medium text-xs 2xl:text-sm text-text-2 font-body truncate">
                     Creato da:

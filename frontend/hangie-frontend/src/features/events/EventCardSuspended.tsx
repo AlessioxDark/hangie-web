@@ -245,7 +245,9 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
                           className="2xl:w-7 2xl:h-7 w-5 h-5"
                           key={partecipante.user_id}
                         >
-                          <ProfileIcon user_id={partecipante.user_id} />
+                          <ProfileIcon
+                            profile_pic={partecipante.utenti.profile_pic}
+                          />
                         </div>
                       </div>
                     );
@@ -268,7 +270,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
           <div className="pb-1 pt-3 2xl:pb-2 2xl:pt-4  ">
             <div className="flex items-center gap-3">
               <div className="2xl:w-12 2xl:h-12 w-8 h-8 flex-shrink-0">
-                <ProfileIcon user_id={utente.user_id} />
+                <ProfileIcon profile_pic={utente.profile_pic} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm 2xl:text-base font-semibold text-text-2 truncate">

@@ -59,7 +59,7 @@ const getAll = async (req) => {
       supabase
         .from("risposte_eventi")
         .select(
-          "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(group_id,nome,group_cover_img,group_id,partecipanti_gruppo(partecipante_id)))",
+          "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome,profile_pic),luoghi(*),gruppi(group_id,nome,group_cover_img,group_id,partecipanti_gruppo(partecipante_id)))",
         )
         .range(offset, offset + EVENTSINPAGE - 1)
         .eq("user_id", user.id)
@@ -67,7 +67,7 @@ const getAll = async (req) => {
       supabase
         .from("risposte_eventi")
         .select(
-          "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome),luoghi(*),gruppi(group_id,nome,group_cover_img,partecipanti_gruppo(partecipante_id)))",
+          "event_id,status,eventi(event_id,costo,created_at,created_by,data,titolo,descrizione,data_scadenza,cover_img,event_imgs(*),utenti(user_id,nome,profile_pic),luoghi(*),gruppi(group_id,nome,group_cover_img,partecipanti_gruppo(partecipante_id)))",
         )
         .limit(3)
         .eq("user_id", user.id)
@@ -205,7 +205,7 @@ const getEvent = async (req) => {
                       data_scadenza,
                       cover_img,
                       event_imgs(*),
-                      utenti(user_id,nome),
+                      utenti(user_id,nome,profile_pic),
                       luoghi(*),
                       gruppi(group_id,nome,group_cover_img,partecipanti_gruppo(partecipante_id)))`,
       )

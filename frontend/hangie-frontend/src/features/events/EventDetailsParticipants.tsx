@@ -19,34 +19,34 @@ const EventDetailsParticipants = () => {
   const renderFilteredAnswers = useCallback(() => {
     if (currentFilter == "") {
       {
-        setCurrentRisposte([
-          ...currentEventData.risposte_evento?.accepted,
-          ...currentEventData.risposte_evento?.rejected,
-          ...currentEventData.risposte_evento?.pending,
-        ]);
+        setCurrentRisposte(currentEventData?.risposte_evento);
       }
     }
     if (query !== "") {
       const queryRegex = new RegExp(query, "i");
-      const allRisposte = [
-        ...currentEventData.risposte_evento?.accepted,
-        ...currentEventData.risposte_evento?.rejected,
-        ...currentEventData.risposte_evento?.pending,
-      ];
-      const nuoveRisposte = allRisposte.filter((risposta) => {
-        return risposta.utenti.nome.match(queryRegex);
-      });
+
+      const nuoveRisposte = currentEventData?.risposte_evento.filter(
+        (risposta) => {
+          return risposta.utenti.nome.match(queryRegex);
+        },
+      );
 
       setCurrentRisposte(nuoveRisposte);
     }
     if (currentFilter == "Confermati") {
-      setCurrentRisposte(currentEventData.risposte_evento?.accepted);
+      setCurrentRisposte(
+        currentEventData.risposte_evento?.filter((r) => r.status == "accepted"),
+      );
     }
     if (currentFilter == "In attesa") {
-      setCurrentRisposte(currentEventData.risposte_evento?.pending);
+      setCurrentRisposte(
+        currentEventData.risposte_evento?.filter((r) => r.status == "pending"),
+      );
     }
     if (currentFilter == "Rifiutati") {
-      setCurrentRisposte(currentEventData.risposte_evento?.rejected);
+      setCurrentRisposte(
+        currentEventData.risposte_evento?.filter((r) => r.status == "rejected"),
+      );
     }
   }, [currentFilter, query]);
   useEffect(() => {

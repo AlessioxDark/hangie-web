@@ -97,7 +97,7 @@ const EventDetailsMobile = () => {
     utente,
     created_by,
   } = currentEventData || {};
-  const acceptedParticipants = risposte_evento.filter(
+  const acceptedParticipants = risposte_evento?.filter(
     (r) => r.status == "accepted",
   );
   const allImgs = [cover_img, ...event_imgs?.map((e) => e.img_url)];
@@ -368,7 +368,7 @@ const EventDetailsMobile = () => {
                   <div className="flex -space-x-2">
                     {acceptedParticipants.slice(0, 3).map((p) => (
                       <div className="w-8 h-8">
-                        <ProfileIcon user_id={p.utenti.user_id} />
+                        <ProfileIcon profile_pic={p.utenti.profile_pic} />
                       </div>
                     ))}
                   </div>
@@ -388,7 +388,7 @@ const EventDetailsMobile = () => {
 
               <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-2xl">
                 <div className="w-10 h-10">
-                  <ProfileIcon user_id={utente.user_id} />
+                  <ProfileIcon profile_pic={utente.profile_pic} />
                 </div>
 
                 <div>

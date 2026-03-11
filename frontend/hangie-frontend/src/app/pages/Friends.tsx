@@ -1,4 +1,3 @@
-import ProfileIcon from "@/components/ProfileIcon";
 import SearchBar from "@/components/SearchBar";
 import { useApi } from "@/contexts/ApiContext";
 import { useAuth } from "@/contexts/AuthContext";

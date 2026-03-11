@@ -150,8 +150,11 @@ const ProfileEventCard = ({ event }) => {
                               key={partecipante.user_id}
                             >
                               <ProfileIcon
-                                user_id={partecipante.utenti.user_id}
+                                profile_pic={partecipante.utenti.user_id}
                               />
+                              {/* <ProfileIcon
+                                user_id={partecipante.utenti.user_id}
+                              /> */}
                             </div>
                           );
                         })}

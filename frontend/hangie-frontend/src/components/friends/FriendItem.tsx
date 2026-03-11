@@ -89,7 +89,8 @@ const FriendItem = ({ friend, setFetchData, type }) => {
     >
       <div className="flex flex-row items-center gap-3">
         <div className="w-12 h-12 flex-shrink-0">
-          <ProfileIcon user_id={friend.user_id} />
+          <ProfileIcon profile_pic={friend.profile_pic} />
+          {/* <ProfileIcon user_id={friend.user_id} /> */}
         </div>
         <div className="flex flex-col min-w-0">
           <h1 className="text-text-1 font-body font-bold truncate text-sm">

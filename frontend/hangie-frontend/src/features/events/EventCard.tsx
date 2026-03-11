@@ -128,7 +128,7 @@ const EventCard = ({ event }) => {
                               key={partecipante.user_id}
                             >
                               <ProfileIcon
-                                user_id={partecipante.utenti.user_id}
+                                profile_pic={partecipante.utenti.profile_pic}
                               />
                             </div>
                           );
@@ -161,7 +161,7 @@ const EventCard = ({ event }) => {
               <div className="w-full h-[0.3px] bg-text-3"></div>
               <div className="flex flex-row items-center gap-3">
                 <div className="2xl:w-15 2xl:h-15 w-10 h-10 flex-shrink-0">
-                  <ProfileIcon user_id={utente.user_id} />
+                  <ProfileIcon profile_pic={utente.profile_pic} />
                 </div>
                 <span className="font-body text-text-2 font-semibold text-base truncate">
                   {utente.nome}

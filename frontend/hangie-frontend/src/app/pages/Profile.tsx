@@ -186,7 +186,7 @@ const Profile = () => {
         >
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-[60px] h-[60px] rounded-2xl overflow-hidden shrink-0">
-              <ProfileIcon user_id={profileData?.user_id} />
+              <ProfileIcon profile_pic={profileData?.profile_pic} />
             </div>
             <div className="min-w-0">
               <h1 className="text-base font-black leading-tight text-text-1 truncate">

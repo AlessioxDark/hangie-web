@@ -10,8 +10,6 @@ const FriendCard = ({
 
   setLocalParticipants,
 }) => {
-  ("local", localParticipants);
-  ("friend", friend);
   const isSelected = useMemo(
     () => localParticipants.some((p) => p.user_id === friend.user_id),
     [localParticipants, friend.user_id],
@@ -39,7 +37,6 @@ const FriendCard = ({
             );
           });
         } else {
-          friend;
           setLocalParticipants((prevParticipants) => [
             friend,
             ...prevParticipants,
@@ -48,7 +45,7 @@ const FriendCard = ({
       }}
     >
       <div className="w-14 h-14 flex items-center justify-center">
-        <ProfileIcon user_id={friend.user_id} />
+        <ProfileIcon profile_pic={friend.profile_pic} />
       </div>
       <div className="flex flex-row justify-between w-full items-center">
         <div className="flex flex-col justify-center min-w-0 gap-1">

@@ -2,8 +2,12 @@ import ProfileIcon from "@/components/ProfileIcon";
 import { X } from "lucide-react";
 import React from "react";
 
-const ParticipantCard = ({ handle, user_id, setCurrentParticipants }) => {
-  handle;
+const ParticipantCard = ({
+  handle,
+  user_id,
+  profile_pic,
+  setCurrentParticipants,
+}) => {
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="w-16 h-16 relative">
@@ -21,7 +25,7 @@ const ParticipantCard = ({ handle, user_id, setCurrentParticipants }) => {
         >
           <X size={9} />
         </div>
-        <ProfileIcon user_id={user_id} />
+        <ProfileIcon profile_pic={profile_pic} />
       </div>
       <span className="font-body text-xs text-text-1 leading-2">{handle}</span>
     </div>

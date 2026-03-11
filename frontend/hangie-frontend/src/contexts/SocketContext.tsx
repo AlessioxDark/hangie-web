@@ -53,6 +53,7 @@ export const SocketProvider = ({ children }) => {
   }, [currentGroupData]);
 
   const SERVER_URL = "https://hangie-web.onrender.com/";
+  // const SERVER_URL = "http://localhost:3000/";
   useEffect(() => {
     if (!session?.user?.id || currentScreen !== "xs") {
       return;
@@ -562,7 +563,8 @@ export const SocketProvider = ({ children }) => {
     socket.on("voted_event", (data) => {
       // notifica
 
-      const { event_id, group_id, status, sender_id, prevStatus } = data;
+      const { event_id, group_id, status, sender_id, prevStatus, profile_pic } =
+        data;
 
       if (sender_id == session.user.id) {
         // bug con i partecipanti dell'evento al cambio per il sender
@@ -601,14 +603,17 @@ export const SocketProvider = ({ children }) => {
 
             const newRisposte = [
               ...newResponses,
-              { status, utenti: { user_id: sender_id } },
+              { status, utenti: { user_id: sender_id, profile_pic } },
             ];
             return { ...prev, risposte_evento: newRisposte };
           });
         }
       }
       if (currentGroup == group_id) {
+        console.log("prev?", groupEventsData);
         setGroupEventsData((prevEvents) => {
+          // console.log("prev?", prevEvents);
+          if (!prevEvents) return null;
           return prevEvents.map((e) => {
             if (e.event_id == event_id) {
               // const newRisposte = {
@@ -624,7 +629,7 @@ export const SocketProvider = ({ children }) => {
 
               const newRisposte = e.risposte_evento.map((r) => {
                 return r.user_id == sender_id
-                  ? { ...r, status, user_id: sender_id }
+                  ? { ...r, status, user_id: sender_id, profile_pic }
                   : r;
               });
 
@@ -632,6 +637,7 @@ export const SocketProvider = ({ children }) => {
                 ...e,
                 risposte_evento: [...newRisposte],
                 status: session.user.id == sender_id ? status : e.status,
+                profile_pic,
               };
             }
             return e;
@@ -658,7 +664,7 @@ export const SocketProvider = ({ children }) => {
           status: session.user.id === sender_id ? status : eventToUpdate.status,
           risposte_evento: eventToUpdate.risposte_evento.map((r) =>
             r.utenti.user_id === session.user.id
-              ? { ...r, status: status } // Aggiorna solo lo stato dell'utente corrente
+              ? { ...r, status: status, profile_pic } // Aggiorna solo lo stato dell'utente corrente
               : r,
           ),
         };
@@ -695,7 +701,7 @@ export const SocketProvider = ({ children }) => {
           if (m.type == "event" && m.event_id == event_id) {
             const newRisposte = m.event_details.risposte_evento.map((r) => {
               return r.utenti?.user_id == sender_id
-                ? { ...r, status, ok: "ok" }
+                ? { ...r, status, profile_pic }
                 : r;
             });
 
@@ -726,7 +732,7 @@ export const SocketProvider = ({ children }) => {
                   ...r,
                   status,
                   user_id: sender_id,
-                  utenti: { user_id: sender_id },
+                  utenti: { user_id: sender_id, profile_pic },
                 }
               : r;
           });

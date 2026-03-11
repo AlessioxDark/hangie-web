@@ -282,7 +282,7 @@ const EventDetails = ({
 
         <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl ring ring-gray-300">
           <div className="w-16 h-16">
-            <ProfileIcon user_id={utenti?.user_id} />
+            <ProfileIcon profile_pic={utenti?.profile_pic} />
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">

@@ -87,7 +87,7 @@ const groupHandlers = (io, socket) => {
       *,
       scadenza:data_scadenza,
       luogo:luoghi(*),
-      utente:utenti(nome, user_id),
+      utente:utenti(nome, user_id,profile_pic),
       gruppo:gruppi(*),
       cover_img,
       created_by,

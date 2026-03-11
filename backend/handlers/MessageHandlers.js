@@ -222,7 +222,11 @@ const messageHandlers = (io, socket) => {
         userId,
         prevStatus,
       });
-
+      const { data: pfpData, error: pfpError } = await supabase
+        .from("utenti")
+        .select("profile_pic")
+        .eq("user_id", userId)
+        .single();
       const { data: participants, error: participantsError } = await supabase
         .from("partecipanti_gruppo")
         .select("*")
@@ -235,6 +239,7 @@ const messageHandlers = (io, socket) => {
           status,
           sender_id: userId,
           prevStatus,
+          profile_pic: pfpData.profile_pic || null,
         });
       });
     },

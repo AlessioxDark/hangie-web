@@ -99,7 +99,6 @@ const AddParticipantsGroup = ({
           className="px-2 py-1 rounded-md font-body text-bg-1 text-sm bg-primary disabled:bg-primary/75"
           disabled={localParticipants.length == 0}
           onClick={() => {
-            localParticipants;
             setCurrentParticipants((prevParticipants) => {
               return [...localParticipants];
             });

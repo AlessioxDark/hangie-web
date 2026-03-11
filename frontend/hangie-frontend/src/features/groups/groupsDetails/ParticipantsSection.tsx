@@ -78,7 +78,7 @@ const ParticipantsSection = ({
                 ("apro profilo di", partecipante.nome);
               }}
             >
-              <ProfileIcon user_id={partecipante.user_id} />
+              <ProfileIcon profile_pic={partecipante.profile_pic} />
             </div>
             <div
               className="flex flex-col min-w-0 flex-1"
