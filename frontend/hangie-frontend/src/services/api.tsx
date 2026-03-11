@@ -1,4 +1,4 @@
-const BASE_URL = "https://hangie-web.onrender.com";
+const BASE_URL = "https://hangie-web.onrender.com/api";
 const handleResponse = async (res) => {
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
