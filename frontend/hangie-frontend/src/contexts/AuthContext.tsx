@@ -22,6 +22,8 @@ export const AuthContextProvider = ({ children }) => {
       email,
       password,
     });
+    localStorage.setItem("to_remember", "true");
+
     if (error) {
       console.error("error during signing up process:", error);
       return { success: false, authError: error };

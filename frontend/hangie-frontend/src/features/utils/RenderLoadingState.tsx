@@ -27,20 +27,24 @@ const RenderLoadingState = ({ type }) => {
       alt: "Stiamo cercando i tuoi eventi",
     },
     add_event: {
-      main: "Creazione evento in corso in corso...",
+      main: "Creazione evento in corso...",
       alt: "Stiamo creando il tuo evento",
     },
     event: {
-      main: "Caricamento evento in corso in corso...",
+      main: "Caricamento evento in corso...",
       alt: "Stiamo cercando il tuo evento",
     },
     friends: {
-      main: "Caricamento amici in corso in corso...",
+      main: "Caricamento amici  in corso...",
       alt: "Stiamo cercando i tuoi amici",
     },
     profile: {
-      main: "Caricamento del profilo in corso in corso...",
+      main: "Caricamento del profilo in corso...",
       alt: "Stiamo cercando il tuo profilo",
+    },
+    auth: {
+      main: "Autenticazione in corso...",
+      alt: "Ci vorra solo un secondo!",
     },
   };
   return (

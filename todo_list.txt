@@ -1,1 +1,5 @@
 FINITO TUTTO! 
+
+ caricare pfp velocemente
+ aggiungere loading a creazione gruppo
+ aggiungere loading ospite

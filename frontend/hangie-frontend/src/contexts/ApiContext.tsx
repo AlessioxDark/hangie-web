@@ -34,6 +34,7 @@ export const ApiContextProvider = ({ children }) => {
     friends: false,
     profile: false,
     new_group: false,
+    auth: false,
   });
   const [error, setError] = useState({
     chat: null,
@@ -53,6 +54,7 @@ export const ApiContextProvider = ({ children }) => {
     friends: null,
     profile: null,
     new_group: null,
+    auth: null,
   });
 
   const executeApiCall = useCallback(
@@ -69,7 +71,8 @@ export const ApiContextProvider = ({ children }) => {
         | "vote_event"
         | "friends"
         | "profile"
-        | "new_group",
+        | "new_group"
+        | "auth",
       fetchCall,
       onSuccess,
     ) => {

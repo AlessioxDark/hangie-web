@@ -13,10 +13,11 @@ import { useProfile } from "@/contexts/ProfileContext.js";
 import { useFriends } from "@/contexts/FriendsContext.js";
 import { useChat } from "@/contexts/ChatContext.js";
 import FormInput from "@/features/CreateEventForm/FormInput.js";
+import RenderLoadingState from "@/features/utils/RenderLoadingState.js";
 
 const Login = () => {
   const { LoginUser, handleGuestSignIn } = useAuth();
-  const { executeApiCall } = useApi();
+  const { executeApiCall, loading } = useApi();
   const { session } = useAuth();
   const { setProfileData, setDefaultHandle } = useProfile();
 
@@ -58,40 +59,57 @@ const Login = () => {
           .single();
         realEmail = emailFound;
       }
+      executeApiCall(
+        "auth",
+        async () => {
+          return await LoginUser(realEmail, password, remember);
+        },
+        (result) => {
+          const { authData, authError } = result;
+          if (authError) {
+            setError("root", { message: "Credenziali non corrette" });
+            return;
+          }
+          console.log("finito", authData);
+          setProfileData({ is_guest: false });
 
-      const { authData, authError } = await LoginUser(
-        realEmail,
-        password,
-        remember,
+          navigate("/");
+        },
       );
-      if (authError) {
-        setError("root", { message: "Credenziali non corrette" });
-        return;
-      }
-      console.log("finito", authData);
-      setProfileData({ is_guest: false });
-
-      navigate("/");
     } catch (error) {
       setError("root", { message: `errore ${error} ` });
     }
   };
-  const onsGuestSignIn: SubmitHandler<FormFields> = async () => {
+  const onGuestSignIn: SubmitHandler<FormFields> = async () => {
     try {
       console.log("provo a anonymous");
-      const { authData, authError } = await handleGuestSignIn();
-      console.log("errore", authError);
-      if (authError) throw authError;
-      setDefaultHandle(authData.guestData.handle);
-      console.log("guestData", authData.guestData);
-      setProfileData(authData.guestData);
-      navigate("/");
+      executeApiCall(
+        "auth",
+        async () => {
+          return await handleGuestSignIn();
+        },
+        (result) => {
+          const { authData, authError } = result;
+          if (authError) setError("root", { message: "Errore nel login" });
+          setDefaultHandle(authData.guestData.handle);
+          setProfileData(authData.guestData);
+          navigate("/");
+        },
+      );
     } catch (error) {
-      setError("root", { message: `errore ${error} ` });
+      setError("root", { message: `errore: ${error} ` });
     }
   };
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  if (loading?.auth) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <RenderLoadingState type={"auth"} />
+      </div>
+    );
+  }
   return (
     <div className=" h-screen w-full 2xl:p-5 flex justify-center items-center flex-col relative bg-bg-2">
       <div className="w-full h-full 2xl:w-3/10 flex flex-col items-center gap-8 rounded-lg shadow-lg bg-white p-8 py-8 pb-8">
@@ -226,7 +244,7 @@ const Login = () => {
 
               <button
                 type="button"
-                onClick={onsGuestSignIn}
+                onClick={onGuestSignIn}
                 className="w-full py-3.5 bg-white border-2 border-slate-100 hover:border-slate-200 text-slate-600 font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 <UserCircle size={18} className="text-slate-400" />

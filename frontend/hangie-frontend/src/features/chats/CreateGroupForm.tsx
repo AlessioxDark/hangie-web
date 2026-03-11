@@ -15,6 +15,7 @@ import { useSocket } from "@/contexts/SocketContext.js";
 import { useMobileLayout } from "@/contexts/MobileLayoutChatContext.js";
 import { useApi } from "@/contexts/ApiContext.js";
 import { ApiCalls } from "@/services/api.js";
+import RenderLoadingState from "../utils/RenderLoadingState.js";
 const ACCEPTED_EXTENSIONS = ["jpg", "png", "jpeg", "webm", "svg"];
 const GroupSchema = z.object({
   nome: z
@@ -150,6 +151,17 @@ const CreateGroupForm = () => {
       setParticipantsError(null);
     }
   }, [currentParticipants]);
+  useEffect(() => {
+    if (error?.new_group) {
+      setError("root", { message: error?.new_group?.message });
+      // return <RenderLoadingState type={"new_group"} />;
+    }
+  }, [error?.new_group]);
+
+  if (loading?.new_group) {
+    return <RenderLoadingState type={"new_group"} />;
+  }
+
   return (
     <div className="flex flex-col gap-2 pb-10">
       {isParticipantsAdd ? (

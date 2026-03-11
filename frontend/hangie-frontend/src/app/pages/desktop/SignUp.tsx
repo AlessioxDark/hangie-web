@@ -10,6 +10,8 @@ import { supabase } from "../../../config/db.js";
 import { useAuth } from "../../../contexts/AuthContext.js";
 import { ApiCalls } from "@/services/api.js";
 import { useApi } from "@/contexts/ApiContext.js";
+import { useProfile } from "@/contexts/ProfileContext.js";
+import RenderLoadingState from "@/features/utils/RenderLoadingState.js";
 
 const steps = [
   {
@@ -23,7 +25,8 @@ const steps = [
 ];
 const SignUp = () => {
   const { signUpNewUser, session } = useAuth();
-  const { executeApiCall } = useApi();
+  const { executeApiCall, loading } = useApi();
+  const { setDefaultHandle } = useProfile();
   const schema = z.object({
     // Definizione dei campi
     nomeCompleto: z.string().min(1, "Il nome completo è obbligatorio"),
@@ -89,29 +92,34 @@ const SignUp = () => {
       return;
     }
     try {
-      const { email, password } = finalData;
-      const { authData, authError } = await signUpNewUser({ email, password });
-      if (authError) {
-        setError("root", {
-          message: `Utente già registrato`,
-        });
-        return;
-      }
-      const { user: utente } = authData;
-      if (!utente) {
-        setError("root", {
-          message: "Registrazione non riuscita, utente non creato",
-        });
-        return;
-      }
+      executeApiCall(
+        "auth",
+        async () => {
+          const { authData, authError } = await signUpNewUser({
+            email: finalData.email,
+            password: finalData.password,
+          });
 
-      await ApiCalls.signUp(authData.session.access_token, finalData);
-      navigate("/");
+          if (authError) throw authError;
+          if (!authData?.session) throw new Error("Errore creazione sessione");
+
+          await ApiCalls.signUp(authData.session.access_token, finalData);
+
+          return authData;
+        },
+        (authData) => {
+          setDefaultHandle(finalData.username);
+          console.log("Registrazione completata con successo");
+          navigate("/");
+        },
+      );
     } catch (error) {
       setError("root", { message: error });
     }
   };
-
+  useEffect(() => {
+    if (errors?.auth) setError("root", { message: `${errors?.auth}` });
+  }, [errors?.auth]);
   const handleStepChange = () => {
     switch (currentStep) {
       case 0:
@@ -158,7 +166,13 @@ const SignUp = () => {
       next();
     }
   };
-
+  if (loading?.auth) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <RenderLoadingState type={"auth"} />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen w-full 2xl:p-5 flex justify-center items-center flex-col relative bg-white">
       <div className="w-full h-max 2xl:w-3/10 flex flex-col items-center gap-8 bg-white p-8 pt-4 2xl:pt-8">

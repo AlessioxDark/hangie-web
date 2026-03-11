@@ -34,7 +34,7 @@ const RegisterStep2 = () => {
             </label>
             <div
               className={`w-full flex items-center
-		                         bg-bg-1 rounded-xl
+		                         bg-bg-2 rounded-xl
 		                         transition-all duration-200
 		                         ${
                                errors?.password
@@ -68,7 +68,7 @@ const RegisterStep2 = () => {
         </div>
 
         {errors.password && (
-          <span className="px-1.5 text-sm  font-body text-red-500  ">
+          <span className="px-1.5 text-sm font-semibold font-body text-error  ">
             {errors.password.message}
           </span>
         )}
@@ -84,7 +84,7 @@ const RegisterStep2 = () => {
           <div className="relative flex items-center justify-end">
             <div
               className={`w-full flex items-center
-		                         bg-bg-1 rounded-xl
+		                         bg-bg-2 rounded-xl
 		                         transition-all duration-200
 		                         ${
                                errors?.password
@@ -118,7 +118,7 @@ const RegisterStep2 = () => {
         </div>
 
         {errors.confermaPassword && (
-          <span className="px-1.5 text-sm font-body text-red-500 ">
+          <span className="px-1.5 text-sm font-semibold font-body text-error  ">
             {errors.confermaPassword.message}
           </span>
         )}
@@ -137,7 +137,7 @@ const RegisterStep2 = () => {
         </div>
 
         {errors.root && (
-          <span className="px-1.5 text-sm font-body text-red-500 ">
+          <span className="px-1.5 text-sm font-semibold font-body text-error  ">
             {errors.root.message}
           </span>
         )}
