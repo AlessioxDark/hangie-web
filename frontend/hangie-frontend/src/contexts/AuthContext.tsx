@@ -79,7 +79,7 @@ export const AuthContextProvider = ({ children }) => {
       guestData = {
         user_id: authData.user.id,
         handle: `guest_${Math.floor(Math.random() * 10000)}`,
-        nome: `Ospite ${Math.random() * 1000}`,
+        nome: `Ospite ${(Math.random() * 1000).toFixed(4)}`,
         email: authData.user.id + "@guest.com",
         is_guest: true,
       };

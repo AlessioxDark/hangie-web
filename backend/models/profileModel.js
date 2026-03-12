@@ -459,6 +459,15 @@ const addGuest = async (req) => {
       .select("event_id, created_by, group_id");
 
     if (eventsError) throw eventsError;
+    const { error: groupEventsError } = await supabase
+      .from("eventi_gruppo")
+      .insert(
+        eventData.map((e) => {
+          return { event_id: e.event_id, group_id: e.group_id };
+        }),
+      );
+
+    if (groupEventsError) throw groupEventsError;
 
     const risposte_eventi = eventData.flatMap((e) => {
       return [...initialFriends, guestData.user_id].map((uId) => ({

@@ -59,10 +59,8 @@ const sendRequest = async (req) => {
       const { data: FriendData, error: friendError } = await supabase
         .from("amicizie")
         .delete()
-        .match({
-          sender_id: user_id,
-          status: "pending", // Sicurezza extra: cancella solo se è ancora pendente
-        });
+        .or(`and(user_id.eq.${user_id},amico_id.eq.${friend_id}),and(user_id.eq.${friend_id},amico_id.eq.${user_id})`)
+        .eq("status", "pending");
       if (friendError) throw friendError;
     } else if (status === "accepted") {
       // 3. ACCETTA RICHIESTA

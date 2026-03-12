@@ -150,14 +150,19 @@ const getEvents = async (req) => {
       .eq("group_id", group_id);
     if (eventsError) throw eventsError;
     ("trovando eventi_gruppo");
-    const eventIds = eventsData.map((e) => e.event_id);
+    const eventIds = eventsData.map((e) => e.eventi.event_id);
+    console.log("event", eventIds);
 
     const { data: risposte, error: risposteError } = await supabase
       .from("risposte_eventi")
-      .select("user_id,is_creator,status,eventi(*,gruppi(*))")
+      .select(
+        "user_id,is_creator,status,eventi!inner( event_id, gruppi!inner(group_id))",
+      )
       .in("eventi.event_id", eventIds)
       .eq("eventi.gruppi.group_id", group_id);
     if (risposteError) throw risposteError;
+    console.log("risp", risposte);
+
     const newRisposte = risposte.reduce((acc, event) => {
       if (!acc[event.eventi.event_id]) acc[event.eventi.event_id] = [];
       acc[event.eventi.event_id].push({
@@ -176,18 +181,17 @@ const getEvents = async (req) => {
     } = await supabase.auth.getUser(token);
     if (tokenError) throw tokenError;
     const newData = eventsData.map((e) => {
-      ("risp", newRisposte, e.event_id);
-      const eventStatus = newRisposte[e.event_id].find(
+      const eventStatus = newRisposte[e.eventi.event_id].find(
         (r) => r.user_id == user.id,
       );
       ("questo è e", e);
       return {
         ...e,
-        partecipanti: newRisposte[e.event_id],
+        partecipanti: newRisposte[e.eventi.event_id],
         status: eventStatus.status,
       };
     });
-    ("ecco il newData", newData);
+    console.log("ecco il newData", newData);
     ("ecco il newRispsote", newRisposte);
     // ottenere partecipanti confermati per tutti, seguire esempio event
     return { data: newData, error: null };
