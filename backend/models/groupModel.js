@@ -1,15 +1,7 @@
 const supabase = require("../config/db");
 const getAll = async (req) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
     const { data, error } = await supabase
       .from("partecipanti_gruppo")
       .select(
@@ -34,16 +26,10 @@ const getAll = async (req) => {
 };
 const getGroup = async (req) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError || !user) {
+    const user = req.user;
+    if (!user) {
       throw {
-        error: tokenError || { message: "Utente non autenticato." },
+        message: "Utente non autenticato.",
       };
     }
     const { group_id } = req.params;
@@ -172,14 +158,7 @@ const getEvents = async (req) => {
       });
       return acc;
     }, {});
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
     const newData = eventsData.map((e) => {
       const eventStatus = newRisposte[e.eventi.event_id].find(
         (r) => r.user_id == user.id,
@@ -217,18 +196,7 @@ const getEvent = async (req) => {
 const newGroup = async (req) => {
   try {
     const body = req.body;
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Auth Header" };
-    const token = authHeader.split(" ")[1];
-
-    const { participants, ...newBody } = body;
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
-
-    if (userError) throw userError;
+    const user = req.user;
     ("ci siamo?");
     const { data: groupData, error: groupError } = await supabase
       .from("gruppi")
@@ -294,15 +262,7 @@ const modify = async (req) => {
 const leave = async (req) => {
   try {
     const { group_id } = req.params;
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Auth Header" };
-    const token = authHeader.split(" ")[1];
-    ("ecco il group id", group_id);
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
-    if (userError) throw userError;
+    const user = req.user;
     const { data, error } = await supabase
       .from("partecipanti_gruppo")
       .delete()
@@ -356,7 +316,7 @@ const leave = async (req) => {
 
       if (messageError) throw messageError;
       ("arrivo ai messaggi");
-      const messageEvents = messages.filter((m) => m.type == "filter");
+      const messageEvents = messages.filter((m) => m.type == "event");
       const messageIds = messages.map((m) => m.message_id);
       if (messages && messages.length > 0) {
         // 2. Elimina gli stati per quei messaggi

@@ -75,7 +75,9 @@ const messageHandlers = (io, socket) => {
       });
       const { data: notificationData, error: errorNotification } =
         await supabase.from("notifiche").insert(notificationInsert);
-    } catch (err) {}
+    } catch (err) {
+      console.error("Error in send_message handler:", err);
+    }
   });
   socket.on("message_sent", async (message_id, user_id, group_id) => {
     try {
@@ -110,7 +112,9 @@ const messageHandlers = (io, socket) => {
           });
         });
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error("Error in message_sent handler:", err);
+    }
   });
 
   socket.on("message_read_bulk", async (message_ids, user_id, group_id) => {
@@ -168,7 +172,9 @@ const messageHandlers = (io, socket) => {
           });
         });
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error("Error in message_read_bulk handler:", err);
+    }
   });
   socket.on(
     "send_event",

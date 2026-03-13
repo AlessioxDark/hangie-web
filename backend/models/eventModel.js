@@ -43,14 +43,7 @@ const getAll = async (req) => {
   try {
     const EVENTSINPAGE = 12;
     const { offset } = req.body;
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw new Error({ message: "Token mancante" });
-    const token = authHeader.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
 
     const [
       { data: acceptedEvents, error: acceptedEventsError },
@@ -87,10 +80,8 @@ const getAll = async (req) => {
       .eq("status", "accepted")
       .in("eventi.event_id", eventIds)
       .in("eventi.gruppi.group_id", groupIds);
-    // risolvere bug ricerca eventi su incognito
     if (risposteError) throw risposteError;
 
-    //
 
     const { data: eventParticipants, error: eventParticipantsError } =
       await supabase
@@ -183,14 +174,7 @@ const deleteEvent = async (req) => {
 const getEvent = async (req) => {
   try {
     const { event_id } = req.params;
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Token mancante" };
-    const token = authHeader.split(" ")[1];
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
-    if (userError) throw userError;
+    const user = req.user;
     const { data: eventData, error: eventError } = await supabase
       .from("risposte_eventi")
       .select(
@@ -290,15 +274,9 @@ const getOrCreateLuogo = async (realBody) => {
 };
 const newEvent = async (req) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "manca header auth" };
-    const token = authHeader.split(" ")[1];
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser(token);
-    if (authError) throw authError;
+    const user = req.user;
 
+    if (!req.body || !req.body.data) throw { message: "Dati evento mancanti o malformati" };
     const { images, ...realBody } = req.body.data;
     const group_id = realBody.group_id;
     const luogoId = await getOrCreateLuogo(realBody);
@@ -404,14 +382,7 @@ const modifyResponse = async (req) => {
   try {
     const { event_id } = req.params;
     const { status, prevStatus } = req.body;
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "manca header auth" };
-    const token = authHeader.split(" ")[1];
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
-    if (userError) throw userError;
+    const user = req.user;
     const { data: answerData, error: answerError } = await supabase
       .from("risposte_eventi")
       .update({ status })
@@ -426,16 +397,7 @@ const modifyResponse = async (req) => {
 const getSuspended = async (req) => {
   try {
     const { offset } = req.body;
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "manca header auth" };
-    const token = authHeader.split(" ")[1];
-    const EVENTSINPAGE = 12;
-
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
     const { data: eventsList, error: eventsListError } = await supabase
       .from("risposte_eventi")
       .select(

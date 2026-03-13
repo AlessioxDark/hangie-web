@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const groupController = require("../controllers/groupController");
+const authMiddleware = require("../middlewares/auth");
+
+router.use(authMiddleware.authMiddleware);
+
 // Definisci la route per ottenere tutti gli eventi
 router.get("/", groupController.getAllGroups);
 router.get("/:group_id", groupController.getSpecificGroup);

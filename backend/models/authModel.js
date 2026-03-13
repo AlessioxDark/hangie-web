@@ -1,17 +1,8 @@
 const supabase = require("../config/db");
 
-const createUser = async (req, token) => {
+const createUser = async (req) => {
   const { email, nomeCompleto, username } = req.body;
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser(token);
-  if (userError) {
-    ("errore ottenere utente da token", token);
-    return { user, error: userError };
-  }
-  ("token", token);
+  const user = req.user;
 
   const { error: profileError } = await supabase
     .from("utenti")

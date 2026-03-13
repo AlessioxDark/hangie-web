@@ -130,14 +130,7 @@ const getByQuery = async (req) => {
     ("ottenendo by query");
     const { query } = req.params;
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
     const { data: FriendsData, error: FriendsError } = await supabase
       .from("amicizie")
       .select(`user_id, amico_id`)
@@ -172,17 +165,9 @@ const getByQuery = async (req) => {
 };
 const deleteFriend = async (req) => {
   try {
-    ("ottenendo by query");
     const { friend_id } = req.body;
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
     const { data: FriendsData, error: FriendsError } = await supabase
       .from("amicizie")
       .delete()

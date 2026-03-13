@@ -168,7 +168,6 @@ const MessageEvent = ({ event_details, group_id, utenti }) => {
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 2xl:w-12 2xl:h-12 flex-shrink-0">
                     <ProfileIcon profile_pic={utenti.profile_pic} />
-                    {/* <ProfileIcon user_id={event_details.utente?.user_id} /> */}
                   </div>
                   <span className="font-medium text-xs 2xl:text-sm text-text-2 font-body truncate">
                     Creato da:
