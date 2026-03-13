@@ -238,7 +238,7 @@ const Profile = () => {
       </div>
 
       {/* ── EVENTI ── */}
-      <div className="px-4 pt-4 space-y-3 ">
+      <div className="px-4 pt-4 space-y-3 flex flex-col">
         {filtered.length === 0 ? (
           <EmptyState tab={activeTab} />
         ) : (

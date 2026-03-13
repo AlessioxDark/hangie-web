@@ -3,6 +3,9 @@ const supabase = require('../config/db');
 const getNearby = async (req) => {
 	// const { user_id } = req.params;
 
+	if (!req.body || !req.body.user_pos) {
+		return { data: null, error: "Posizione utente non fornita" };
+	}
 	const { user_pos } = req.body;
 	const lat_var = 0.135;
 	const lon_var = 0.182;

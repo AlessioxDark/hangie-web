@@ -123,17 +123,34 @@ const Friends = () => {
     if (query !== "") {
       const queryRegex = new RegExp(query, "i");
 
-      const nuoviFriends = friendsData.filter((friend) => {
-        return friend.handle.match(queryRegex);
+      // Cerca nei tuoi amici e richieste locali
+      const localFriendsMatches = (friendsData || []).filter((friend) =>
+        friend.handle?.toLowerCase().match(queryRegex) ||
+        friend.nome?.toLowerCase().match(queryRegex)
+      );
+
+      // Cerca negli utenti globali
+      const globalMatches = (globalFriendships || []).filter((friend) =>
+        friend.handle?.toLowerCase().match(queryRegex) ||
+        friend.nome?.toLowerCase().match(queryRegex)
+      );
+
+      // Unisci e rimuovi eventuali duplicati
+      const allFriendsMap = new Map();
+      localFriendsMatches.forEach((f) => allFriendsMap.set(f.user_id, f));
+      globalMatches.forEach((f) => {
+        if (!allFriendsMap.has(f.user_id)) {
+          allFriendsMap.set(f.user_id, f);
+        }
       });
-      const allFriends = [...nuoviFriends, ...globalFriendships];
+      const allFriends = Array.from(allFriendsMap.values());
       return (
         <div className="border-2 border-[#E2E8F0] rounded-lg transition-all duration-500 ease-in-out overflow-hidden">
           {allFriends.length > 0 ? (
             allFriends.map((friend) => {
               return (
                 <FriendItem
-                  key={friend.user_id}
+                  key={`${friend.user_id}-${friend.status}`}
                   friend={friend}
                   setFetchData={setFriendsData}
                 />

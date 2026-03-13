@@ -50,21 +50,16 @@ const getAllEvents = async (req, res) => {
 };
 const getMyEvents = async (req, res) => {
   try {
-    const { finalData, error } = await Event.getEvents();
+    const { data, error } = await Event.getAll(req);
 
     if (error) {
-      console.error("Errore nel modello Event.getEvents():", error);
+      console.error("Errore nel modello Event.getAll():", error);
       return res.status(500).json({ error: error.message });
     }
 
-    // Assicurati che finalData non sia undefined o null
-    const responseData = finalData || [];
-    ("Dati da inviare:", responseData);
-
-    // Invia la risposta JSON con i dati, o un array vuoto se i dati non sono stati trovati
-    res.json({ data: responseData });
+    const responseData = data || [];
+    res.json({ success: true, data: responseData });
   } catch (err) {
-    // Gestisce qualsiasi altro errore inaspettato
     console.error("Errore inaspettato nel controller:", err.message);
     res.status(500).json({ error: "Errore interno del server" });
   }

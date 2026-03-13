@@ -9,6 +9,7 @@ import DollarIcon from "@/assets/icons/DollarIcon";
 import MapIcon from "@/assets/icons/MapIcon";
 import { useSocket } from "@/contexts/SocketContext";
 import { useAuth } from "@/contexts/AuthContext";
+import GroupIcon from "@/components/GroupIcon";
 
 const ProfileEventCard = ({ event }) => {
   const {
@@ -92,9 +93,7 @@ const ProfileEventCard = ({ event }) => {
           <div className="absolute top-3 left-3 max-w-[70%]">
             <div className="px-3 py-1.5 2xl:py-2 bg-text-1/80 backdrop-blur-md rounded-xl shadow-lg">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6">
-                  <img src={gruppo.group_cover_img} alt="" />
-                </div>
+                <GroupIcon group_cover_img={gruppo.group_cover_img} className="w-6 h-6" />
 
                 <span className="text-sm font-bold text-bg-1 truncate">
                   {gruppo.nome}
@@ -150,11 +149,8 @@ const ProfileEventCard = ({ event }) => {
                               key={partecipante.user_id}
                             >
                               <ProfileIcon
-                                profile_pic={partecipante.utenti.user_id}
+                                profile_pic={partecipante.utenti.profile_pic}
                               />
-                              {/* <ProfileIcon
-                                user_id={partecipante.utenti.user_id}
-                              /> */}
                             </div>
                           );
                         })}
@@ -186,7 +182,7 @@ const ProfileEventCard = ({ event }) => {
               <div className="w-full h-[0.3px] bg-text-3"></div>
               <div className="flex flex-row items-center gap-3">
                 <div className="2xl:w-15 2xl:h-15 w-10 h-10 flex-shrink-0">
-                  <ProfileIcon user_id={utente.user_id} />
+                  <ProfileIcon profile_pic={utente.profile_pic} />
                 </div>
                 <span className="font-body text-text-2 font-semibold text-base truncate">
                   {utente.nome}

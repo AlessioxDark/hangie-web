@@ -165,7 +165,7 @@ const groupHandlers = (io, socket) => {
           });
         });
       } catch (err) {
-        ("c'è un err", err);
+        console.error("Errore add_participants:", err);
       }
     },
   );
@@ -187,7 +187,7 @@ const groupHandlers = (io, socket) => {
         });
       });
     } catch (err) {
-      ("c'è un err", err);
+      console.error("Errore in GroupHandlers:", err);
     }
   });
   socket.on("admin_participant", async (groupId, participant) => {
@@ -206,7 +206,7 @@ const groupHandlers = (io, socket) => {
         });
       });
     } catch (err) {
-      ("c'è un err", err);
+      console.error("Errore in GroupHandlers:", err);
     }
   });
   socket.on("add_new_group", async (groupId, groupData, imgUrl, creatorId) => {
@@ -267,7 +267,7 @@ const groupHandlers = (io, socket) => {
         });
       });
     } catch (err) {
-      ("c'è err", err);
+      console.error("Errore add_new_group:", err);
     }
   });
   socket.on("leave_group", async (groupId, userId) => {
@@ -292,7 +292,7 @@ const groupHandlers = (io, socket) => {
         io.to(userId).emit("left_group", groupId, userId);
       }
     } catch (err) {
-      ("c'è un err", err);
+      console.error("Errore in GroupHandlers:", err);
     }
   });
   socket.on("remove_participant", async (groupId, participant) => {
@@ -326,7 +326,7 @@ const groupHandlers = (io, socket) => {
         });
       }
     } catch (err) {
-      ("c'è un err", err);
+      console.error("Errore in GroupHandlers:", err);
     }
   });
 };

@@ -60,7 +60,7 @@ const messageHandlers = (io, socket) => {
           sender: sender,
         });
         if (p.user_id !== user.id) {
-          io.to(user.user_id).emit("new_notification", {
+          io.to(user.id).emit("new_notification", {
             type: "new_message",
             sender: sender,
             receiver: p,
@@ -75,7 +75,9 @@ const messageHandlers = (io, socket) => {
       });
       const { data: notificationData, error: errorNotification } =
         await supabase.from("notifiche").insert(notificationInsert);
-    } catch (err) {}
+    } catch (err) {
+      console.error("Error in send_message handler:", err);
+    }
   });
   socket.on("message_sent", async (message_id, user_id, group_id) => {
     try {
@@ -110,7 +112,9 @@ const messageHandlers = (io, socket) => {
           });
         });
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error("Error in message_sent handler:", err);
+    }
   });
 
   socket.on("message_read_bulk", async (message_ids, user_id, group_id) => {
@@ -168,80 +172,101 @@ const messageHandlers = (io, socket) => {
           });
         });
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error("Error in message_read_bulk handler:", err);
+    }
   });
   socket.on(
     "send_event",
     async (eventId, group_id, eventDetails, messageDetails) => {
-      const { data: participants, error: participantsError } = await supabase
-        .from("partecipanti_gruppo")
-        .select("*")
-        .eq("group_id", group_id);
-      if (participantsError) throw participantsError;
+      try {
+        const { data: participants, error: participantsError } = await supabase
+          .from("partecipanti_gruppo")
+          .select("*")
+          .eq("group_id", group_id);
+        if (participantsError) throw participantsError;
+        if (!participants) throw { message: "Partecipanti non trovati" };
 
-      const risposte_evento = participants.map((p) => {
-        return {
-          status:
-            eventDetails.created_by == p.partecipante_id
-              ? "accepted"
-              : "pending",
-          utenti: { user_id: p.partecipante_id },
-        };
-      });
-
-      participants.forEach((p) => {
-        io.to(p.partecipante_id).emit("sent_event", {
-          eventi: { ...eventDetails, event_id: eventId, risposte_evento },
-          messageDetails,
-          group_id,
+        const risposte_evento = participants.map((p) => {
+          return {
+            status:
+              eventDetails.created_by == p.partecipante_id
+                ? "accepted"
+                : "pending",
+            utenti: { user_id: p.partecipante_id },
+          };
         });
-      });
+
+        participants.forEach((p) => {
+          io.to(p.partecipante_id).emit("sent_event", {
+            eventi: { ...eventDetails, event_id: eventId, risposte_evento },
+            messageDetails,
+            group_id,
+          });
+        });
+      } catch (err) {
+        console.error("Errore in send_event:", err);
+      }
     },
   );
   socket.on("delete_event", async (eventId, groupId) => {
-    const { data: participants, error: participantsError } = await supabase
-      .from("partecipanti_gruppo")
-      .select("*")
-      .eq("group_id", groupId);
+    try {
+      const { data: participants, error: participantsError } = await supabase
+        .from("partecipanti_gruppo")
+        .select("*")
+        .eq("group_id", groupId);
+      if (participantsError) throw participantsError;
+      if (!participants) throw { message: "Partecipanti non trovati" };
 
-    participants.forEach((p) => {
-      io.to(p.partecipante_id).emit("deleted_event", {
-        event_id: eventId,
-        group_id: groupId,
+      participants.forEach((p) => {
+        io.to(p.partecipante_id).emit("deleted_event", {
+          event_id: eventId,
+          group_id: groupId,
+        });
       });
-    });
+    } catch (err) {
+      console.error("Errore in delete_event:", err);
+    }
   });
 
   socket.on(
     "vote_event",
     async (eventId, groupId, status, userId, prevStatus) => {
-      console.log("eccoli i socketini", {
-        eventId,
-        groupId,
-        status,
-        userId,
-        prevStatus,
-      });
-      const { data: pfpData, error: pfpError } = await supabase
-        .from("utenti")
-        .select("profile_pic")
-        .eq("user_id", userId)
-        .single();
-      const { data: participants, error: participantsError } = await supabase
-        .from("partecipanti_gruppo")
-        .select("*")
-        .eq("group_id", groupId);
-
-      participants.forEach((p) => {
-        io.to(p.partecipante_id).emit("voted_event", {
-          event_id: eventId,
-          group_id: groupId,
+      try {
+        console.log("eccoli i socketini", {
+          eventId,
+          groupId,
           status,
-          sender_id: userId,
+          userId,
           prevStatus,
-          profile_pic: pfpData.profile_pic || null,
         });
-      });
+        const { data: pfpData, error: pfpError } = await supabase
+          .from("utenti")
+          .select("profile_pic")
+          .eq("user_id", userId)
+          .single();
+        if (pfpError) throw pfpError;
+
+        const { data: participants, error: participantsError } = await supabase
+          .from("partecipanti_gruppo")
+          .select("*")
+          .eq("group_id", groupId);
+        if (participantsError) throw participantsError;
+        if (!participants) throw { message: "Partecipanti non trovati" };
+
+        participants.forEach((p) => {
+          io.to(p.partecipante_id).emit("voted_event", {
+            event_id: eventId,
+            group_id: groupId,
+            status,
+            sender_id: userId,
+            prevStatus,
+            profile_pic: pfpData?.profile_pic || null,
+          });
+        });
+      } catch (err) {
+        console.error("Errore in vote_event:", err);
+      }
     },
   );
 };

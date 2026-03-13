@@ -1,15 +1,7 @@
 const supabase = require("../config/db");
 const getAll = async (req) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
     const { data, error } = await supabase
       .from("partecipanti_gruppo")
       .select(
@@ -34,16 +26,10 @@ const getAll = async (req) => {
 };
 const getGroup = async (req) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError || !user) {
+    const user = req.user;
+    if (!user) {
       throw {
-        error: tokenError || { message: "Utente non autenticato." },
+        message: "Utente non autenticato.",
       };
     }
     const { group_id } = req.params;
@@ -150,14 +136,19 @@ const getEvents = async (req) => {
       .eq("group_id", group_id);
     if (eventsError) throw eventsError;
     ("trovando eventi_gruppo");
-    const eventIds = eventsData.map((e) => e.event_id);
+    const eventIds = eventsData.map((e) => e.eventi.event_id);
+    console.log("event", eventIds);
 
     const { data: risposte, error: risposteError } = await supabase
       .from("risposte_eventi")
-      .select("user_id,is_creator,status,eventi(*,gruppi(*))")
+      .select(
+        "user_id,is_creator,status,eventi!inner( event_id, gruppi!inner(group_id))",
+      )
       .in("eventi.event_id", eventIds)
       .eq("eventi.gruppi.group_id", group_id);
     if (risposteError) throw risposteError;
+    console.log("risp", risposte);
+
     const newRisposte = risposte.reduce((acc, event) => {
       if (!acc[event.eventi.event_id]) acc[event.eventi.event_id] = [];
       acc[event.eventi.event_id].push({
@@ -167,27 +158,19 @@ const getEvents = async (req) => {
       });
       return acc;
     }, {});
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
     const newData = eventsData.map((e) => {
-      ("risp", newRisposte, e.event_id);
-      const eventStatus = newRisposte[e.event_id].find(
+      const eventStatus = newRisposte[e.eventi.event_id].find(
         (r) => r.user_id == user.id,
       );
       ("questo è e", e);
       return {
         ...e,
-        partecipanti: newRisposte[e.event_id],
+        partecipanti: newRisposte[e.eventi.event_id],
         status: eventStatus.status,
       };
     });
-    ("ecco il newData", newData);
+    console.log("ecco il newData", newData);
     ("ecco il newRispsote", newRisposte);
     // ottenere partecipanti confermati per tutti, seguire esempio event
     return { data: newData, error: null };
@@ -213,18 +196,7 @@ const getEvent = async (req) => {
 const newGroup = async (req) => {
   try {
     const body = req.body;
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Auth Header" };
-    const token = authHeader.split(" ")[1];
-
-    const { participants, ...newBody } = body;
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
-
-    if (userError) throw userError;
+    const user = req.user;
     ("ci siamo?");
     const { data: groupData, error: groupError } = await supabase
       .from("gruppi")
@@ -290,15 +262,7 @@ const modify = async (req) => {
 const leave = async (req) => {
   try {
     const { group_id } = req.params;
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Auth Header" };
-    const token = authHeader.split(" ")[1];
-    ("ecco il group id", group_id);
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
-    if (userError) throw userError;
+    const user = req.user;
     const { data, error } = await supabase
       .from("partecipanti_gruppo")
       .delete()
@@ -352,7 +316,7 @@ const leave = async (req) => {
 
       if (messageError) throw messageError;
       ("arrivo ai messaggi");
-      const messageEvents = messages.filter((m) => m.type == "filter");
+      const messageEvents = messages.filter((m) => m.type == "event");
       const messageIds = messages.map((m) => m.message_id);
       if (messages && messages.length > 0) {
         // 2. Elimina gli stati per quei messaggi

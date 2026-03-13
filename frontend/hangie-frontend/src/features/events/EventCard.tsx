@@ -6,6 +6,7 @@ import { useModal } from "@/contexts/ModalContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import { Link, useLocation } from "react-router";
 import { useChat } from "@/contexts/ChatContext";
+import GroupIcon from "@/components/GroupIcon";
 
 const EventCard = ({ event }) => {
   const {
@@ -59,20 +60,21 @@ const EventCard = ({ event }) => {
           }
         }}
       >
-        <img
-          src={cover_img}
-          className="w-full rounded-t-xl h-56 object-cover flex-shrink-0"
-          alt="Immagine cover evento"
-          loading="lazy"
-        />
-
+        {cover_img == null ? (
+          <DefaultGroupIcon />
+        ) : (
+          <img
+            src={cover_img}
+            className="w-full rounded-t-xl h-56 object-cover flex-shrink-0"
+            alt="Immagine cover evento"
+            loading="lazy"
+          />
+        )}
         {gruppo && (
           <div className="absolute top-3 left-3 max-w-[70%]">
             <div className="px-3 py-1.5 2xl:py-2 bg-text-1/80 backdrop-blur-md rounded-xl shadow-lg">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6">
-                  <img src={gruppo.group_cover_img} alt="" />
-                </div>
+                <GroupIcon group_cover_img={gruppo.group_cover_img} className="w-6 h-6" />
 
                 <span className="text-sm font-bold text-bg-1 truncate">
                   {gruppo.nome}

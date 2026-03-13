@@ -292,14 +292,7 @@ const getData = async (req) => {
 };
 const deleteGuest = async (req) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw new Error({ message: "Token mancante" });
-    const token = authHeader.split(" ")[1];
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
-    if (userError) throw userError;
+    const user = req.user;
     const { data: userEventAnswers, error: userEventAnswersError } =
       await supabase
         .from("risposte_eventi")
@@ -396,14 +389,7 @@ const addGuest = async (req) => {
   try {
     const { guestData } = req.body;
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw new Error({ message: "Token mancante" });
-    const token = authHeader.split(" ")[1];
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
-    if (userError) throw userError;
+    const user = req.user;
     const { error: userAddError } = await supabase
       .from("utenti")
       .insert(guestData);
@@ -424,26 +410,29 @@ const addGuest = async (req) => {
 
     const { data: groupData, error: groupsError } = await supabase
       .from("gruppi")
-      .insert(initialGroups)
+      .insert(
+        initialGroups.map((g) => {
+          return g.nome == "Zaino in Spalla"
+            ? { ...g, createdBy: guestData.user_id }
+            : g;
+        }),
+      )
       .select("group_id,createdBy,nome");
     if (groupsError) console.log(groupsError);
     const gIds = groupData.map((g) => g.group_id);
     // setGroupIds(gIds);
-
+    console.log("groupdata", groupData);
     const newParticipantsData = groupData.flatMap((g) => {
-      const participants = initialFriends.map((f) => ({
+      const participants = [...initialFriends, guestData.user_id].map((f) => ({
         group_id: g.group_id,
         partecipante_id: f,
         role: g.createdBy === f ? "admin" : "member",
       }));
-      // Aggiungiamo anche il Guest stesso come membro
-      participants.push({
-        group_id: g.group_id,
-        partecipante_id: guestData.user_id,
-        role: "member",
-      });
+
       return participants;
     });
+    console.log("parts", newParticipantsData);
+
     const { error: participantsError } = await supabase
       .from("partecipanti_gruppo")
       .insert(newParticipantsData);
@@ -459,6 +448,15 @@ const addGuest = async (req) => {
       .select("event_id, created_by, group_id");
 
     if (eventsError) throw eventsError;
+    const { error: groupEventsError } = await supabase
+      .from("eventi_gruppo")
+      .insert(
+        eventData.map((e) => {
+          return { event_id: e.event_id, group_id: e.group_id };
+        }),
+      );
+
+    if (groupEventsError) throw groupEventsError;
 
     const risposte_eventi = eventData.flatMap((e) => {
       return [...initialFriends, guestData.user_id].map((uId) => ({

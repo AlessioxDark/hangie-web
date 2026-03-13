@@ -52,8 +52,8 @@ export const SocketProvider = ({ children }) => {
     currentGroupDataRef.current = currentGroupData;
   }, [currentGroupData]);
 
-  const SERVER_URL = "https://hangie-web.onrender.com/";
-  // const SERVER_URL = "http://localhost:3000/";
+  // const SERVER_URL = "https://hangie-web.onrender.com/";
+  const SERVER_URL = "http://localhost:3000/";
   useEffect(() => {
     if (!session?.user?.id || currentScreen !== "xs") {
       return;
@@ -749,7 +749,21 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("deleted_friend", (data) => {
       // notifica
-
+      console.log("rimuovo amico");
+      if (getFriendsData) {
+        getFriendsData();
+      }
+    });
+    socket.on("accepted_request", (data) => {
+      // notifica
+      console.log("accetto richest");
+      if (getFriendsData) {
+        getFriendsData();
+      }
+    });
+    socket.on("rejected_request", (data) => {
+      // notifica
+      console.log("rimuovo richiest");
       if (getFriendsData) {
         getFriendsData();
       }
@@ -770,6 +784,7 @@ export const SocketProvider = ({ children }) => {
       socket.off("voted_event");
       socket.off("sent_request");
       socket.off("deleted_friend");
+      socket.off("accepted_request");
       socket.disconnect();
     };
   }, [

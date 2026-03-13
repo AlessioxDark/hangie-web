@@ -5,9 +5,9 @@ import { useChat } from "@/contexts/ChatContext";
 import { useModal } from "@/contexts/ModalContext";
 import { useScreen } from "@/contexts/ScreenContext";
 import { useSocket } from "@/contexts/SocketContext";
-import { Clock1 } from "lucide-react"; // Aggiungi questa icona
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import GroupIcon from "@/components/GroupIcon";
 
 interface Gruppo {
   nome: string;
@@ -176,9 +176,7 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
           <div className=" max-w-[90%]">
             <div className="px-3 py-1.5 2xl:py-2 bg-black/60 backdrop-blur-md rounded-xl shadow-lg">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6">
-                  <img src={gruppo.group_cover_img} alt="" />
-                </div>
+                <GroupIcon group_cover_img={gruppo.group_cover_img} className="w-6 h-6" />
 
                 <span className="text-xs 2xl:text-sm font-bold text-bg-1 truncate">
                   {gruppo.nome}

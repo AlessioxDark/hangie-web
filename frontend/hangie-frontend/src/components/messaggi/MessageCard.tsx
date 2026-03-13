@@ -52,7 +52,6 @@ const MessageCard = ({
       {!isUser && (
         <div className="w-10 h-10 2xl:w-14 2xl:h-14 -mt-4   ">
           <ProfileIcon profile_pic={utenti.profile_pic} />
-          {/* <ProfileIcon user_id={user_id} /> */}
         </div>
       )}
       <div

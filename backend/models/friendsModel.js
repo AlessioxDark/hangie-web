@@ -49,7 +49,8 @@ const getPending = async (req) => {
 const sendRequest = async (req) => {
   try {
     ("inviata richiesta con", req.body);
-    const { friend_id, user_id, status } = req.body;
+    const { friend_id, status } = req.body;
+    const user_id = req.user.id;
     if (status == "pending") {
       const { data: FriendData, error: friendError } = await supabase
         .from("amicizie")
@@ -59,10 +60,8 @@ const sendRequest = async (req) => {
       const { data: FriendData, error: friendError } = await supabase
         .from("amicizie")
         .delete()
-        .match({
-          sender_id: user_id,
-          status: "pending", // Sicurezza extra: cancella solo se è ancora pendente
-        });
+        .or(`and(user_id.eq.${user_id},amico_id.eq.${friend_id}),and(user_id.eq.${friend_id},amico_id.eq.${user_id})`)
+        .eq("status", "pending");
       if (friendError) throw friendError;
     } else if (status === "accepted") {
       // 3. ACCETTA RICHIESTA
@@ -132,14 +131,7 @@ const getByQuery = async (req) => {
     ("ottenendo by query");
     const { query } = req.params;
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
     const { data: FriendsData, error: FriendsError } = await supabase
       .from("amicizie")
       .select(`user_id, amico_id`)
@@ -174,17 +166,9 @@ const getByQuery = async (req) => {
 };
 const deleteFriend = async (req) => {
   try {
-    ("ottenendo by query");
     const { friend_id } = req.body;
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader) throw { message: "Manca Header Auth" };
-    const token = req.headers.authorization.split(" ")[1];
-    const {
-      data: { user },
-      error: tokenError,
-    } = await supabase.auth.getUser(token);
-    if (tokenError) throw tokenError;
+    const user = req.user;
     const { data: FriendsData, error: FriendsError } = await supabase
       .from("amicizie")
       .delete()

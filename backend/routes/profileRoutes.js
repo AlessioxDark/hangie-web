@@ -7,8 +7,8 @@ const authMiddleware = require("../middlewares/auth");
 // router.post('/login', authController.Login);
 router.get("/getpfp/:user_id", profileController.getPfp);
 router.get("/:userHandle", profileController.getData);
-router.delete("/guest/removeall", profileController.deleteGuest);
-router.post("/guest/add", profileController.addGuest);
+router.delete("/guest/removeall", authMiddleware.authMiddleware, profileController.deleteGuest);
+router.post("/guest/add", authMiddleware.authMiddleware, profileController.addGuest);
 
 // router.get('/login', authController.Login);
 module.exports = router;
