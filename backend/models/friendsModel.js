@@ -49,7 +49,8 @@ const getPending = async (req) => {
 const sendRequest = async (req) => {
   try {
     ("inviata richiesta con", req.body);
-    const { friend_id, user_id, status } = req.body;
+    const { friend_id, status } = req.body;
+    const user_id = req.user.id;
     if (status == "pending") {
       const { data: FriendData, error: friendError } = await supabase
         .from("amicizie")
