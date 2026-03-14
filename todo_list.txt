@@ -1,3 +1,2 @@
 FINITO TUTTO! 
-creare error per socket?
 

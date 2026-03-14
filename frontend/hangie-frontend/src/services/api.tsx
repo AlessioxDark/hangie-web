@@ -22,7 +22,6 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   AddParticipants: async (token: string, groupId: string, dataToSend) => {
-
     const res = await fetch(`${BASE_URL}/groups/add/participants/${groupId}`, {
       method: "PATCH",
       body: JSON.stringify(dataToSend),
@@ -38,7 +37,6 @@ export const ApiCalls = {
     groupId: string,
     dataToSend,
   ) => {
-
     const res = await fetch(
       `${BASE_URL}/groups/remove/participants/${groupId}`,
       {
@@ -64,7 +62,6 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleDeleteFriend: async (token: string, dataToSend) => {
-
     const res = await fetch(`${BASE_URL}/friends/delete`, {
       method: "DELETE",
       body: JSON.stringify(dataToSend),
@@ -86,7 +83,6 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleGetFriendsByQuery: async (token: string, query: string) => {
-
     const res = await fetch(`${BASE_URL}/friends/query/${query}`, {
       method: "GET",
       headers: {
@@ -97,7 +93,6 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleSendOrDeleteFriendRequest: async (token: string, dataToSend) => {
-
     const res = await fetch(`${BASE_URL}/friends/request`, {
       method: "POST",
       body: JSON.stringify(dataToSend),
@@ -188,7 +183,6 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   voteEvent: async (eventId: string, token: string, body) => {
-
     const res = await fetch(`${BASE_URL}/events/answer/${eventId}`, {
       method: "PATCH",
       body: JSON.stringify(body),

@@ -42,8 +42,6 @@ L'app si chiama Hangie, è una web app che aiuta i suoi utenti ad organizzare ev
 
 L'applicazione è un **MVP (Minimum Viable Product)** funzionante.
 
-- **Bug Noti:** Sono consapevole di alcune piccole imperfezioni di funzionalità che sto rifinendo.
-
 ---
 
 Realizzato con impegno da **Alessio Quaranta** | [Email](alessio40aq@gmail.com)
