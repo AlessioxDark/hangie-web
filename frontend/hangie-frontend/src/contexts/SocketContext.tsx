@@ -740,12 +740,6 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("operation_failed", (data) => {
       switch (data.type) {
-        // case "voted_event":
-        //   setError("chat", data.message);
-        //   break;
-        // case "deleted_event":
-        //   setError("event", data.message);
-        //   break;
         case "all":
           setError("home", data.message);
           break;
