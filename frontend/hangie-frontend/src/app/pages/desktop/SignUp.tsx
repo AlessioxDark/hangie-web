@@ -109,7 +109,6 @@ const SignUp = () => {
         },
         (authData) => {
           setDefaultHandle(finalData.username);
-          console.log("Registrazione completata con successo");
           navigate("/");
         },
       );

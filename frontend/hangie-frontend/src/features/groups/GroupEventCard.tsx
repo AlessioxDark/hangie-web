@@ -25,8 +25,6 @@ const GroupEventCard = ({
   status,
   created_by,
 }) => {
-  ("ris", risposte_evento);
-
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
         day: "numeric",
@@ -141,9 +139,6 @@ const GroupEventCard = ({
   
           
 		 `}
-      // onClick={() => {
-      //   navigate(`/events/${event_id}`);
-      // }}
     >
       <div className="flex flex-row gap-4 2xl:gap-6  py-3 h-full">
         <div className="relative w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-100">
@@ -201,7 +196,6 @@ px-2 py-1 bg-amber-50 text-amber-600  border border-amber-100
                     <button
                       className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 transition-colors flex items-center gap-2"
                       onClick={() => {
-                        ("click");
                         handleDeleteEvent(event_id, sendSocket);
                       }}
                     >

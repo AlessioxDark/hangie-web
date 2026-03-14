@@ -8,9 +8,6 @@ const getCoords = async ({ indirizzo, citta, cap }) => {
     const response = await fetch(nominatimUrl);
 
     if (!response.ok) {
-      console.error(
-        `Errore nella richiesta API: Stato ${response.status} - ${response.statusText}`,
-      );
       throw { data: null, error: "Impossibile effettuare chiamata api" };
     }
 
@@ -72,7 +69,7 @@ const getAll = async (req) => {
     if (eventsList.length == 0) return { data: [], error: null };
     const eventIds = eventsList.map((e) => e?.event_id);
     const groupIds = eventsList.map((e) => e.eventi.gruppi.group_id);
-    const { data: risposte, error: risposteError } = await supabase
+    const { error: risposteError } = await supabase
       .from("risposte_eventi")
       .select(
         "user_id,is_creator,status, eventi!inner(event_id,gruppi(group_id))",
@@ -81,7 +78,6 @@ const getAll = async (req) => {
       .in("eventi.event_id", eventIds)
       .in("eventi.gruppi.group_id", groupIds);
     if (risposteError) throw risposteError;
-
 
     const { data: eventParticipants, error: eventParticipantsError } =
       await supabase
@@ -141,8 +137,6 @@ const deleteEvent = async (req) => {
       .eq("event_id", event_id);
     if (eventError) throw eventError;
 
-    // rimuovi immgaini
-
     const { data: files, error: listError } = await supabase.storage
       .from("eventi")
       .list(`${event_id}`);
@@ -150,16 +144,10 @@ const deleteEvent = async (req) => {
     if (listError) throw listError;
 
     if (!files || files.length === 0) {
-      console.log(
-        "La cartella è già vuota, procedo con l'eliminazione del record.",
-      );
       return { data: { message: "ok" }, error: null };
     }
     const filesToRemove = files.map((x) => `${event_id}/${x.name}`);
 
-    // 2. Crea i percorsi completi (folder/file.jpg)
-
-    // 3. Elimina i file in blocco
     const { error: deleteError } = await supabase.storage
       .from("eventi")
       .remove(filesToRemove);
@@ -228,15 +216,6 @@ const getEvent = async (req) => {
   }
 };
 
-const modify = async (req) => {
-  const { event_id } = req.params;
-  const body = req.body;
-  const { data, error } = await supabase
-    .from("eventi")
-    .update([{ ...body }])
-    .eq("event_id", event_id);
-  return { data, error };
-};
 const getOrCreateLuogo = async (realBody) => {
   const {
     latitudine,
@@ -276,7 +255,8 @@ const newEvent = async (req) => {
   try {
     const user = req.user;
 
-    if (!req.body || !req.body.data) throw { message: "Dati evento mancanti o malformati" };
+    if (!req.body || !req.body.data)
+      throw { message: "Dati evento mancanti o malformati" };
     const { images, ...realBody } = req.body.data;
     const group_id = realBody.group_id;
     const luogoId = await getOrCreateLuogo(realBody);
@@ -348,16 +328,6 @@ const newEvent = async (req) => {
       };
     });
 
-    console.log("aggiunto nuovo evento", {
-      event_imgs: [],
-      ...messageData.eventi,
-      risposte_evento: {
-        rejected: newRisposte.filter((r) => r.status == "rejected"),
-        accepted: newRisposte.filter((r) => r.status == "accepted"),
-        pending: newRisposte.filter((r) => r.status == "pending"),
-      },
-    });
-
     return {
       data: {
         event_id: eventId,
@@ -411,7 +381,7 @@ const getSuspended = async (req) => {
     if (eventsList.length == 0) return { data: [], error: null };
     const eventIds = eventsList.map((e) => e.event_id);
     const groupIds = eventsList.map((e) => e.eventi.gruppi.group_id);
-    const { data: risposte, error: risposteError } = await supabase
+    const { error: risposteError } = await supabase
       .from("risposte_eventi")
       .select(
         "user_id,is_creator,status, eventi!inner(event_id,gruppi(group_id))",

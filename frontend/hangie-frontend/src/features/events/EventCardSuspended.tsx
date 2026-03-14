@@ -62,7 +62,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
   const risposteAccepted = risposte_evento.filter(
     (r) => r.status == "accepted",
   );
-  ("il group_id", group_id);
   const formattedTime = data
     ? new Date(data).toLocaleTimeString("it-IT", {
         day: "numeric",
@@ -72,7 +71,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
       })
     : "";
   const { currentScreen } = useScreen();
-  // ✅ Calcola urgenza
 
   const getUrgencyText = () => {
     // 1. Calcola la differenza in millisecondi (la base di tutto)
@@ -129,10 +127,6 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
   const { session } = useAuth();
   const [prevStatus, setPrevStatus] = useState("pending");
   const sendSocketVoteEvent = (status, prevStatus) => {
-    // setCurrentEventData((prev) => {
-
-    //   return { ...prev, status };
-    // });
     currentSocket.emit(
       "vote_event",
       event_id,
@@ -176,7 +170,10 @@ const EventCardSuspended: React.FC<EventCardSuspendedProps> = ({
           <div className=" max-w-[90%]">
             <div className="px-3 py-1.5 2xl:py-2 bg-black/60 backdrop-blur-md rounded-xl shadow-lg">
               <div className="flex items-center gap-2">
-                <GroupIcon group_cover_img={gruppo.group_cover_img} className="w-6 h-6" />
+                <GroupIcon
+                  group_cover_img={gruppo.group_cover_img}
+                  className="w-6 h-6"
+                />
 
                 <span className="text-xs 2xl:text-sm font-bold text-bg-1 truncate">
                   {gruppo.nome}

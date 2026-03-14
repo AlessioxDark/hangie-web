@@ -53,7 +53,6 @@ const getMyEvents = async (req, res) => {
     const { data, error } = await Event.getAll(req);
 
     if (error) {
-      console.error("Errore nel modello Event.getAll():", error);
       return res.status(500).json({ error: error.message });
     }
 
@@ -67,7 +66,6 @@ const getMyEvents = async (req, res) => {
 const getSpecificEvent = async (req, res) => {
   try {
     const { data, error } = await Event.getEvent(req);
-    data;
     if (error) throw error;
     let newData = {
       event_id: data.event_id,
@@ -85,7 +83,6 @@ const getSpecificEvent = async (req, res) => {
       created_by: data.eventi.created_by,
       risposte_evento: data.partecipanti,
     };
-    ("data che invio", newData);
 
     res.status(200).json({
       success: true,
@@ -147,9 +144,7 @@ const modifyResponseEvent = async (req, res) => {
 const deleteSpecificEvent = async (req, res) => {
   try {
     const { data, error } = await Event.deleteEvent(req); // Chiama il modello per ottenere gli eventi
-    ("error", error);
     if (error) throw error;
-    ("è andata bene");
     res.status(200).json({
       success: true,
       message: "Operazione completata con successo", // Opzionale, utile per i toast

@@ -113,7 +113,6 @@ const CreateEventForm = () => {
     if (checkImagesError()) return;
 
     const handleUploadAndSocket = async (dataArrived) => {
-      ("inviato da", session.user.id);
       try {
         clearErrors("root");
         const newEventId = dataArrived.event_id;
@@ -137,7 +136,6 @@ const CreateEventForm = () => {
           return urlData.publicUrl;
         });
         const uploadedUrls = await Promise.all(uploadPromises);
-        ("url caricati", uploadedUrls);
         const cover_url = uploadedUrls[0];
         const { error: coverError } = await supabase
           .from("eventi")
@@ -148,15 +146,12 @@ const CreateEventForm = () => {
         const otherImages = uploadedUrls
           .filter((url) => url !== cover_url)
           .map((url) => ({ img_url: url, event_id: newEventId }));
-        ("altre immagini no cover", otherImages);
         if (otherImages.length > 0) {
           const { error: imgError } = await supabase
             .from("event_imgs")
             .insert(otherImages);
           if (imgError) throw imgError;
-          ("inseriti other img");
         }
-        ("ecco cover", cover_url);
         const newEventDetails = {
           ...dataArrived.messageDetails.eventi,
           cover_img: cover_url,
@@ -165,7 +160,6 @@ const CreateEventForm = () => {
         sendEvent(newEventId, newEventDetails, messageDetails);
         setMobileView("");
       } catch (error) {
-        error;
         setError("root", {
           message: error.message || "Qualcosa è andato storto",
         });
@@ -227,7 +221,6 @@ const CreateEventForm = () => {
     }
   };
   useEffect(() => {
-    ("cambiato errr");
     if (errorsApi?.add_event) {
       setError("root", {
         message: errorsApi.add_event.message,

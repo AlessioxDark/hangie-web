@@ -25,7 +25,6 @@ export const AuthContextProvider = ({ children }) => {
     localStorage.setItem("to_remember", "true");
 
     if (error) {
-      console.error("error during signing up process:", error);
       return { success: false, authError: error };
     }
     return { success: true, authData: data };
@@ -39,10 +38,9 @@ export const AuthContextProvider = ({ children }) => {
         password,
       });
       if (error) {
-        console.error("errore nel login", error);
         return { success: false, authError: error.message };
       }
-      console.log("loginnato");
+
       return { success: true, authData: data };
     } catch (error) {
       console.error("errore nel login", error);
@@ -50,19 +48,17 @@ export const AuthContextProvider = ({ children }) => {
   };
   const LogoutUser = async () => {
     try {
-      console.log("faccio il logout");
       await supabase.auth.signOut();
       setSession(null);
       localStorage.removeItem("to_remember");
 
       return <Navigate to={"/login"} replace />;
     } catch (error) {
-      console.error("errore nel login", error);
+      console.error("errore nel logout", error);
     }
   };
 
   const handleGuestSignIn = async () => {
-    console.log("ci proviamo");
     localStorage.setItem("to_remember", "true");
     isPopulatingRef.current = true;
     const { data: authData, error: authError } =
@@ -75,7 +71,6 @@ export const AuthContextProvider = ({ children }) => {
     }
     let guestData = {};
     if (authData?.user) {
-      console.log("metto isPopulating a true");
       guestData = {
         user_id: authData.user.id,
         handle: `guest_${Math.floor(Math.random() * 10000)}`,
@@ -86,9 +81,7 @@ export const AuthContextProvider = ({ children }) => {
       await ApiCalls.addGuest(authData.session.access_token, {
         guestData,
       });
-      console.log("c'è user");
       isPopulatingRef.current = false;
-      console.log("lo metto false");
       setSession(authData?.session);
     }
 
@@ -100,14 +93,12 @@ export const AuthContextProvider = ({ children }) => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      console.log("controllo");
+
       const wantToBeRemembered = localStorage.getItem("to_remember") === "true";
       if (session && !wantToBeRemembered) {
-        console.log("esco");
         await supabase.auth.signOut();
         setSession(null);
       } else {
-        console.log("metto la sessione");
         setSession(session);
       }
       setIsAuthLoading(false);
@@ -118,7 +109,6 @@ export const AuthContextProvider = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_, session) => {
-      console.log("cambiato stato", session);
       if (isPopulatingRef.current) return;
 
       setSession(session);
@@ -126,10 +116,6 @@ export const AuthContextProvider = ({ children }) => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  useEffect(() => {
-    console.log("cambiata session", session);
-  }, [session]);
 
   return (
     <authContext.Provider

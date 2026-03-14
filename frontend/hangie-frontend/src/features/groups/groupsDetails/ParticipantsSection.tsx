@@ -38,7 +38,6 @@ const ParticipantsSection = ({
     const saveData = (data) => {
       currentSocket.emit("remove_participant", currentGroup, partecipante);
     };
-    ("ora la chiamo");
 
     executeApiCall(
       "remove_participant",
@@ -46,14 +45,7 @@ const ParticipantsSection = ({
         ApiCalls.handleRemoveParticipant(session.access_token, currentGroup, {
           user_id: partecipante.user_id,
         }),
-      // () => {
-      //   return () => {
-      //      ("sto rimuovendo participant");
-      //     ApiCalls.handleRemoveParticipant(session.access_token, currentGroup, {
-      //       user_id: partecipante.user_id,
-      //     });
-      //   };
-      // },
+
       saveData,
     );
   };
@@ -73,19 +65,13 @@ const ParticipantsSection = ({
               idx !== currentParticipants.length - 1 && "border-b border-bg-3"
             } `}
           >
-            <div
-              className="w-13 h-13 shrink-0 "
-              onClick={() => {
-                ("apro profilo di", partecipante.nome);
-              }}
-            >
+            <div className="w-13 h-13 shrink-0 " onClick={() => {}}>
               <ProfileIcon profile_pic={partecipante.profile_pic} />
             </div>
             <div
               className="flex flex-col min-w-0 flex-1"
               onClick={() => {
                 if (partecipante.user_id !== session.user.id) {
-                  ("apro action sheet di", partecipante.nome);
                   openModal({
                     type: "PARTICIPANT_ACTIONS",
                     data: {
@@ -124,12 +110,7 @@ const ParticipantsSection = ({
                 @{partecipante.handle}
               </span>
             </div>
-            <div
-              className="w-5 h-5"
-              onClick={() => {
-                ("apro profilo di", partecipante.nome);
-              }}
-            >
+            <div className="w-5 h-5" onClick={() => {}}>
               <ChevronRight color={"#64748b"} />
             </div>
           </div>

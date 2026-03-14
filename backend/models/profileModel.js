@@ -121,21 +121,6 @@ const initialEvents = [
   },
 ];
 
-const getPfp = async (req) => {
-  try {
-    const { user_id } = req.params;
-    console.log("ecco pfp", user_id);
-    const { data, error } = await supabase
-      .from("utenti")
-      .select("profile_pic")
-      .eq("user_id", user_id);
-    console.log("dati ottenuti", data, error);
-    if (error) throw error;
-    return { data: data, error: null };
-  } catch (err) {
-    return { data: null, error: err };
-  }
-};
 const getData = async (req) => {
   try {
     const { userHandle } = req.params;
@@ -214,7 +199,7 @@ const getData = async (req) => {
               "status, utente:utenti(*), eventi(*), created_at, is_creator",
             )
             .in("event_id", eventIds);
-
+        if (eventParticipantsError) throw eventParticipantsError;
         const eventParticipantsMap = (eventParticipants || []).reduce(
           (acc, curr) => {
             const id = curr?.eventi?.event_id;
@@ -286,7 +271,6 @@ const getData = async (req) => {
       error: null,
     };
   } catch (err) {
-    console.error("Crash in getData:", err.message);
     return { data: null, error: err.message };
   }
 };
@@ -358,7 +342,6 @@ const deleteGuest = async (req) => {
     const { error: eventsError } = await supabase
       .from("eventi")
       .delete()
-      // .in("event_id", EventAnswersIds)
       .in("group_id", groupIds);
     if (eventsError) throw eventsError;
     const { error: groupsError } = await supabase
@@ -380,8 +363,6 @@ const deleteGuest = async (req) => {
 
     return { data: { success: true }, error: null };
   } catch (err) {
-    console.error("Crash in deleteGuest:", err.message);
-    console.log(err);
     return { data: null, error: err.message };
   }
 };
@@ -389,7 +370,6 @@ const addGuest = async (req) => {
   try {
     const { guestData } = req.body;
 
-    const user = req.user;
     const { error: userAddError } = await supabase
       .from("utenti")
       .insert(guestData);
@@ -420,7 +400,6 @@ const addGuest = async (req) => {
       .select("group_id,createdBy,nome");
     if (groupsError) console.log(groupsError);
     const gIds = groupData.map((g) => g.group_id);
-    // setGroupIds(gIds);
     console.log("groupdata", groupData);
     const newParticipantsData = groupData.flatMap((g) => {
       const participants = [...initialFriends, guestData.user_id].map((f) => ({
@@ -431,8 +410,6 @@ const addGuest = async (req) => {
 
       return participants;
     });
-    console.log("parts", newParticipantsData);
-
     const { error: participantsError } = await supabase
       .from("partecipanti_gruppo")
       .insert(newParticipantsData);
@@ -508,13 +485,10 @@ const addGuest = async (req) => {
     if (messagesError) throw messagesError;
     return { data: { success: true }, error: null };
   } catch (err) {
-    console.error("Crash in deleteGuest:", err.message);
-    console.log(err);
     return { data: null, error: err.message };
   }
 };
 module.exports = {
-  getPfp,
   getData,
   deleteGuest,
   addGuest,

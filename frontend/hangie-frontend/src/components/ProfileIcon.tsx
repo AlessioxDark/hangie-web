@@ -23,14 +23,9 @@ const defaultPfp = (
     </g>
   </svg>
 );
-const ProfileIcon = ({ user_id, profile_pic }) => {
+const ProfileIcon = ({ profile_pic }) => {
   return (
-    <div
-      className="rounded-full w-full cursor-pointer"
-      onClick={() => {
-        // navigate(isLoggedIn ? '/profile' : '/login');
-      }}
-    >
+    <div className="rounded-full w-full cursor-pointer">
       {profile_pic ? (
         <img
           src={profile_pic}

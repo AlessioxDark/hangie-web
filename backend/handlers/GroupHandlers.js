@@ -1,10 +1,6 @@
 const supabase = require("../config/db");
 
 const groupHandlers = (io, socket) => {
-  socket.on("join_room", (room_id) => {
-    ("room_joinata");
-    socket.join(room_id);
-  });
   socket.on(
     "add_participants",
     async (groupId, token, finalEventsResponses) => {
@@ -39,7 +35,6 @@ const groupHandlers = (io, socket) => {
           .eq("partecipante_id", user.id)
           .single();
         if (groupError) throw groupError;
-        ("i dati del gruppo", groupInfo);
         let ultimoMessaggio = null;
         groupInfo?.gruppi.messaggi.forEach(async (messaggio) => {
           if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
@@ -68,13 +63,10 @@ const groupHandlers = (io, socket) => {
           .select("*")
           .eq("group_id", groupId);
 
-        ("groupEvnts", groupEvents, { groupId, user_id: user.id });
         if (groupsError) {
-          ("groupsError", groupsError);
           throw groupsError;
         }
         const groupEventsIds = groupEvents.map((e) => e.event_id);
-        groupEventsIds;
         const { data: eventsDetails, error: eventsError } = await supabase
           .from("risposte_eventi")
           .select(
@@ -96,10 +88,8 @@ const groupHandlers = (io, socket) => {
   `,
           )
           .in("event_id", groupEventsIds);
-        if (eventsError) {
-          ("c'è un eventsErro", eventsError);
-          throw eventsError;
-        }
+        if (eventsError) throw eventsError;
+
         const reducedEventsData = eventsDetails.reduce((acc, response) => {
           // 1. L'evento è dentro response.eventi
           const event = response.eventi;
@@ -125,53 +115,26 @@ const groupHandlers = (io, socket) => {
 
           return acc;
         }, {});
-        // const reducedEventsData = eventsDetails.reduce((acc, response) => {
-        //   // 1. L'evento è dentro response.eventi
-        //   const event = response.eventi;
-        //   const eventId = event.event_id;
 
-        //   // 2. Se è la prima volta che vediamo questo evento, creiamo l'oggetto base
-        //   if (!acc[eventId]) {
-        //     acc[eventId] = {
-        //       ...event,
-        //       risposte_evento: [], // Inizializziamo l'array delle risposte
-        //       user_status: response.status, // Lo status dell'utente attuale
-        //     };
-        //   }
-
-        //   // 3. Aggiungiamo la risposta corrente all'array dell'evento
-        //   acc[eventId].risposte_evento.push({
-        //     utenti: response.utente,
-        //     user_id: response.utente.user_id,
-        //     status: response.status,
-        //     created_at: response.created_at,
-        //     is_creator: response.is_creator,
-        //   });
-
-        //   return acc;
-        // }, {});
-        ("le final responses", finalEventsResponses);
         const finalEventsArray = Object.values(reducedEventsData);
-        ("i groupInfo", groupInfo, formattedData);
         allParticipants.forEach((p) => {
           io.to(p.user_id).emit("added_participants", {
             group_id: groupId,
             newParticipants: allParticipants,
-            groupInfo: formattedData, // <--- FONDAMENTALE PER IL NUOVO UTENTE
+            groupInfo: formattedData,
             eventsDetails: finalEventsArray,
             eventsResponses: finalEventsResponses,
-            // eventi:
-            // finalEventResponses: finaleventResponses,
           });
         });
       } catch (err) {
-        console.error("Errore add_participants:", err);
+        socket.emit("operation_failed", {
+          type: "add_participants",
+          message: "Qualcosa è andato storto, riprova tra poco.",
+        });
       }
     },
   );
   socket.on("edit_field", async (groupId, field, fieldValue) => {
-    ("ricevuto add participants server.js");
-    // manca creatore gruppo in participants
     try {
       const { data: participants, error: participantsError } = await supabase
         .from("partecipanti_gruppo")
@@ -187,7 +150,10 @@ const groupHandlers = (io, socket) => {
         });
       });
     } catch (err) {
-      console.error("Errore in GroupHandlers:", err);
+      socket.emit("operation_failed", {
+        type: "edit_field",
+        message: "Qualcosa è andato storto, riprova tra poco.",
+      });
     }
   });
   socket.on("admin_participant", async (groupId, participant) => {
@@ -206,12 +172,14 @@ const groupHandlers = (io, socket) => {
         });
       });
     } catch (err) {
-      console.error("Errore in GroupHandlers:", err);
+      socket.emit("operation_failed", {
+        type: "make_admin",
+        message: "Qualcosa è andato storto, riprova tra poco.",
+      });
     }
   });
   socket.on("add_new_group", async (groupId, groupData, imgUrl, creatorId) => {
     try {
-      ("io sto qua", { groupId, groupData, imgUrl, creatorId });
       const [
         { data: sender, error: userError },
         { data: participants, error: participantsError },
@@ -234,7 +202,6 @@ const groupHandlers = (io, socket) => {
           user_id: p.user_id,
         };
       });
-      ("aggiungo notifiche", insertNotification);
 
       const { error: notificationError } = await supabase
         .from("notifiche")
@@ -267,38 +234,36 @@ const groupHandlers = (io, socket) => {
         });
       });
     } catch (err) {
-      console.error("Errore add_new_group:", err);
+      socket.emit("operation_failed", {
+        type: "new_group",
+        message: "Qualcosa è andato storto, riprova tra poco.",
+      });
     }
   });
   socket.on("leave_group", async (groupId, userId) => {
-    ("ricevuto leave group server.js", groupId, userId);
-    // manca creatore gruppo in participants
     try {
       const { data: participants, error: participantsError } = await supabase
         .from("partecipanti_gruppo")
         .select("*,user_id:partecipante_id")
         .eq("group_id", groupId);
       if (participantsError) throw participantsError;
-      ("i partecipanti", participants);
       participants.forEach((p) => {
-        ("adesso invio left group no user");
         io.to(p.user_id).emit("left_group", groupId, userId);
       });
       if (
         participants.length == 0 ||
         participants.some((p) => p.user_id !== userId)
       ) {
-        ("adesso invio left group");
         io.to(userId).emit("left_group", groupId, userId);
       }
     } catch (err) {
-      console.error("Errore in GroupHandlers:", err);
+      socket.emit("operation_failed", {
+        type: "leave_group",
+        message: "Qualcosa è andato storto, riprova tra poco.",
+      });
     }
   });
   socket.on("remove_participant", async (groupId, participant) => {
-    ("ricevuto remove participant server.js");
-    // manca creatore gruppo in participants
-
     try {
       const { data: participants, error: participantsError } = await supabase
         .from("partecipanti_gruppo")
@@ -326,7 +291,10 @@ const groupHandlers = (io, socket) => {
         });
       }
     } catch (err) {
-      console.error("Errore in GroupHandlers:", err);
+      socket.emit("operation_failed", {
+        type: "remove_participant",
+        message: "Qualcosa è andato storto, riprova tra poco.",
+      });
     }
   });
 };

@@ -25,9 +25,7 @@ export const useMobileLayout = () => {
 
 export const MobileLayoutChatProvider = ({ children }) => {
   const [mobileView, setMobileView] = useState("groups");
-  useEffect(() => {
-    ("cambiata mobile view", mobileView);
-  }, [mobileView]);
+
   return (
     <MobileLayoutContext.Provider value={{ mobileView, setMobileView }}>
       {children}

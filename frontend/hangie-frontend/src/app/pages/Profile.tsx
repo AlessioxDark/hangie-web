@@ -153,10 +153,6 @@ const Profile = () => {
       await ApiCalls.deleteGuest(token);
     }
     LogoutUser();
-    // if(isGuest){
-
-    // }
-    // return <Navigate replace to={"/login"} />;
   };
   return (
     <div className="flex flex-col bg-bg-1">
@@ -242,13 +238,7 @@ const Profile = () => {
         {filtered.length === 0 ? (
           <EmptyState tab={activeTab} />
         ) : (
-          filtered.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              // isOwner={event.created_by === profileData.user_id}
-            />
-          ))
+          filtered.map((event) => <EventCard key={event.id} event={event} />)
         )}
       </div>
       {filtered.length > 0 && (

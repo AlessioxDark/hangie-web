@@ -72,9 +72,6 @@ const ChatHeader = () => {
         <button
           onClick={() => {
             navigate(`/chats/${currentGroupData.group_id}/events`);
-            if (currentScreen == "xl") {
-              //   setShowEvents(true);
-            }
           }}
           className="relative p-2.5 rounded-full bg-[#D9EAFF] active:bg-indigo-100 transition-all group"
           title="Vedi Eventi"

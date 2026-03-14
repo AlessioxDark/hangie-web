@@ -42,7 +42,6 @@ const MessageEvent = ({ event_details, group_id, utenti }) => {
       return dateString;
     }
   };
-  ("dettagli evento del socket", event_details);
   // Determina se la data di scadenza è passata
 
   const isDeadlinePassed = useMemo(() => {
@@ -50,8 +49,6 @@ const MessageEvent = ({ event_details, group_id, utenti }) => {
       event_details.scadenza && new Date(event_details.scadenza) < new Date()
     );
   }, [event_details?.scadenza || null]);
-
-  // --- Icona Placeholder per Profilo (sostituisce ProfileIcon) ---
 
   const sendSocketVoteEvent = (status, prevStatus) => {
     setCurrentEventData((prev) => {
@@ -67,7 +64,6 @@ const MessageEvent = ({ event_details, group_id, utenti }) => {
     );
   };
 
-  ("message", event_details);
   const acceptedParticipants = event_details.risposte_evento.filter(
     (r) => r.status == "accepted",
   ).length;

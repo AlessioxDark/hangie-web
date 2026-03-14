@@ -45,9 +45,6 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/friends", friendsRoutes);
-// app.listen(port, () => {
-// 	 (`Server is running on port ${port}`);
-// });
+
 server.listen(port, () => {
-  `Server is running on port ${port}`;
 });

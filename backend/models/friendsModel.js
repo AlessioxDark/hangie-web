@@ -12,6 +12,9 @@ const getAll = async (req) => {
   `,
     )
     .or(`user_id.eq.${user_id},amico_id.eq.${user_id}`);
+  if (error) {
+    return { data: null, error };
+  }
   const friendsOnly = data.map((rel) => {
     // Se user_1 sono io, l'amico è user_2. Altrimenti è user_1.
     const isUser1Me = rel.user_1.user_id === user_id;
@@ -31,7 +34,6 @@ const getAll = async (req) => {
 };
 const getPending = async (req) => {
   const { user_id } = req.params;
-  ("le ha chieste", user_id);
   const { data, error } = await supabase
     .from("amicizie")
     .select(
@@ -48,19 +50,20 @@ const getPending = async (req) => {
 };
 const sendRequest = async (req) => {
   try {
-    ("inviata richiesta con", req.body);
     const { friend_id, status } = req.body;
     const user_id = req.user.id;
     if (status == "pending") {
-      const { data: FriendData, error: friendError } = await supabase
+      const { error: friendError } = await supabase
         .from("amicizie")
         .insert({ user_id, amico_id: friend_id, status, sender_id: user_id });
       if (friendError) throw friendError;
     } else if (status == "delete") {
-      const { data: FriendData, error: friendError } = await supabase
+      const { error: friendError } = await supabase
         .from("amicizie")
         .delete()
-        .or(`and(user_id.eq.${user_id},amico_id.eq.${friend_id}),and(user_id.eq.${friend_id},amico_id.eq.${user_id})`)
+        .or(
+          `and(user_id.eq.${user_id},amico_id.eq.${friend_id}),and(user_id.eq.${friend_id},amico_id.eq.${user_id})`,
+        )
         .eq("status", "pending");
       if (friendError) throw friendError;
     } else if (status === "accepted") {
@@ -112,6 +115,9 @@ const getAccepted = async (req) => {
     )
     .or(`user_id.eq.${user_id},amico_id.eq.${user_id}`)
     .eq("status", "accepted");
+  if (error) {
+    return { data: null, error };
+  }
   const friendsOnly = data.map((rel) => {
     // Se user_1 sono io, l'amico è user_2. Altrimenti è user_1.
     const isUser1Me = rel.user_1.user_id === user_id;
@@ -128,7 +134,6 @@ const getAccepted = async (req) => {
 };
 const getByQuery = async (req) => {
   try {
-    ("ottenendo by query");
     const { query } = req.params;
 
     const user = req.user;
@@ -157,7 +162,6 @@ const getByQuery = async (req) => {
     const finalData = data.map((f) => {
       return f;
     });
-    ("ottenendo by query eccolo il data", data);
 
     return { data: finalData, error: null };
   } catch (err) {
@@ -169,7 +173,7 @@ const deleteFriend = async (req) => {
     const { friend_id } = req.body;
 
     const user = req.user;
-    const { data: FriendsData, error: FriendsError } = await supabase
+    const { error: FriendsError } = await supabase
       .from("amicizie")
       .delete()
       .or(

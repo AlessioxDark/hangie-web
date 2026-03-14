@@ -12,10 +12,8 @@ import RenderLoadingState from "@/features/utils/RenderLoadingState";
 const Chats = () => {
   const { currentGroupData, currentChatData, currentGroup, setCurrentGroup } =
     useChat();
-  const { groupId } = useParams();
   const { currentSocket } = useSocket();
   const [chatInput, setChatInput] = useState<string>("");
-  const [showEvents, setShowEvents] = useState(false);
   const chatInputRef = useRef<HTMLInputElement>(null);
   const { session, isAuthLoading } = useAuth();
 

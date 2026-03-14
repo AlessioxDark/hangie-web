@@ -15,7 +15,7 @@ export const useScreen = () => {
   // Si può aggiungere un check per assicurarsi che l'hook venga usato all'interno del Provider
   if (context === undefined) {
     throw new Error(
-      "useScrenn deve essere usato all'interno di un ScreenProvider",
+      "useScreen deve essere usato all'interno di un ScreenProvider",
     );
   }
 
@@ -46,7 +46,6 @@ export const ScreenProvider = ({ children }) => {
   }, []);
   useEffect(() => {
     if (typeof window === "undefined") return;
-    ("resize");
 
     window.addEventListener("resize", handleResize);
     handleResize();
@@ -56,7 +55,6 @@ export const ScreenProvider = ({ children }) => {
   useEffect(() => {
     if (calculateBreakPoint(width) !== currentScreen) {
       setCurrentScreen(calculateBreakPoint(width));
-      //  (`Breakpoint cambiato a: ${newName}`); // Utile per il debug
     }
   }, [width, currentScreen]);
 

@@ -25,7 +25,6 @@ const EventsSuspended = () => {
 
   const saveData = (data) => {
     if (data.length > 0) {
-      ("ecco i dati", data);
       setEventsData((prevData) => {
         const mergeData = [...prevData, ...data];
 
@@ -90,7 +89,6 @@ const EventsSuspended = () => {
               "
           >
             {eventsData.map((event) => {
-              // const evento = event.evento
               return (
                 <div key={event.event_id}>
                   <EventCardSuspended {...event} line_clamp={"line-clamp-2"} />
