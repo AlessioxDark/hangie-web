@@ -111,7 +111,6 @@ const Home = () => {
               "
               >
                 {homeEventsData.accepted.map((event) => {
-                  // const evento = event.evento
                   return (
                     <div key={event.event_id}>
                       <EventCard event={event} />

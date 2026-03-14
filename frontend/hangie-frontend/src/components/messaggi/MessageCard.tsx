@@ -40,8 +40,6 @@ const MessageCard = ({
         <TickIcon color="#94a3b8" />
       </div>
     );
-
-    // BLU
   };
   return (
     <div

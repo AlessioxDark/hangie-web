@@ -43,8 +43,6 @@ const ImageInput = ({
     }
     for (let i = 0; i < files.length; i++) {
       const ext = files[i].type.split("/")[1];
-      (ext, files[i].type);
-      ext;
       if (!ACCEPTED_EXTENSIONS.includes(ext)) {
         setImageError({
           message: `Accettiamo solo ${ACCEPTED_EXTENSIONS.join(", ")}`,

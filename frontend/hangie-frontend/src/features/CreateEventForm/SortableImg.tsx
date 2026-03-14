@@ -7,10 +7,7 @@ import React from "react";
 
 const SortableImg = ({ image, index, removeImg }) => {
   const { currentScreen } = useScreen();
-  // **********************************************
-  // * COMPONENTE: SortableImage (da inserire sopra CreateEventForm)
-  // **********************************************
-  // 1. Usa l'hook useSortable per rendere l'elemento trascinabile
+
   const {
     attributes,
     listeners,
@@ -26,9 +23,7 @@ const SortableImg = ({ image, index, removeImg }) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    // Alza l'elemento trascinato in cima (Z-Index alto)
     zIndex: isDragging ? 99 : 1,
-    // Opacità per mostrare che è in trascinamento (opzionale)
     opacity: isDragging ? 0.6 : 1,
   };
 
@@ -39,8 +34,7 @@ const SortableImg = ({ image, index, removeImg }) => {
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners} // Questi attivano il trascinamento al click e movimento
-      // Applica le tue classi di stile e la logica della cover
+      {...listeners}
       className={`aspect-square minw-[80px] w-25  2xl:w-40 2xl:h-40 relative group border-2 rounded-xl p-0 overflow-hidden flex-shrink-0 cursor-move 
                 
 		${image.name === "cover" ? "border-primary shadow-xl" : "border-gray-300"}

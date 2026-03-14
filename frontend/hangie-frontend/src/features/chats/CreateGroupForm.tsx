@@ -154,7 +154,6 @@ const CreateGroupForm = () => {
   useEffect(() => {
     if (error?.new_group) {
       setError("root", { message: error?.new_group?.message });
-      // return <RenderLoadingState type={"new_group"} />;
     }
   }, [error?.new_group]);
 
@@ -274,7 +273,6 @@ const CreateGroupForm = () => {
                       }  
                                     aspect-square minw-[80px] w-16 min-h-16 max-h-16 2xl:min-w-[150px] 2xl:w-40 flex items-center justify-center cursor-pointer 
                                     hover:bg-bg-3 transition-all duration-200 shadow-inner`}
-                      // onClick={handleButtonClick}
                       onClick={() => setIsParticipantsAdd(true)}
                       aria-label="Aggiungi Immagine"
                     >

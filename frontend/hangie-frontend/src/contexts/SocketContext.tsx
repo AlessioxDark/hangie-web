@@ -6,6 +6,7 @@ import { type GroupData } from "@/types/chat";
 import { useLocation, useNavigate } from "react-router";
 import { useFriends } from "./FriendsContext";
 import { useScreen } from "./ScreenContext";
+import { useApi } from "./ApiContext";
 
 const SocketContext = createContext({
   currentSocket: null,
@@ -40,6 +41,7 @@ export const SocketProvider = ({ children }) => {
     groupEventsData,
     setCurrentEventData,
   } = useChat();
+  const { setError } = useApi();
   const { session } = useAuth();
   const { currentScreen } = useScreen();
   const { getFriendsData } = useFriends();
@@ -276,7 +278,6 @@ export const SocketProvider = ({ children }) => {
 
       if (data.eventsDetails) {
         // "L'OPPOSTO" DEL REDUCE: Trasformiamo l'oggetto in un array piatto
-        // data.eventsDetails è { "id1": [event], "id2": [event] }
         const flatEvents = Object.values(data.eventsDetails).flat();
 
         setHomeEventsData((prevData) => {
@@ -540,12 +541,6 @@ export const SocketProvider = ({ children }) => {
         setCurrentChatData((prevData) => {
           if (!prevData) return prevData;
 
-          console.log("restituisco", {
-            messaggi: prevData.messaggi.filter((m) => {
-              if (m?.event_id == null) return true;
-              return m.event_details.event_id !== event_id;
-            }),
-          });
           return {
             ...prevData,
             messaggi: prevData.messaggi.filter((m) => {
@@ -574,14 +569,6 @@ export const SocketProvider = ({ children }) => {
             (e) => e.event_id == event_id,
           );
 
-          console.log("risultato", {
-            ...prevEvents,
-            [status]: [eventToMove, ...prevEvents[status]],
-            [prevStatus]: prevEvents[prevStatus].filter(
-              (e) => e.event_id !== event_id,
-            ),
-          });
-
           return {
             ...prevEvents,
             [status]: [eventToMove, ...prevEvents[status]],
@@ -590,11 +577,7 @@ export const SocketProvider = ({ children }) => {
             ),
           };
         });
-        console.log(
-          "controllo se i due event id sono uguali",
-          currentEventData.event_id,
-          event_id,
-        );
+
         if (currentEventData && currentEventData.event_id == event_id) {
           setCurrentEventData((prev) => {
             const newResponses = prev.risposte_evento.filter(
@@ -610,23 +593,10 @@ export const SocketProvider = ({ children }) => {
         }
       }
       if (currentGroup == group_id) {
-        console.log("prev?", groupEventsData);
         setGroupEventsData((prevEvents) => {
-          // console.log("prev?", prevEvents);
           if (!prevEvents) return null;
           return prevEvents.map((e) => {
             if (e.event_id == event_id) {
-              // const newRisposte = {
-              //   [prevStatus]:     ...e.risposte_eventi[prevStatus].filter(
-              //     (event) => event.event_id !== event_id,
-              //   ),
-              //   { ...eventToMove, status },
-              // }
-
-              // const altreRisposte = e.risposte_evento.filter(
-              //   (r) => r.user_id !== sender_id,
-              // );
-
               const newRisposte = e.risposte_evento.map((r) => {
                 return r.user_id == sender_id
                   ? { ...r, status, user_id: sender_id, profile_pic }
@@ -749,23 +719,39 @@ export const SocketProvider = ({ children }) => {
     });
     socket.on("deleted_friend", (data) => {
       // notifica
-      console.log("rimuovo amico");
+
       if (getFriendsData) {
         getFriendsData();
       }
     });
     socket.on("accepted_request", (data) => {
       // notifica
-      console.log("accetto richest");
+
       if (getFriendsData) {
         getFriendsData();
       }
     });
     socket.on("rejected_request", (data) => {
       // notifica
-      console.log("rimuovo richiest");
+
       if (getFriendsData) {
         getFriendsData();
+      }
+    });
+    socket.on("operation_failed", (data) => {
+      switch (data.type) {
+        // case "voted_event":
+        //   setError("chat", data.message);
+        //   break;
+        // case "deleted_event":
+        //   setError("event", data.message);
+        //   break;
+        case "all":
+          setError("home", data.message);
+          break;
+        default:
+          setError(data.type, data.message);
+          break;
       }
     });
 
@@ -785,6 +771,7 @@ export const SocketProvider = ({ children }) => {
       socket.off("sent_request");
       socket.off("deleted_friend");
       socket.off("accepted_request");
+      socket.off("operation_failed");
       socket.disconnect();
     };
   }, [

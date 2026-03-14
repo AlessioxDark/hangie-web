@@ -22,9 +22,7 @@ const ChatsEvents = () => {
   const { error, loading } = useApi();
 
   const getEventStatus = (event) => {
-    ("eventStatus");
     if (event?.created_by === session.user.id) {
-      ("creator");
       return "creator"; // L'utente è il creatore, vede i pulsanti di modifica
     }
     session.user.id;
@@ -41,7 +39,6 @@ const ChatsEvents = () => {
 
   const filteredEvents = useMemo(() => {
     const allEvents = groupEventsData || [];
-    ("qui arrivo", allEvents);
     const getUserEventStatus = (event) => {
       if (event.created_by === session.user.id) {
         return "creator";
@@ -60,9 +57,7 @@ const ChatsEvents = () => {
 
     let statusFilteredList = [];
 
-    ("qui arrivo");
     if (currentFilter === "") {
-      ("qui arrivo");
       statusFilteredList = allEvents;
     } else {
       statusFilteredList = allEvents.filter((event) => {
@@ -82,7 +77,6 @@ const ChatsEvents = () => {
         (evento) => evento.titolo && evento.titolo.match(regex),
       );
     }
-    ("pure qui", statusFilteredList);
     return statusFilteredList;
   }, [
     groupEventsData,

@@ -22,7 +22,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   AddParticipants: async (token: string, groupId: string, dataToSend) => {
-    ("data da inviare", { token, groupId, dataToSend });
+
     const res = await fetch(`${BASE_URL}/groups/add/participants/${groupId}`, {
       method: "PATCH",
       body: JSON.stringify(dataToSend),
@@ -38,7 +38,7 @@ export const ApiCalls = {
     groupId: string,
     dataToSend,
   ) => {
-    ("remove participant fetch");
+
     const res = await fetch(
       `${BASE_URL}/groups/remove/participants/${groupId}`,
       {
@@ -64,7 +64,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleDeleteFriend: async (token: string, dataToSend) => {
-    ("gdelete friend");
+
     const res = await fetch(`${BASE_URL}/friends/delete`, {
       method: "DELETE",
       body: JSON.stringify(dataToSend),
@@ -86,7 +86,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleGetFriendsByQuery: async (token: string, query: string) => {
-    ("get friends fetch");
+
     const res = await fetch(`${BASE_URL}/friends/query/${query}`, {
       method: "GET",
       headers: {
@@ -97,7 +97,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   handleSendOrDeleteFriendRequest: async (token: string, dataToSend) => {
-    ("invio a ", `${BASE_URL}/friends/request`);
+
     const res = await fetch(`${BASE_URL}/friends/request`, {
       method: "POST",
       body: JSON.stringify(dataToSend),
@@ -188,7 +188,7 @@ export const ApiCalls = {
     return await handleResponse(res);
   },
   voteEvent: async (eventId: string, token: string, body) => {
-    ({ eventId, token, body });
+
     const res = await fetch(`${BASE_URL}/events/answer/${eventId}`, {
       method: "PATCH",
       body: JSON.stringify(body),
@@ -249,16 +249,7 @@ export const ApiCalls = {
     });
     return await handleResponse(res);
   },
-  getPfp: async (token: string, user_id) => {
-    const res = await fetch(`${BASE_URL}/profile/getpfp/${user_id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return await handleResponse(res);
-  },
+
   createGroup: async (token: string, dataToSend) => {
     const res = await fetch(`${BASE_URL}/groups/add/newGroup`, {
       method: "POST",

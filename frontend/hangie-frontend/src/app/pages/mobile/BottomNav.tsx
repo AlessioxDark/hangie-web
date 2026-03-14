@@ -47,7 +47,6 @@ const BottomNav = () => {
     },
   ];
   return (
-    // bottom-0 fixed
     <div
       className=" 
    min-h-16 max-h-16

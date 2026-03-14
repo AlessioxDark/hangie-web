@@ -27,37 +27,29 @@ export const ProfileProvider = ({ children }) => {
 
   const getDefaulHandle = async () => {
     if (!session?.access_token || !session?.user?.id) return;
-    console.log("sess", session.user.id);
-    // await new Promise((resolve) => setTimeout(resolve, 200));
     try {
       const { data, error } = await supabase
         .from("utenti")
         .select("handle")
         .eq("user_id", session.user.id)
         .single();
-      console.log("ricevuto", data);
       if (error) {
         console.warn("Handle non ancora trovato, riprovo...");
         throw error;
       }
       return data.handle;
     } catch (err) {
-      console.log("err", err);
-      return "non c'è data";
+      return err;
     }
   };
   useEffect(() => {
-    console.log("avviato in profile", session, isAuthLoading, defaultHandle);
     if (session && !isAuthLoading && !defaultHandle) {
-      console.log("session c'è");
-      console.log("eccola", session);
       executeApiCall(
         "profile",
         () => {
           return getDefaulHandle();
         },
         (data) => {
-          console.log("ris", data);
           if (data) {
             setDefaultHandle(data);
           } else {
@@ -83,8 +75,6 @@ export const ProfileProvider = ({ children }) => {
   }, []);
   useEffect(() => {
     const splittedLoation = location.pathname.split("/");
-    splittedLoation;
-    ("sess", session);
     if (splittedLoation[1] == "profile") {
       getProfileData(splittedLoation[2]);
     }

@@ -17,10 +17,6 @@ const createUser = async (req) => {
     .select();
 
   if (profileError) {
-    console.error(
-      "Errore nell'inserimento del profilo utente:",
-      profileError.message,
-    );
     return { user, error: profileError };
   }
 
@@ -34,7 +30,6 @@ const findUserByEmail = async (email) => {
     .eq("email", email);
 
   if (error) {
-    console.error("Errore durante la ricerca per email:", error);
     return null;
   }
   return data;
@@ -46,7 +41,6 @@ const findUserByUsername = async (username) => {
     .eq("handle", username);
 
   if (error) {
-    console.error("Errore durante la ricerca per username:", error);
     return null;
   }
   return data;

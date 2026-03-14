@@ -10,9 +10,8 @@ const getAllGroups = async (req, res) => {
       data.map(async (row) => {
         let ultimoMessaggio = null;
 
-        // Usiamo for...of che supporta correttamente l'await
         for (const messaggio of row.gruppi.messaggi) {
-          ("oi");
+
 
           if (!ultimoMessaggio || messaggio.sent_at > ultimoMessaggio.sent_at) {
             if (messaggio.type === "event") {
@@ -23,7 +22,6 @@ const getAllGroups = async (req, res) => {
                 .single();
 
               if (titoloError) {
-                console.error("Errore recupero titolo:", titoloError);
                 ultimoMessaggio = messaggio; // Fallback se la query fallisce
               } else {
                 ultimoMessaggio = {
@@ -33,11 +31,10 @@ const getAllGroups = async (req, res) => {
                 };
               }
             } else {
-              ("vai qui");
 
               ultimoMessaggio = messaggio;
             }
-            ("c'è mess?", row.gruppi.messaggi.length);
+
           }
         }
         if (row.gruppi.messaggi.length == 0) {
@@ -57,7 +54,7 @@ const getAllGroups = async (req, res) => {
       data: formattedData,
     });
   } catch (err) {
-    ("ecco err", err.message);
+
     res.status(500).json({
       success: false,
       message: "Non siamo riusciti a trovare i tuoi gruppi",
@@ -87,7 +84,6 @@ const getGroupEvents = async (req, res) => {
   try {
     const { data, error } = await Group.getEvents(req);
     if (error) throw error;
-    ("da group events ecco data", data);
     const cleanData = data.map((response) => {
       // Estrae l'oggetto evento dal campo 'eventi' e aggiunge lo 'status'
       return {
@@ -145,10 +141,9 @@ const getSpecificGroupEvent = async (req, res) => {
 const addNewGroup = async (req, res) => {
   try {
     const { data, error } = await Group.newGroup(req);
-    ("c'è data o errore", { data, error });
     if (error) throw error;
     const { groupData, participants, creator } = data;
-    ({ groupData, participants, creator });
+
     const notificationInsert = participants
       .filter((p) => p.user_id !== creator.id)
       .map((p) => {
@@ -198,10 +193,8 @@ const modifyGroup = async (req, res) => {
 };
 const leaveGroup = async (req, res) => {
   try {
-    ("arrivati a leave");
     const { data, error } = await Group.leave(req); // Chiama il modello per ottenere gli eventi
     if (error) {
-      ("err", error);
       throw error;
     }
     res.status(200).json({
@@ -219,7 +212,6 @@ const leaveGroup = async (req, res) => {
 };
 const addParticipants = async (req, res) => {
   try {
-    ("ci siamo?");
     const { data, error } = await Group.addParticipants(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;
     res.status(200).json({
@@ -236,7 +228,6 @@ const addParticipants = async (req, res) => {
   }
 };
 const removeParticipant = async (req, res) => {
-  ("remove participant al backend");
   try {
     const { data, error } = await Group.removeParticipant(req); // Chiama il modello per ottenere gli eventi
     if (error) throw error;

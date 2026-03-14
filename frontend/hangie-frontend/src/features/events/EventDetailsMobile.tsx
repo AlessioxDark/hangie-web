@@ -35,7 +35,6 @@ const EventDetailsMobile = () => {
   const carouselRef = useRef(null);
   const imageRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [prevStatus, setPrevStatus] = useState(currentEventData?.status);
 
   const fetchEvent = () => {
     executeApiCall(
@@ -46,32 +45,6 @@ const EventDetailsMobile = () => {
       (data) => {
         setCurrentEventData(data);
       },
-      // (data) => {
-      //
-      //
-      //   const usefulFields = [
-      //     "descrizione",
-      //     "titolo",
-      //     "partecipanti_gruppo",
-      //     "status",
-      //     "gruppo",
-      //     "luogo",
-      //     "cover_img",
-      //     "costo",
-      //     "data",
-      //     "data_scadenza",
-      //     "utente",
-      //     "partecipanti_confermati",
-      //   ];
-
-      //   for (const key of usefulFields) {
-      //     if (data[key] !== currentEventData[key]) {
-      //       setCurrentEventData((prev) => {
-      //         return { ...prev, [key]: data[key] };
-      //       });
-      //     }
-      //   }
-      // },
     );
   };
 
@@ -81,6 +54,9 @@ const EventDetailsMobile = () => {
 
   if (Object.keys(currentEventData).length == 0) {
     return <RenderLoadingState type={"event"} />;
+  }
+  if (error?.event) {
+    return <RenderErrorState reloadFunction={fetchEvent} type={"event"} />;
   }
   const {
     titolo,
@@ -175,31 +151,10 @@ const EventDetailsMobile = () => {
     });
   };
 
-  // const handleDeleteEvent = () => {
-  //   const saveData = (data) => {
-  //
-  //     navigate(-1);
-  //     currentSocket.emit("delete_event", eventId, gruppo.group_id);
-  //   };
-  //   executeApiCall(
-  //     "delete_event",
-  //     () => {
-  //       return ApiCalls.deleteEvent(eventId, session.access_token);
-  //     },
-  //     saveData,
-  //   );
-  // };
-
   const sendSocketDeleteEvent = () => {
-    +currentSocket.emit("delete_event", eventId, gruppo.group_id);
+    currentSocket.emit("delete_event", eventId, gruppo.group_id);
   };
   const sendSocketVoteEvent = (newStatus) => {
-    console.log(
-      "lo stato corrente è",
-      prevStatus,
-      "lo voglio cambiare in",
-      newStatus,
-    );
     currentSocket.emit(
       "vote_event",
       eventId,

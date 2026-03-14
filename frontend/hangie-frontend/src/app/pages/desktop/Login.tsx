@@ -18,7 +18,6 @@ import RenderLoadingState from "@/features/utils/RenderLoadingState.js";
 const Login = () => {
   const { LoginUser, handleGuestSignIn } = useAuth();
   const { executeApiCall, loading } = useApi();
-  const { session } = useAuth();
   const { setProfileData, setDefaultHandle } = useProfile();
 
   const schema = z.object({
@@ -35,13 +34,9 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-    trigger,
-    setValue,
     formState: { errors, isSubmitting },
-    getValues,
+
     setError,
-    clearErrors,
-    watch,
   } = methods;
   const navigate = useNavigate();
 
@@ -70,7 +65,7 @@ const Login = () => {
             setError("root", { message: "Credenziali non corrette" });
             return;
           }
-          console.log("finito", authData);
+
           setProfileData({ is_guest: false });
 
           navigate("/");
@@ -82,7 +77,6 @@ const Login = () => {
   };
   const onGuestSignIn: SubmitHandler<FormFields> = async () => {
     try {
-      console.log("provo a anonymous");
       executeApiCall(
         "auth",
         async () => {

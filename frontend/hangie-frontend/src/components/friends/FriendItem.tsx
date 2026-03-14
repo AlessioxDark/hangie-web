@@ -7,7 +7,6 @@ import { useSocket } from "@/contexts/SocketContext";
 import { useNavigate } from "react-router";
 
 const FriendItem = ({ friend, setFetchData, type }) => {
-  // const [isSent, setIsSent] = useState(friend.status === "pending");
   const { executeApiCall } = useApi();
   const { session } = useAuth();
   const { currentSocket } = useSocket();
@@ -24,10 +23,6 @@ const FriendItem = ({ friend, setFetchData, type }) => {
     const apiStatus = statusMap[actionType];
 
     const updateUI = () => {
-      // Se accettiamo o inviamo, isSent/isAccepted cambia
-      // if (actionType === "send") setIsSent(true);
-      // if (actionType === "delete") setIsSent(false);
-
       if (setFetchData) {
         setFetchData((prevData) => {
           const data = prevData || [];

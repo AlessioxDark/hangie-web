@@ -56,7 +56,6 @@ const EditableImg = ({
           cacheControl: "3600",
         });
       if (uploadError) {
-        uploadError;
         setFormError("img", { message: uploadError.message });
         return;
       }
@@ -116,7 +115,6 @@ const EditableImg = ({
               </div>
             ) : (
               <img
-                // src={currentGroupImg}
                 src={displayImage}
                 alt=""
                 className="w-48 h-48 rounded-full"
@@ -138,9 +136,7 @@ const EditableImg = ({
               <div
                 className="absolute rounded-full -top-2.5 -right-5 rotate-270 p-1.5 bg-primary"
                 onClick={() => {
-                  ("voglio modificare il titolo");
                   if (currentEditingField != "nome") {
-                    ("era false lo metto true");
                     setCurrentEditingField("nome");
                   } else {
                     if (localGroupData.nome !== currentGroupData.nome) {

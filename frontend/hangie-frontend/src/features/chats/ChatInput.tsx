@@ -116,7 +116,6 @@ const ChatInput = ({
                 >
                   <div
                     onClick={() => {
-                      ("cambio mobil");
                       setMobileView("CREATE_EVENT");
                     }}
                     className="flex flex-col items-center gap-1"

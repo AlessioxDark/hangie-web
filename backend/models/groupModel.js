@@ -20,7 +20,6 @@ const getAll = async (req) => {
     if (error) throw error;
     return { data, error: null };
   } catch (err) {
-    ("ho trowato", err);
     return { data: null, error: err };
   }
 };
@@ -76,12 +75,10 @@ const getGroup = async (req) => {
             `,
       )
       .in("event_id", eventIds);
-    ("gli eventsDetails", eventsDetails);
     const newEventsDetails = eventsDetails.map((e) => {
       const risposta = e.risposte_evento.find((r) => r.user_id == user.id);
       return { ...e, status: risposta.status };
     });
-    ("i nuovi eventsDetails", newEventsDetails);
     if (eventsError) throw eventsError;
 
     const eventDetail = newEventsDetails.reduce((acc, event) => {
@@ -119,7 +116,6 @@ const getGroup = async (req) => {
       error: null,
     };
   } catch (err) {
-    ("ecco", err);
     return { data: null, error: err };
   }
 };
@@ -135,9 +131,8 @@ const getEvents = async (req) => {
       )
       .eq("group_id", group_id);
     if (eventsError) throw eventsError;
-    ("trovando eventi_gruppo");
     const eventIds = eventsData.map((e) => e.eventi.event_id);
-    console.log("event", eventIds);
+
 
     const { data: risposte, error: risposteError } = await supabase
       .from("risposte_eventi")
@@ -147,7 +142,6 @@ const getEvents = async (req) => {
       .in("eventi.event_id", eventIds)
       .eq("eventi.gruppi.group_id", group_id);
     if (risposteError) throw risposteError;
-    console.log("risp", risposte);
 
     const newRisposte = risposte.reduce((acc, event) => {
       if (!acc[event.eventi.event_id]) acc[event.eventi.event_id] = [];
@@ -163,16 +157,12 @@ const getEvents = async (req) => {
       const eventStatus = newRisposte[e.eventi.event_id].find(
         (r) => r.user_id == user.id,
       );
-      ("questo è e", e);
       return {
         ...e,
         partecipanti: newRisposte[e.eventi.event_id],
         status: eventStatus.status,
       };
     });
-    console.log("ecco il newData", newData);
-    ("ecco il newRispsote", newRisposte);
-    // ottenere partecipanti confermati per tutti, seguire esempio event
     return { data: newData, error: null };
   } catch (err) {
     return { error: err, data: null };
@@ -195,9 +185,7 @@ const getEvent = async (req) => {
 
 const newGroup = async (req) => {
   try {
-    const body = req.body;
     const user = req.user;
-    ("ci siamo?");
     const { data: groupData, error: groupError } = await supabase
       .from("gruppi")
       .insert([{ ...newBody, createdBy: user.id }])
@@ -218,12 +206,10 @@ const newGroup = async (req) => {
       group_id: groupId,
       role: "admin",
     });
-    const { data: participantsData, error: participantsError } = await supabase
+    const { error: participantsError } = await supabase
       .from("partecipanti_gruppo")
       .insert(newPartecipantiArray);
     if (participantsError) throw participantsError;
-
-    // aggiungo immagine a database
 
     return {
       data: {
@@ -303,7 +289,7 @@ const leave = async (req) => {
     if (countError) throw countError;
 
     if (count == 0) {
-      ("eliminiamo il gruppo");
+
       const { error: notificanError } = await supabase
         .from("notifiche")
         .delete()
@@ -315,7 +301,6 @@ const leave = async (req) => {
         .eq("group_id", group_id);
 
       if (messageError) throw messageError;
-      ("arrivo ai messaggi");
       const messageEvents = messages.filter((m) => m.type == "event");
       const messageIds = messages.map((m) => m.message_id);
       if (messages && messages.length > 0) {
@@ -345,24 +330,19 @@ const leave = async (req) => {
             await supabase.storage.from("eventi").remove(filesToDelete);
           }
         }
-        ("arrivo agli eventi");
-        ("promo a rimuovere gli eventi", messageEventsEventsIds);
         const { error: eventsError } = await supabase
           .from("eventi")
           .delete()
           .in("event_id", messageEventsEventsIds);
 
-        ("promo a rimuovere eventi gruppo", messageEventsEventsIds);
         if (eventsError) throw eventsError;
         const { error: groupEventsError } = await supabase
           .from("eventi_gruppo")
           .delete()
           .eq("group_id", group_id);
 
-        ("promo a rimuovere eventi gruppo", messageEventsEventsIds);
         if (groupEventsError) throw groupEventsError;
       }
-      ("ecco i message ids", messageIds);
       const { error: messagesStatusError } = await supabase
         .from("messaggi_status")
         .delete()
@@ -373,7 +353,7 @@ const leave = async (req) => {
         .delete()
         .in("message_id", messageIds);
       if (messagesError) throw messagesError;
-      ("arrivo a folder");
+
       const { data: folderContent, error: folderError } = await supabase.storage
         .from("group_cover_imgs")
         .list(group_id);
@@ -409,7 +389,7 @@ const leave = async (req) => {
       if (adminError) throw adminError;
     }
     if (!isCreator) {
-      const { data: adminGroupData, error: adminGroupError } = await supabase
+      const { error: adminGroupError } = await supabase
         .from("gruppi")
         .update({ createdBy: participantsData[0].partecipante_id })
         .eq("group_id", group_id);
@@ -445,7 +425,6 @@ const addParticipants = async (req) => {
 
     if (eventsError) throw eventsError;
 
-    // 2. Crea le righe di inserimento partendo dagli EVENTI, non dalle risposte vecchie
     const insertData = events.flatMap((e) => {
       return participantsIds.map((p) => ({
         event_id: e.event_id,
@@ -454,8 +433,6 @@ const addParticipants = async (req) => {
         is_creator: false,
       }));
     });
-
-    ("aggiungo insertdata", insertData);
 
     const { data: groupEventsData, error: insertError } = await supabase
       .from("risposte_eventi")
@@ -480,7 +457,6 @@ const addParticipants = async (req) => {
       });
       return acc;
     }, {});
-    ("le final responses da model", finalEventsResponses);
     return { data: { groupEventsData, finalEventsResponses }, error: null };
   } catch (err) {
     return { error: err, data: null };
@@ -488,8 +464,6 @@ const addParticipants = async (req) => {
 };
 const removeParticipant = async (req) => {
   try {
-    ("tolto p");
-
     const { group_id } = req.params;
     const { user_id } = req.body;
     const { error: participantError } = await supabase

@@ -78,7 +78,7 @@ export const ChatProvider = ({ children }) => {
 
   const fetchEvents = useCallback(async (): Promise<void> => {
     const saveData = (data) => {
-      ("event dalla home", data);
+
       setHomeEventsData((prevData) => {
         const mergeAccepted = [...prevData.accepted, ...data.accepted];
         const dedupAccepted = Array.from(
@@ -88,7 +88,7 @@ export const ChatProvider = ({ children }) => {
         const dedupPending = Array.from(
           new Map(mergePending.map((item) => [item.event_id, item])).values(),
         );
-        ("il prev", prevData);
+
 
         return {
           pending: dedupPending,
@@ -122,9 +122,8 @@ export const ChatProvider = ({ children }) => {
     [session, executeApiCall, currentGroup],
   );
   const fetchGroups = useCallback(async () => {
-    console.log("faccio fetchgroups", session);
     const saveData = (data) => {
-      console.log("ecco il data", data);
+
       setGroupsData(data);
     };
     executeApiCall(
@@ -137,7 +136,7 @@ export const ChatProvider = ({ children }) => {
   }, [session, executeApiCall]);
   const fetchChat = useCallback(
     async (groupId: UUID) => {
-      ("carico chat", groupId, session);
+
       if (!groupId || !session || isAuthLoading) return;
 
       const saveData = (groupData) => {

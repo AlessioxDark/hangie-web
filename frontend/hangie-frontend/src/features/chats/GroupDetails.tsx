@@ -84,7 +84,6 @@ const GroupDetails = () => {
       );
     };
 
-    ("invio richiesta api");
     executeApiCall(
       "add_participants",
       () => {

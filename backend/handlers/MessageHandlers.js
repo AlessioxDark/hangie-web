@@ -7,16 +7,20 @@ const messageHandlers = (io, socket) => {
         data: { user },
         error: tokenError,
       } = await supabase.auth.getUser(token);
+      if (tokenError) throw tokenError;
       const { data: participantsData, error: participantsError } =
         await supabase
           .from("partecipanti_gruppo")
           .select("*,user_id:partecipante_id")
           .eq("group_id", group_id);
+      if (participantsError) throw participantsError;
       const { data: messageData, error: messageError } = await supabase
         .from("messaggi")
         .insert([{ content: message, user_id: user.id, group_id }])
         .select("message_id")
         .single();
+      if (messageError) throw messageError;
+
       const messageId = messageData.message_id;
       const rowStatus = participantsData
         .filter((p) => p.user_id !== user.id)
@@ -39,17 +43,18 @@ const messageHandlers = (io, socket) => {
             message_id: messageId,
           };
         });
-      // 1. Devi mettere AWAIT qui
-      const { data: messageStatus, error: errorStatus } = await supabase
+      const { error: errorStatus } = await supabase
         .from("messaggi_status")
         .insert(rowStatus)
         .select();
+      if (errorStatus) throw errorStatus;
       const { data: userInfo, error: userError } = await supabase
         .from("utenti")
         .select("*")
         .eq("user_id", user.id)
         .single();
       const sender = userInfo;
+      if (userError) throw userError;
 
       participantsData.forEach((p) => {
         io.to(p.user_id).emit("receive_message", {
@@ -73,10 +78,15 @@ const messageHandlers = (io, socket) => {
           });
         }
       });
-      const { data: notificationData, error: errorNotification } =
-        await supabase.from("notifiche").insert(notificationInsert);
+      const { error: errorNotification } = await supabase
+        .from("notifiche")
+        .insert(notificationInsert);
+      if (errorNotification) throw errorNotification;
     } catch (err) {
-      console.error("Error in send_message handler:", err);
+      socket.emit("operation_failed", {
+        type: "chat",
+        message: "Qualcosa è andato storto, riprova tra poco.",
+      });
     }
   });
   socket.on("message_sent", async (message_id, user_id, group_id) => {
@@ -113,7 +123,10 @@ const messageHandlers = (io, socket) => {
         });
       }
     } catch (err) {
-      console.error("Error in message_sent handler:", err);
+      socket.emit("operation_failed", {
+        type: "chat",
+        message: "Qualcosa è andato storto, riprova tra poco.",
+      });
     }
   });
 
@@ -121,7 +134,7 @@ const messageHandlers = (io, socket) => {
     try {
       const [
         { data: partecipantiDB, error: errorParticipants },
-        { data: messageStatus, error: errorStatus },
+        { error: errorStatus },
         { data: notificationData, error: errorNotification },
       ] = await Promise.all([
         supabase
@@ -146,10 +159,6 @@ const messageHandlers = (io, socket) => {
       if (errorNotification) throw errorNotification;
 
       if (notificationData && notificationData.length > 0) {
-        console.log(
-          `Pulizia di ${notificationData.length} notifiche per l'utente`,
-        );
-
         io.to(user_id).emit("clear_notifications_count", {
           group_id,
           user_id,
@@ -173,7 +182,10 @@ const messageHandlers = (io, socket) => {
         });
       }
     } catch (err) {
-      console.error("Error in message_read_bulk handler:", err);
+      socket.emit("operation_failed", {
+        type: "chat",
+        message: "Qualcosa è andato storto, riprova tra poco.",
+      });
     }
   });
   socket.on(
@@ -205,67 +217,10 @@ const messageHandlers = (io, socket) => {
           });
         });
       } catch (err) {
-        console.error("Errore in send_event:", err);
-      }
-    },
-  );
-  socket.on("delete_event", async (eventId, groupId) => {
-    try {
-      const { data: participants, error: participantsError } = await supabase
-        .from("partecipanti_gruppo")
-        .select("*")
-        .eq("group_id", groupId);
-      if (participantsError) throw participantsError;
-      if (!participants) throw { message: "Partecipanti non trovati" };
-
-      participants.forEach((p) => {
-        io.to(p.partecipante_id).emit("deleted_event", {
-          event_id: eventId,
-          group_id: groupId,
+        socket.emit("operation_failed", {
+          type: "chat",
+          message: "Qualcosa è andato storto, riprova tra poco.",
         });
-      });
-    } catch (err) {
-      console.error("Errore in delete_event:", err);
-    }
-  });
-
-  socket.on(
-    "vote_event",
-    async (eventId, groupId, status, userId, prevStatus) => {
-      try {
-        console.log("eccoli i socketini", {
-          eventId,
-          groupId,
-          status,
-          userId,
-          prevStatus,
-        });
-        const { data: pfpData, error: pfpError } = await supabase
-          .from("utenti")
-          .select("profile_pic")
-          .eq("user_id", userId)
-          .single();
-        if (pfpError) throw pfpError;
-
-        const { data: participants, error: participantsError } = await supabase
-          .from("partecipanti_gruppo")
-          .select("*")
-          .eq("group_id", groupId);
-        if (participantsError) throw participantsError;
-        if (!participants) throw { message: "Partecipanti non trovati" };
-
-        participants.forEach((p) => {
-          io.to(p.partecipante_id).emit("voted_event", {
-            event_id: eventId,
-            group_id: groupId,
-            status,
-            sender_id: userId,
-            prevStatus,
-            profile_pic: pfpData?.profile_pic || null,
-          });
-        });
-      } catch (err) {
-        console.error("Errore in vote_event:", err);
       }
     },
   );
